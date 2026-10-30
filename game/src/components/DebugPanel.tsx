@@ -1,49 +1,39 @@
-import { useRef } from 'react';
-import { BALANCE, type SpecKey } from '../config/balance';
-import { SCRIPT } from '../content/script';
+import { BALANCE } from '../config/balance';
+import { LOCALES, TEST_LANGUAGE, type I18n } from '../content/i18n';
 import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
 import { canSave } from '../systems/state';
 
-export function DebugPanel({ runtime, snapshot }: { runtime: GameRuntime; snapshot: RuntimeSnapshot }) {
-  const input = useRef<HTMLInputElement>(null);
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([runtime.exportData()], { type: 'application/json' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = '画面の保存データ.json';
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-  };
+export function DebugPanel({ runtime, snapshot, i18n }: { runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
   return (
     <fieldset className="debug-panel">
-      <legend>開発用・段階1</legend>
-      {runtime.fixture && <p>固定状態（実際の保存データには影響しません）</p>}
-      <p>状態・保存・時間・表示だけを確認します。</p>
+      <legend>{i18n.t('debug.title')}</legend>
+      {runtime.fixture && <p>{i18n.t('debug.fixture')}</p>}
+      <p>{i18n.t('debug.description')}</p>
+      <label>
+        {i18n.t('language.label')}
+        <select title={i18n.languageName(snapshot.language)} value={snapshot.language} onChange={event => runtime.changeLanguage(event.target.value)}>
+          {[...Object.keys(LOCALES), TEST_LANGUAGE].map(id => <option value={id} key={id}>{i18n.languageName(id)}</option>)}
+        </select>
+      </label>
       <div className="debug-actions">
-        <button onClick={runtime.addDebugPixels}>ピクセルを足す</button>
-        <button onClick={runtime.enableDebugSave} disabled={canSave(snapshot.state)}>保存済みの状態を試す</button>
-        <button onClick={runtime.persist} disabled={!canSave(snapshot.state)}>いま保存する</button>
+        <button onClick={runtime.addDebugPixels}>{i18n.t('debug.addPixels')}</button>
+        <button onClick={runtime.enableDebugSave} disabled={canSave(snapshot.state)}>{i18n.t('debug.enableSave')}</button>
+        <button onClick={runtime.persist} disabled={!canSave(snapshot.state)}>{i18n.t('debug.saveNow')}</button>
       </div>
-      {(['color', 'refresh', 'storage'] as SpecKey[]).map(key => (
+      <p className="cursor-count">{i18n.t('debug.cursorCount', { count: snapshot.state.run.seed.autoCursors })}</p>
+      {(['color', 'refresh', 'storage'] as const).map(key => (
         <label key={key}>
-          {({ color: '色深度', refresh: 'リフレッシュレート', storage: 'ストレージ' } as Partial<Record<SpecKey, string>>)[key]}
-          <select value={snapshot.state.persistent.specs[key]} onChange={event => runtime.changeDebugSpec(key, Number(event.target.value))}>
-            {BALANCE.spec[key].map((spec, index) => <option value={index} key={spec.name}>{spec.name}</option>)}
+          {i18n.t(`spec.${key}`)}
+          <select title={i18n.spec(key, snapshot.state.persistent.specs[key])} value={snapshot.state.persistent.specs[key]} onChange={event => runtime.changeDebugSpec(key, Number(event.target.value))}>
+            {BALANCE.spec[key].map((_, index) => <option value={index} key={index}>{i18n.spec(key, index)}</option>)}
           </select>
         </label>
       ))}
       <div className="debug-actions">
-        <button onClick={download}>データを書き出す</button>
-        <button onClick={() => input.current?.click()}>データを読み込む</button>
-        <button onClick={() => {
-          if (window.confirm(SCRIPT.confirmReset) && window.confirm(SCRIPT.confirmResetAgain)) runtime.reset();
-        }}>最初からやり直す</button>
+        <button onClick={runtime.downloadData}>{i18n.t('data.export')}</button>
+        <button onClick={() => { void runtime.requestImport(); }}>{i18n.t('data.import')}</button>
+        <button onClick={() => runtime.requestReset()}>{i18n.t('data.reset')}</button>
       </div>
-      <input ref={input} hidden type="file" accept=".json,application/json" onChange={async event => {
-        const file = event.target.files?.[0];
-        event.target.value = '';
-        if (file && window.confirm(SCRIPT.confirmImport)) runtime.importData(await file.text());
-      }} />
     </fieldset>
   );
 }

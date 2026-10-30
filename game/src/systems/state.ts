@@ -7,7 +7,7 @@ export const SCHEMA_VERSION = 1;
 export interface GameState {
   schemaVersion: typeof SCHEMA_VERSION;
   createdAt: number;
-  lastTickAt: number;
+  lastTickAt: number; // 不在用の端末時計。能動時間には使わない。
   lastSavedAt: number | null;
   elapsedMs: number;
   resources: { pixels: number; tokens: number; dollars: number };

@@ -18,6 +18,7 @@ ARTIFACTS = ROOT / "game/artifacts/stage1"
 
 def ready(page):
     page.locator(".foundation").wait_for()
+    page.evaluate("async () => { await document.fonts.ready; }")
 
 
 def main():
@@ -33,7 +34,7 @@ def main():
 
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=args.chromium, args=["--no-sandbox"])
-        context = browser.new_context(viewport={"width": 1920, "height": 1080})
+        context = browser.new_context(locale="ja-JP", timezone_id="Asia/Tokyo", viewport={"width": 1920, "height": 1080})
         context.on("page", lambda page: page.on("pageerror", lambda error: errors.append(str(error))))
         page = context.new_page()
         response = page.goto(url)
@@ -82,7 +83,7 @@ def main():
         second.get_by_text("別のタブで開いています", exact=True).wait_for()
         assert second.locator(".debug-panel").count() == 0
         page.close()
-        second.reload()
+        second.get_by_role("button", name="読み込み直す", exact=True).click()
         ready(second)
         page = second
         checks.append("後から開いたタブの操作停止・先のタブを閉じて再読み込みで再開")
@@ -119,11 +120,15 @@ def main():
         checks.append("予備からの復元・両方破損時の停止・確認の取消と承認")
 
         page.once("dialog", lambda dialog: dialog.accept())
-        page.locator('input[type="file"]').set_input_files({"name": "不正.json", "mimeType": "application/json", "buffer": b"{"})
+        with page.expect_file_chooser() as chooser:
+            page.get_by_role("button", name="データを読み込む", exact=True).click()
+        chooser.value.set_files({"name": "不正.json", "mimeType": "application/json", "buffer": b"{"})
         page.get_by_text("このファイルは読み込めませんでした。いまのデータは変更していません。", exact=True).wait_for()
         assert page.get_by_text("ピクセル: 0", exact=True).count() == 1
         page.once("dialog", lambda dialog: dialog.accept())
-        page.locator('input[type="file"]').set_input_files({"name": "保存.json", "mimeType": "application/json", "buffer": exported})
+        with page.expect_file_chooser() as chooser:
+            page.get_by_role("button", name="データを読み込む", exact=True).click()
+        chooser.value.set_files({"name": "保存.json", "mimeType": "application/json", "buffer": exported})
         page.wait_for_function("localStorage.getItem('refresh.save') !== null")
         checks.append("JSONファイルの書き出し・読み込み・不正ファイルの拒否")
 
@@ -137,19 +142,20 @@ def main():
         # 現在の画面を閉じる保存で、上の検証用データを上書きしないよう別のタブで復元する。
         # ページの再読み込み前に pagehide も発火するため、このケースは新しい文脈で検査する。
         offline_state = page.evaluate("localStorage.getItem('refresh.save')")
-        offline_context = browser.new_context()
+        offline_context = browser.new_context(locale="ja-JP", timezone_id="Asia/Tokyo")
         offline_context.add_init_script("localStorage.setItem('refresh.save', " + json.dumps(offline_state) + ")")
         offline_page = offline_context.new_page()
         offline_page.goto(url)
         ready(offline_page)
         value = offline_page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
         assert 7200 <= value < 7201
+        offline_page.get_by_text("留守の間に 2時間ぶん作業しました", exact=False).wait_for()
         offline_page.screenshot(path=str(ARTIFACTS / "offline-capped.png"))
         offline_context.close()
         checks.append("3時間の不在から2時間分（7,200ピクセル）だけ加算")
         context.close()
 
-        fixture_context = browser.new_context(viewport={"width": 1920, "height": 1080})
+        fixture_context = browser.new_context(locale="ja-JP", timezone_id="Asia/Tokyo", viewport={"width": 1920, "height": 1080})
         fixture_page = fixture_context.new_page()
         fixture_page.goto(url + "?state=foundation-saved&debug=1")
         ready(fixture_page)
@@ -159,7 +165,7 @@ def main():
         fixture_context.close()
         checks.append("固定状態と実セーブの隔離・開発用小窓")
 
-        file_context = browser.new_context(offline=True, viewport={"width": 1920, "height": 1080})
+        file_context = browser.new_context(locale="ja-JP", timezone_id="Asia/Tokyo", offline=True, viewport={"width": 1920, "height": 1080})
         file_page = file_context.new_page()
         file_page.on("pageerror", lambda error: errors.append(str(error)))
         requests = []
@@ -176,7 +182,7 @@ def main():
             limitations.append("file:// は環境のブラウザポリシーで拒否され、ダブルクリックの実動作は未確認")
         file_context.close()
 
-        disconnected = browser.new_context()
+        disconnected = browser.new_context(locale="ja-JP", timezone_id="Asia/Tokyo")
         disconnected_page = disconnected.new_page()
         disconnected_page.on("pageerror", lambda error: errors.append(str(error)))
         disconnected_page.goto(url + "?debug=1")
@@ -188,7 +194,7 @@ def main():
         disconnected.close()
         checks.append("HTTP読み込み後に通信を切り、生成・保存が動くことを確認")
 
-        mockup_context = browser.new_context(viewport={"width": 1920, "height": 1080})
+        mockup_context = browser.new_context(locale="ja-JP", timezone_id="Asia/Tokyo", viewport={"width": 1920, "height": 1080})
         mockup_context.route("https://**/*", lambda route: route.abort())
         mockup_page = mockup_context.new_page()
         mockup_page.goto(args.base_url.rstrip("/") + "/01-seed.html")

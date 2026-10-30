@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BALANCE } from '../config/balance';
-import { createMemoryStorage } from './save';
-import { acquireTab, type TabLease } from './tab';
+import { createMemoryStorage } from './storage';
+import { acquireTab } from './tab';
+import type { TabLease } from './types';
 
 const leases: TabLease[] = [];
 

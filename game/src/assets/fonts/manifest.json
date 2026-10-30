@@ -1,0 +1,34 @@
+[
+  {
+    "file": "noto-serif-jp.woff2",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifjp/NotoSerifJP%5Bwght%5D.ttf",
+    "source_sha256": "2fd527ba12b6a44ec30d796d633360da0aeba6c5d4af1304ce12bb4dc15a7dfc",
+    "woff2_sha256": "075dddc7c1db881edb70818c6c1131085009f74086616fddb4ca805cc6b52888",
+    "license": "notoserifjp-OFL.txt",
+    "conversion": "WOFF2 compression, all glyphs and original font metadata retained"
+  },
+  {
+    "file": "biz-udpgothic-regular.woff2",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bizudpgothic/BIZUDPGothic-Regular.ttf",
+    "source_sha256": "258d7156c165f2ff774b6efee637c22c3b950de0d8a10e501137061bc8085d01",
+    "woff2_sha256": "1c946054094a84b08b1c99b2239cec57f9fa0611031e4634cb3ab202784629a1",
+    "license": "bizudpgothic-OFL.txt",
+    "conversion": "WOFF2 compression, all glyphs and original font metadata retained"
+  },
+  {
+    "file": "biz-udpgothic-bold.woff2",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bizudpgothic/BIZUDPGothic-Bold.ttf",
+    "source_sha256": "30eba52fc837e8b62c97d4b82e6706583149fb7294e3712dd71a655eaea80a90",
+    "woff2_sha256": "1551af7874ec0b2f03aa2424b421c6dccd4adb4a5d469da8f7c12a9c5c890e74",
+    "license": "bizudpgothic-OFL.txt",
+    "conversion": "WOFF2 compression, all glyphs and original font metadata retained"
+  },
+  {
+    "file": "dotgothic16.woff2",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/dotgothic16/DotGothic16-Regular.ttf",
+    "source_sha256": "3ad9af88726d42b40f7f365f0dcac785af73cf20ea6f1d5b44e57cc21150b8f1",
+    "woff2_sha256": "ba8513004fcb6c03c831d7eefd7fffe457426346820054a2481c278076796b32",
+    "license": "dotgothic16-OFL.txt",
+    "conversion": "WOFF2 compression, all glyphs and original font metadata retained"
+  }
+]

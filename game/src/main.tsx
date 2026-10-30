@@ -1,25 +1,23 @@
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { GameRuntime } from './systems/runtime';
+import { browserRoot, createBrowserPlatform } from './platform/browser';
 import './style.css';
 
-const params = new URLSearchParams(window.location.search);
-const runtime = new GameRuntime(params);
-const root = createRoot(document.getElementById('root')!);
-root.render(<App runtime={runtime} debug={params.get('debug') === '1'} />);
+const platform = createBrowserPlatform();
+const runtime = new GameRuntime(platform);
+const root = createRoot(browserRoot());
+root.render(<App runtime={runtime} debug={platform.launch.debug} />);
 void runtime.start();
 
-document.addEventListener('visibilitychange', runtime.visibilityChanged);
-const onPageHide = () => { runtime.leave(); runtime.dispose(); };
-window.addEventListener('pagehide', onPageHide);
-// 戻る・進むで凍結した画面が復活した場合は、所有権を取得し直して保存から再開する。
-const onPageShow = (event: PageTransitionEvent) => { if (event.persisted) window.location.reload(); };
-window.addEventListener('pageshow', onPageShow);
+const unsubscribe = [
+  platform.visibility.subscribe(runtime.visibilityChanged),
+  platform.lifecycle.onLeave(() => { runtime.leave(); runtime.dispose(); }),
+  platform.lifecycle.onRestore(runtime.reload),
+];
 if (import.meta.hot) import.meta.hot.dispose(() => {
   runtime.leave();
   runtime.dispose();
-  document.removeEventListener('visibilitychange', runtime.visibilityChanged);
-  window.removeEventListener('pagehide', onPageHide);
-  window.removeEventListener('pageshow', onPageShow);
+  unsubscribe.forEach(stop => stop());
   root.unmount();
 });

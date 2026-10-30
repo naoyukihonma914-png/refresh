@@ -1,10 +1,9 @@
 import { BALANCE } from '../config/balance';
-import type { SaveStorage } from './save';
+import type { SaveStorage } from './storage';
+import type { TabLease } from './types';
 
 const LOCK_NAME = 'refresh.active-tab';
 const LEASE_KEY = 'refresh.active-tab.lease';
-
-export type TabLease = { acquired: boolean; isOwner: () => boolean; release: () => void };
 
 // Web Locks は先に開いたタブを優先する。古いブラウザは期限つきリースに退避。
 export async function acquireTab(

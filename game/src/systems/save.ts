@@ -1,12 +1,8 @@
 import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
+import type { SaveStorage } from '../platform/storage';
+export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
 export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup' } as const;
-
-export interface SaveStorage {
-  getItem(key: string): string | null;
-  setItem(key: string, value: string): void;
-  removeItem(key: string): void;
-}
 
 // 実在する旧版ができたら、その版から次版への変換をここに追加する。
 // 過去の試作は別仕様なので、旧セーブの形式を推測して読み込まない。
@@ -91,13 +87,4 @@ export function clearGame(storage: SaveStorage): boolean {
     storage.removeItem(SAVE_KEYS.backup);
     return true;
   } catch { return false; }
-}
-
-export function createMemoryStorage(): SaveStorage {
-  const values = new Map<string, string>();
-  return {
-    getItem: key => values.get(key) ?? null,
-    setItem: (key, value) => { values.set(key, value); },
-    removeItem: key => { values.delete(key); },
-  };
 }

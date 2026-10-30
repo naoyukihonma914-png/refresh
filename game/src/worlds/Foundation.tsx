@@ -1,23 +1,21 @@
-import { SCRIPT } from '../content/script';
+import type { I18n } from '../content/i18n';
 import { canSave } from '../systems/state';
 import type { RuntimeSnapshot } from '../systems/runtime';
 
-const formatNumber = (value: number) => Math.floor(value).toLocaleString('ja-JP');
-
-export function Foundation({ snapshot }: { snapshot: RuntimeSnapshot }) {
+export function Foundation({ snapshot, i18n }: { snapshot: RuntimeSnapshot; i18n: I18n }) {
   const { state, offline } = snapshot;
   return (
     <main className="foundation">
-      <p><b>目標</b>：{SCRIPT.goal}</p>
-      <p>ピクセル: {formatNumber(state.resources.pixels)}</p>
+      <p><b>{i18n.t('foundation.goalLabel')}</b> {i18n.t('foundation.goal')}</p>
+      <p>{i18n.t('foundation.pixels', { pixels: i18n.pixels(state.resources.pixels) })}</p>
       <p className="save-status">
         {canSave(state) && state.lastSavedAt !== null
-          ? `保存しました ${new Date(state.lastSavedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', hour12: false })}`
-          : SCRIPT.noSave}
+          ? i18n.t('save.saved', { time: i18n.time(state.lastSavedAt) })
+          : i18n.t('save.unavailableUntilBuilt')}
       </p>
-      {offline && <p role="status">留守の間に {offline.creditedMs < 60_000
-        ? `${Math.floor(offline.creditedMs / 1_000)}秒`
-        : `${Math.floor(offline.creditedMs / 60_000)}分`}ぶん作業しました（+{formatNumber(offline.pixels)}）</p>}
+      {offline && <p role="status">{i18n.t('offline.notice', {
+        duration: i18n.duration(offline.creditedMs), pixels: i18n.pixels(offline.pixels), count: Math.floor(offline.pixels),
+      })}</p>}
     </main>
   );
 }
