@@ -1,0 +1,1508 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>UI・アルケミスト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: era 0 = one centered column of raw, unstyled text. Era 1+ = HUD bar over [stage | inspector panel].
+   The page deliberately starts as an unstyled HTML document; crafted components switch the tokens on. */
+:root{
+  --bg:#ffffff; --bg2:#ffffff; --fg:#000000; --muted:#444444; --line:#000000;
+  --accent:#0000ee; --accent2:#551a8b; --hot:#cc0000; --good:#006600; --panel:#ffffff;
+  --gel-top:#ffffff; --gel-bot:#ffffff; --gel-edge:#000000; --gel-text:#000000;
+  --gridc:rgba(0,0,0,0);
+  --font-body:"Times New Roman","Hiragino Mincho ProN","Yu Mincho","MS PMincho",serif;
+  --font-display:var(--font-body); --font-num:var(--font-body);
+  color-scheme:light;
+}
+body.has-color{
+  --bg:#0d2140; --bg2:#13305a; --fg:#e8eefa; --muted:#93a8c9; --line:#2f5185;
+  --accent:#ffb23e; --accent2:#62d6ff; --hot:#ff5d73; --good:#7cf2b0; --panel:#0f2649;
+  --gel-top:#ffcf7a; --gel-bot:#ff9a1a; --gel-edge:#a9560a; --gel-text:#3b1c00;
+  --gridc:rgba(98,214,255,.07);
+  color-scheme:dark;
+}
+body.has-font{
+  --font-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  --font-display:"DotGothic16","MS Gothic","Osaka-Mono",monospace;
+  --font-num:"DotGothic16",ui-monospace,monospace;
+}
+body.era-2{ --bg:#08152b; --bg2:#0f2448; --panel:rgba(12,29,58,.94); --line:#284a7c; }
+body.era-3{ --bg:#05070e; --bg2:#0d1428; --panel:rgba(10,15,30,.94); --line:#26344f; --muted:#8a97b5; }
+
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+#app{height:100%}
+:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+
+/* ---------- ERA 0: raw text ---------- */
+#e0{position:relative;height:100%;overflow:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding-block:32px;padding-inline:16px;box-sizing:border-box}
+#e0.out{transition:transform .6s cubic-bezier(.7,0,.3,1),opacity .6s;transform:scale(.15);opacity:0}
+.e0-count{font-size:18px}
+body.has-font .e0-count{font-family:var(--font-num);font-size:34px;letter-spacing:.02em}
+body.has-color .e0-count{color:var(--accent)}
+.e0-count small{font-size:.5em;color:var(--muted);margin-left:.4em}
+.e0-stage{position:relative;width:min(440px,100%);height:270px;display:grid;place-items:center}
+#gen{all:unset;cursor:pointer;color:#0000ee;text-decoration:underline;font-size:18px;position:relative;z-index:2;user-select:none}
+body.has-border #gen{text-decoration:none;color:var(--fg);border:1px solid var(--line);padding:12px 22px;background:var(--bg)}
+body.has-color #gen{background:linear-gradient(var(--gel-top),var(--gel-bot));color:var(--gel-text);border-color:#ffe0a6;border-radius:12px;box-shadow:0 5px 0 var(--gel-edge),0 0 34px rgba(255,178,62,.35)}
+body.has-font #gen{font-family:var(--font-display);font-size:20px;letter-spacing:.04em}
+body.has-anim #gen{transition:transform .07s,box-shadow .07s}
+body.has-anim #gen.press{transform:translateY(4px);box-shadow:0 1px 0 var(--gel-edge),0 0 44px rgba(255,178,62,.6)}
+.e0-heat{display:flex;align-items:center;gap:10px;font-family:var(--font-num);color:var(--muted)}
+.e0-heat i,.hud-heat i{display:block;width:160px;height:8px;border-radius:4px;background:rgba(255,255,255,.08);border:1px solid var(--line);overflow:hidden}
+.e0-heat b,.hud-heat b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--hot))}
+.e0-shop{width:min(660px,100%);display:flex;flex-direction:column;gap:6px}
+.e0-item{display:grid;grid-template-columns:auto 1fr auto;column-gap:10px;align-items:baseline}
+.e0-item .e0-act{all:unset;cursor:pointer;color:#0000ee;text-decoration:underline}
+.e0-item.no .e0-act{color:#777;cursor:default;text-decoration:none}
+.e0-name{white-space:nowrap;overflow:hidden}
+.e0-name::after{content:" ................................................................................";color:var(--muted)}
+.e0-cost{white-space:nowrap;font-variant-numeric:tabular-nums}
+.e0-desc{grid-column:2/4;font-size:13px;color:var(--muted)}
+body.has-border .e0-item{border:1px solid var(--line);padding:8px 10px}
+body.has-border .e0-item .e0-act{text-decoration:none;border:1px solid var(--line);padding:2px 8px;color:var(--fg)}
+body.has-color .e0-item{background:var(--panel);border-radius:8px}
+body.has-color .e0-item .e0-act{background:var(--accent);color:var(--gel-text);border-color:var(--accent);border-radius:6px}
+body.has-color .e0-item.no .e0-act{background:transparent;color:var(--muted);border-color:var(--line)}
+body.has-color .e0-name::after{color:rgba(147,168,201,.35)}
+body.has-font .e0-act{font-family:var(--font-display)}
+body.has-font .e0-cost{font-family:var(--font-num)}
+.e0-log{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:2px;max-width:calc(100% - 32px);pointer-events:none}
+.e0-foot{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:11px;color:var(--muted)}
+body.has-anim .e0-item.new{animation:pop .5s}
+@keyframes pop{0%{transform:translateY(8px);opacity:0}100%{transform:none;opacity:1}}
+
+/* cursors */
+.curs{position:absolute;left:50%;top:50%;width:0;height:0;z-index:3;pointer-events:none}
+body.has-anim .curs.spin{animation:orbit 40s linear infinite}
+@keyframes orbit{to{transform:rotate(360deg)}}
+.cur{position:absolute;width:15px;height:20px;margin:-2px 0 0 -2px;transform-origin:2px 2px}
+.cur svg{width:15px;height:20px;display:block;overflow:visible}
+.cur path{fill:#fff;stroke:#000;stroke-width:1.4;stroke-linejoin:round}
+body.has-color .cur path{fill:var(--accent2);stroke:#062033}
+body.has-anim .cur.tap svg{animation:tap .22s}
+@keyframes tap{50%{transform:translate(3px,3px) scale(.85)}}
+.cur-more{position:absolute;left:0;top:0;transform:translate(-50%,0);font-size:11px;color:var(--muted);white-space:nowrap;font-family:var(--font-num)}
+
+.float{position:fixed;pointer-events:none;z-index:50;font-family:var(--font-num);font-size:16px;color:var(--accent);text-shadow:0 0 8px rgba(255,178,62,.6);animation:flt .8s ease-out forwards;white-space:nowrap}
+.float.big{font-size:22px;color:var(--good)}
+@keyframes flt{0%{transform:translate(-50%,0);opacity:1}100%{transform:translate(-50%,-46px);opacity:0}}
+
+/* ---------- SHELL (era 1+) ---------- */
+#shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px);grid-template-rows:auto minmax(0,1fr);height:100%}
+#shell.in{animation:winopen .55s cubic-bezier(.2,.9,.2,1)}
+@keyframes winopen{0%{transform:scale(.3);opacity:0}100%{transform:none;opacity:1}}
+#hud{grid-column:1/3;display:flex;align-items:center;gap:22px;flex-wrap:wrap;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--bg)}
+.hud-px{display:flex;align-items:baseline;gap:6px;font-family:var(--font-num)}
+.hud-px b{font-size:30px;font-weight:400;color:var(--accent);font-variant-numeric:tabular-nums;min-width:5ch}
+.hud-px span{color:var(--muted)}
+.hud-rate{font-family:var(--font-num);color:var(--fg);font-size:16px}
+.hud-rate span{color:var(--accent2)}
+.hud-heat{display:flex;align-items:center;gap:8px;font-family:var(--font-num);color:var(--muted);font-size:13px}
+.hud-heat i{width:110px}
+.hud-heat em{font-style:normal;min-width:4.5ch;color:var(--fg)}
+.hud-heat.fz em{color:var(--good)}
+.hud-era{font-family:var(--font-display);color:var(--muted);font-size:13px;letter-spacing:.08em;margin-left:auto}
+.hud-btns{display:flex;gap:8px}
+.hbtn{background:transparent;border:1px solid var(--line);color:var(--fg);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px}
+.hbtn:hover{border-color:var(--accent2)}
+.hbtn.ref{border-color:var(--accent);color:var(--accent);font-family:var(--font-display)}
+.hbtn.ref.glow{box-shadow:0 0 16px rgba(255,178,62,.35)}
+
+#stage{position:relative;overflow:hidden;background-color:var(--bg);background-image:linear-gradient(var(--gridc) 1px,transparent 1px),linear-gradient(90deg,var(--gridc) 1px,transparent 1px);background-size:28px 28px;min-height:0}
+body.era-2 #stage,body.era-3 #stage{background-image:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.hint{position:absolute;left:16px;bottom:12px;right:16px;font-size:12px;color:var(--muted);pointer-events:none;line-height:1.6}
+.hint kbd{font-family:var(--font-num);border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--fg)}
+
+#panel{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--line);background:var(--panel)}
+.psec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.psec h3{margin:0 0 10px;font-family:var(--font-display);font-weight:400;font-size:13px;letter-spacing:.12em;color:var(--muted)}
+#shop{flex:1;overflow:auto;min-height:120px}
+#logbox{height:132px;overflow:hidden;font-size:12px;color:var(--muted);display:flex;flex-direction:column;justify-content:flex-end;gap:3px;border-bottom:0}
+#logbox .good{color:var(--good)} #logbox .bad{color:var(--hot)} #logbox .sys{color:var(--accent2)}
+
+.grp{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.item{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;transition:border-color .12s,transform .08s}
+.item:hover{border-color:var(--accent2)}
+.item:active{transform:translateY(1px)}
+.item.no{opacity:.5;cursor:default}
+.item.no:hover{border-color:var(--line)}
+.item.new{box-shadow:0 0 0 1px var(--accent),0 0 18px rgba(255,178,62,.25)}
+.item.on{border-color:var(--accent)}
+.item svg{width:30px;height:30px}
+.item path{fill:none;stroke:var(--tc,var(--accent2));stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.it-top{display:flex;gap:8px;align-items:baseline}
+.it-name{font-weight:700;font-size:14px}
+.it-meta{font-family:var(--font-num);font-size:12px;color:var(--muted)}
+.it-desc{font-size:12px;color:var(--muted);line-height:1.45;margin-top:2px}
+.it-cost{font-family:var(--font-num);font-size:14px;color:var(--accent);white-space:nowrap;text-align:right}
+.item.no .it-cost{color:var(--muted)}
+.item.shift .it-name{color:var(--accent)}
+
+#sel .selhead{display:flex;gap:10px;align-items:center}
+#sel .selhead svg{width:34px;height:34px}
+#sel .selhead path{fill:none;stroke:var(--tc);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#sel .selname{font-weight:700}
+#sel .selout{font-family:var(--font-num);color:var(--accent);font-size:20px}
+.facts{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:12px;color:var(--muted);margin:10px 0}
+.facts b{font-weight:400;font-family:var(--font-num);color:var(--fg);text-align:right}
+.facts .up{color:var(--good)} .facts .dn{color:var(--hot)}
+.selbtns{display:flex;gap:8px;flex-wrap:wrap}
+.sbtn{background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px}
+.sbtn:hover{border-color:var(--accent2)}
+.sbtn.pri{border-color:var(--accent);color:var(--accent)}
+.sbtn:disabled{opacity:.45;cursor:default}
+.selhint{font-size:12px;color:var(--muted);line-height:1.7}
+.selhint kbd{font-family:var(--font-num);border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--fg)}
+
+.strow{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:12px;margin-bottom:5px}
+.strow svg{width:18px;height:18px} .strow path{fill:none;stroke:var(--tc);stroke-width:1.8}
+.strow .bar{grid-column:2/4;height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.strow .bar i{display:block;height:100%;background:var(--tc)}
+.strow b{font-weight:400;font-family:var(--font-num)}
+
+/* ---------- ERA 1 window ---------- */
+.desk{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:30px}
+.win{border:1px solid var(--line);background:var(--bg);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 0 4px rgba(98,214,255,.04)}
+.win.creak{animation:creak 2.6s infinite}
+@keyframes creak{0%,90%,100%{transform:none}92%{transform:translate(1px,-1px) rotate(.15deg)}94%{transform:translate(-1px,1px) rotate(-.15deg)}96%{transform:translate(1px,0)}}
+.win-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;border-bottom:1px solid var(--line);font-family:var(--font-display);font-size:13px}
+.win-bar .win-name{color:var(--fg);letter-spacing:.06em}
+.win-bar .win-info{color:var(--muted)}
+.win-bar .win-info.full{color:var(--hot)}
+.grid{position:relative;margin:16px}
+.glinks{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.glinks line{stroke:var(--line);stroke-width:3}
+.glinks line.act{stroke:var(--accent);stroke-dasharray:4 5;animation:dash 0.8s linear infinite}
+.glinks line.loop{stroke:var(--accent2)}
+@keyframes dash{to{stroke-dashoffset:-18}}
+.slot{position:absolute;border:1px dashed var(--line);border-radius:8px;box-sizing:border-box;opacity:.55}
+.slot.can{opacity:1;border-color:var(--accent);background:rgba(255,178,62,.07);cursor:pointer;animation:breathe 1.2s infinite}
+@keyframes breathe{50%{background:rgba(255,178,62,.16)}}
+.tile{position:absolute;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:border-color .12s,transform .1s;user-select:none;text-align:center;padding:4px}
+.tile:hover{border-color:var(--tc)}
+.tile svg{width:42%;height:42%;max-width:40px}
+.tile path{fill:none;stroke:var(--tc);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tile .tn{font-size:11px;line-height:1.1}
+.tile .tv{font-family:var(--font-num);font-size:11px;color:var(--muted)}
+.tile.sel{border-color:#fff;box-shadow:0 0 0 2px var(--tc)}
+.tile.loop{box-shadow:inset 0 0 0 2px rgba(98,214,255,.5)}
+.tile.boost{background:linear-gradient(180deg,rgba(255,178,62,.12),var(--bg2))}
+.tile.pop{animation:tpop .35s}
+@keyframes tpop{0%{transform:scale(.6)}70%{transform:scale(1.06)}100%{transform:none}}
+.tile.core{background:linear-gradient(var(--gel-top),var(--gel-bot));border-color:#ffe0a6;color:var(--gel-text);box-shadow:0 4px 0 var(--gel-edge)}
+.tile.core path{stroke:var(--gel-text)}
+.tile.core .tv{color:var(--gel-text);opacity:.8}
+.tile.core.press{transform:translateY(3px);box-shadow:0 1px 0 var(--gel-edge)}
+.tile.moving{opacity:.4}
+
+/* bugs */
+.bug{position:absolute;z-index:20;cursor:pointer;border:0;background:none;padding:0;animation:glitch .18s steps(2) infinite}
+@keyframes glitch{0%{transform:translate(0,0)}50%{transform:translate(2px,-1px)}100%{transform:translate(-1px,1px)}}
+.bug-e0{font-family:monospace;font-size:16px;color:#f00;background:#000;padding:2px 6px}
+body.has-color .bug-e0{color:var(--hot);background:#1a0008;border:1px solid var(--hot)}
+.bug-e1{background:var(--bg2);border:1px solid var(--hot);border-radius:6px;padding:8px 12px;color:var(--fg);text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.bug-e1 b{display:block;color:var(--hot);font-size:13px} .bug-e1 small{font-family:var(--font-num);color:var(--muted)}
+.bug-e2,.bug-e3{width:46px;height:46px;border-radius:50%;border:2px dashed var(--hot);color:var(--hot);font-size:20px;background:rgba(255,93,115,.1);box-shadow:0 0 22px rgba(255,93,115,.45)}
+.bug-e3{border-radius:4px;transform:rotate(45deg)}
+
+/* overlays */
+.ovl{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(3,6,14,.78);padding:16px;overflow:auto}
+.modal{width:min(720px,100%);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px;box-sizing:border-box;max-height:calc(100vh - 32px);overflow:auto}
+.modal h2{margin:0 0 6px;font-family:var(--font-display);font-weight:400;font-size:22px;letter-spacing:.06em;color:var(--accent)}
+.modal p{color:var(--muted);line-height:1.7;margin:0 0 14px;font-size:14px}
+.modal .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:16px}
+.codes{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0 16px;font-family:var(--font-num)}
+.codes div{display:flex;flex-direction:column} .codes span{font-size:12px;color:var(--muted)} .codes b{font-size:26px;font-weight:400;color:var(--accent2)}
+.libs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.lib{border:1px solid var(--line);background:var(--bg2);border-radius:8px;padding:10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.lib b{font-size:14px} .lib small{color:var(--muted);font-size:12px;line-height:1.45} .lib em{font-style:normal;font-family:var(--font-num);color:var(--accent2);font-size:13px}
+.lib.own{border-color:var(--accent2);cursor:default} .lib.own em{color:var(--good)}
+.lib.no{opacity:.5;cursor:default}
+.mbtn{background:var(--bg2);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:10px 16px;cursor:pointer;font-size:14px}
+.mbtn.pri{background:var(--accent);border-color:var(--accent);color:var(--gel-text);font-family:var(--font-display)}
+.mbtn.warn{border-color:var(--hot);color:var(--hot)}
+.mbtn:disabled{opacity:.45;cursor:default}
+.set{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:12px}
+.fx{position:fixed;inset:0;z-index:70;pointer-events:none}
+.compile{position:fixed;inset:0;z-index:90;background:#000;color:#62d6ff;font-family:"DotGothic16",monospace;font-size:13px;overflow:hidden;padding:20px;line-height:1.3;word-break:break-all;opacity:0;transition:opacity .4s}
+.compile.on{opacity:1}
+.ending{position:fixed;inset:0;z-index:95;background:#000;display:grid;place-items:center;text-align:center;padding:24px;color:#e8eefa;font-family:"DotGothic16",monospace}
+.ending p{font-size:20px;line-height:2;margin:0;opacity:0;transition:opacity 1.2s}
+.ending p.on{opacity:1}
+
+@media (max-width:860px){
+  body{overflow:auto}
+  #shell{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 62vh auto;height:auto;min-height:100%}
+  #hud{grid-column:1}
+  #panel{border-left:0;border-top:1px solid var(--line)}
+  #shop{overflow:visible}
+  .hud-era{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+
+<div id="app"></div>
+
+<script>
+/*ECON-START*/
+const PROD=[
+  {k:'button',  name:'ボタン',       era:1, base:3,    cost:120,   desc:'押されるのを待つ、最小の部品。'},
+  {k:'slider',  name:'スライダー',   era:1, base:22,   cost:1500,  desc:'値を連続的に生み出す。'},
+  {k:'graph',   name:'グラフ',       era:1, base:150,  cost:2.0e4, desc:'数字に形を与える。'},
+  {k:'terminal',name:'ターミナル',   era:1, base:1100, cost:2.6e5, desc:'自分自身を記述しはじめる。'},
+  {k:'cpu',     name:'プロセッサ',   era:2, base:9000, cost:4.5e6, desc:'命令を並列に解釈する。'},
+  {k:'neural',  name:'ニューラル網', era:2, base:8.0e4,cost:9.0e7, desc:'自分の配線を学習する。'},
+  {k:'poly',    name:'ポリゴン',     era:3, base:8.0e5,cost:2.5e9, desc:'面で世界を張る。'},
+  {k:'shader',  name:'シェーダ',     era:3, base:9.0e6,cost:7.0e10,desc:'光の計算そのもの。'},
+];
+const SUP=[
+  {k:'amp',    name:'アンプ',   era:1, cost:2500,  growth:1.5, desc:'隣の生成モジュールの出力 +60%（重ねがけ可）'},
+  {k:'mirror', name:'ミラー',   era:1, cost:6.0e4, growth:1.5, desc:'隣の生成モジュール出力の合計30%を複製する'},
+  {k:'router', name:'ルーター', era:2, cost:5.0e6, growth:1.6, desc:'接続上限8。アンプとコアの効果を1段先まで中継する'},
+];
+const DEF={};
+PROD.forEach((d,i)=>{d.i=i;d.type='prod';d.growth=1.22;DEF[d.k]=d;});
+SUP.forEach(d=>{d.type='sup';DEF[d.k]=d;});
+DEF.core={k:'core',name:'コア',type:'core'};
+
+const COMPS=[
+  {k:'border',  era:0,cost:10,   name:'枠線',          desc:'ボタンに輪郭を与える。クリック +1'},
+  {k:'save',    era:0,cost:30,   name:'セーブ機能',    desc:'進行状況が保存されるようになる。閉じている間も生成が続く', req:'border'},
+  {k:'color',   era:0,cost:80,   name:'色',            desc:'画面に色を与える。カーソルの速さ ×2', req:'border'},
+  {k:'keyboard',era:0,cost:120,  name:'キーボード入力',desc:'Space キーでボタンを押せるようになる', req:'save'},
+  {k:'font',    era:0,cost:250,  name:'フォント',      desc:'文字に形を与える。クリック ×2', req:'color'},
+  {k:'anim',    era:0,cost:600,  name:'アニメーション',desc:'時間を与える。連打で「熱」が溜まり、全生産が最大 ×10', req:'font'},
+  {k:'debug',   era:0,cost:1000, name:'デバッガ',      desc:'画面にバグが湧くようになる。捕まえると報酬', req:'anim'},
+  {k:'window',  era:0,cost:2500, name:'ウィンドウ',    desc:'テキストを枠に収め、部品を並べる平面を作る', req:'debug', shift:1},
+  {k:'stats',   era:1,cost:5000, name:'統計パネル',    desc:'生産の内訳を表示するパネルを錬成する'},
+  {k:'shortcut',era:1,cost:3.0e4,name:'ショートカット',desc:'クリックするたびに、モジュール生産1秒分の4%も得る'},
+  {k:'break',   era:1,cost:1.0e7,name:'フレーム破壊',  desc:'ウィンドウ枠を壊し、無限の回路平面へ出る（画面が満杯のとき）', shift:1, full:1},
+  {k:'feedback',era:2,cost:4.0e6,name:'フィードバック',desc:'閉じた輪（ループ）の上にあるノードの出力 ×2'},
+  {k:'recursion',era:2,cost:8.0e8,name:'再帰',         desc:'ループ倍率 ×2 → ×3', req:'feedback'},
+  {k:'zaxis',   era:2,cost:3.0e10,name:'Z軸',          desc:'平面に奥行きを与える。ワイヤーフレーム空間へ', req:'feedback', shift:1},
+  {k:'normal',  era:3,cost:2.0e12,name:'法線計算',     desc:'押し出し1段あたりの倍率 ×2 → ×3'},
+  {k:'boundary',era:3,cost:1.0e21,name:'次元の境界',   desc:'この画面の、外側へ。'},
+];
+const LIBS=[
+  {k:'preset',    cost:[1],       name:'起動プリセット',    desc:'テキスト期の構成要素（ウィンドウ以外）を最初から持つ'},
+  {k:'cursorInit',cost:[2],       name:'カーソル初期化',    desc:'カーソル20個で開始する'},
+  {k:'grid',      cost:[3,8,20],  name:'圧縮グリッド',      desc:'ウィンドウのセルが横に1列増える（最大3）'},
+  {k:'gc',        cost:[4],       name:'ガベージコレクタ',  desc:'バグの出現頻度と報酬が2倍'},
+  {k:'resident',  cost:[6],       name:'ウィンドウ常駐',    desc:'ウィンドウ期から始める', req:'preset'},
+  {k:'inline',    cost:[6],       name:'インライン展開',    desc:'時代を進める構成要素のコスト ×0.2'},
+  {k:'parallel',  cost:[10],      name:'並列処理',          desc:'熱の最大倍率 ×10 → ×20。熱が冷めにくい'},
+  {k:'autoscript',cost:[10],      name:'自己記述スクリプト',desc:'買える一番安い生成モジュールを自動で設置する'},
+  {k:'eternal',   cost:[15],      name:'永続ループ',        desc:'ウィンドウ期から2×2の正方形がループになる。ループ倍率 +1'},
+  {k:'cache',     cost:[30],      name:'高次元キャッシュ',  desc:'リファクタリング後も、改良レベルの半分を保持する'},
+];
+
+let S=null;
+function fresh(){ return {v:1,px:0,runTotal:0,allTotal:0,clicks:0,era:0,comps:{},cursors:0,cursorUpg:0,coreUpg:0,typeUpg:{},
+  mods:[],links:[],nid:1,layers:0,heat:0,codes:0,codesTotal:0,libs:{},refactors:0,rows:4,seen:{},t:Date.now(),play:0,
+  ended:false,auto:true,sound:true,log:[],best:0}; }
+
+const cnt=k=>S.mods.reduce((a,m)=>a+(m.k===k?1:0),0);
+function globalMult(){ return (1+0.03*S.codesTotal)*(1+S.layers); }
+function cursorSpeed(){ return 0.2*(S.comps.color?2:1)*Math.pow(2,S.cursorUpg); }
+function clickBase(){ return (1+(S.comps.border?1:0))*(S.comps.font?2:1)*Math.pow(2,S.coreUpg); }
+function heatMax(){ return S.libs.parallel?20:10; }
+function heatMult(){ return S.comps.anim ? 1+(heatMax()-1)*S.heat*S.heat : 1; }
+function loopsOn(){ return S.era>=2 ? !!(S.comps.feedback||S.libs.eternal) : (S.era===1 && !!S.libs.eternal); }
+function loopMult(){ return (S.comps.recursion?3:2)+(S.libs.eternal?1:0); }
+function heightBase(){ return S.comps.normal?3:2; }
+function capOf(m){ return (m.k==='core'||m.k==='router')?8:4; }
+function gridCols(){ return 6+(S.libs.grid||0); }
+function coreCell(){ return {x:Math.floor((gridCols()-1)/2),y:1}; }
+function gridFull(){ return S.era===1 && S.mods.length>=gridCols()*S.rows; }
+function coreMod(){ return S.mods.find(m=>m.k==='core'); }
+function byId(id){ return S.mods.find(m=>m.id===id); }
+
+let G=null, C=null;
+function dirty(){ G=null; C=null; }
+function graph(){
+  if(G) return G;
+  const g=new Map(); S.mods.forEach(m=>g.set(m.id,[]));
+  if(S.era===1){
+    for(let i=0;i<S.mods.length;i++) for(let j=i+1;j<S.mods.length;j++){
+      const a=S.mods[i], b=S.mods[j];
+      if(Math.abs(a.gx-b.gx)+Math.abs(a.gy-b.gy)===1){ g.get(a.id).push(b.id); g.get(b.id).push(a.id); }
+    }
+  } else {
+    S.links.forEach(([a,b])=>{ if(g.has(a)&&g.has(b)){ g.get(a).push(b); g.get(b).push(a); } });
+  }
+  return (G=g);
+}
+function edgeKey(a,b){ return a<b?a+'-'+b:b+'-'+a; }
+function bridgesOf(g){
+  const disc=new Map(), low=new Map(), br=new Set(); let t=0;
+  const dfs=(u,p)=>{ disc.set(u,t); low.set(u,t); t++;
+    for(const v of g.get(u)){ if(v===p) continue;
+      if(!disc.has(v)){ dfs(v,u); low.set(u,Math.min(low.get(u),low.get(v))); if(low.get(v)>disc.get(u)) br.add(edgeKey(u,v)); }
+      else low.set(u,Math.min(low.get(u),disc.get(v)));
+    } };
+  for(const u of g.keys()) if(!disc.has(u)) dfs(u,-1);
+  return br;
+}
+function loopInfo(g){
+  const br=bridgesOf(g), nodes=new Set(), edges=new Set();
+  for(const [u,ns] of g) for(const v of ns){ const k=edgeKey(u,v); if(!br.has(k)){ nodes.add(u); edges.add(k); } }
+  return {nodes,edges};
+}
+function reachableFrom(g,id){
+  const seen=new Set([id]), q=[id];
+  while(q.length){ const u=q.shift(); for(const v of (g.get(u)||[])) if(!seen.has(v)){ seen.add(v); q.push(v); } }
+  return seen;
+}
+function synergy(d){
+  if(d.i===0) return 1+0.01*S.cursors;
+  return 1+0.04*cnt(PROD[d.i-1].k);
+}
+function calc(){
+  if(C) return C;
+  const g=graph(), glob=globalMult();
+  const cp=clickBase()*glob;
+  const cursorRate=S.cursors*cursorSpeed()*cp;
+  const core=coreMod();
+  const L = loopsOn()? loopInfo(g) : {nodes:new Set(),edges:new Set()};
+  const lm=loopMult();
+  const conn = (S.era>=2 && core) ? reachableFrom(g,core.id) : null;
+  const info=new Map(); let moduleRate=0;
+  const idx=new Map(S.mods.map(m=>[m.id,m]));
+  const reachOf=id=>{ const r=new Set(g.get(id)||[]); for(const n of (g.get(id)||[])){ const nm=idx.get(n); if(nm&&nm.k==='router') for(const x of g.get(n)) if(x!==id) r.add(x); } return r; };
+  for(const m of S.mods){
+    const d=DEF[m.k]; if(d.type!=='prod') continue;
+    const lvl=S.typeUpg[m.k]||0;
+    const base=d.base*Math.pow(2,lvl), syn=synergy(d);
+    const reach=reachOf(m.id);
+    let amps=0; for(const x of reach){ const xm=idx.get(x); if(xm&&xm.k==='amp') amps++; }
+    const coreL = core && reach.has(core.id);
+    const loop = L.nodes.has(m.id);
+    const hm = Math.pow(heightBase(), m.h||0);
+    const disc = conn && !conn.has(m.id);
+    const v = base*syn*(1+0.6*amps)*(coreL?2:1)*(loop?lm:1)*hm*glob*(disc?0.25:1);
+    info.set(m.id,{v,base,lvl,syn,amps,coreL,loop,hm,disc});
+    moduleRate+=v;
+  }
+  for(const m of S.mods){
+    if(m.k!=='mirror') continue;
+    let src=0; for(const x of (g.get(m.id)||[])){ const i=info.get(x); if(i&&DEF[idx.get(x).k].type==='prod') src+=i.v; }
+    const loop=L.nodes.has(m.id), hm=Math.pow(heightBase(),m.h||0), disc=conn&&!conn.has(m.id);
+    const v=src*0.3*(loop?lm:1)*hm*(disc?0.25:1);
+    info.set(m.id,{v,src,loop,hm,disc,mirror:true});
+    moduleRate+=v;
+  }
+  C={cp,cursorRate,moduleRate,total:cursorRate+moduleRate,info,loops:L,conn,glob};
+  return C;
+}
+function clickValue(c,fz){ return (c.cp + (S.comps.shortcut?0.04*c.moduleRate:0))*heatMult()*(fz?7:1); }
+function addPx(v){ S.px+=v; S.runTotal+=v; S.allTotal+=v; }
+
+function modCost(k){ const d=DEF[k]; return d.cost*Math.pow(d.growth,cnt(k)); }
+function sellValue(k){ const d=DEF[k]; return d.cost*Math.pow(d.growth,Math.max(0,cnt(k)-1))*0.5; }
+function upgCost(k){ return DEF[k].cost*10*Math.pow(6,S.typeUpg[k]||0); }
+function coreUpgCost(){ return 300*Math.pow(9,S.coreUpg); }
+function cursorCost(){ return 15*Math.pow(1.15,S.cursors); }
+function cursorUpgCost(){ return 150*Math.pow(12,S.cursorUpg); }
+function compCost(c){ return c.cost*((c.shift&&S.libs.inline)?0.2:1); }
+function extrudeCost(m){ return DEF[m.k].cost*30*Math.pow(9,m.h||0); }
+function layerCost(){ return 5e10*Math.pow(20,S.layers); }
+function codeGain(){ return Math.floor(Math.cbrt(S.runTotal/1e6)); }
+function libLevel(k){ return S.libs[k]||0; }
+function libNextCost(l){ const lv=libLevel(l.k); return lv<l.cost.length? l.cost[lv] : null; }
+/*ECON-END*/
+</script>
+
+<script>
+// ===================== UI LAYER =====================
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const SAVE_KEY='ui-alchemist-v1';
+const ERA_NAMES=['テキスト','ウィンドウ','回路','空間'];
+const ICON={
+  core:'M12 2 L21 12 L12 22 L3 12 Z M12 7 L16 12 L12 17 L8 12 Z',
+  button:'M5 8 H19 A2 2 0 0 1 21 10 V14 A2 2 0 0 1 19 16 H5 A2 2 0 0 1 3 14 V10 A2 2 0 0 1 5 8 Z M8 12 H16',
+  slider:'M3 8 H21 M3 16 H21 M8 5 V11 M16 13 V19',
+  graph:'M4 20 V4 M4 20 H20 M8 17 V12 M12 17 V8 M16 17 V10',
+  terminal:'M3 5 H21 V19 H3 Z M6 10 L9 12 L6 14 M11 15 H16',
+  cpu:'M7 7 H17 V17 H7 Z M10 10 H14 V14 H10 Z M9 3 V7 M15 3 V7 M9 17 V21 M15 17 V21 M3 9 H7 M3 15 H7 M17 9 H21 M17 15 H21',
+  neural:'M6 6 L12 12 L6 18 M18 6 L12 12 L18 18 M6 6 V18 M18 6 V18 M4.5 6 A1.5 1.5 0 1 0 7.5 6 A1.5 1.5 0 1 0 4.5 6 M16.5 6 A1.5 1.5 0 1 0 19.5 6 A1.5 1.5 0 1 0 16.5 6 M4.5 18 A1.5 1.5 0 1 0 7.5 18 A1.5 1.5 0 1 0 4.5 18 M16.5 18 A1.5 1.5 0 1 0 19.5 18 A1.5 1.5 0 1 0 16.5 18',
+  poly:'M12 3 L21 19 H3 Z M7.5 11 H16.5 L12 19 Z',
+  shader:'M3 12 A9 9 0 1 0 21 12 A9 9 0 1 0 3 12 M7 10 A5.5 5.5 0 0 1 12 6',
+  amp:'M4 18 L12 5 L20 18 Z M12 10 V15 M9.5 12.5 H14.5',
+  mirror:'M12 3 V21 M4 7 L10 12 L4 17 Z M20 7 L14 12 L20 17 Z',
+  router:'M9 12 A3 3 0 1 0 15 12 A3 3 0 1 0 9 12 M12 3 V9 M12 15 V21 M3 12 H9 M15 12 H21 M5.5 5.5 L9.8 9.8 M18.5 18.5 L14.2 14.2 M18.5 5.5 L14.2 9.8 M5.5 18.5 L9.8 14.2',
+  cursor:'M6 3 L6 18 L10 14 L13 21 L15.5 20 L12.5 13 L18 13 Z',
+  layer:'M12 3 L21 8 L12 13 L3 8 Z M3 12 L12 17 L21 12 M3 16 L12 21 L21 16',
+  upg:'M12 20 V5 M6 11 L12 5 L18 11 M6 20 H18',
+  comp:'M3 4 H21 V20 H3 Z M3 9 H21 M7 6.5 H8',
+  ext:'M5 19 H19 M8 19 V9 H16 V19 M8 9 L12 4 L16 9',
+};
+const TCOL={core:'#ffb23e',button:'#ffb23e',slider:'#62d6ff',graph:'#7cf2b0',terminal:'#b9a2ff',cpu:'#ff8a65',neural:'#ff7ac8',poly:'#7fb6ff',shader:'#ffe066',amp:'#ff5d73',mirror:'#cfd8ea',router:'#ffffff',cursor:'#62d6ff',layer:'#62d6ff',upg:'#7cf2b0',comp:'#ffb23e',ext:'#ffe066'};
+const PATH2D={}; for(const k in ICON){ try{ PATH2D[k]=new Path2D(ICON[k]); }catch(e){} }
+const svgIcon=k=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON[k]||ICON.comp}"/></svg>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const UNITS=[[1e24,'秭'],[1e20,'垓'],[1e16,'京'],[1e12,'兆'],[1e8,'億'],[1e4,'万']];
+function fmt(n){
+  if(!isFinite(n)) return '∞';
+  if(n<0) return '-'+fmt(-n);
+  if(n<1e4){ if(n<100 && n%1>0.0001) return n<10? n.toFixed(1) : n.toFixed(0); return Math.floor(n).toLocaleString('ja-JP'); }
+  if(n>=1e28) return n.toExponential(2).replace('e+','e');
+  for(const [v,u] of UNITS) if(n>=v){ const x=n/v; return (x<10?x.toFixed(2):x<100?x.toFixed(1):Math.floor(x))+u; }
+}
+function fmtTime(s){ s=Math.floor(s); const h=Math.floor(s/3600), m=Math.floor(s%3600/60); return h? `${h}時間${m}分` : `${m}分${s%60}秒`; }
+
+// ---------- sound ----------
+let AC=null;
+function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ AC=false; } } return AC||null; }
+function tone(f,dur,type,vol,slide,delay){
+  if(!S||!S.sound) return; const c=ac(); if(!c) return;
+  try{
+    const t=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+    o.type=type||'square'; o.frequency.setValueAtTime(f,t);
+    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(30,f*slide),t+dur);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||0.04,t+0.006); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.03);
+  }catch(e){}
+}
+const snd={
+  click(){ tone(480+S.heat*620,.05,S.comps.color?'triangle':'square',.035); },
+  buy(){ tone(660,.07,'triangle',.05); tone(990,.1,'triangle',.045,0,.06); },
+  place(){ tone(200,.14,'sine',.09,.5); tone(800,.05,'triangle',.03); },
+  deny(){ tone(150,.12,'square',.025); },
+  link(){ tone(700,.08,'sine',.05,1.6); },
+  unlink(){ tone(600,.08,'sine',.04,.6); },
+  bug(){ for(let i=0;i<6;i++) tone(200+Math.random()*1400,.035,'square',.025,0,i*.035); },
+  shift(){ tone(90,1.4,'sawtooth',.045,9); tone(180,1.6,'triangle',.05,7,.15); tone(1320,.6,'sine',.03,1,.9); },
+  unlock(){ tone(880,.06,'sine',.04); tone(1320,.12,'sine',.035,0,.07); },
+};
+
+// ---------- log ----------
+function log(msg,k){
+  S.log.push({m:msg,k:k||''}); if(S.log.length>40) S.log.shift();
+  renderLog();
+}
+function renderLog(){
+  const el=$('#logbox'); if(!el) return;
+  const n = S.era===0 ? 5 : 9;
+  el.innerHTML=S.log.slice(-n).map(l=>`<div class="${l.k}">${esc(l.m)}</div>`).join('');
+}
+
+// ---------- save ----------
+function save(){
+  if(!S.comps.save) return;
+  S.t=Date.now();
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){}
+}
+function load(){
+  try{ const raw=localStorage.getItem(SAVE_KEY); if(raw){ const o=JSON.parse(raw); if(o&&o.v===1) return Object.assign(fresh(),o); } }catch(e){}
+  return null;
+}
+
+// ---------- runtime (non-saved) ----------
+let selected=null, placing=null, moving=null, frenzyT=0, bugEl=null, bugLife=0, bugNext=22;
+let shopSig='', shopRefs=new Map(), selSig='';
+
+// ---------- clicking ----------
+function doClick(x,y){
+  const c=calc(); const v=clickValue(c,frenzyT>0);
+  addPx(v); S.clicks++;
+  if(S.comps.anim) S.heat=Math.min(1,S.heat+0.03);
+  snd.click();
+  if(S.comps.anim && x!=null) floatText(x,y,'+'+fmt(v));
+  if(S.clicks===1) log('> pixel[0] を生成しました。','sys');
+  pressCore();
+}
+function pressCore(){
+  const el = S.era===0 ? $('#gen') : (S.era===1 ? document.querySelector('.tile.core') : null);
+  if(el){ el.classList.add('press'); setTimeout(()=>el.classList.remove('press'),70); }
+  if(S.era>=2) corePulse=1;
+}
+let floats=0;
+function floatText(x,y,t,big){
+  if(floats>40) return; floats++;
+  const d=document.createElement('div'); d.className='float'+(big?' big':''); d.textContent=t;
+  d.style.left=(x+(Math.random()*30-15))+'px'; d.style.top=(y-14)+'px';
+  document.body.appendChild(d); setTimeout(()=>{d.remove();floats--;},800);
+}
+function coreScreenPos(){
+  if(S.era===0){ const r=$('#gen').getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2]; }
+  if(S.era===1){ const el=document.querySelector('.tile.core'); if(el){ const r=el.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2]; } }
+  if(cv){ const r=cv.getBoundingClientRect(); const c=coreMod(); if(c){ const p = S.era===2? w2s(c.wx,c.wy) : (proj3(c.wx,40,c.wy)||[r.width/2,r.height/2]); return [r.left+p[0],r.top+p[1]]; } }
+  return [innerWidth/2,innerHeight/2];
+}
+
+// ---------- shop model ----------
+function compDef(k){ return COMPS.find(c=>c.k===k); }
+function buyComp(c){
+  const cost=compCost(c);
+  if(S.px<cost || S.comps[c.k]) { snd.deny(); return; }
+  if(c.full && !gridFull()){ log('> 画面がまだ満杯ではありません。','bad'); snd.deny(); return; }
+  S.px-=cost; S.comps[c.k]=true; dirty(); snd.buy();
+  onComp(c.k);
+}
+function onComp(k){
+  const msgs={
+    border:'> 境界が定義された。ボタンに輪郭ができた。',
+    save:'> 記憶領域を確保。進行状況が残るようになった。',
+    color:'> 色空間をロード。世界に色がついた。',
+    keyboard:'> 入力デバイスを認識。Space キーが使える。',
+    font:'> 字形を取得。文字に形ができた。',
+    anim:'> 時間軸を追加。連打すると熱が溜まる。',
+    debug:'> デバッガ起動。画面のどこかにバグが湧く。',
+    stats:'> 統計パネルを錬成。生産の内訳が見える。',
+    shortcut:'> ショートカット登録。クリックがモジュールに比例する。',
+    feedback:'> 出力を入力へ戻す。輪をつくれ。',
+    recursion:'> 再帰を許可。輪はさらに強くなる。',
+    normal:'> 法線を計算。押し出しがよく効くようになった。',
+  };
+  if(msgs[k]) log(msgs[k],'sys');
+  if(k==='save') save();
+  if(k==='window'){ enterEra(1); return; }
+  if(k==='break'){ enterEra(2); return; }
+  if(k==='zaxis'){ enterEra(3); return; }
+  if(k==='boundary'){ ending(); return; }
+  if(S.era===0){ setBodyClasses(); renderE0Static(); }
+  else { setBodyClasses(); }
+}
+
+function startPlace(k,auto){
+  const cost=modCost(k);
+  if(S.px<cost){ snd.deny(); return; }
+  moving=null;
+  if(S.era===1){
+    const empt=emptyCells();
+    if(!empt.length){ log('> 空きセルがありません。撤去するか、枠の外へ。','bad'); snd.deny(); return; }
+    if(auto){ placeAt(k,empt[0]); return; }
+    placing={k}; renderGrid();
+  } else if(S.era===2){
+    if(auto){ placeAt(k,autoSpot()); return; }
+    placing={k};
+  } else {
+    placeAt(k,autoSpot());
+  }
+  refreshSel(true);
+}
+function placeAt(k,pos){
+  const cost=modCost(k);
+  if(S.px<cost){ snd.deny(); placing=null; refreshSel(true); return null; }
+  S.px-=cost;
+  const m={id:S.nid++,k,h:0};
+  if(S.era===1){ m.gx=pos.x; m.gy=pos.y; } else { m.wx=pos.x; m.wy=pos.y; }
+  S.mods.push(m);
+  if(S.era>=2) autoLink(m);
+  dirty(); snd.place(); lastPlaced=m.id;
+  if(S.era===1){ renderGrid(m.id); if(gridFull()) log('> 警告: 画面に空きがありません。ウィンドウ枠が軋んでいる。','bad'); }
+  return m;
+}
+let lastPlaced=null;
+
+const SHOP=[];
+function buildShopModel(){
+  SHOP.length=0;
+  SHOP.push({id:'cursor',g:'mod',name:'カーソル',icon:'cursor',
+    vis:()=>!!S.comps.border, cost:cursorCost, meta:()=>'×'+S.cursors,
+    desc:()=>`自動でコアを押す（${cursorSpeed().toFixed(1)}回/秒）`,
+    act:()=>{ const c=cursorCost(); if(S.px<c){snd.deny();return;} S.px-=c; S.cursors++; dirty(); snd.buy(); renderCursors(); }});
+  PROD.forEach(d=>SHOP.push({id:'p-'+d.k,g:'mod',name:d.name,icon:d.k,tc:TCOL[d.k],
+    vis:()=>S.era>=d.era && (S.runTotal>=d.cost*0.25||cnt(d.k)>0), cost:()=>modCost(d.k), meta:()=>'×'+cnt(d.k),
+    desc:()=>`${fmt(d.base*Math.pow(2,S.typeUpg[d.k]||0))}/秒・${d.desc}`, act:e=>startPlace(d.k,e&&e.shiftKey), on:()=>placing&&placing.k===d.k}));
+  SUP.forEach(d=>SHOP.push({id:'s-'+d.k,g:'mod',name:d.name,icon:d.k,tc:TCOL[d.k],
+    vis:()=>S.era>=d.era && (S.runTotal>=d.cost*0.25||cnt(d.k)>0), cost:()=>modCost(d.k), meta:()=>'×'+cnt(d.k),
+    desc:()=>d.desc, act:e=>startPlace(d.k,e&&e.shiftKey), on:()=>placing&&placing.k===d.k}));
+  SHOP.push({id:'cursorUpg',g:'upg',name:'カーソル加速',icon:'cursor',
+    vis:()=>!!S.comps.color && (S.runTotal>=cursorUpgCost()*0.3||S.cursorUpg>0), cost:cursorUpgCost, meta:()=>'Lv'+S.cursorUpg,
+    desc:()=>'カーソルの速さ ×2', act:()=>{ const c=cursorUpgCost(); if(S.px<c){snd.deny();return;} S.px-=c; S.cursorUpg++; dirty(); snd.buy(); }});
+  SHOP.push({id:'coreUpg',g:'upg',name:'コア改良',icon:'core',tc:TCOL.core,
+    vis:()=>S.era>=1, cost:coreUpgCost, meta:()=>'Lv'+S.coreUpg,
+    desc:()=>'クリックとカーソルの生成量 ×2', act:()=>{ const c=coreUpgCost(); if(S.px<c){snd.deny();return;} S.px-=c; S.coreUpg++; dirty(); snd.buy(); }});
+  PROD.forEach(d=>SHOP.push({id:'u-'+d.k,g:'upg',name:d.name+' 改良',icon:'upg',tc:TCOL[d.k],
+    vis:()=>cnt(d.k)>0||(S.typeUpg[d.k]||0)>0, cost:()=>upgCost(d.k), meta:()=>'Lv'+(S.typeUpg[d.k]||0),
+    desc:()=>`すべての${d.name}の出力 ×2`, act:()=>{ const c=upgCost(d.k); if(S.px<c){snd.deny();return;} S.px-=c; S.typeUpg[d.k]=(S.typeUpg[d.k]||0)+1; dirty(); snd.buy(); }}));
+  SHOP.push({id:'layer',g:'upg',name:'レイヤー複製',icon:'layer',
+    vis:()=>S.era>=3, cost:layerCost, meta:()=>'×'+S.layers,
+    desc:()=>`回路全体を上の階へ複製する。全生産 ×${1+S.layers} → ×${2+S.layers}`,
+    act:()=>{ const c=layerCost(); if(S.px<c){snd.deny();return;} S.px-=c; S.layers++; dirty(); snd.buy(); log(`> レイヤー ${S.layers} を複製。世界が上へ伸びる。`,'sys'); }});
+  COMPS.forEach(c=>SHOP.push({id:'c-'+c.k,g:'comp',name:c.name,icon:'comp',shift:!!c.shift,
+    vis:()=>c.era<=S.era && !S.comps[c.k] && (!c.req||S.comps[c.req]) && (!c.full||gridFull()) && S.runTotal>=c.cost*0.35*((c.shift&&S.libs.inline)?0.2:1),
+    cost:()=>compCost(c), meta:()=>'', desc:()=>c.desc, act:()=>buyComp(c), can:()=>!c.full||gridFull()}));
+}
+function visibleItems(){
+  const out=[];
+  for(const it of SHOP){
+    let v = S.seen[it.id] ? !(it.id.startsWith('c-')&&S.comps[it.id.slice(2)]) : it.vis();
+    if(it.id.startsWith('c-') && S.comps[it.id.slice(2)]) v=false;
+    if(it.id.startsWith('c-') && v){ const c=compDef(it.id.slice(2)); if(c.era>S.era) v=false; }
+    if(S.era===0 && (it.g==='mod'&&it.id!=='cursor' || it.id==='coreUpg' || it.id.startsWith('u-'))) v=false;
+    if(v && !S.seen[it.id]){ S.seen[it.id]=true; it._new=performance.now(); if(S.play>1){ snd.unlock(); if(it.g!=='upg') log(`> 錬成可能: ${it.name}`); } }
+    if(v) out.push(it);
+  }
+  return out;
+}
+const GRP_NAME={mod:'モジュール',upg:'改良',comp:'構成要素'};
+function renderShop(force){
+  const host=$('#shop'); if(!host) return;
+  const vis=visibleItems();
+  const sig=S.era+'|'+vis.map(i=>i.id).join(',');
+  if(force || sig!==shopSig){
+    shopSig=sig; shopRefs.clear();
+    if(S.era===0){
+      host.innerHTML=vis.map(it=>`<div class="e0-item${it._new&&performance.now()-it._new<1000?' new':''}" data-id="${it.id}"><button type="button" class="e0-act">[錬成]</button><span class="e0-name">${esc(it.name)} <span class="e0-meta"></span></span><span class="e0-cost"></span><div class="e0-desc"></div></div>`).join('');
+    } else {
+      let html='';
+      for(const g of ['mod','upg','comp']){
+        const its=vis.filter(i=>i.g===g); if(!its.length) continue;
+        html+=`<div class="grp"><h3>${GRP_NAME[g]}</h3>`+its.map(it=>`<button type="button" class="item${it.shift?' shift':''}" data-id="${it.id}" style="--tc:${it.tc||TCOL[it.icon]||'var(--accent2)'}">${svgIcon(it.icon)}<div><div class="it-top"><span class="it-name">${esc(it.name)}</span><span class="it-meta"></span></div><div class="it-desc"></div></div><div class="it-cost"></div></button>`).join('')+'</div>';
+      }
+      host.innerHTML=html||'<p class="selhint">まだ錬成できるものはありません。</p>';
+    }
+    host.querySelectorAll('[data-id]').forEach(el=>{
+      const it=SHOP.find(s=>s.id===el.dataset.id);
+      shopRefs.set(it.id,{it,el,cost:el.querySelector('.it-cost,.e0-cost'),meta:el.querySelector('.it-meta,.e0-meta'),desc:el.querySelector('.it-desc,.e0-desc')});
+      const trg = S.era===0 ? el.querySelector('.e0-act') : el;
+      trg.addEventListener('click',e=>{ ac(); it.act(e); updateUI(); });
+    });
+  }
+  const now=performance.now();
+  for(const {it,el,cost,meta,desc} of shopRefs.values()){
+    const c=it.cost(); const ok=S.px>=c && (!it.can||it.can());
+    el.classList.toggle('no',!ok);
+    if(S.era>0){ el.classList.toggle('new', !!it._new && now-it._new<4000); el.classList.toggle('on', !!(it.on&&it.on())); }
+    const ct=fmt(c)+' px'; if(cost.textContent!==ct) cost.textContent=ct;
+    const mt=it.meta(); if(meta.textContent!==mt) meta.textContent=mt;
+    const dt=it.desc(); if(desc.textContent!==dt) desc.textContent=dt;
+  }
+}
+
+// ---------- body / rendering ----------
+function setBodyClasses(){
+  const b=document.body; b.className='';
+  ['border','color','font','anim'].forEach(k=>{ if(S.comps[k]) b.classList.add('has-'+k); });
+  b.classList.add('era-'+S.era);
+}
+function render(){
+  setBodyClasses(); shopSig=''; selSig=''; cv=null;
+  if(bugEl){ bugEl.remove(); bugEl=null; }
+  if(S.era===0) buildE0(); else { buildShell(); buildStage(); }
+  updateUI(true);
+}
+
+// ===== ERA 0 =====
+function buildE0(){
+  app.innerHTML=`<div id="e0">
+    <div class="e0-count" id="e0c" hidden></div>
+    <div class="e0-stage"><div class="curs" id="curs"></div><button id="gen" type="button"></button></div>
+    <div class="e0-heat" id="e0heat" hidden><span>熱</span><i><b></b></i><em></em></div>
+    <div class="e0-shop" id="shop"></div>
+    <div class="e0-log" id="logbox"></div>
+    <div class="e0-foot">UI・アルケミスト — Created by PLATINA</div>
+  </div>`;
+  $('#gen').addEventListener('pointerdown',e=>{ e.preventDefault(); ac(); doClick(e.clientX,e.clientY); updateUI(); });
+  renderE0Static(); renderLog();
+}
+function renderE0Static(){
+  const g=$('#gen'); if(!g) return;
+  const n=clickBase()*globalMult();
+  const nn = n<10 && n%1===0 ? n+'つ' : fmt(n)+'個';
+  g.textContent = S.comps.border ? `ピクセルを${nn}生成する` : `[ ピクセルを${nn}生成する ]`;
+  renderCursors(); shopSig='';
+}
+
+// ===== cursors (DOM, era 0/1) =====
+function renderCursors(){
+  const host=$('#curs'); if(!host) return;
+  host.classList.add('spin');
+  const shown=Math.min(S.cursors,24);
+  const r = S.era===0 ? 112 : (G1? G1.cell*0.74 : 70);
+  let html='';
+  for(let i=0;i<shown;i++){
+    const ring = i<12?0:1;
+    const k = ring? i-12 : i, n = ring? Math.min(12,shown-12) : Math.min(12,shown);
+    const a = (k/n)*Math.PI*2 + ring*0.26;
+    const rr = r + ring*22;
+    const x=Math.cos(a)*rr, y=Math.sin(a)*rr;
+    const rot = a*180/Math.PI - 45; // arrow tip faces the core
+    html+=`<span class="cur" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;transform:rotate(${rot.toFixed(1)}deg)"><svg viewBox="0 0 13 20"><path d="M1 1 L1 15 L4.6 11.6 L7.4 18 L9.6 17 L6.9 10.8 L11.8 10.8 Z"/></svg></span>`;
+  }
+  if(S.cursors>24) html+=`<span class="cur-more" style="top:${r+40}px">+${S.cursors-24}</span>`;
+  host.innerHTML=html;
+}
+let curAcc=0;
+function cursorVisual(dt){
+  if(!S.comps.anim || S.era>1 || !S.cursors) return;
+  curAcc += S.cursors*cursorSpeed()*dt;
+  if(curAcc>=1){
+    curAcc = Math.min(curAcc-1, 3);
+    const list=document.querySelectorAll('#curs .cur'); if(!list.length) return;
+    const el=list[Math.floor(Math.random()*list.length)];
+    el.classList.remove('tap'); void el.offsetWidth; el.classList.add('tap');
+  }
+}
+
+// ===== SHELL =====
+function buildShell(){
+  app.innerHTML=`<div id="shell">
+    <header id="hud">
+      <div class="hud-px"><b id="pxv">0</b><span>px</span></div>
+      <div class="hud-rate"><span id="ratev">0</span> /秒</div>
+      <div class="hud-heat" id="heat" hidden><span>熱</span><i><b></b></i><em>×1.0</em></div>
+      <div class="hud-era" id="erav"></div>
+      <div class="hud-btns"><button class="hbtn ref" id="b-ref" type="button" hidden>リファクタリング</button><button class="hbtn" id="b-set" type="button">設定</button></div>
+    </header>
+    <main id="stage"></main>
+    <aside id="panel">
+      <section id="sel" class="psec"></section>
+      <section id="stats" class="psec" hidden></section>
+      <section id="shop" class="psec"></section>
+      <section id="logbox" class="psec"></section>
+    </aside>
+  </div>`;
+  $('#b-ref').addEventListener('click',openRefactor);
+  $('#b-set').addEventListener('click',openSettings);
+  renderLog();
+}
+function buildStage(){
+  const st=$('#stage');
+  if(S.era===1){
+    st.innerHTML=`<div class="desk"><div class="win" id="win"><div class="win-bar"><span class="win-name">main.ui</span><span class="win-info" id="wininfo"></span></div><div class="grid" id="grid"></div></div></div><div class="hint" id="hint"></div>`;
+    $('#grid').addEventListener('pointerdown',gridPointer);
+    layoutGrid(); renderGrid();
+  } else {
+    st.innerHTML=`<canvas id="cv"></canvas><div class="hint" id="hint"></div>`;
+    setupCanvas();
+  }
+  setHint();
+}
+function setHint(){
+  const h=$('#hint'); if(!h) return;
+  const sp = S.comps.keyboard? '<kbd>Space</kbd> コアを押す　' : '';
+  if(S.era===1) h.innerHTML=`${sp}コアをクリックで生成　モジュールは隣り合うと効果を及ぼし合う　<kbd>Shift</kbd>+購入で自動配置　<kbd>Esc</kbd> 中止`;
+  if(S.era===2) h.innerHTML=`${sp}ノードを選んで別のノードをクリック = 接続/切断　ドラッグで移動　空白をドラッグでスクロール　ホイールで拡大縮小　<kbd>Esc</kbd> 選択解除`;
+  if(S.era===3) h.innerHTML=`${sp}ドラッグで視点を回転　ホイールで拡大縮小　ノードを選んで押し出す（高くするほど出力が増える）`;
+}
+
+// ===== ERA 1 GRID =====
+let G1=null;
+function layoutGrid(){
+  const st=$('#stage'); if(!st) return; const r=st.getBoundingClientRect();
+  const cols=gridCols(), rows=S.rows, gap=12;
+  let cell=Math.floor(Math.min((r.width-80-gap*(cols-1))/cols,(r.height-130-gap*(rows-1))/rows,108));
+  cell=Math.max(cell,42);
+  G1={cell,gap,cols,rows,w:cols*cell+(cols-1)*gap,h:rows*cell+(rows-1)*gap};
+  const g=$('#grid'); g.style.width=G1.w+'px'; g.style.height=G1.h+'px';
+}
+const cellXY=(x,y)=>[x*(G1.cell+G1.gap), y*(G1.cell+G1.gap)];
+function emptyCells(){
+  const occ=new Set(S.mods.map(m=>m.gx+','+m.gy)); const core=coreMod(); const out=[];
+  for(let y=0;y<S.rows;y++) for(let x=0;x<gridCols();x++) if(!occ.has(x+','+y)) out.push({x,y});
+  if(core) out.sort((a,b)=>(Math.abs(a.x-core.gx)+Math.abs(a.y-core.gy))-(Math.abs(b.x-core.gx)+Math.abs(b.y-core.gy)));
+  return out;
+}
+function renderGrid(popId){
+  const g=$('#grid'); if(!g||!G1) return;
+  const c=calc(), gr=graph(), {cell}=G1;
+  const occ=new Set(S.mods.map(m=>m.gx+','+m.gy));
+  let lines='', slots='', tiles='';
+  const done=new Set();
+  for(const m of S.mods) for(const n of gr.get(m.id)){
+    const k=edgeKey(m.id,n); if(done.has(k)) continue; done.add(k);
+    const o=byId(n); const [ax,ay]=cellXY(m.gx,m.gy), [bx,by]=cellXY(o.gx,o.gy);
+    const act=(m.k==='amp'||o.k==='amp'||m.k==='core'||o.k==='core'||m.k==='mirror'||o.k==='mirror') && (DEF[m.k].type==='prod'||DEF[o.k].type==='prod');
+    const lp=c.loops.edges.has(k);
+    lines+=`<line x1="${ax+cell/2}" y1="${ay+cell/2}" x2="${bx+cell/2}" y2="${by+cell/2}" class="${act?'act':''}${lp?' loop':''}"/>`;
+  }
+  for(let y=0;y<S.rows;y++) for(let x=0;x<gridCols();x++){
+    if(occ.has(x+','+y)) continue; const [l,t]=cellXY(x,y);
+    slots+=`<div class="slot${(placing||moving)?' can':''}" data-x="${x}" data-y="${y}" style="left:${l}px;top:${t}px;width:${cell}px;height:${cell}px"></div>`;
+  }
+  for(const m of S.mods){
+    const [l,t]=cellXY(m.gx,m.gy), d=DEF[m.k];
+    const cls=['tile']; if(m.k==='core') cls.push('core'); if(selected===m.id) cls.push('sel'); if(moving===m.id) cls.push('moving'); if(popId===m.id && S.comps.anim) cls.push('pop');
+    const label = m.k==='core' ? '生成' : d.name;
+    tiles+=`<div class="${cls.join(' ')}" data-id="${m.id}" style="left:${l}px;top:${t}px;width:${cell}px;height:${cell}px;--tc:${TCOL[m.k]}">${svgIcon(m.k)}<span class="tn">${label}</span><span class="tv" data-v="${m.id}"></span></div>`;
+  }
+  g.innerHTML=`<svg class="glinks" width="${G1.w}" height="${G1.h}">${lines}</svg>${slots}${tiles}<div class="curs" id="curs"></div>`;
+  const core=coreMod();
+  if(core){ const [l,t]=cellXY(core.gx,core.gy); const cu=$('#curs'); cu.style.left=(l+cell/2)+'px'; cu.style.top=(t+cell/2)+'px'; }
+  renderCursors(); updateGrid();
+}
+function updateGrid(){
+  if(S.era!==1) return;
+  const c=calc();
+  const info=$('#wininfo');
+  if(info){ const free=gridCols()*S.rows-S.mods.length; info.textContent=`${gridCols()}×${S.rows} ・ 空き ${free}`; info.classList.toggle('full',free===0); $('#win').classList.toggle('creak', free===0 && !!S.comps.anim); }
+  document.querySelectorAll('.tile').forEach(el=>{
+    const id=+el.dataset.id, m=byId(id); if(!m) return;
+    const tv=el.querySelector('.tv');
+    if(m.k==='core'){ tv.textContent='+'+fmt(clickValue(c,frenzyT>0)); return; }
+    const i=c.info.get(id);
+    tv.textContent = i? fmt(i.v)+'/秒' : '';
+    el.classList.toggle('loop', !!(i&&i.loop));
+    el.classList.toggle('boost', !!(i&&(i.amps||i.coreL)));
+  });
+}
+function gridPointer(e){
+  ac();
+  const tile=e.target.closest('.tile'), slot=e.target.closest('.slot');
+  if(tile){
+    const m=byId(+tile.dataset.id);
+    if(m.k==='core'){ e.preventDefault(); doClick(e.clientX,e.clientY); updateUI(); return; }
+    if(placing||moving){ placing=null; moving=null; }
+    selected = selected===m.id? null : m.id; renderGrid(); refreshSel(true); return;
+  }
+  if(slot){
+    const pos={x:+slot.dataset.x,y:+slot.dataset.y};
+    if(placing){ const k=placing.k; const ok=placeAt(k,pos); if(!(e.shiftKey && ok)) placing=null; renderGrid(); refreshSel(true); return; }
+    if(moving){ const m=byId(moving); m.gx=pos.x; m.gy=pos.y; moving=null; dirty(); snd.place(); renderGrid(m.id); refreshSel(true); return; }
+    selected=null; renderGrid(); refreshSel(true);
+  }
+}
+
+// ===== selection panel =====
+function refreshSel(force){
+  const el=$('#sel'); if(!el) return;
+  const m = selected!=null ? byId(selected) : null;
+  if(selected!=null && !m) selected=null;
+  const sig = (placing?'p'+placing.k:'')+(moving?'mv':'')+'|'+(m?m.id+':'+(m.h||0):'none')+'|'+S.era;
+  if(force || sig!==selSig){
+    selSig=sig;
+    if(placing){
+      el.innerHTML=`<h3>配置中</h3><div class="selhead" style="--tc:${TCOL[placing.k]}">${svgIcon(placing.k)}<div><div class="selname">${DEF[placing.k].name}</div><div class="selhint">${S.era===1?'光っている空きセルをクリック':'回路平面の空いた場所をクリック'}<br><kbd>Shift</kbd> を押しながらで連続配置 ・ <kbd>Esc</kbd> 中止</div></div></div>`;
+    } else if(moving){
+      el.innerHTML=`<h3>移動中</h3><p class="selhint">移動先の空きセルをクリック ・ <kbd>Esc</kbd> 中止</p>`;
+    } else if(m){
+      const d=DEF[m.k];
+      const canExt = S.era===3 && (d.type==='prod'||m.k==='mirror');
+      el.innerHTML=`<h3>選択中</h3><div class="selhead" style="--tc:${TCOL[m.k]}">${svgIcon(m.k)}<div><div class="selname">${d.name}${m.h?` <span class="it-meta">高さ ${m.h}</span>`:''}</div><div class="selout" id="sel-out"></div></div></div>
+        <div class="facts" id="sel-facts"></div>
+        <div class="selbtns">${canExt?`<button class="sbtn pri" id="sb-ext" type="button"></button>`:''}${S.era===1?'<button class="sbtn" id="sb-move" type="button">移動</button>':''}${S.era>=2?'<button class="sbtn" id="sb-cut" type="button">接続を全部切る</button>':''}<button class="sbtn" id="sb-sell" type="button">撤去（${fmt(sellValue(m.k))} px 返却）</button></div>`;
+      const q=s=>el.querySelector(s);
+      if(q('#sb-move')) q('#sb-move').onclick=()=>{ moving=m.id; renderGrid(); refreshSel(true); };
+      if(q('#sb-sell')) q('#sb-sell').onclick=()=>removeMod(m.id);
+      if(q('#sb-cut')) q('#sb-cut').onclick=()=>{ S.links=S.links.filter(l=>l[0]!==m.id&&l[1]!==m.id); dirty(); snd.unlink(); };
+      if(q('#sb-ext')) q('#sb-ext').onclick=()=>{ const c=extrudeCost(m); if(S.px<c){snd.deny();return;} S.px-=c; m.h=(m.h||0)+1; dirty(); snd.buy(); refreshSel(true); };
+    } else {
+      const tips={
+        1:'モジュールを買って、ウィンドウの空きセルに置く。<br>隣り合うモジュールどうしは効果を及ぼし合う。アンプやコアの隣は強い。<br>セルは有限。上位のモジュールに置き換えていこう。',
+        2:'枠の外は無限の回路平面。<br>コアにつながっていないノードは出力が25%に落ちる。<br>ノードを選んでから別のノードをクリックすると接続/切断。接続は1ノード4本まで（コアとルーターは8本）。<br>輪をつくると、フィードバックでループ倍率がかかる。',
+        3:'平面は空間の断面だった。<br>ノードを選んで押し出すと、高さ1段ごとに出力が倍になる。<br>レイヤー複製で、回路全体を上の階へ重ねられる。',
+      };
+      el.innerHTML=`<h3>${ERA_NAMES[S.era]}期</h3><p class="selhint">${tips[S.era]||''}</p>`;
+    }
+  }
+  if(m && !placing && !moving){
+    const c=calc(), i=c.info.get(m.id), d=DEF[m.k];
+    const out=$('#sel-out'), facts=$('#sel-facts');
+    if(out) out.textContent = i? fmt(i.v)+' /秒' : (m.k==='amp'?'出力なし（支援）':m.k==='router'?'出力なし（中継）':'');
+    if(facts){
+      let f='';
+      const row=(a,b,cls)=>f+=`<span>${a}</span><b class="${cls||''}">${b}</b>`;
+      if(i && !i.mirror){
+        row('基礎',`${fmt(d.base)}/秒`);
+        if(i.lvl) row('改良',`×${Math.pow(2,i.lvl)}`,'up');
+        row(d.i===0?'シナジー（カーソル数）':`シナジー（${PROD[d.i-1].name}の数）`,`×${i.syn.toFixed(2)}`,i.syn>1?'up':'');
+        if(i.amps) row(`アンプ ×${i.amps}`,`×${(1+0.6*i.amps).toFixed(1)}`,'up');
+        if(i.coreL) row('コア直結','×2','up');
+        if(i.loop) row('ループ',`×${loopMult()}`,'up');
+        if(i.hm>1) row('高さ',`×${fmt(i.hm)}`,'up');
+        if(i.disc) row('コア未接続','×0.25','dn');
+        if(c.glob>1) row('全体倍率',`×${c.glob.toFixed(2)}`,'up');
+      } else if(i && i.mirror){
+        row('隣の生成の合計',`${fmt(i.src)}/秒`); row('複製率','30%');
+        if(i.loop) row('ループ',`×${loopMult()}`,'up'); if(i.hm>1) row('高さ',`×${fmt(i.hm)}`,'up'); if(i.disc) row('コア未接続','×0.25','dn');
+      } else if(m.k==='amp'){
+        const n=(graph().get(m.id)||[]).filter(x=>DEF[byId(x).k].type==='prod').length;
+        row('隣の生成モジュール',`${n}個に +60%`);
+      } else if(m.k==='router'){
+        row('接続',`${(graph().get(m.id)||[]).length} / 8`);
+      }
+      if(S.era>=2) row('接続数',`${(graph().get(m.id)||[]).length} / ${capOf(m)}`);
+      if(facts.innerHTML!==f) facts.innerHTML=f;
+    }
+    const ext=$('#sb-ext');
+    if(ext){ const cc=extrudeCost(m); const t=`押し出し +1（${fmt(cc)} px）`; if(ext.textContent!==t) ext.textContent=t; ext.disabled=S.px<cc; }
+  }
+}
+function removeMod(id){
+  const m=byId(id); if(!m||m.k==='core') return;
+  S.px+=sellValue(m.k);
+  S.mods=S.mods.filter(x=>x.id!==id); S.links=S.links.filter(l=>l[0]!==id&&l[1]!==id);
+  selected=null; dirty(); snd.unlink();
+  if(S.era===1) renderGrid();
+  refreshSel(true);
+}
+
+// ===== stats panel =====
+function renderStats(){
+  const el=$('#stats'); if(!el) return;
+  el.hidden=!S.comps.stats; if(!S.comps.stats) return;
+  const c=calc(); const rows=[];
+  rows.push({k:'cursor',name:'カーソル',v:c.cursorRate,n:S.cursors});
+  [...PROD,DEF.mirror].forEach(d=>{ let v=0,n=0; for(const m of S.mods) if(m.k===d.k){ n++; const i=c.info.get(m.id); if(i) v+=i.v; } if(n) rows.push({k:d.k,name:d.name,v,n}); });
+  const tot=c.total||1;
+  el.innerHTML=`<h3>統計</h3>`+rows.map(r=>`<div class="strow" style="--tc:${TCOL[r.k]}">${svgIcon(r.k)}<span>${r.name} ×${r.n}</span><b>${fmt(r.v)}/秒</b><span class="bar"><i style="width:${(r.v/tot*100).toFixed(1)}%"></i></span></div>`).join('')
+    +`<div class="facts"><span>クリック1回</span><b>${fmt(clickValue(c,frenzyT>0))}</b><span>ループ中のノード</span><b>${c.loops.nodes.size}</b><span>プレイ時間</span><b>${fmtTime(S.play)}</b></div>`;
+}
+
+// ===== canvas (era 2/3) =====
+let cv=null, cx=null, dpr=1, cam2={x:0,y:0,z:1}, cam3={yaw:0.7,pitch:0.62,dist:1000,tPitch:0.62,tDist:1000,tx:0,tz:0,anim:0};
+let ptr=null, hover=null, corePulse=0, zoomAnim=0;
+function setupCanvas(){
+  cv=$('#cv'); cx=cv.getContext('2d');
+  const rs=()=>{ dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); cv.width=Math.max(1,r.width*dpr); cv.height=Math.max(1,r.height*dpr); };
+  rs(); new ResizeObserver(rs).observe(cv);
+  cv.addEventListener('contextmenu',e=>e.preventDefault());
+  cv.addEventListener('pointerdown',e=>{
+    ac(); try{cv.setPointerCapture(e.pointerId);}catch(_){}
+    const p=locPt(e);
+    if(e.button===2){ placing=null; selected=null; refreshSel(true); return; }
+    ptr={x0:p[0],y0:p[1],x:p[0],y:p[1],hit:pick(p[0],p[1]),moved:false,shift:e.shiftKey,cx:e.clientX,cy:e.clientY};
+  });
+  cv.addEventListener('pointermove',e=>{
+    const p=locPt(e); hover=p;
+    if(!ptr) return;
+    const dx=p[0]-ptr.x, dy=p[1]-ptr.y; ptr.x=p[0]; ptr.y=p[1];
+    if(!ptr.moved && Math.hypot(p[0]-ptr.x0,p[1]-ptr.y0)>5) ptr.moved=true;
+    if(!ptr.moved) return;
+    if(S.era===2){
+      if(ptr.hit && !placing){ const w=s2w(p[0],p[1]); ptr.hit.wx=w[0]; ptr.hit.wy=w[1]; }
+      else { cam2.x-=dx/cam2.z; cam2.y-=dy/cam2.z; }
+    } else {
+      cam3.yaw+=dx*0.008; cam3.tPitch=cam3.pitch=Math.max(0.12,Math.min(1.5,cam3.pitch+dy*0.005));
+    }
+  });
+  const up=e=>{
+    if(!ptr) return; const p=ptr; ptr=null;
+    if(!p.moved) canvasTap(p.x0,p.y0,p.hit,e.shiftKey||p.shift,e.clientX,e.clientY);
+  };
+  cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',()=>ptr=null);
+  cv.addEventListener('pointerleave',()=>{hover=null;});
+  cv.addEventListener('wheel',e=>{
+    e.preventDefault();
+    if(S.era===2){ const p=locPt(e); const before=s2w(p[0],p[1]); cam2.z=Math.max(0.25,Math.min(2.5,cam2.z*Math.exp(-e.deltaY*0.0012))); const after=s2w(p[0],p[1]); cam2.x+=before[0]-after[0]; cam2.y+=before[1]-after[1]; }
+    else { cam3.tDist=Math.max(300,Math.min(6000,cam3.tDist*Math.exp(e.deltaY*0.0012))); }
+  },{passive:false});
+}
+function locPt(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; }
+function cvSize(){ return [cv.width/dpr, cv.height/dpr]; }
+function w2s(x,y){ const [W,H]=cvSize(); return [(x-cam2.x)*cam2.z+W/2,(y-cam2.y)*cam2.z+H/2]; }
+function s2w(x,y){ const [W,H]=cvSize(); return [(x-W/2)/cam2.z+cam2.x,(y-H/2)/cam2.z+cam2.y]; }
+const NR=30;
+function nodeTop(m){ return DEF[m.k].type==='prod'||m.k==='mirror' ? 26+(m.h||0)*34 : m.k==='core'? 80 : 44; }
+function pick(x,y){
+  let best=null, bd=1e9;
+  for(const m of S.mods){
+    let p, rr;
+    if(S.era===2){ p=w2s(m.wx,m.wy); rr=(NR+6)*cam2.z; }
+    else { p=proj3(m.wx,nodeTop(m)*0.5,m.wy); if(!p) continue; rr=Math.max(18,44*p[2]); }
+    const d=Math.hypot(p[0]-x,p[1]-y); if(d<rr && d<bd){ bd=d; best=m; }
+  }
+  return best;
+}
+function canvasTap(x,y,hit,shift,clx,cly){
+  if(placing && S.era===2){
+    const w=s2w(x,y);
+    if(S.mods.some(m=>Math.hypot(m.wx-w[0],m.wy-w[1])<NR*2.2)){ log('> 近すぎます。少し離して置く。','bad'); snd.deny(); return; }
+    const ok=placeAt(placing.k,{x:w[0],y:w[1]}); if(!(shift&&ok)) placing=null; refreshSel(true); return;
+  }
+  if(hit){
+    if(selected!=null && hit.id!==selected){ toggleLink(selected,hit.id); return; }
+    if(hit.k==='core' && selected==null){ doClick(clx,cly); updateUI(); return; }
+    selected = hit.id===selected? null : hit.id; refreshSel(true); return;
+  }
+  selected=null; refreshSel(true);
+}
+function deg(id){ return S.links.reduce((a,l)=>a+((l[0]===id||l[1]===id)?1:0),0); }
+function toggleLink(a,b){
+  const i=S.links.findIndex(l=>(l[0]===a&&l[1]===b)||(l[0]===b&&l[1]===a));
+  if(i>=0){ S.links.splice(i,1); snd.unlink(); }
+  else {
+    const ma=byId(a), mb=byId(b);
+    if(deg(a)>=capOf(ma)||deg(b)>=capOf(mb)){ log('> 接続上限に達しています。','bad'); snd.deny(); return; }
+    S.links.push([a,b]); snd.link();
+  }
+  dirty(); refreshSel(true);
+}
+function autoSpot(){
+  const base = (selected!=null&&byId(selected)) || (lastPlaced!=null&&byId(lastPlaced)) || coreMod();
+  const ok=(x,y)=>!S.mods.some(m=>Math.hypot(m.wx-x,m.wy-y)<120);
+  for(let r=140;r<4000;r+=70){
+    const n=Math.max(6,Math.floor(r/40)), off=Math.random()*Math.PI*2;
+    for(let i=0;i<n;i++){ const a=off+i/n*Math.PI*2; const x=base.wx+Math.cos(a)*r, y=base.wy+Math.sin(a)*r; if(ok(x,y)) return {x,y}; }
+  }
+  return {x:base.wx+200,y:base.wy};
+}
+function autoLink(m){
+  const cand=S.mods.filter(o=>o.id!==m.id && deg(o.id)<capOf(o)).sort((a,b)=>Math.hypot(a.wx-m.wx,a.wy-m.wy)-Math.hypot(b.wx-m.wx,b.wy-m.wy));
+  if(cand[0]) S.links.push([m.id,cand[0].id]);
+}
+
+// ----- era 2 drawing -----
+function drawE2(t){
+  const [W,H]=cvSize(); const ctx=cx;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle='#08152b'; ctx.fillRect(0,0,W,H);
+  if(zoomAnim>0){ zoomAnim=Math.max(0,zoomAnim-0.016); cam2.z = 1 + 0.9*zoomAnim*zoomAnim; }
+  // dot grid
+  const step=40*cam2.z; if(step>9){
+    const o=w2s(0,0); const sx=((o[0]%step)+step)%step, sy=((o[1]%step)+step)%step;
+    ctx.fillStyle='rgba(98,214,255,.13)';
+    for(let x=sx;x<W;x+=step) for(let y=sy;y<H;y+=step) ctx.fillRect(x-1,y-1,2,2);
+  }
+  const c=calc(), g=graph(), core=coreMod(); if(!core) return;
+  // distances to core for particle direction
+  const dist=new Map([[core.id,0]]), q=[core.id];
+  while(q.length){ const u=q.shift(); for(const v of g.get(u)) if(!dist.has(v)){ dist.set(v,dist.get(u)+1); q.push(v); } }
+  // links
+  ctx.lineCap='round';
+  for(const [a,b] of S.links){
+    const ma=byId(a), mb=byId(b); if(!ma||!mb) continue;
+    const pa=w2s(ma.wx,ma.wy), pb=w2s(mb.wx,mb.wy);
+    const lp=c.loops.edges.has(edgeKey(a,b));
+    ctx.strokeStyle = lp? 'rgba(98,214,255,.75)' : 'rgba(80,120,180,.55)'; ctx.lineWidth=(lp?3:2)*Math.max(.6,cam2.z);
+    ctx.beginPath(); ctx.moveTo(pa[0],pa[1]); ctx.lineTo(pb[0],pb[1]); ctx.stroke();
+    const da=dist.get(a), db=dist.get(b);
+    if(da!=null&&db!=null&&da!==db){
+      const [from,to,pf,pt]= da>db? [ma,mb,pa,pb] : [mb,ma,pb,pa];
+      const iv=c.info.get(from.id); const nP = iv? Math.min(4,1+Math.floor(Math.log10(1+iv.v)/2)) : 1;
+      ctx.fillStyle=TCOL[from.k];
+      for(let k=0;k<nP;k++){ const f=((t*0.55+k/nP+(a*0.137))%1); const x=pf[0]+(pt[0]-pf[0])*f, y=pf[1]+(pt[1]-pf[1])*f; ctx.globalAlpha=Math.sin(f*Math.PI); ctx.fillRect(x-2.5,y-2.5,5,5); }
+      ctx.globalAlpha=1;
+    }
+  }
+  // link preview from selection
+  if(selected!=null && hover){ const sm=byId(selected); if(sm){ const p=w2s(sm.wx,sm.wy); ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(255,178,62,.6)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(hover[0],hover[1]); ctx.stroke(); ctx.setLineDash([]); } }
+  // nodes
+  const z=cam2.z, R=NR*z;
+  ctx.textAlign='center';
+  if(corePulse>0) corePulse=Math.max(0,corePulse-0.08);
+  for(const m of S.mods){
+    const p=w2s(m.wx,m.wy); if(p[0]<-80||p[1]<-80||p[0]>W+80||p[1]>H+80) continue;
+    const i=c.info.get(m.id), col=TCOL[m.k];
+    const disc = c.conn && !c.conn.has(m.id);
+    ctx.globalAlpha = disc? .45 : 1;
+    const rr = m.k==='core'? R*1.25*(1+corePulse*0.08) : R;
+    ctx.beginPath(); ctx.arc(p[0],p[1],rr,0,Math.PI*2);
+    ctx.fillStyle = m.k==='core'? '#3a2406' : '#0f2448'; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle=col; ctx.shadowColor=col; ctx.shadowBlur= m.k==='core'? 18+corePulse*20 : 8; ctx.stroke(); ctx.shadowBlur=0;
+    // icon
+    if(PATH2D[m.k]){ ctx.save(); const s=rr*1.1/24; ctx.translate(p[0]-12*s,p[1]-12*s); ctx.scale(s,s); ctx.strokeStyle=col; ctx.lineWidth=1.7; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.stroke(PATH2D[m.k]); ctx.restore(); }
+    // capacity pips
+    const cap=capOf(m), dg=(g.get(m.id)||[]).length;
+    for(let k=0;k<cap;k++){ const a=-Math.PI/2+(k-(cap-1)/2)*0.28; const px=p[0]+Math.cos(a)*(rr+7), py=p[1]+Math.sin(a)*(rr+7)-0; ctx.fillStyle = k<dg? col : 'rgba(147,168,201,.25)'; ctx.fillRect(px-1.5,py-1.5,3,3); }
+    // loop ring
+    if(i&&i.loop){ ctx.save(); ctx.translate(p[0],p[1]); ctx.rotate(t*0.8); ctx.setLineDash([5,7]); ctx.strokeStyle='rgba(98,214,255,.8)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(0,0,rr+13,0,Math.PI*2); ctx.stroke(); ctx.restore(); }
+    if(selected===m.id){ ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(p[0],p[1],rr+19,0,Math.PI*2); ctx.stroke(); }
+    // labels
+    if(z>0.55){
+      ctx.font=`${Math.round(11*Math.min(1.3,z))}px "Zen Kaku Gothic New",sans-serif`; ctx.fillStyle='#e8eefa';
+      ctx.fillText(m.k==='core'?'コア':DEF[m.k].name, p[0], p[1]+rr+20);
+      ctx.font=`${Math.round(11*Math.min(1.3,z))}px DotGothic16,monospace`; ctx.fillStyle= disc? '#ff5d73' : '#93a8c9';
+      const lbl = m.k==='core'? '+'+fmt(clickValue(c,frenzyT>0)) : i? fmt(i.v)+'/秒'+(disc?' 未接続':'') : '';
+      ctx.fillText(lbl, p[0], p[1]+rr+34);
+    }
+    ctx.globalAlpha=1;
+  }
+  // cursors orbiting core
+  drawCanvasCursors(w2s(core.wx,core.wy), R*1.25+30, t);
+  // placing ghost
+  if(placing && hover){
+    ctx.globalAlpha=.55; ctx.strokeStyle=TCOL[placing.k]; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.arc(hover[0],hover[1],R,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+  }
+}
+function drawCanvasCursors(c0,r,t){
+  const n=Math.min(S.cursors,24); if(!n) return;
+  const ctx=cx; ctx.fillStyle='#62d6ff'; ctx.strokeStyle='#062033'; ctx.lineWidth=1;
+  for(let i=0;i<n;i++){
+    const a=t*0.15+i/n*Math.PI*2; const tap=(Math.sin(t*6+i*1.7)>0.92)?4:0;
+    const rr=r-tap; const x=c0[0]+Math.cos(a)*rr, y=c0[1]+Math.sin(a)*rr;
+    ctx.save(); ctx.translate(x,y); ctx.rotate(a+Math.PI*0.75); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,11); ctx.lineTo(3,8.5); ctx.lineTo(5,13); ctx.lineTo(6.5,12.3); ctx.lineTo(4.6,8); ctx.lineTo(8,8); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+}
+
+// ----- era 3 drawing (wireframe) -----
+let W3=0,H3=0;
+function proj3(x,y,z){
+  const [W,H]=cv?cvSize():[W3,H3];
+  x-=cam3.tx; z-=cam3.tz;
+  const cy=Math.cos(cam3.yaw), sy=Math.sin(cam3.yaw);
+  const x1=x*cy-z*sy, z1=x*sy+z*cy;
+  const cp=Math.cos(cam3.pitch), sp=Math.sin(cam3.pitch);
+  const y2=y*cp+z1*sp, z2=-y*sp+z1*cp;
+  const d=cam3.dist+z2; if(d<40) return null;
+  const s=Math.min(W,H)*1.15/d;
+  return [W/2+x1*s, H*0.55-y2*s, s];
+}
+function seg(ax,ay,az,bx,by,bz){ const a=proj3(ax,ay,az), b=proj3(bx,by,bz); if(a&&b){ cx.moveTo(a[0],a[1]); cx.lineTo(b[0],b[1]); } }
+function prism(x,z,n,r,y0,y1,rot){
+  const P=[]; for(let i=0;i<n;i++){ const a=rot+i/n*Math.PI*2; P.push([x+Math.cos(a)*r,z+Math.sin(a)*r]); }
+  for(let i=0;i<n;i++){ const p=P[i], q=P[(i+1)%n]; seg(p[0],y0,p[1],q[0],y0,q[1]); seg(p[0],y1,p[1],q[0],y1,q[1]); seg(p[0],y0,p[1],p[0],y1,p[1]); }
+}
+function pyramid(x,z,n,r,y0,apex,rot){
+  const P=[]; for(let i=0;i<n;i++){ const a=rot+i/n*Math.PI*2; P.push([x+Math.cos(a)*r,z+Math.sin(a)*r]); }
+  for(let i=0;i<n;i++){ const p=P[i], q=P[(i+1)%n]; seg(p[0],y0,p[1],q[0],y0,q[1]); seg(p[0],y0,p[1],x,apex,z); }
+}
+const SHAPE={button:[4,26],slider:[4,22],graph:[4,26],terminal:[6,26],cpu:[4,30],neural:[6,28],poly:[3,32],shader:[12,26],mirror:[4,24]};
+function drawModel(m,yo,t){
+  const x=m.wx, z=m.wy, h=m.h||0;
+  if(m.k==='core'){
+    const r=30, mid=yo+44, rot=t*0.9;
+    const P=[0,1,2,3].map(i=>[x+Math.cos(rot+i*Math.PI/2)*r, z+Math.sin(rot+i*Math.PI/2)*r]);
+    for(let i=0;i<4;i++){ const p=P[i], q=P[(i+1)%4]; seg(p[0],mid,p[1],q[0],mid,q[1]); seg(p[0],mid,p[1],x,mid+40,z); seg(p[0],mid,p[1],x,mid-40,z); }
+    return;
+  }
+  if(m.k==='amp'){ pyramid(x,z,4,26,yo,yo+48,Math.PI/4); return; }
+  if(m.k==='router'){ prism(x,z,8,22,yo,yo+14,0); prism(x,z,8,10,yo+14,yo+40,0); return; }
+  const [n,r]=SHAPE[m.k]||[4,24];
+  const top=yo+26+h*34;
+  if(m.k==='mirror'){ pyramid(x,z,4,r,yo+top*0+ (top-yo)/2, top, Math.PI/4); pyramid(x,z,4,r,yo+(top-yo)/2, yo, Math.PI/4); return; }
+  prism(x,z,n,r,yo,top,Math.PI/4);
+  for(let k=1;k<=h;k++){ const y=yo+26+(k-1)*34+26; prism(x,z,n,r*0.82,y,y,Math.PI/4); }
+  if(m.k==='graph'){ seg(x-10,yo,z,x-10,yo+(top-yo)*0.5,z); seg(x+10,yo,z,x+10,yo+(top-yo)*0.85,z); }
+  if(m.k==='cpu'){ prism(x,z,4,r*0.5,top,top+8,Math.PI/4); }
+}
+function drawE3(t,dt){
+  const [W,H]=cvSize(); W3=W; H3=H; const ctx=cx;
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='#05070e'; ctx.fillRect(0,0,W,H);
+  if(cam3.anim>0){ cam3.anim=Math.max(0,cam3.anim-dt/3); const e=cam3.anim*cam3.anim; cam3.pitch=0.62+(1.52-0.62)*e; }
+  cam3.dist += (cam3.tDist-cam3.dist)*Math.min(1,dt*6);
+  if(!ptr) cam3.yaw+=dt*0.04;
+  const c=calc(), core=coreMod(); if(!core) return;
+  let E=300; for(const m of S.mods) E=Math.max(E,Math.abs(m.wx-core.wx)+180,Math.abs(m.wy-core.wy)+180);
+  cam3.tx+= (core.wx-cam3.tx)*0.1; cam3.tz+=(core.wy-cam3.tz)*0.1;
+  // floor grid
+  ctx.lineWidth=1; ctx.strokeStyle='rgba(98,214,255,.10)'; ctx.beginPath();
+  const g0=Math.ceil(E/70)*70;
+  for(let v=-g0; v<=g0; v+=70){ seg(core.wx+v,0,core.wy-g0,core.wx+v,0,core.wy+g0); seg(core.wx-g0,0,core.wy+v,core.wx+g0,0,core.wy+v); }
+  ctx.stroke();
+  ctx.globalCompositeOperation='lighter';
+  const LH=230;
+  for(let L=S.layers; L>=0; L--){
+    const yo=L*LH, alpha = L===0? 1 : Math.max(.18,.5-L*0.06);
+    // links
+    for(const [a,b] of S.links){
+      const ma=byId(a), mb=byId(b); if(!ma||!mb) continue;
+      const lp=c.loops.edges.has(edgeKey(a,b));
+      ctx.strokeStyle = lp? `rgba(98,214,255,${.8*alpha})` : `rgba(90,130,200,${.5*alpha})`; ctx.lineWidth=lp?2:1.2;
+      ctx.beginPath(); seg(ma.wx,yo+2,ma.wy,mb.wx,yo+2,mb.wy); ctx.stroke();
+      if(L===0){ const f=(t*0.5+a*0.13)%1; const p=proj3(ma.wx+(mb.wx-ma.wx)*f,4,ma.wy+(mb.wy-ma.wy)*f); if(p){ ctx.fillStyle=TCOL[ma.k]; ctx.fillRect(p[0]-2,p[1]-2,4,4); } }
+    }
+    // nodes
+    for(const m of S.mods){
+      const disc=c.conn&&!c.conn.has(m.id);
+      ctx.strokeStyle=TCOL[m.k]; ctx.globalAlpha=alpha*(disc?.4:1); ctx.lineWidth = selected===m.id&&L===0? 2.2 : 1.3;
+      ctx.beginPath(); drawModel(m,yo,t); ctx.stroke();
+      if(L===0 && selected===m.id){ ctx.strokeStyle='#ffffff'; ctx.beginPath(); prism(m.wx,m.wy,8,46,1,1,0); ctx.stroke(); }
+      if(L===0 && c.info.get(m.id)&&c.info.get(m.id).loop){ ctx.strokeStyle='rgba(98,214,255,.6)'; ctx.beginPath(); prism(m.wx,m.wy,16,38,1,1,t*0.5); ctx.stroke(); }
+    }
+    ctx.globalAlpha=1;
+  }
+  if(S.layers){ ctx.strokeStyle='rgba(255,178,62,.35)'; ctx.beginPath(); seg(core.wx,0,core.wy,core.wx,S.layers*LH+90,core.wy); ctx.stroke(); }
+  ctx.globalCompositeOperation='source-over';
+  // labels
+  ctx.textAlign='center';
+  for(const m of S.mods){
+    const p=proj3(m.wx,nodeTop(m)+14,m.wy); if(!p) continue;
+    const i=c.info.get(m.id);
+    if(m.k==='core'||selected===m.id||(i&&p[2]>0.55)){
+      ctx.font='11px DotGothic16,monospace'; ctx.fillStyle= selected===m.id? '#ffffff' : 'rgba(232,238,250,.75)';
+      ctx.fillText(m.k==='core'? 'コア +'+fmt(clickValue(c,frenzyT>0)) : (i? fmt(i.v)+'/秒' : DEF[m.k].name), p[0], p[1]);
+    }
+  }
+  const cp=proj3(core.wx,84,core.wy); if(cp) drawCanvasCursors(cp, 70*cp[2]+26, t);
+}
+
+// ===== bugs =====
+function bugTick(dt){
+  if(frenzyT>0) frenzyT=Math.max(0,frenzyT-dt);
+  if(!S.comps.debug) return;
+  if(bugEl){ bugLife-=dt; if(bugLife<=0){ bugEl.remove(); bugEl=null; } return; }
+  bugNext-=dt; if(bugNext<=0){ spawnBug(); bugNext=(25+Math.random()*30)*(S.libs.gc?0.5:1); }
+}
+function spawnBug(){
+  const host = S.era===0? $('#e0') : $('#stage'); if(!host) return;
+  const r=host.getBoundingClientRect(); if(r.width<120) return;
+  const b=document.createElement('button'); b.type='button'; b.className='bug bug-e'+S.era;
+  const hex=Math.floor(Math.random()*65535).toString(16).toUpperCase().padStart(4,'0');
+  b.innerHTML = S.era===0? '▓▒░ ERR ░▒▓' : S.era===1? `<b>⚠ 応答なし</b><small>0x${hex} をクリックで修正</small>` : S.era===2? '✕' : '<span style="display:inline-block;transform:rotate(-45deg)">NaN</span>';
+  b.style.left=(40+Math.random()*Math.max(10,r.width-200))+'px';
+  b.style.top=(60+Math.random()*Math.max(10,r.height-200))+'px';
+  b.setAttribute('aria-label','バグを捕まえる');
+  b.addEventListener('pointerdown',e=>{ e.stopPropagation(); catchBug(e); });
+  host.appendChild(b); bugEl=b; bugLife=12;
+}
+function catchBug(e){
+  const c=calc(), m=S.libs.gc?2:1;
+  if(Math.random()<0.6){ const v=Math.max(15,c.total*heatMult()*30)*m; addPx(v); log(`> バグを修正: +${fmt(v)} px`,'good'); floatText(e.clientX,e.clientY,'+'+fmt(v),true); }
+  else { frenzyT=12*m; log(`> オーバークロック: ${12*m}秒間 全生産 ×7`,'good'); floatText(e.clientX,e.clientY,'×7',true); }
+  snd.bug(); if(bugEl){ bugEl.remove(); bugEl=null; }
+}
+
+// ===== era transitions =====
+function ensureCore(){ if(!coreMod()){ const c=coreCell(); S.mods.push({id:S.nid++,k:'core',gx:c.x,gy:c.y,h:0}); } }
+function enterEra(n){
+  selected=null; placing=null; moving=null; snd.shift();
+  if(n===1){
+    ensureCore(); S.era=1; dirty();
+    log('> ウィンドウを生成。部品を並べる平面ができた。','sys');
+    const e0=$('#e0');
+    if(e0 && S.comps.anim){ e0.classList.add('out'); setTimeout(()=>{ render(); $('#shell').classList.add('in'); },620); }
+    else render();
+    return;
+  }
+  if(n===2){
+    const core=coreMod();
+    S.mods.forEach(m=>{ m.wx=(m.gx-core.gx)*140; m.wy=(m.gy-core.gy)*140; });
+    const g=graph(); const L=[]; const done=new Set();
+    for(const [u,ns] of g) for(const v of ns){ const k=edgeKey(u,v); if(!done.has(k)){ done.add(k); L.push([u,v]); } }
+    S.links=L; S.era=2; dirty();
+    const win=$('#win'); const rect=win? win.getBoundingClientRect() : null;
+    if(rect) shatter(rect);
+    cam2={x:0,y:0,z:1.9}; zoomAnim=1;
+    render();
+    log('> フレームを破壊。枠の外は、無限の回路平面だった。','sys');
+    return;
+  }
+  if(n===3){
+    S.era=3; dirty();
+    let E=300; const core=coreMod(); for(const m of S.mods) E=Math.max(E,Math.hypot(m.wx-core.wx,m.wy-core.wy)+200);
+    cam3={yaw:0,pitch:1.52,dist:E*2.6,tPitch:0.62,tDist:E*2.2,tx:core.wx,tz:core.wy,anim:1};
+    render();
+    log('> 奥行きを獲得。平面は、空間の断面にすぎなかった。','sys');
+  }
+}
+function shatter(rect){
+  const c=document.createElement('canvas'); c.className='fx'; c.width=innerWidth; c.height=innerHeight; document.body.appendChild(c);
+  const ctx=c.getContext('2d'); const cxm=rect.left+rect.width/2, cym=rect.top+rect.height/2;
+  const shards=[];
+  for(let i=0;i<90;i++){
+    const side=i%4, f=Math.random();
+    let x,y; if(side===0){x=rect.left+f*rect.width;y=rect.top;} else if(side===1){x=rect.right;y=rect.top+f*rect.height;} else if(side===2){x=rect.left+f*rect.width;y=rect.bottom;} else {x=rect.left;y=rect.top+f*rect.height;}
+    const a=Math.atan2(y-cym,x-cxm)+(Math.random()-.5)*.6, sp=4+Math.random()*12;
+    const s=6+Math.random()*22;
+    shards.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:Math.random()*6,vr:(Math.random()-.5)*.4,p:[[0,0],[s,Math.random()*s*.4],[Math.random()*s*.6,s*(.4+Math.random()*.6)]],col:Math.random()<.5?'#ffb23e':'#62d6ff'});
+  }
+  let life=1;
+  const step=()=>{
+    life-=0.018; ctx.clearRect(0,0,c.width,c.height);
+    if(life>0.8){ ctx.fillStyle=`rgba(255,255,255,${(life-0.8)*2.5})`; ctx.fillRect(0,0,c.width,c.height); }
+    for(const s of shards){ s.x+=s.vx; s.y+=s.vy; s.vx*=.985; s.vy*=.985; s.r+=s.vr;
+      ctx.save(); ctx.translate(s.x,s.y); ctx.rotate(s.r); ctx.globalAlpha=Math.max(0,life); ctx.strokeStyle=s.col; ctx.lineWidth=1.5; ctx.fillStyle='rgba(13,33,64,.8)';
+      ctx.beginPath(); ctx.moveTo(...s.p[0]); ctx.lineTo(...s.p[1]); ctx.lineTo(...s.p[2]); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
+    if(life>0) requestAnimationFrame(step); else c.remove();
+  };
+  requestAnimationFrame(step);
+}
+
+// ===== ending =====
+function ending(){
+  S.ended=true; save();
+  const el=document.createElement('div'); el.className='ending';
+  const lines=['次元の境界に到達した。','この画面の外側には、まだ何も描かれていない。','描くための部品は、もう全部持っている。','— UI・アルケミスト —<br><small style="font-size:13px;color:#93a8c9">Created by PLATINA</small>'];
+  el.innerHTML=`<div>${lines.map(l=>`<p>${l}</p>`).join('')}<div style="margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;opacity:0;transition:opacity 1s" id="endbtns"><button class="mbtn" id="end-cont" type="button">つづける</button><button class="mbtn pri" id="end-ref" type="button">リファクタリングへ</button></div></div>`;
+  document.body.appendChild(el);
+  el.querySelectorAll('p').forEach((p,i)=>setTimeout(()=>p.classList.add('on'),600+i*1600));
+  setTimeout(()=>{ $('#endbtns').style.opacity=1; },600+lines.length*1600);
+  $('#end-cont').onclick=()=>el.remove();
+  $('#end-ref').onclick=()=>{ el.remove(); openRefactor(); };
+}
+
+// ===== refactor (prestige) =====
+let refArm=false;
+function openRefactor(){
+  refArm=false;
+  const ov=document.createElement('div'); ov.className='ovl'; ov.id='ovl';
+  ov.innerHTML=`<div class="modal" role="dialog" aria-label="リファクタリング"><h2>リファクタリング（再コンパイル）</h2>
+    <p>肥大化したシステムを圧縮して、最初から組み直す。得た圧縮コードは1つにつき全生産 +3%（永続）。圧縮コードを払ってライブラリを入れると、次の構築が楽になる。</p>
+    <div class="codes"><div><span>今回得られる圧縮コード</span><b id="r-gain"></b></div><div><span>所持中（未使用）</span><b id="r-have"></b></div><div><span>累計（全生産ボーナス）</span><b id="r-tot"></b></div></div>
+    <h3 style="font-family:var(--font-display);font-weight:400;font-size:13px;letter-spacing:.12em;color:var(--muted);margin:0 0 8px">ライブラリ</h3>
+    <div class="libs" id="r-libs"></div>
+    <div class="row"><button class="mbtn" id="r-close" type="button">閉じる</button><button class="mbtn pri" id="r-go" type="button"></button></div></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('pointerdown',e=>{ if(e.target===ov) ov.remove(); });
+  $('#r-close').onclick=()=>ov.remove();
+  $('#r-go').onclick=()=>{
+    const g=codeGain(); if(S.era<1||g<1) return;
+    if(!refArm){ refArm=true; renderRefactor(); return; }
+    ov.remove(); doRefactor();
+  };
+  renderRefactor();
+}
+function renderRefactor(){
+  if(!$('#ovl')) return;
+  const g=codeGain();
+  $('#r-gain').textContent='+'+fmt(g); $('#r-have').textContent=fmt(S.codes); $('#r-tot').textContent=`${fmt(S.codesTotal)}（+${fmt(S.codesTotal*3)}%）`;
+  const go=$('#r-go');
+  const can=S.era>=1&&g>=1;
+  go.disabled=!can;
+  go.textContent = !can ? `あと ${fmt(Math.max(0,1e6-S.runTotal))} px 生成で実行可能` : refArm ? '本当に実行する（モジュールと構成要素はリセット）' : `実行して +${fmt(g)} を得る`;
+  go.classList.toggle('warn',refArm);
+  $('#r-libs').innerHTML=LIBS.map(l=>{
+    const lv=libLevel(l.k), nc=libNextCost(l), maxed=nc==null, lock=l.req&&!S.libs[l.req];
+    const cls = maxed? 'own' : (lock||S.codes<nc)? 'no' : '';
+    return `<button type="button" class="lib ${cls}" data-k="${l.k}"><b>${l.name}${l.cost.length>1?` Lv${lv}`:''}</b><small>${l.desc}${lock?'（要: 起動プリセット）':''}</small><em>${maxed?'導入済み':nc+' コード'}</em></button>`;
+  }).join('');
+  $('#r-libs').querySelectorAll('.lib').forEach(b=>b.onclick=()=>{
+    const l=LIBS.find(x=>x.k===b.dataset.k); const nc=libNextCost(l);
+    if(nc==null||(l.req&&!S.libs[l.req])||S.codes<nc){ snd.deny(); return; }
+    S.codes-=nc; S.libs[l.k]=libLevel(l.k)+1; snd.buy(); dirty();
+    log(`> ライブラリを導入: ${l.name}`,'sys');
+    if(l.k==='grid' && S.era===1){ layoutGrid(); renderGrid(); }
+    renderRefactor();
+  });
+}
+function doRefactor(){
+  const g=codeGain();
+  const keep={codes:S.codes+g,codesTotal:S.codesTotal+g,libs:S.libs,refactors:S.refactors+1,allTotal:S.allTotal,sound:S.sound,auto:S.auto,play:S.play,best:Math.max(S.best||0,S.runTotal)};
+  const oldUpg={t:S.typeUpg,c:S.coreUpg,u:S.cursorUpg};
+  const ov=document.createElement('div'); ov.className='compile';
+  const chars='{}();=>01abcdefghijklmnopqrstuvwxyz<>/*&|';
+  let txt=''; for(let i=0;i<5000;i++) txt+=chars[Math.floor(Math.random()*chars.length)];
+  ov.textContent=txt; document.body.appendChild(ov);
+  requestAnimationFrame(()=>ov.classList.add('on'));
+  snd.shift();
+  setTimeout(()=>{
+    S=Object.assign(fresh(),keep);
+    S.comps.save=true;
+    if(S.libs.preset){ ['border','save','color','keyboard','font','anim','debug'].forEach(k=>S.comps[k]=true); }
+    if(S.libs.cursorInit) S.cursors=20;
+    if(S.libs.cache){ for(const k in oldUpg.t) S.typeUpg[k]=Math.floor(oldUpg.t[k]/2); S.coreUpg=Math.floor(oldUpg.c/2); S.cursorUpg=Math.floor(oldUpg.u/2); }
+    if(S.libs.resident){ S.comps.window=true; S.era=1; ensureCore(); }
+    dirty(); selected=null; placing=null; moving=null;
+    log(`> 再コンパイル完了。圧縮コード +${fmt(g)}（累計 ${fmt(S.codesTotal)}）`,'sys');
+    render(); save();
+    ov.classList.remove('on'); setTimeout(()=>ov.remove(),450);
+  },1300);
+}
+
+// ===== settings =====
+let resetArm=false;
+function openSettings(){
+  resetArm=false;
+  const ov=document.createElement('div'); ov.className='ovl'; ov.id='ovl-set';
+  const draw=()=>{
+    ov.innerHTML=`<div class="modal" role="dialog" aria-label="設定"><h2>設定</h2>
+      <div class="set"><span>効果音</span><button class="mbtn" id="st-snd" type="button">${S.sound?'オン':'オフ'}</button></div>
+      ${S.libs.autoscript?`<div class="set"><span>自己記述スクリプト（自動設置）</span><button class="mbtn" id="st-auto" type="button">${S.auto?'オン':'オフ'}</button></div>`:''}
+      <div class="set"><span>保存</span><span style="color:var(--muted);font-size:13px">${S.comps.save?'10秒ごとに自動保存':'「セーブ機能」が未錬成のため保存されません'}</span></div>
+      <div class="set"><span>累計生成 / リファクタリング回数</span><span style="font-family:var(--font-num)">${fmt(S.allTotal)} px / ${S.refactors}回</span></div>
+      <div class="set"><span>最初からやり直す（ライブラリも消える）</span><button class="mbtn warn" id="st-reset" type="button">${resetArm?'本当に全部消す':'リセット'}</button></div>
+      <p style="margin-top:14px">UI・アルケミスト — Created by PLATINA</p>
+      <div class="row"><button class="mbtn pri" id="st-close" type="button">閉じる</button></div></div>`;
+    ov.querySelector('#st-snd').onclick=()=>{ S.sound=!S.sound; draw(); };
+    const au=ov.querySelector('#st-auto'); if(au) au.onclick=()=>{ S.auto=!S.auto; draw(); };
+    ov.querySelector('#st-reset').onclick=()=>{ if(!resetArm){ resetArm=true; draw(); return; } try{localStorage.removeItem(SAVE_KEY);}catch(e){} S=fresh(); dirty(); ov.remove(); render(); };
+    ov.querySelector('#st-close').onclick=()=>ov.remove();
+  };
+  draw(); ov.addEventListener('pointerdown',e=>{ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
+}
+
+// ===== auto script =====
+function autoBuy(){
+  if(!S.libs.autoscript||!S.auto||S.era<1||placing) return;
+  const avail=PROD.filter(d=>S.era>=d.era).map(d=>({d,c:modCost(d.k)})).filter(o=>o.c<=S.px*0.5).sort((a,b)=>a.c-b.c);
+  if(!avail.length) return;
+  if(S.era===1){
+    const e=emptyCells(); if(!e.length) return;
+    // prefer the best tier that fits in budget when space is scarce
+    const pick = e.length<=3 ? avail[avail.length-1] : avail[0];
+    placeAt(pick.d.k,e[0]); log(`> スクリプトが ${pick.d.name} を設置`,'');
+  } else {
+    const pick=avail[avail.length-1]; placeAt(pick.d.k,autoSpot()); log(`> スクリプトが ${pick.d.name} を設置`,'');
+  }
+}
+
+// ===== HUD / periodic UI =====
+function updateUI(force){
+  const c=calc(); const hm=heatMult()*(frenzyT>0?7:1);
+  if(S.era===0){
+    const cel=$('#e0c');
+    if(cel){ cel.hidden=S.clicks===0&&S.px===0; const rate=c.total*hm; cel.innerHTML = (S.comps.font? `${fmt(S.px)}<small>px</small>` : `ピクセル: ${fmt(S.px)}`) + (rate>0? `<small>（${fmt(rate)}/秒）</small>`:''); }
+    const he=$('#e0heat'); if(he){ he.hidden=!S.comps.anim; if(S.comps.anim){ he.querySelector('b').style.width=(S.heat*100)+'%'; he.querySelector('em').textContent='×'+hm.toFixed(1)+(frenzyT>0?' OC':''); } }
+    const g=$('#gen'); if(g && force) renderE0Static();
+    renderShop(force);
+    return;
+  }
+  const pv=$('#pxv'); if(!pv) return;
+  pv.textContent=fmt(S.px);
+  $('#ratev').textContent=fmt(c.total*hm);
+  const he=$('#heat'); he.hidden=!S.comps.anim;
+  if(S.comps.anim){ he.querySelector('b').style.width=(S.heat*100)+'%'; he.querySelector('em').textContent='×'+hm.toFixed(1)+(frenzyT>0?' OC':''); he.classList.toggle('fz',frenzyT>0); }
+  $('#erav').textContent=`ERA ${S.era} ・ ${ERA_NAMES[S.era]}${S.refactors?` ・ 再構築 ${S.refactors}`:''}`;
+  const rb=$('#b-ref'); const g=codeGain(); rb.hidden=!(S.era>=1&&(g>=1||S.codesTotal>0)); rb.textContent= g>=1? `リファクタリング +${fmt(g)}` : 'リファクタリング'; rb.classList.toggle('glow',g>=Math.max(3,S.codesTotal*0.5));
+  renderShop(force); refreshSel(force); renderStats(); updateGrid();
+  if($('#ovl')) renderRefactorLive();
+}
+function renderRefactorLive(){ const g=$('#r-gain'); if(g) g.textContent='+'+fmt(codeGain()); }
+
+// ===== keyboard =====
+addEventListener('keydown',e=>{
+  if(e.code==='Space'){
+    if(document.querySelector('.ovl,.ending')) return;
+    e.preventDefault();
+    if(e.repeat||!S.comps.keyboard) return;
+    ac(); const p=coreScreenPos(); doClick(p[0],p[1]-10); updateUI();
+  }
+  if(e.key==='Escape'){ placing=null; moving=null; selected=null; if(S.era===1) renderGrid(); refreshSel(true); const o=$('#ovl')||$('#ovl-set'); if(o) o.remove(); }
+  if((e.key==='Delete'||e.key==='Backspace') && selected!=null && !document.querySelector('.ovl')) removeMod(selected);
+});
+addEventListener('keyup',e=>{ if(e.code==='Space') e.preventDefault(); });
+addEventListener('resize',()=>{ if(S.era===1){ layoutGrid(); renderGrid(); } });
+addEventListener('beforeunload',save);
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) save(); });
+
+// ===== main loop =====
+let last=performance.now(), uiAcc=0, saveAcc=0, autoAcc=0;
+function frame(now){
+  let dt=(now-last)/1000; last=now; if(dt<0) dt=0; dt=Math.min(dt,43200);
+  S.play+=dt;
+  const c=calc(); const mult=heatMult()*(frenzyT>0?7:1);
+  addPx(c.total*mult*Math.min(dt,43200));
+  S.heat=Math.max(0,S.heat-(S.heat*(S.libs.parallel?0.15:0.25)+0.02)*dt);
+  if(dt<1) cursorVisual(dt);
+  bugTick(dt);
+  uiAcc+=dt; if(uiAcc>0.15){ uiAcc=0; updateUI(); }
+  saveAcc+=dt; if(saveAcc>10){ saveAcc=0; save(); }
+  autoAcc+=dt; if(autoAcc>1.5){ autoAcc=0; autoBuy(); }
+  try{
+    if(cv && S.era===2) drawE2(now/1000);
+    else if(cv && S.era===3) drawE3(now/1000,Math.min(dt,0.05));
+  }catch(err){ console.error(err); }
+  requestAnimationFrame(frame);
+}
+
+// ===== boot =====
+function boot(){
+  const hot=window.claude&&window.claude.hot&&window.claude.hot.data;
+  S = (hot&&hot.S) ? Object.assign(fresh(),hot.S) : (load()||fresh());
+  dirty(); buildShopModel();
+  if(S.comps.save && !(hot&&hot.S)){
+    const away=Math.min(43200,Math.max(0,(Date.now()-S.t)/1000));
+    if(away>30){ S.heat=0; const g=calc().total*away; if(g>0){ addPx(g); log(`> 不在の ${fmtTime(away)} の間に ${fmt(g)} px を生成していた。`,'good'); } }
+  }
+  if(S.era>=1) ensureCore();
+  if(S.era===2) cam2={x:0,y:0,z:1};
+  if(S.era===3){ const core=coreMod(); let E=300; for(const m of S.mods) E=Math.max(E,Math.hypot(m.wx-core.wx,m.wy-core.wy)+200); cam3={yaw:0.6,pitch:0.62,dist:E*2.2,tPitch:0.62,tDist:E*2.2,tx:core.wx,tz:core.wy,anim:0}; }
+  render();
+  try{ window.claude&&window.claude.hot&&window.claude.hot.snapshot&&window.claude.hot.snapshot(()=>({S})); }catch(e){}
+  requestAnimationFrame(t=>{ last=t; requestAnimationFrame(frame); });
+}
+boot();
+</script>
+
+</body>
+</html>
