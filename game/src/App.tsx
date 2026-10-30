@@ -20,7 +20,7 @@ export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }
           <p>{i18n.t('save.corrupt')}</p>
           <button onClick={() => runtime.requestReset(true)}>{i18n.t('system.startNew')}</button>
         </div>}
-        {snapshot.status === 'ready' && <Foundation snapshot={snapshot} i18n={i18n} />}
+        {snapshot.status === 'ready' && <Foundation snapshot={snapshot} i18n={i18n} onLanguageChange={runtime.changeLanguage} />}
         {snapshot.notice && <p className="runtime-notice" role="alert">{i18n.t(snapshot.notice)}</p>}
       </Stage>
       {debug && snapshot.status === 'ready' && <DebugPanel runtime={runtime} snapshot={snapshot} i18n={i18n} />}

@@ -12,6 +12,7 @@ body { overflow: hidden; }
 .foundation, .system-message { padding: 8px; font: 16px 'Times New Roman', 'Refresh Serif', serif; }
 .foundation p { margin: 16px 0; }
 .save-status { font-size: 13.33px; }
+.foundation .language-select select { margin-inline-start: 8px; }
 .runtime-notice { position: absolute; inset-inline-start: 8px; inset-block-end: 8px; font-size: 14px; }
 .screen-notice { position: fixed; inset-inline-start: 0; inset-block-end: 0; margin: 0; padding: 4px 8px; background: #fff; font: 13px 'Segoe UI', 'Refresh UI', sans-serif; }
 button, select { font-family: inherit; }

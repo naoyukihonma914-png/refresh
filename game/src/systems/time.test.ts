@@ -3,12 +3,20 @@ import { BALANCE } from '../config/balance';
 import { passivePixelsPerSecond } from './economy';
 import { createFixture } from './fixtures';
 import { createInitialState } from './state';
-import { advanceActiveTime, advanceOfflineTime } from './time';
+import { advanceActiveTime, advanceOfflineTime, isInactiveGap } from './time';
 
 const hour = BALANCE.time.millisecondsPerHour;
 const savedState = () => createFixture('foundation-saved', 1_000)!;
 
 describe('能動時間と不在時間', () => {
+  it('処理停止と時計の差を設定値で判定し、小さな誤差や負の差では停止としない', () => {
+    const { inactivityGapMs: gap, clockDriftToleranceMs: drift } = BALANCE.time;
+    expect(isInactiveGap(gap, gap)).toBe(true);
+    expect(isInactiveGap(100, 3 * hour)).toBe(true);
+    expect(isInactiveGap(gap - 1, gap - 1)).toBe(false);
+    expect(isInactiveGap(gap - 1, gap - 1 + drift / 2)).toBe(false);
+    expect(isInactiveGap(100, -hour)).toBe(false);
+  });
   it('生成手段がなければ不在でも資源は増えない', () => {
     expect(advanceOfflineTime(createInitialState(1_000), 1_000 + hour).pixels).toBe(0);
   });

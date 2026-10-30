@@ -42,9 +42,14 @@ afterEach(() => { runtime?.dispose(); vi.useRealTimers(); });
 async function start() { runtime = new GameRuntime(platform); await runtime.start(); }
 
 function step(ms: number, wallDelta = ms) {
-  clock.mono += ms;
-  clock.wall += wallDelta;
-  vi.advanceTimersByTime(ms);
+  clock.wall += wallDelta - ms;
+  for (let remaining = ms; remaining > 0;) {
+    const delta = Math.min(remaining, BALANCE.time.tickMs);
+    clock.mono += delta;
+    clock.wall += delta;
+    vi.advanceTimersByTime(delta);
+    remaining -= delta;
+  }
 }
 
 describe('プラットフォームを通した保存・時間処理', () => {
@@ -61,9 +66,9 @@ describe('プラットフォームを通した保存・時間処理', () => {
     expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10);
   });
 
-  it.each([-hour, hour])('端末時計が %i ms 飛んでも能動時間と自動保存は止まらず、余分にも増えない', async jump => {
+  it('端末時計を戻しても能動時間と自動保存は止まらない', async () => {
     await start(); runtime.enableDebugSave();
-    step(10_000, jump);
+    step(10_000, -hour);
     expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(10);
     const saved = loadGame(storage);
     expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10);
@@ -72,11 +77,53 @@ describe('プラットフォームを通した保存・時間処理', () => {
     expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(11);
   });
 
-  it('時計の値だけが変わっても能動時間は増えない', async () => {
+  it('単調時計が進まない長い停止も端末時計の差から検出し、上限まで保存する', async () => {
     await start(); runtime.enableDebugSave();
     clock.wall += 3 * hour;
+    clock.mono += 100;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    expect(runtime.getSnapshot().offline?.capped).toBe(true);
+    const saved = loadGame(storage);
+    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBe(7_200);
+    step(1_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_201);
+  });
+
+  it('開いたまま3時間処理が止まった場合は2時間分だけ加算し、次の処理で重ねない', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.wall += 3 * hour; clock.mono += 3 * hour;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
     runtime.persist();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+  });
+
+  it('短い処理遅れは能動時間として計算し、留守の知らせを出さない', async () => {
+    await start(); runtime.enableDebugSave();
+    const elapsed = BALANCE.time.inactivityGapMs - BALANCE.time.tickMs;
+    clock.wall += elapsed; clock.mono += elapsed;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(elapsed / 1_000);
+    expect(runtime.getSnapshot().offline).toBeNull();
+  });
+
+  it('長い停止の端末時計差が負でも0で再開し、その後の能動生成は続く', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.wall -= hour; clock.mono += 3 * hour;
+    vi.advanceTimersByTime(100);
     expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    step(1_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(1);
+  });
+
+  it('持っているストレージの上限を開いたままの停止にも適用する', async () => {
+    await start(); runtime.enableDebugSave(); runtime.changeDebugSpec('storage', 1);
+    clock.wall += 6 * hour; clock.mono += 6 * hour;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(14_400);
   });
 
   it('端数の能動時間は複数回の保存をまたいで残る', async () => {

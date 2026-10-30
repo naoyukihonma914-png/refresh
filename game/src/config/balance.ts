@@ -67,6 +67,8 @@ export const BALANCE = {
   time: {
     tickMs: 100,
     autosaveMs: 10_000,
+    inactivityGapMs: 5_000,
+    clockDriftToleranceMs: 1_000,
     offlineNoticeMinMs: 1_000,
     millisecondsPerSecond: 1_000,
     millisecondsPerHour: 3_600_000,

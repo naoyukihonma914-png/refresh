@@ -1,7 +1,7 @@
 {
   "_meta": { "comment": "Draft English translation; human review is required before release.", "id": "en", "name": "English", "intl": "en-US", "direction": "ltr", "compactThreshold": 1000000000 },
   "messages": {
-    "foundation.goalLabel": "Goal:",
+    "foundation.goalLabel": "Goal: ",
     "foundation.goal": "Finish building this screen and release it as v1.0.",
     "foundation.pixels": "Pixels: {pixels}",
     "save.unavailableUntilBuilt": "Saving is not available yet. Closing this page will start you over.",

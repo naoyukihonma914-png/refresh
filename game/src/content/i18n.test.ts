@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BALANCE, type SpecKey } from '../config/balance';
 import { chooseLanguage, createI18n, LOCALES, TEST_LANGUAGE, type MessageKey } from './i18n';
 
@@ -7,6 +7,31 @@ function placeholders(text: string): string[] {
 }
 
 describe('言語ファイルと表示', () => {
+  it('目標の区切りは言語ファイルが持ち、日本語に余計な空白を入れない', () => {
+    const ja = createI18n('ja');
+    const en = createI18n('en');
+    expect(ja.t('foundation.goalLabel') + ja.t('foundation.goal')).toMatch(/^目標：この/);
+    expect(en.t('foundation.goalLabel') + en.t('foundation.goal')).toMatch(/^Goal: Finish/);
+  });
+
+  it('開発中の差し込み不足はエラーにする', () => {
+    expect(() => createI18n('ja').t('foundation.pixels')).toThrow('Missing translation argument');
+    expect(() => createI18n('en', { strictInterpolation: true }).t('foundation.pixels')).toThrow('pixels');
+  });
+
+  it('本番の差し込み不足はそのまま表示し、ほかの差し込みは続ける', () => {
+    const ja = createI18n('ja', { strictInterpolation: false });
+    expect(ja.t('foundation.pixels')).toBe('ピクセル: {pixels}');
+    expect(ja.t('offline.notice', { duration: '2時間' })).toBe('留守の間に 2時間ぶん作業しました（+{pixels}）');
+    expect(ja.t('foundation.pixels', { pixels: 0 })).toBe('ピクセル: 0');
+  });
+
+  it('本番環境では指定がなくても差し込み不足で止めない', () => {
+    vi.stubEnv('DEV', false);
+    try {
+      expect(createI18n('en').t('foundation.pixels')).toBe('Pixels: {pixels}');
+    } finally { vi.unstubAllEnvs(); }
+  });
   it('すべての言語が同じ文言キーと差し込みを備えている', () => {
     const source = LOCALES.ja!;
     for (const locale of Object.values(LOCALES)) {

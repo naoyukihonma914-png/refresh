@@ -33,7 +33,7 @@ function expandText(text: string): string {
   return `[${expanded}]`;
 }
 
-export function createI18n(language: string) {
+export function createI18n(language: string, { strictInterpolation = import.meta.env.DEV } = {}) {
   const pseudo = language === TEST_LANGUAGE;
   const locale = LOCALES[pseudo ? 'en' : language] ?? LOCALES.en!;
   const intl = locale._meta.intl;
@@ -49,9 +49,12 @@ export function createI18n(language: string) {
     const text = typeof message === 'string' ? message
       : message[plural.select(typeof params.count === 'number' ? params.count : 0)] ?? message.other;
     const template = pseudo ? expandText(text) : text;
-    return template.replace(/\{(\w+)\}/g, (_, name: string) => {
+    return template.replace(/\{(\w+)\}/g, (placeholder, name: string) => {
       const value = params[name];
-      if (value === undefined) throw new Error(`Missing translation argument: ${key}.${name}`);
+      if (value === undefined) {
+        if (strictInterpolation) throw new Error(`Missing translation argument: ${key}.${name}`);
+        return placeholder;
+      }
       return typeof value === 'number' ? number.format(value) : value;
     });
   }

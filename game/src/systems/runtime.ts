@@ -5,7 +5,7 @@ import { creditPixels } from './economy';
 import { createFixture } from './fixtures';
 import { clearGame, decodeSave, encodeSave, loadGame, saveGame } from './save';
 import { canSave, createInitialState, type GameState } from './state';
-import { advanceActiveTime, advanceOfflineTime, type TimeResult } from './time';
+import { advanceActiveTime, advanceOfflineTime, isInactiveGap, type TimeResult } from './time';
 
 export interface RuntimeSnapshot {
   state: GameState;
@@ -87,8 +87,8 @@ export class GameRuntime {
     this.lastAutosaveAt = this.platform.clock.monotonicNow();
     this.stopTimer = this.platform.every(BALANCE.time.tickMs, () => {
       if (this.suspended || this.platform.visibility.isHidden() || !this.canOperate()) return;
-      this.advanceForeground();
-      if (this.platform.clock.monotonicNow() - this.lastAutosaveAt >= BALANCE.time.autosaveMs) this.persist();
+      const inactive = this.advanceForeground();
+      if (inactive || this.platform.clock.monotonicNow() - this.lastAutosaveAt >= BALANCE.time.autosaveMs) this.persist();
     });
   }
 
@@ -104,12 +104,20 @@ export class GameRuntime {
 
   private advanceForeground() {
     const now = this.platform.clock.monotonicNow();
-    const elapsed = Math.max(0, now - this.lastActiveAt) + this.activeRemainderMs;
+    const wallNow = this.platform.clock.wallNow();
+    const monotonicElapsed = Math.max(0, now - this.lastActiveAt);
+    const wallElapsed = wallNow - this.snapshot.state.lastTickAt;
+    const inactive = isInactiveGap(monotonicElapsed, wallElapsed);
     this.lastActiveAt = now;
-    const result = advanceActiveTime(this.snapshot.state, elapsed);
-    this.activeRemainderMs = result.remainderMs;
-    // 保存する端末時計は次の不在の開始地点。能動時間の計算には使わない。
-    this.publish({ state: { ...result.state, lastTickAt: this.platform.clock.wallNow() } });
+    if (inactive) {
+      const result = advanceOfflineTime(this.snapshot.state, wallNow);
+      this.publish({ state: result.state, offline: offlineNotice(result) });
+    } else {
+      const result = advanceActiveTime(this.snapshot.state, monotonicElapsed + this.activeRemainderMs);
+      this.activeRemainderMs = result.remainderMs;
+      this.publish({ state: { ...result.state, lastTickAt: wallNow } });
+    }
+    return inactive;
   }
 
   persist = () => {
@@ -147,6 +155,7 @@ export class GameRuntime {
 
   changeLanguage = (language: string) => {
     if (!LOCALES[language] && !(this.platform.launch.debug && language === TEST_LANGUAGE)) return;
+    if (this.canOperate() && !this.suspended && this.advanceForeground()) this.persist();
     const i18n = createI18n(language);
     this.platform.setDocumentLanguage(language, i18n.direction);
     const stored = language === TEST_LANGUAGE || this.platform.settings.write({ language });

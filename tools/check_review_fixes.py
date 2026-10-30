@@ -94,26 +94,68 @@ def main():
 
         ctx = context()
         page = ctx.new_page()
+        page.goto(url)
+        ready(page)
+        assert page.locator('.debug-panel').count() == 0
+        assert page.locator('.foundation p').first.inner_text().startswith('目標：この')
+        page.locator('.foundation select').select_option('en')
+        assert page.locator('.foundation p').first.inner_text().startswith('Goal: Finish')
+        assert page.evaluate("localStorage.getItem('refresh.save')") is None
+        page.reload()
+        ready(page)
+        assert page.locator('.foundation select').input_value() == 'en'
+        assert page.evaluate('document.documentElement.lang') == 'en'
+        page.screenshot(path=str(ARTIFACTS / 'normal-language-en.png'))
+        page.locator('.foundation select').select_option('ja')
+        page.screenshot(path=str(ARTIFACTS / 'normal-language-ja.png'))
+        ctx.close()
+        checks.append('通常画面の末尾から最初から言語を選べ、即時反映と保存ができ、目標の空白もない')
+
+        ctx = context()
+        page = ctx.new_page()
         instant = datetime(2026, 10, 30, 16, 0, tzinfo=timezone.utc)
         page.clock.install(time=instant)
         page.goto(url + '?debug=1')
         ready(page)
         page.get_by_role('button', name='保存済みの状態を試す', exact=True).click()
         balance = page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
-        for offset in [-timedelta(hours=3), timedelta(hours=8)]:
-            page.clock.set_fixed_time(instant + offset)
-            page.clock.run_for(1000)
-            page.get_by_role('button', name='いま保存する', exact=True).click()
-            after = page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
-            assert 0.9 <= after - balance <= 1.6, (balance, after)
-            assert page.get_by_role('status').count() == 0
-            balance = after
+        page.clock.set_fixed_time(instant - timedelta(hours=3))
+        page.clock.run_for(1000)
+        page.get_by_role('button', name='いま保存する', exact=True).click()
+        after = page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
+        assert 0.9 <= after - balance <= 1.6, (balance, after)
+        assert page.get_by_role('status').count() == 0
+        balance = after
         # 100ms刻みの処理と、保存ボタンを押した時刻の位相差も含めて待つ。
         page.clock.run_for(10_200)
         saved = page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
         assert saved >= balance + 9.9, (balance, saved)
         ctx.close()
-        checks.append('端末時計を3時間戻す・8時間進める場合も毎秒生成と10秒ごとの自動保存が続く')
+        checks.append('端末時計を3時間戻しても毎秒生成と10秒ごとの自動保存が続く')
+
+        for mode in ['both-clocks', 'wall-clock-only']:
+            ctx = context()
+            page = ctx.new_page()
+            page.clock.install(time=instant)
+            page.goto(url + '?debug=1')
+            ready(page)
+            page.get_by_role('button', name='保存済みの状態を試す', exact=True).click()
+            balance = page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
+            if mode == 'both-clocks':
+                page.clock.fast_forward(3 * 3_600_000)
+            else:
+                page.clock.set_fixed_time(instant + timedelta(hours=3))
+                page.clock.run_for(100)
+            page.get_by_text('留守の間に 2時間ぶん作業しました', exact=False).wait_for()
+            saved = page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
+            assert 7200 <= saved - balance < 7201, (mode, balance, saved)
+            page.clock.run_for(1000)
+            page.get_by_role('button', name='いま保存する', exact=True).click()
+            after = page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).resources.pixels")
+            assert 0.9 <= after - saved <= 1.6, (mode, saved, after)
+            page.screenshot(path=str(ARTIFACTS / f'sleep-{mode}.png'))
+            ctx.close()
+        checks.append('開いたまま3時間処理が止まる場合と単調時計が止まる場合に、上限2時間だけ加算し能動生成へ戻る')
 
         ctx = context()
         page = ctx.new_page()

@@ -11,6 +11,12 @@ export interface TimeResult {
   remainderMs: number;
 }
 
+export function isInactiveGap(monotonicElapsedMs: number, wallElapsedMs: number): boolean {
+  const { inactivityGapMs, clockDriftToleranceMs } = BALANCE.time;
+  return monotonicElapsedMs >= inactivityGapMs
+    || (wallElapsedMs >= inactivityGapMs && wallElapsedMs - monotonicElapsedMs >= clockDriftToleranceMs);
+}
+
 function applyTime(state: GameState, elapsedMs: number, creditedMs: number, capped: boolean): TimeResult {
   const pixels = passivePixelsPerSecond(state) * creditedMs / BALANCE.time.millisecondsPerSecond;
   return {
