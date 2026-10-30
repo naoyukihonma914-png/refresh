@@ -1,6 +1,6 @@
-# 見本（docs/mockups）を GitHub Pages に公開する。
+# 見本はルート、ゲームは /play/ に公開する。
 # 無料プランではリポジトリが公開（Public）のときだけ動く。非公開（Private）なら何もしない。
-name: 見本を公開
+name: 見本とゲームを公開
 
 on:
   push:
@@ -25,9 +25,25 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: game/package-lock.json
+      - run: npm ci
+        working-directory: game
+      - run: npm test
+        working-directory: game
+      - run: npm run build
+        working-directory: game
+      - name: 見本とゲームを配置
+        run: |
+          mkdir -p "$RUNNER_TEMP/refresh-pages/play"
+          cp -R docs/mockups/. "$RUNNER_TEMP/refresh-pages/"
+          cp game/dist/index.html "$RUNNER_TEMP/refresh-pages/play/index.html"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/mockups
+          path: ${{ runner.temp }}/refresh-pages
       - id: deployment
         uses: actions/deploy-pages@v4
