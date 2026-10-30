@@ -80,7 +80,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
     date: (timestamp: number) => date.format(timestamp),
     spec: (key: SpecKey, level: number) => t(`spec.${key}.${level}` as MessageKey),
     languageName: (id: string) => id === TEST_LANGUAGE ? t('language.test')
-      : id === 'ja' || id === 'en' ? t(`language.${id}`) : LOCALES[id]!._meta.name,
+      : LOCALES[id]!._meta.name,
   };
 }
 

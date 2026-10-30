@@ -56,9 +56,14 @@ def main():
         for language in ['ja', 'en', 'en-XA']:
             page.locator('.debug-panel select').first.select_option(language)
             assert page.evaluate('document.documentElement.lang') == language
+            for scope in ['.foundation', '.debug-panel']:
+                assert page.locator(scope + ' option[value="ja"]').inner_text() == '日本語'
+                assert page.locator(scope + ' option[value="en"]').inner_text() == 'English'
             if language == 'en':
                 assert 'Goal:' in page.locator('.foundation').inner_text()
-                assert not any('\u3040' <= char <= '\u9fff' for char in page.locator('body').inner_text())
+                # 言語の選択肢だけは各言語自身の名前を表示する。
+                text = page.locator('body').inner_text().replace('日本語', '')
+                assert not any('\u3040' <= char <= '\u9fff' for char in text)
             if language == 'en-XA':
                 assert '~' in page.locator('.foundation').inner_text()
             for width, height in [(1920, 1080), (1366, 768)]:
