@@ -5,152 +5,109 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>見本：リリース（出荷）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&amp;display=swap">
 <style>
 body{margin:0}
-button{cursor:default}
-.num{font-family:'JetBrains Mono',monospace}
-.row{display:grid;grid-template-columns:150px 1fr 96px 92px;align-items:center;gap:14px;height:62px;padding:0 20px;border-top:1px solid #e4ddd0}
-.row .name{font-weight:700}
-.row .step{display:flex;align-items:center;gap:8px;font-size:14px}
-.row .eff{color:#6e665b;font-size:13px;margin-top:2px}
-.row .price{text-align:right;font-size:15px}
-.buy{height:36px;border-radius:8px;border:0;font:inherit;font-weight:700;font-size:14px}
-.buy.main{background:#c8553d;color:#fff}
-.buy.sub{background:#fff;color:#c8553d;box-shadow:inset 0 0 0 1.5px #c8553d}
-.buy.off{background:#ebe5da;color:#a59c8e}
+.ui{font-family:'Segoe UI Variable Text','Segoe UI','BIZ UDPGothic',sans-serif}
+table{border-collapse:collapse;width:100%}
+th{font-weight:400;color:#6e665b;text-align:left;height:32px;padding:0 12px;border-bottom:1px solid #ddd6ca;white-space:nowrap}
+td{height:40px;padding:0 12px;border-bottom:1px solid #ebe5da;white-space:nowrap}
+.r{text-align:right}
+.b{height:28px;padding:0 14px;border-radius:4px;font:inherit;font-size:13px;border:0}
+.b.main{background:#b8452f;color:#fff}
+.b.sub{background:#fffdf9;color:#24211d;box-shadow:inset 0 0 0 1px #cfc6b6,inset 0 -1px 0 #b9af9d}
+.b.off{background:#f1ece4;color:#a59c8e;box-shadow:inset 0 0 0 1px #e2dbcf}
 .dim{color:#a59c8e}
+.sec{font-size:14px;font-weight:700;margin:0 0 10px}
+.box{background:#fffdf9;border:1px solid #ddd6ca;border-radius:4px}
 </style>
 <style>html,body{background:#0e0f11} #stage{transform-origin:0 0;width:1920px;height:1080px}</style>
 </head>
 <body>
 <!-- 見本（静止画）。1920×1080で設計。画面が狭いときは縮小して表示する -->
-<!-- 場面：最初のリリース（試作版 v0.1）。売上が7日分増えていく動きが終わったところ。これから性能（スペック）を買う -->
-<!-- 余白社の画面なので、どの世界とも違う、紙のような温かい地色と朱色を使う。主役は「性能を買う」と「次のバージョンを作り始める」の2つ -->
+<!-- 場面：最初のリリース（試作版 v0.1）。売上が7日分入り終わったところ。これから性能（スペック）を買う -->
+<!-- 見た目：販売元「余白社」の出荷の管理画面。実際の販売管理の画面のように、表が中心で引き締まった作り。どの世界とも違う紙のような地色と朱色 -->
 <div id="frame"><div id="stage">
-<div style="width:1920px;height:1080px;position:relative;overflow:hidden;background:#efe9df;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:#24211d;font-variant-numeric:tabular-nums">
+<div class="ui" style="width:1920px;height:1080px;position:relative;overflow:hidden;background:#f4f1ec;font-size:13px;color:#24211d;font-variant-numeric:tabular-nums">
 
-  <!-- 上部：余白社の出荷の画面 -->
-  <header style="height:72px;display:flex;align-items:center;gap:14px;padding:0 48px;border-bottom:1px solid #ddd5c7">
-    <span style="width:30px;height:30px;border-radius:6px;background:#24211d;display:flex;align-items:center;justify-content:center"><span style="width:14px;height:14px;border:2px solid #efe9df;border-radius:2px"></span></span>
-    <span style="font-weight:700;font-size:17px;letter-spacing:.06em">余白社</span>
-    <span style="width:1px;height:18px;background:#cfc6b6"></span>
-    <span style="color:#6e665b;font-size:15px">出荷</span>
-    <span style="flex:1"></span>
-    <span style="font-size:15px;color:#6e665b">ホーム画面　<b style="color:#24211d">試作版 v0.1</b></span>
+  <header style="height:48px;display:flex;align-items:center;gap:12px;padding:0 32px;background:#fffdf9;border-bottom:1px solid #ddd6ca">
+    <span style="width:20px;height:20px;border:2px solid #24211d;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span style="width:6px;height:6px;background:#b8452f"></span></span>
+    <span style="font-weight:700;font-size:14px">余白社</span>
+    <span style="color:#cfc6b6">/</span>
+    <span>出荷</span>
+    <span style="color:#cfc6b6">/</span>
+    <span>ホーム画面 試作版 v0.1</span>
   </header>
 
-  <div style="position:absolute;left:48px;right:48px;top:112px;bottom:48px;display:grid;grid-template-columns:420px 1fr 760px;gap:40px">
+  <div style="position:absolute;left:32px;right:32px;top:80px;bottom:32px;display:grid;grid-template-columns:1fr 860px;gap:32px">
 
-    <!-- 左：出荷した製品 -->
-    <section>
-      <div style="color:#6e665b;font-size:13px;margin-bottom:12px">出荷した製品</div>
-      <div style="background:#fbf8f3;border-radius:14px;box-shadow:0 1px 0 #ddd5c7,0 12px 30px rgba(80,60,30,.10);overflow:hidden">
-        <!-- 製品の中身＝プレイヤーが作ったホーム画面を、同じ部品で縮小して描いたもの -->
-        <div style="height:260px;background:#1c1d20;display:flex;align-items:center;justify-content:center;background-image:radial-gradient(#2a2c31 1px,transparent 1px);background-size:16px 16px">
-          <div style="width:300px;height:200px;background:#eef1f5;border-radius:5px;overflow:hidden;position:relative">
-            <div style="height:28px;background:#fff;border-bottom:1px solid #dde1e7;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:11px;font-weight:700;color:#14161b">
-              <svg width="14" height="14" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="1" y="1" width="5" height="1" fill="#3b2a14"/><rect x="0" y="2" width="1" height="11" fill="#3b2a14"/><rect x="1" y="2" width="5" height="3" fill="#f2b23a"/><rect x="6" y="3" width="9" height="1" fill="#3b2a14"/><rect x="1" y="5" width="15" height="1" fill="#3b2a14"/><rect x="1" y="6" width="14" height="6" fill="#f2b23a"/><rect x="15" y="4" width="1" height="9" fill="#3b2a14"/><rect x="1" y="12" width="14" height="1" fill="#c98a1e"/><rect x="0" y="13" width="16" height="1" fill="#3b2a14"/></svg>ホーム
-            </div>
-            <div style="position:absolute;left:30px;top:44px;width:240px;height:140px;background:#fff;border-radius:8px;box-shadow:0 1px 6px rgba(20,30,50,.08);padding:14px 16px;box-sizing:border-box">
-              <div style="font-size:9px;color:#5a6170">所持ピクセル</div>
-              <div style="font-size:22px;font-weight:700;line-height:1.2">51,872</div>
-              <div style="display:flex;gap:6px;margin-top:10px"><div style="flex:1;height:24px;border-radius:5px;background:#3d7bff"></div><div style="flex:1;height:24px;border-radius:5px;background:#3d7bff"></div></div>
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><div style="width:60px;height:5px;border-radius:3px;background:#dfe3ea"></div><div style="width:22px;height:12px;border-radius:6px;background:#c9ced8"></div></div>
+    <!-- 左：製品と売上 -->
+    <div style="display:flex;flex-direction:column;gap:28px;min-width:0">
+      <section>
+        <div class="sec">出荷した製品</div>
+        <div class="box" style="display:flex;gap:20px;padding:16px">
+          <!-- 製品の中身（作った画面を同じ部品で縮小して描いたもの。1周目なので16色） -->
+          <div style="width:280px;height:176px;flex:none;background:#b8b2a8;box-shadow:0 0 0 1px #101018;position:relative;font-family:'BIZ UDPGothic',sans-serif;color:#101018">
+            <div style="height:16px;background:#1f3f7a;color:#f4efe4;font-size:9px;font-weight:700;display:flex;align-items:center;padding:0 6px">ホーム</div>
+            <div style="position:absolute;left:30px;top:30px;width:220px;height:126px;background:#f4efe4;box-shadow:0 0 0 1px #101018;padding:10px 12px;box-sizing:border-box">
+              <div style="font-size:8px;color:#3a3450">所持ピクセル</div>
+              <div style="font-size:18px;font-weight:700">51,872</div>
+              <div style="display:flex;gap:6px;margin-top:8px"><div style="flex:1;height:20px;background:#1f3f7a"></div><div style="flex:1;height:20px;background:#1f3f7a"></div></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><div style="width:70px;height:4px;background:#6b6478"></div><div style="width:22px;height:11px;background:#b8b2a8;box-shadow:0 0 0 1px #101018"></div></div>
             </div>
           </div>
+          <table style="width:auto;flex:1">
+            <tr><td style="color:#6e665b;width:120px">名前</td><td>ホーム画面</td></tr>
+            <tr><td style="color:#6e665b">版</td><td>試作版 v0.1</td></tr>
+            <tr><td style="color:#6e665b">作者</td><td>あおい</td></tr>
+            <tr><td style="color:#6e665b;border:0">中身</td><td style="border:0">作ったもの 17　書き出したアイコン 6</td></tr>
+          </table>
         </div>
-        <div style="padding:20px 24px 22px">
-          <div style="font-weight:700;font-size:20px">ホーム画面</div>
-          <div style="color:#6e665b;margin-top:2px">試作版 v0.1　作者 あおい</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px">
-            <div><div style="color:#6e665b;font-size:13px">作ったもの</div><div class="num" style="font-weight:700;font-size:22px">17</div></div>
-            <div><div style="color:#6e665b;font-size:13px">書き出したアイコン</div><div class="num" style="font-weight:700;font-size:22px">6</div></div>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 中央：売上 -->
-    <section style="display:flex;flex-direction:column">
-      <div style="color:#6e665b;font-size:13px;margin-bottom:12px">売上</div>
-      <div style="display:flex;align-items:baseline;gap:10px"><span class="num" style="font-weight:700;font-size:64px;line-height:1">303</span><span style="font-size:22px;font-weight:700">ドル</span></div>
-      <div style="color:#6e665b;margin-top:8px">発売から7日間</div>
+      <section>
+        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px"><span class="sec" style="margin:0">売上</span><span style="color:#6e665b">発売から7日間</span><span style="margin-left:auto;font-size:20px;font-weight:700">303 ドル</span></div>
+        <div class="box">
+          <table>
+            <tr><th style="width:80px">日</th><th></th><th class="r" style="width:90px">売上</th></tr>
+            <tr><td>1日目</td><td><div style="height:10px;width:100%;background:#b8452f"></div></td><td class="r">88 ドル</td></tr>
+            <tr><td>2日目</td><td><div style="height:10px;width:69%;background:#d08a78"></div></td><td class="r">61 ドル</td></tr>
+            <tr><td>3日目</td><td><div style="height:10px;width:53%;background:#d08a78"></div></td><td class="r">47 ドル</td></tr>
+            <tr><td>4日目</td><td><div style="height:10px;width:43%;background:#d08a78"></div></td><td class="r">38 ドル</td></tr>
+            <tr><td>5日目</td><td><div style="height:10px;width:33%;background:#d08a78"></div></td><td class="r">29 ドル</td></tr>
+            <tr><td>6日目</td><td><div style="height:10px;width:25%;background:#d08a78"></div></td><td class="r">22 ドル</td></tr>
+            <tr><td style="border:0">7日目</td><td style="border:0"><div style="height:10px;width:20%;background:#d08a78"></div></td><td class="r" style="border:0">18 ドル</td></tr>
+          </table>
+        </div>
+      </section>
 
-      <!-- 7日分の売上（動きが終わった状態） -->
-      <div style="margin-top:40px;height:300px;display:flex;align-items:flex-end;gap:14px;border-bottom:1px solid #cfc6b6;padding:0 4px">
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="num" style="font-size:13px;color:#6e665b">88</span><div style="width:100%;height:240px;border-radius:6px 6px 0 0;background:#c8553d"></div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="num" style="font-size:13px;color:#6e665b">61</span><div style="width:100%;height:166px;border-radius:6px 6px 0 0;background:#d9826f"></div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="num" style="font-size:13px;color:#6e665b">47</span><div style="width:100%;height:128px;border-radius:6px 6px 0 0;background:#d9826f"></div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="num" style="font-size:13px;color:#6e665b">38</span><div style="width:100%;height:104px;border-radius:6px 6px 0 0;background:#d9826f"></div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="num" style="font-size:13px;color:#6e665b">29</span><div style="width:100%;height:79px;border-radius:6px 6px 0 0;background:#d9826f"></div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="num" style="font-size:13px;color:#6e665b">22</span><div style="width:100%;height:60px;border-radius:6px 6px 0 0;background:#d9826f"></div></div>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="num" style="font-size:13px;color:#6e665b">18</span><div style="width:100%;height:49px;border-radius:6px 6px 0 0;background:#d9826f"></div></div>
-      </div>
-      <div style="display:flex;gap:14px;padding:8px 4px 0;color:#6e665b;font-size:13px">
-        <span style="flex:1;text-align:center">1日目</span><span style="flex:1;text-align:center">2日目</span><span style="flex:1;text-align:center">3日目</span><span style="flex:1;text-align:center">4日目</span><span style="flex:1;text-align:center">5日目</span><span style="flex:1;text-align:center">6日目</span><span style="flex:1;text-align:center">7日目</span>
-      </div>
+      <section class="box" style="padding:14px 16px;border-left:3px solid #b8452f">
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px"><span style="font-weight:700">榎本 湊</span><span style="color:#6e665b">余白社</span></div>
+        <div style="line-height:1.75;font-size:14px">初日で思っていたより売れました。ありがとうございます。<br>この売上で、画面の性能を上げられます。まずは色を増やしましょう。256色あれば、デスクトップが映せます。</div>
+      </section>
+    </div>
 
-      <!-- ガイドの言葉 -->
-      <div style="margin-top:48px;background:#fbf8f3;border-radius:12px;padding:18px 22px;box-shadow:0 1px 0 #ddd5c7">
-        <div style="line-height:1.8;font-size:15px">初日で思っていたより売れました。ありがとうございます。<br>この売上で、画面の性能を上げられます。まずは色を増やしましょう。256色あれば、デスクトップが映せます。</div>
-        <div style="color:#6e665b;font-size:13px;margin-top:8px;text-align:right">余白社 榎本</div>
+    <!-- 右：性能 -->
+    <div style="display:flex;flex-direction:column">
+      <div style="display:flex;align-items:baseline;margin-bottom:10px"><span class="sec" style="margin:0">性能</span><span style="margin-left:auto;color:#6e665b">使えるドル</span><span style="margin-left:10px;font-size:16px;font-weight:700">303</span></div>
+      <div class="box">
+        <table>
+          <tr><th>項目</th><th>いま</th><th>次</th><th>効き目</th><th class="r">値段</th><th></th></tr>
+          <tr style="background:#f8ebe5;box-shadow:inset 3px 0 0 #b8452f"><td style="font-weight:700">色深度</td><td>16色</td><td style="font-weight:700">256色</td><td>ピクセル ×1.5、デスクトップを映せる</td><td class="r">200</td><td class="r"><button class="b main">買う</button></td></tr>
+          <tr><td>ストレージ</td><td>128 GB</td><td>256 GB</td><td>留守の間の作業 2時間 → 4時間</td><td class="r">100</td><td class="r"><button class="b sub">買う</button></td></tr>
+          <tr><td>メモリ</td><td>4 GB</td><td>8 GB</td><td>カーソルを置ける窓 3 → 4</td><td class="r dim">800</td><td class="r"><button class="b off" disabled>買う</button></td></tr>
+          <tr><td>解像度</td><td>低</td><td>中</td><td>アイコン 16×16 → 32×32</td><td class="r dim">1,500</td><td class="r"><button class="b off" disabled>買う</button></td></tr>
+          <tr><td>通信速度</td><td>低</td><td>中</td><td>要望のメール 4分 → 3分ごと</td><td class="r dim">3,000</td><td class="r"><button class="b off" disabled>買う</button></td></tr>
+          <tr><td>リフレッシュレート</td><td>30 Hz</td><td>60 Hz</td><td>自動の作業 ×2、動きが滑らかに</td><td class="r dim">5,000</td><td class="r"><button class="b off" disabled>買う</button></td></tr>
+          <tr><td style="border:0">描画性能</td><td style="border:0">低</td><td style="border:0">中</td><td style="border:0">画面を撮る待ち 30秒 → 20秒</td><td class="r dim" style="border:0">6,000</td><td class="r" style="border:0"><button class="b off" disabled>買う</button></td></tr>
+        </table>
       </div>
-    </section>
+      <div style="margin-top:12px;color:#6e665b">残ったドルは、次のリリースまで取っておけます。</div>
 
-    <!-- 右：性能（スペック） -->
-    <section style="display:flex;flex-direction:column">
-      <div style="display:flex;align-items:baseline;margin-bottom:12px"><span style="color:#6e665b;font-size:13px">性能を上げる</span><span style="flex:1"></span><span style="color:#6e665b;font-size:13px;margin-right:8px">使えるドル</span><span class="num" style="font-weight:700;font-size:18px">303</span></div>
-      <div style="background:#fbf8f3;border-radius:14px;box-shadow:0 1px 0 #ddd5c7,0 12px 30px rgba(80,60,30,.08);overflow:hidden">
-        <div class="row" style="border-top:0;height:78px;background:#f7e9e3;box-shadow:inset 4px 0 0 #c8553d">
-          <div class="name">色深度</div>
-          <div><div class="step">16色 <span class="dim">→</span> <b>256色</b></div><div class="eff">ピクセル×1.5。デスクトップを映せるようになる</div></div>
-          <div class="price num">200</div>
-          <button type="button" class="buy main">買う</button>
-        </div>
-        <div class="row">
-          <div class="name">ストレージ</div>
-          <div><div class="step">128GB <span class="dim">→</span> <b>256GB</b></div><div class="eff">留守の間に作業できる時間 2時間 → 4時間</div></div>
-          <div class="price num">100</div>
-          <button type="button" class="buy sub">買う</button>
-        </div>
-        <div class="row">
-          <div class="name">メモリ</div>
-          <div><div class="step">4GB <span class="dim">→</span> 8GB</div><div class="eff">自動カーソルを置ける窓 3 → 4</div></div>
-          <div class="price num dim">800</div>
-          <button type="button" class="buy off" disabled>買う</button>
-        </div>
-        <div class="row">
-          <div class="name">解像度</div>
-          <div><div class="step">低 <span class="dim">→</span> 中</div><div class="eff">アイコンが 32×32 で描ける</div></div>
-          <div class="price num dim">1,500</div>
-          <button type="button" class="buy off" disabled>買う</button>
-        </div>
-        <div class="row">
-          <div class="name">通信速度</div>
-          <div><div class="step">低 <span class="dim">→</span> 中</div><div class="eff">要望のメールが 4分 → 3分ごとに届く</div></div>
-          <div class="price num dim">3,000</div>
-          <button type="button" class="buy off" disabled>買う</button>
-        </div>
-        <div class="row">
-          <div class="name">リフレッシュレート</div>
-          <div><div class="step">30Hz <span class="dim">→</span> 60Hz</div><div class="eff">自動の作業が2倍の速さに。動きが滑らかに</div></div>
-          <div class="price num dim">5,000</div>
-          <button type="button" class="buy off" disabled>買う</button>
-        </div>
-        <div class="row">
-          <div class="name">描画性能</div>
-          <div><div class="step">低 <span class="dim">→</span> 中</div><div class="eff">画面を撮る待ち時間 30秒 → 20秒</div></div>
-          <div class="price num dim">6,000</div>
-          <button type="button" class="buy off" disabled>買う</button>
-        </div>
+      <div style="margin-top:auto;display:flex;justify-content:flex-end">
+        <button class="b" style="height:36px;padding:0 24px;font-size:14px;background:#24211d;color:#fffdf9">次のバージョンを作り始める</button>
       </div>
-
-      <div style="margin-top:auto;display:flex;align-items:center;justify-content:flex-end;gap:18px">
-        <span style="color:#6e665b">残ったドルは、次のリリースまで取っておけます</span>
-        <button type="button" style="height:56px;padding:0 32px;border-radius:12px;border:0;background:#24211d;color:#fbf8f3;font:inherit;font-weight:700;font-size:17px">次のバージョンを作り始める</button>
-      </div>
-    </section>
+    </div>
   </div>
 </div>
 </div></div>
