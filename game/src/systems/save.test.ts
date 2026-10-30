@@ -66,7 +66,7 @@ describe('保存と読み込み', () => {
   });
 
   it('今後の版・未対応の旧版を推測で読み込まない', () => {
-    expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 2 }))).toThrow('新しい版');
+    expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 3 }))).toThrow('新しい版');
     expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 0 }))).toThrow('対応していません');
     expect(() => decodeSave('{}')).toThrow();
   });

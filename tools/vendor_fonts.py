@@ -24,6 +24,7 @@ SUBSETS = PROJECT / 'tools/font_subsets'
 SOURCE_REF = '6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec'
 FONTS = [
     ('noto-serif-jp', 'notoserifjp', 'NotoSerifJP[wght].ttf'),
+    ('noto-sans-jp', 'notosansjp', 'NotoSansJP[wght].ttf'),
     ('biz-udpgothic-regular', 'bizudpgothic', 'BIZUDPGothic-Regular.ttf'),
     ('biz-udpgothic-bold', 'bizudpgothic', 'BIZUDPGothic-Bold.ttf'),
     ('dotgothic16', 'dotgothic16', 'DotGothic16-Regular.ttf'),

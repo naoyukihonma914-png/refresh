@@ -1,6 +1,17 @@
-import { BALANCE, type SeedItem, type SpecKey } from '../config/balance';
+import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
+
+export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint'] as const;
+export type GuideId = typeof GUIDE_IDS[number];
+export interface SeedState {
+  built: SeedItem[];
+  autoCursors: number;
+  history: { item: SeedItem | 'cursor'; at: number }[];
+  guide: { seen: GuideId[]; current: GuideId | null; collapsed: boolean };
+  lastActionAt: number; // 能動経過時間。端末時計の変更に影響されない。
+  installer: { items: SeedItem[]; elapsedMs: number } | null;
+}
 
 // ここには JSON として保存できるものだけを入れる。
 // 選択中の道具・押しているキー・勢いなど、一時的な表示状態は入れない。
@@ -12,12 +23,16 @@ export interface GameState {
   elapsedMs: number;
   resources: { pixels: number; tokens: number; dollars: number };
   run: {
-    version: 'v0.1';
+    version: 'v0.1' | 'v1' | 'v2';
     world: 'seed';
     totalPixelsGenerated: number;
-    seed: { built: SeedItem[]; autoCursors: number };
+    seed: SeedState;
   };
-  persistent: { specs: Record<SpecKey, number>; playerName: string | null };
+  persistent: {
+    specs: Record<SpecKey, number>; playerName: string | null;
+    seedSkills: SeedSkill[];
+    seedAppearance: { pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean };
+  };
 }
 
 export function createInitialState(now: number): GameState {
@@ -30,11 +45,15 @@ export function createInitialState(now: number): GameState {
     resources: { pixels: 0, tokens: 0, dollars: 0 },
     run: {
       version: 'v0.1', world: 'seed', totalPixelsGenerated: 0,
-      seed: { built: [], autoCursors: 0 },
+      seed: {
+        built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
+        guide: { seen: [], current: null, collapsed: false },
+      },
     },
     persistent: {
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
       playerName: null,
+      seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
     },
   };
 }
@@ -63,12 +82,28 @@ export function isGameState(value: unknown): value is GameState {
   const persistent = value.persistent;
   if (!isRecord(resources) || !isRecord(run) || !isRecord(persistent)) return false;
   if (!isAmount(resources.pixels) || !isAmount(resources.tokens) || !isAmount(resources.dollars)) return false;
-  if (run.version !== 'v0.1' || run.world !== 'seed' || !isAmount(run.totalPixelsGenerated)) return false;
+  if (!['v0.1', 'v1', 'v2'].includes(run.version as string) || run.world !== 'seed' || !isAmount(run.totalPixelsGenerated)) return false;
   if (run.totalPixelsGenerated < resources.pixels) return false;
   if (!isRecord(run.seed) || !Array.isArray(run.seed.built) || !isCount(run.seed.autoCursors)) return false;
   const itemIds: readonly unknown[] = BALANCE.w1.items.map(item => item.id);
   if (!run.seed.built.every(item => itemIds.includes(item))) return false;
   if (new Set(run.seed.built).size !== run.seed.built.length) return false;
+  const seed = run.seed;
+  if (!isAmount(seed.lastActionAt) || !Array.isArray(seed.history)
+    || !seed.history.every(entry => isRecord(entry) && (itemIds.includes(entry.item) || entry.item === 'cursor') && isAmount(entry.at))) return false;
+  if (!isRecord(seed.guide) || !Array.isArray(seed.guide.seen)
+    || !seed.guide.seen.every(id => GUIDE_IDS.includes(id as GuideId))
+    || new Set(seed.guide.seen).size !== seed.guide.seen.length
+    || (seed.guide.current !== null && !seed.guide.seen.includes(seed.guide.current))
+    || typeof seed.guide.collapsed !== 'boolean') return false;
+  if (seed.installer !== null && (!isRecord(seed.installer) || !Array.isArray(seed.installer.items)
+    || !seed.installer.items.every(item => itemIds.includes(item) && item !== 'kumiki')
+    || new Set(seed.installer.items).size !== seed.installer.items.length
+    || !isAmount(seed.installer.elapsedMs) || seed.installer.elapsedMs > BALANCE.w1.inheritMs)) return false;
+  if (!Array.isArray(persistent.seedSkills) || !persistent.seedSkills.every(id => BALANCE.w1.skills.some(skill => skill.id === id))
+    || new Set(persistent.seedSkills).size !== persistent.seedSkills.length) return false;
+  if (!isRecord(persistent.seedAppearance) || !['none', 'dots', 'grid', 'diagonal'].includes(persistent.seedAppearance.pattern as string)
+    || typeof persistent.seedAppearance.marquee !== 'boolean') return false;
   if (persistent.playerName !== null && typeof persistent.playerName !== 'string') return false;
   const specs = persistent.specs;
   if (!isRecord(specs)) return false;

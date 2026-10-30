@@ -1,6 +1,7 @@
 import { BALANCE } from '../config/balance';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import type { GameState } from './state';
+import { advanceSeedInstaller, updateSeedGuide } from './seed';
 
 export interface TimeResult {
   state: GameState;
@@ -31,7 +32,8 @@ export function advanceActiveTime(state: GameState, elapsedMs: number): TimeResu
   if (!Number.isFinite(elapsedMs)) throw new Error('Invalid active duration');
   const elapsed = Math.max(0, elapsedMs);
   const creditedMs = Math.floor(elapsed / BALANCE.time.tickMs) * BALANCE.time.tickMs;
-  return { ...applyTime(state, elapsed, creditedMs, false), remainderMs: elapsed - creditedMs };
+  const result = applyTime(state, elapsed, creditedMs, false);
+  return { ...result, state: updateSeedGuide(advanceSeedInstaller(result.state, creditedMs)), remainderMs: elapsed - creditedMs };
 }
 
 // 閉じていた・裏のタブだった時間だけ、端末時計の差で計算する。
@@ -42,5 +44,7 @@ export function advanceOfflineTime(state: GameState, wallNow: number): TimeResul
     * BALANCE.time.millisecondsPerHour;
   const result = applyTime(state, elapsedMs, Math.min(elapsedMs, limit), elapsedMs > limit);
   // 時計が戻った差は0にし、次回の不在は現在の時計を基準にする。
-  return { ...result, state: { ...result.state, lastTickAt: wallNow } };
+  return { ...result, state: { ...result.state, lastTickAt: wallNow,
+    run: { ...result.state.run, seed: { ...result.state.run.seed, lastActionAt: result.state.elapsedMs } },
+  } };
 }
