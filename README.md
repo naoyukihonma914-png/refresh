@@ -17,4 +17,4 @@ PCブラウザ向けインクリメンタルゲーム。Created by PLATINA。
 
 ## 見本を見る
 - パソコン：`docs/mockups/index.html` をダブルクリック
-- リポジトリを公開（Public）にしている場合：GitHub Pages のURLから、スマホでも見られる
+- スマホ・PCのブラウザ：https://naoyukihonma914-png.github.io/refresh/ （`main` に push すると自動で更新される）

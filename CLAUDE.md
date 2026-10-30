@@ -62,7 +62,7 @@ ChatGPTからの引継ぎ資料・元ゲーム・最新試作は `docs/handoff/`
 - 写真などの画像は作らない（主役はUI）。壁紙は `docs/mockups/assets/` の既存のものを使う
 - 新しい見本を作ったら `docs/mockups/index.html` に追加する
 - ブラウザで描画して確かめられる環境なら、スクリーンショットで文字の読みやすさ・はみ出し・配色を確認してからユーザーに見せる
-- `main` に push すると、リポジトリが公開（Public）の場合は GitHub Pages に `docs/mockups/` が公開される（`.github/workflows/pages.yml`）。ユーザーはそのURLをスマホやPCで開いて見本を確認できる
+- `main` に push すると GitHub Pages に `docs/mockups/` が公開される（`.github/workflows/pages.yml`）。公開先：https://naoyukihonma914-png.github.io/refresh/ 。ユーザーはこのURLをスマホやPCで開いて見本を確認できる（反映には1〜2分かかる）
 
 ## 作業の流れ（クラウドセッション）
 - 作業はこのリポジトリの中だけで行う。`docs/handoff/` は編集・移動・削除しない
