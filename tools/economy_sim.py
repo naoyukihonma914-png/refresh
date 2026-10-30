@@ -59,14 +59,29 @@ CONFIG = {
     "w3": {
         "items": [
             ("ファイル", 300_000),
+            ("ファイル：並べ替え", 450_000),
             ("メール", 600_000),
+            ("メール：返信の下書き", 800_000),
             ("持ち場", 1_000_000),
+            ("ファイル：検索", 2_000_000),
+            ("ファイル：大きいアイコン表示", 3_500_000),
             ("写真", 5_000_000),
+            ("写真：切り抜き", 8_000_000),
+            ("写真：比べて見る", 11_000_000),
             ("ごみ箱", 15_000_000),
+            ("ごみ箱：元に戻す", 22_000_000),
+            ("メール：フォルダ分け", 30_000_000),
             ("時計", 40_000_000),
+            ("時計：タイマー", 55_000_000),
+            ("時計：カレンダー", 75_000_000),
             ("テーマ", 100_000_000),
+            ("テーマ：壁紙のスライドショー", 140_000_000),
+            ("テーマ：アイコンの大きさ", 190_000_000),
             ("ターミナル", 250_000_000),
         ],
+        # アプリの小さな機能：画面に写る部品が増える。持ち場になるアプリなら、その窓の働きも上がる
+        "feature_parts": 2,
+        "feature_post_mult": 1.25,
         # 持ち場にできるアプリ：(名前, 解放する作るもの, カーソル1台の毎秒, カーソル初値)
         "posts": [
             ("組木", "持ち場", 40, 30_000),
@@ -148,7 +163,8 @@ class Run:
         for name, unlock, base, cost0 in self.c["w3"]["posts"]:
             if name in self.posts:
                 n, lv = self.posts[name]
-                r += n * base * (self.c["w3"]["update_mult"] ** lv)
+                f = sum(1 for x in self.owned if x.startswith(name + "："))
+                r += n * base * (self.c["w3"]["update_mult"] ** lv) * self.c["w3"]["feature_post_mult"] ** f
         r *= self.color() * self.hz()
         if self.has("ごみ箱"):
             r *= self.c["w3"]["recycle_mult"]
@@ -338,7 +354,11 @@ class Run:
                 self.posts[best[2]][1] += 1
 
     def parts_on_screen(self):
-        return 10 + 3 * len([x for x in self.owned if x in dict(self.c["w3"]["items"])]) + self.icons_done
+        w3 = self.c["w3"]
+        made = [x for x in self.owned if x in dict(w3["items"])]
+        apps = [x for x in made if "：" not in x]
+        feats = [x for x in made if "：" in x]
+        return 10 + 3 * len(apps) + w3["feature_parts"] * len(feats) + self.icons_done
 
     def world3(self):
         p, w3 = self.c["player"], self.c["w3"]
