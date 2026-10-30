@@ -30,7 +30,9 @@ PCブラウザ向けのインクリメンタルゲーム。生成ボタン1つ�
 - 置き場所：`game/`（`src/config/`、`src/content/`、`src/worlds/`、`src/systems/`）
 - `npm run build` で `game/dist/index.html` 1つにまとめる（画像・書体も中に含める）。ダブルクリックでも、GitHub Pages の `/play/` でも遊べるようにする
 - GitHub Pages：今は `docs/mockups/` を公開している（`.github/workflows/pages.yml`）。見本は今までどおり公開しつつ、ゲームのビルドを `/play/` に足す
-- 外部への通信はしない（書体の読み込みを除く。書体は同梱が望ましい）
+- 外部への通信はしない（ネットにつながなくても遊べる）
+- 書体は同梱する（BIZ UDPGothic、DotGothic16。ライセンスの文面も同梱）。Segoe UI は同梱しない
+- **将来 Steam で出す**（Electron で包む）。今回は作らないが、セーブ・設定・データの書き出し・実績・全画面・終了は `game/src/platform/` の窓口にまとめ、ゲームの他の部分はブラウザやSteamを直接さわらない（仕様書 10.4）
 - 1920×1080 で設計した画面を、ブラウザの大きさに合わせて等倍率で縮小・拡大して表示する
 
 ## 作る順番
