@@ -1,0 +1,110 @@
+import { useState, type CSSProperties } from 'react';
+import { BALANCE, type SpecKey } from '../config/balance';
+import { productLabel } from '../content/products';
+import { iconTemplate, paletteFor } from '../content/kumikiArt';
+import coast from '../assets/wallpaper/coast.webp';
+import { JOB_IDS, type AppId, type JobId, type PhotoEdit } from '../systems/desktopState';
+import { activeScreenshots } from '../systems/desktop';
+import { featureCount, hasDesktopSkill, hasUpgrade, jobCapacity, jobCursorCost, jobCursorRate, jobRate, jobUpdateCost } from '../systems/desktopJobs';
+import { homePixelsPerSecond, passivePixelsPerSecond } from '../systems/economy';
+import { LanguageSelect } from '../components/LanguageSelect';
+import { ProductSettings } from '../components/ProductSettings';
+import { Estimate } from '../components/Estimate';
+import { ScreenshotPreview } from './Desktop';
+import { LineIcon, PixelArt } from './desktop-icons';
+import type { DesktopProps as Props } from './desktopTypes';
+// The second original photo is bundled, like the coast, and is never fetched at runtime.
+import night from '../assets/wallpaper/night.webp';
+export function Photograph({edit,wallpaper=false,...props}:Props&{edit:PhotoEdit;wallpaper?:boolean}) {
+ const {snapshot,i18n}=props,s=snapshot.state;
+ const shot=edit.source.startsWith('shot:')?(props.catalog??s.persistent.screenshots).find(x=>x.id===Number(edit.source.slice(5))):null;
+ const drawing=(wallpaper?s.persistent.artwork.wallpaper:null)??s.persistent.artwork.sketchbook;
+ const style={filter:`brightness(${edit.brightness}) sepia(${Math.abs(edit.tone)/100}) hue-rotate(${edit.tone*2}deg)`,transform:`scale(${1/(1-edit.crop/50)})`} as CSSProperties;
+ return <div className={`photograph ${wallpaper?'wallpaper-photo':''}`} style={{filter:wallpaper&&s.persistent.specs.color===1?`url(#${props.preview?'coast-256-preview':'coast-256'})`:undefined}}><div className="photo-transform" style={style}>
+ {edit.source==='sketch'?<PixelArt frames={drawing.frames} size={drawing.size} palette={props.capture?.palette??paletteFor(s.persistent.specs.color)}/>:shot?<ScreenshotPreview {...props} shot={shot} catalog={props.catalog??s.persistent.screenshots}/>:<img src={edit.source==='night'?night:coast} alt={wallpaper?'':i18n.t(edit.source==='night'?'photo.night':'photo.coast')} draggable={false}/>}
+ </div></div>;
+}
+function JobActivity({app,...props}:Props&{app:JobId}) {
+ const s=props.snapshot.state,phase=props.preview||props.runtime.platform.animation.reducedMotion()?0.5:(s.elapsedMs%BALANCE.w3.jobAnimationMs)/BALANCE.w3.jobAnimationMs,palette=props.capture?.palette??paletteFor(s.persistent.specs.color);
+ return <svg className="job-activity" data-job-preview={app} viewBox="0 0 64 24" aria-hidden="true">
+ {app==='tessera'?iconTemplate('folder',16).map((color,i)=>color>=0&&i<Math.floor(phase*256)?<rect key={i} x={20+i%16} y={4+Math.floor(i/16)} width="1" height="1" fill={palette[color]}/>:null):app==='files'?Array.from({length:3},(_,i)=><g key={i} transform={`translate(0,${((i+Math.floor(phase*3))%3)*7+2})`}><rect x="2" y="0" width="58" height="6" fill={i===0?'#cce4f7':'#e7e7e7'}/><path d={`M7 3h${16+i*8}`} stroke="#72818b" strokeWidth="1"/></g>):app==='photo'?Array.from({length:3},(_,i)=><g key={i}><path d={`M4 ${5+i*7}h54`} stroke="#aaa"/><circle cx={12+(Math.sin(phase*Math.PI*2+i)+1)*18} cy={5+i*7} r="2.5" fill="#537e9a"/></g>):Array.from({length:4},(_,i)=><path key={i} d={`M4 ${3+i*6}h${12+((i+Math.floor(phase*4))%4)*12}`} stroke="#608d78" strokeWidth="2"/>)}
+ </svg>;
+}
+export function JobControls({app,...props}:Props&{app:JobId}){
+ const {snapshot,runtime,i18n,preview}=props,s=snapshot.state,j=s.run.desktop.jobs[app];
+ if(!hasUpgrade(s,'jobs'))return null;
+ const cost=jobCursorCost(s,app),updateCost=jobUpdateCost(s,app),rate=passivePixelsPerSecond(s);
+ return <div className="job-controls"><div>{j.assigned&&j.cursors>0&&<JobActivity {...props} app={app}/>}<span>{i18n.t('jobs.count',{count:j.cursors})}</span><span>{i18n.t('jobs.rate',{rate:i18n.rate(jobRate(s,app))})}</span>
+ <button className="win-button" disabled={!j.assigned&&JOB_IDS.filter(id=>s.run.desktop.jobs[id].assigned).length>=jobCapacity(s)} onClick={()=>runtime.actDesktop({type:'job-assign',app})}>{i18n.t(j.assigned?'jobs.remove':'jobs.assign')}</button></div>
+ <div><button className="win-button" disabled={s.resources.pixels<cost} onClick={()=>runtime.actDesktop({type:'job-buy',app})}>{i18n.t('jobs.buy',{cost:i18n.price(cost)})}</button><span>{i18n.t('jobs.effect',{rate:i18n.rate(jobCursorRate(s,app))})}</span><Estimate cost={cost} pixels={s.resources.pixels} rate={rate} i18n={i18n} runtime={runtime} preview={preview}/>
+ <button className="win-button" disabled={s.resources.pixels<updateCost||j.cursors===0} title={i18n.t('jobs.update',{version:`1.${j.updates}`,next:`1.${j.updates+1}`})} onClick={()=>runtime.actDesktop({type:'job-update',app})}>{i18n.t('jobs.updateCost',{cost:i18n.price(updateCost)})}</button><span>{i18n.t('jobs.double',{factor:BALANCE.w3.updateMultiplier})}</span><Estimate cost={updateCost} pixels={s.resources.pixels} rate={rate} i18n={i18n} runtime={runtime} preview={preview}/></div></div>;
+}
+export function WorkingCursors({app,...props}:Props&{app:JobId}){
+ const {snapshot,i18n,preview,runtime}=props,s=snapshot.state,j=s.run.desktop.jobs[app];if(!j.assigned||!j.cursors)return null;
+ return <div className={`working-cursors job-motion-${app} ${preview||runtime.platform.animation.reducedMotion()?'no-motion':''}`} aria-label={i18n.t('jobs.count',{count:j.cursors})}>
+ {Array.from({length:Math.min(j.cursors,BALANCE.w3.maxVisibleJobCursors)},(_,i)=><svg key={i} viewBox="0 0 16 20" aria-hidden="true" style={{left:`${14+i*15}%`,animationDelay:`${-i*.37}s`}}><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="#fff" stroke="#283744"/></svg>)}<span>{i18n.t('jobs.count',{count:j.cursors})}</span></div>;
+}
+export function PhotoApp(props:Props){
+ const {snapshot,runtime,i18n}=props,s=snapshot.state,d=s.run.desktop,edit=d.photo;
+ const change=(patch:Partial<PhotoEdit>)=>runtime.actDesktop({type:'photo',edit:patch});
+ return <div className="photo-app"><div className="app-toolbar"><label>{i18n.t('photo.source')}<select aria-label={i18n.t('photo.source')} value={edit.source} onChange={e=>change({source:e.target.value})}>
+ {(['coast','night','sketch'] as const).map(id=><option value={id} key={id}>{i18n.t(`photo.${id}`)}</option>)}{activeScreenshots(s).map(shot=><option key={shot.id} value={`shot:${shot.id}`}>{i18n.t('files.shot',{count:shot.id})}</option>)}</select></label>
+ {hasUpgrade(s,'compare')&&<button className="win-button" aria-pressed={d.compare} onClick={()=>runtime.actDesktop({type:'compare'})}>{i18n.t('photo.compare')}</button>}
+ <button className="win-button accent" onClick={()=>runtime.actDesktop({type:'wallpaper'})}>{i18n.t('photo.wallpaper')}</button></div>
+ <div className="photo-workbench">{d.compare&&<figure><figcaption>{i18n.t('photo.before')}</figcaption><Photograph {...props} edit={{...edit,brightness:1,tone:0,crop:0}}/></figure>}<figure><figcaption>{i18n.t('photo.after')}</figcaption><Photograph {...props} edit={edit}/></figure></div>
+ <div className="photo-adjustments"><label>{i18n.t('photo.brightness')}<input type="range" min=".5" max="1.5" step=".05" value={edit.brightness} onChange={e=>change({brightness:Number(e.target.value)})}/><output>{i18n.number(edit.brightness)}</output></label>
+ <label>{i18n.t('photo.tone')}<input type="range" min="-50" max="50" value={edit.tone} onChange={e=>change({tone:Number(e.target.value)})}/><output>{i18n.integer(edit.tone)}</output></label>
+ {hasUpgrade(s,'crop')&&<label>{i18n.t('photo.crop')}<input type="range" min="0" max="40" value={edit.crop} onChange={e=>change({crop:Number(e.target.value)})}/><output title={i18n.t('photo.cropValue',{count:edit.crop})}>{i18n.t('number.percent',{value:i18n.integer(edit.crop)})}</output></label>}</div></div>;
+}
+export function BinApp({snapshot,runtime,i18n}:Props){
+ const s=snapshot.state,d=s.run.desktop;
+ const name=(id:string)=>id.startsWith('shot:')?i18n.t('bin.itemShot',{count:Number(id.slice(5))}):i18n.t('bin.itemIcon',{name:i18n.t(`k.icon.${id.split(':').at(-1) as 'document'}`)});
+ return <div className="bin-app"><div className="app-toolbar"><button className="win-button" disabled={!d.trash.length} onClick={()=>runtime.actDesktop({type:'empty-trash'})}>{i18n.t('bin.empty')}</button></div>
+ <table className="native-table"><thead><tr><th>{i18n.t('files.name')}</th><th>{i18n.t('bin.deleted')}</th><th>{i18n.t('files.size')}</th></tr></thead><tbody>{d.trash.map(t=><tr key={t.id}><td>{name(t.id)}</td><td>{i18n.dateTime(t.at)}</td><td>{i18n.t('bin.reward',{pixels:i18n.pixels(t.reward)})}{hasUpgrade(s,'undo')&&<button className="win-button" title={i18n.t('bin.repay',{pixels:i18n.pixels(t.reward)})} disabled={s.resources.pixels<t.reward} onClick={()=>runtime.actDesktop({type:'undo-trash',id:t.id})}>{i18n.t('bin.restore')}</button>}</td></tr>)}</tbody></table>{!d.trash.length&&<p className="app-empty">{i18n.t('bin.none')}</p>}</div>;
+}
+export function ClockApp(props:Props){
+ const {snapshot,runtime,i18n,capture}=props,s=snapshot.state,d=s.run.desktop,now=capture?.version===2?capture.display.wallTime:runtime.platform.clock.wallNow();
+ const [at,setAt]=useState('');const current=new Date(d.calendarMonth??now),month=new Date(current.getFullYear(),current.getMonth(),1);const setMonth=(date:Date)=>runtime.actDesktop({type:'calendar-month',at:date.getTime()});
+ const days=new Date(month.getFullYear(),month.getMonth()+1,0).getDate();
+ const match=/^(\d{1,2}):(\d{2})$/.exec(at);
+ let scheduledAt:number|null=null;
+ if(match&&Number(match[1])<24&&Number(match[2])<60){const date=new Date(now);date.setHours(Number(match[1]),Number(match[2]),0,0);if(date.getTime()<=now)date.setDate(date.getDate()+1);scheduledAt=date.getTime();}
+ const events=[...Object.entries(d.builtAt).map(([id,at])=>({at,name:id==='desktop'?i18n.t('clock.created'):i18n.t('clock.built',{app:i18n.t(`desktop.app.${id as 'files'}`)})})),...s.persistent.products.map(p=>({at:p.releasedAt,name:i18n.t('clock.release',{product:productLabel(i18n,p.name,p.version)})}))];
+ return <div className="clock-app"><h2>{i18n.t('clock.now')}</h2><div className="clock-time">{i18n.time(now)}</div><p>{i18n.date(now)}</p>
+ {hasUpgrade(s,'timer')&&<section><h2>{i18n.t('clock.timer')}</h2><label>{i18n.t('clock.reserveAt')}<input type="text" inputMode="numeric" placeholder={i18n.t('clock.timeExample')} aria-label={i18n.t('clock.reserveAt')} value={at} onChange={e=>setAt(e.target.value)}/></label><button className="win-button accent" disabled={scheduledAt===null} onClick={()=>scheduledAt!==null&&runtime.actDesktop({type:'reserve',at:scheduledAt})}>{i18n.t('clock.reserve')}</button>
+ {d.reservation&&<p>{d.reservation.done?i18n.t(d.reservation.result==='expired'?'clock.expired':d.reservation.result==='skipped'?'clock.skipped':'clock.done'):i18n.t('clock.scheduled',{time:i18n.dateTime(d.reservation.at)})}<button className="win-button" onClick={()=>runtime.actDesktop({type:'cancel-reservation'})}>{i18n.t('clock.cancel')}</button></p>}<p className="muted">{i18n.t('clock.offline')}</p></section>}
+ {hasUpgrade(s,'calendar')&&<section className="clock-calendar"><header><button className="win-button" aria-label={i18n.t('clock.previous')} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()-1,1))}><LineIcon kind="back"/></button><h2>{i18n.date(month.getTime())}</h2><button className="win-button" aria-label={i18n.t('clock.next')} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()+1,1))}><LineIcon kind="forward"/></button></header><div className="calendar-days">{Array.from({length:7},(_,i)=><b key={`weekday${i}`} className="calendar-weekday">{i18n.t(`clock.weekday.${i as 0}`)}</b>)}{Array.from({length:month.getDay()},(_,i)=><span key={`blank${i}`}/>)}{Array.from({length:days},(_,i)=>{const date=new Date(month.getFullYear(),month.getMonth(),i+1),dayEvents=events.filter(e=>new Date(e.at).toDateString()===date.toDateString());return <span key={i} className={dayEvents.length?'has-events':''} title={dayEvents.map(e=>e.name).join('\n')||i18n.t('clock.noEvents')}>{i18n.integer(i+1)}</span>;})}</div>{events.filter(e=>new Date(e.at).getMonth()===month.getMonth()&&new Date(e.at).getFullYear()===month.getFullYear()).map((e,i)=><p key={i}>{i18n.date(e.at)}　{e.name}</p>)}</section>}</div>;
+}
+export function ThemeApp({snapshot,runtime,i18n}:Props){
+ const s=snapshot.state,p=s.persistent.desktopPrefs;
+ return <div className="theme-app"><h1>{i18n.t('desktop.app.theme')}</h1><label>{i18n.t('theme.mode')}<select aria-label={i18n.t('theme.mode')} value={p.mode} onChange={e=>runtime.actDesktop({type:'theme',mode:e.target.value as 'light'|'dark'})}><option value="light">{i18n.t('theme.light')}</option><option value="dark">{i18n.t('theme.dark')}</option></select></label>
+ <label>{i18n.t('theme.accent')}<input aria-label={i18n.t('theme.accent')} type="color" value={p.accent} onChange={e=>runtime.actDesktop({type:'theme',accent:e.target.value})}/></label>
+ <label>{i18n.t('theme.radius')}<input aria-label={i18n.t('theme.radius')} type="range" min="0" max="8" value={p.radius} onChange={e=>runtime.actDesktop({type:'theme',radius:Number(e.target.value)})}/><output>{i18n.integer(p.radius)}</output></label>
+ {hasUpgrade(s,'slideshow')&&<label>{i18n.t('theme.slideshow')}<input aria-label={i18n.t('theme.slideshow')} type="checkbox" checked={p.slideshow} onChange={e=>runtime.actDesktop({type:'theme',slideshow:e.target.checked})}/><small>{i18n.t('theme.slideshowInterval')}</small></label>}
+ {hasUpgrade(s,'iconSize')&&<label>{i18n.t('theme.iconSize')}<select aria-label={i18n.t('theme.iconSize')} value={p.iconSize} onChange={e=>runtime.actDesktop({type:'theme',iconSize:Number(e.target.value)})}>{([32,48,64] as const).map((size,i)=><option key={size} value={size}>{i18n.t((['theme.small','theme.medium','theme.large'] as const)[i]!)}</option>)}</select></label>}</div>;
+}
+export function TerminalApp({snapshot,runtime,i18n}:Props){
+ const t=snapshot.state.run.desktop.terminal;
+ return <div className="terminal-app"><div className="app-toolbar"><label>{i18n.t('terminal.command')}<span>{i18n.t('terminal.capture')}</span></label><label>{i18n.t('terminal.interval')}<select aria-label={i18n.t('terminal.interval')} value={t.interval} onChange={e=>runtime.actDesktop({type:'terminal',interval:Number(e.target.value),running:t.running})}>{BALANCE.w3.terminalIntervals.map((n,i)=><option key={n} value={n}>{i18n.t(i===0?'terminal.minute':'terminal.hour')}</option>)}</select></label><button className="win-button" onClick={()=>runtime.actDesktop({type:'terminal',interval:t.interval,running:!t.running})}>{i18n.t(t.running?'terminal.stop':'terminal.start')}</button></div>
+ <div className="terminal-output">{snapshot.state.run.desktop.jobs.terminal.assigned&&snapshot.state.run.desktop.jobs.terminal.cursors>0&&<div className="terminal-job-stream" aria-live="off">{Array.from({length:5},(_,i)=><p key={i}>{i18n.t('jobs.processing',{rate:i18n.rate(jobRate(snapshot.state,'terminal'))})}</p>)}</div>}<p>{i18n.t(t.running?'terminal.running':'terminal.stopped',{count:t.executions})}</p>{!t.log.length&&<p>{i18n.t('terminal.idle')}</p>}{t.log.map((l,i)=><p key={i}>{i18n.t(l.ok?'terminal.log.success':'terminal.log.skipped',{time:i18n.time(l.at)})}</p>)}</div></div>;
+}
+export function SettingsApp(props:Props){
+ const {snapshot,runtime,i18n}=props,s=snapshot.state,d=s.run.desktop,p=s.persistent.desktopPrefs;
+ return <div className="settings-app"><aside>{(['skills','general','data','specs'] as const).map(page=><button className={page===d.settingsPage?'selected':''} key={page} onClick={()=>runtime.actDesktop({type:'settings-page',page})}>{i18n.t(`settings.${page}`)}</button>)}</aside><article><h1>{i18n.t(`settings.${d.settingsPage}`)}</h1>
+ {d.settingsPage==='skills'&&<><p>{i18n.t('desktop.tokens',{count:s.resources.tokens})}</p>{([1,2] as const).filter(band=>band===1||s.run.version!=='v0.1').map(band=><fieldset key={band}><legend>{i18n.t(band===1?'settings.band1':'settings.band2')}</legend>{BALANCE.w3.skills.filter(skill=>skill.band===band).map(skill=><div className="desktop-skill" key={skill.id}><div><b>{i18n.t(`desktop.skill.${skill.id}`)}</b><p>{i18n.t(`desktop.skill.${skill.id}.description`)}</p></div><span>{i18n.t('k.skillCost',{count:skill.cost})}</span>{p.skills.includes(skill.id)?skill.playful?<input aria-label={i18n.t(`desktop.skill.${skill.id}`)} type="checkbox" checked={hasDesktopSkill(s,skill.id)} onChange={()=>runtime.actDesktop({type:'toggle-skill',id:skill.id})}/>:<span>{i18n.t('k.acquired')}</span>:<button className="win-button" disabled={s.resources.tokens<skill.cost} onClick={()=>runtime.actDesktop({type:'skill',id:skill.id})}>{i18n.t('k.acquire')}</button>}</div>)}</fieldset>)}</>}
+ {d.settingsPage==='general'&&<><ProductSettings state={s} runtime={runtime} i18n={i18n}/><p><label className="author-name-setting">{i18n.t('settings.playerName')}<input value={s.persistent.playerName??''} maxLength={BALANCE.w2.maxName} onChange={e=>runtime.actKumiki({type:'name',name:e.target.value})}/></label></p><p><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} includeTest={runtime.platform.launch.debug}/></p></>}
+ {d.settingsPage==='data'&&<div className="data-buttons"><button className="win-button" onClick={runtime.downloadData}>{i18n.t('data.export')}</button><button className="win-button" onClick={()=>void runtime.requestImport()}>{i18n.t('data.import')}</button><button className="win-button" onClick={()=>runtime.requestReset()}>{i18n.t('data.reset')}</button></div>}
+ {d.settingsPage==='specs'&&<><p>{i18n.t('settings.specReadOnly')}</p><table className="native-table"><tbody>{(Object.keys(BALANCE.spec) as SpecKey[]).map(key=><tr key={key}><th>{i18n.t(`spec.${key}`)}</th><td>{i18n.spec(key,s.persistent.specs[key])}</td></tr>)}</tbody></table></>}
+ </article></div>;
+}
+export function ManagerApp(props:Props){
+ const {snapshot,i18n,capture}=props,s=snapshot.state,d=s.run.desktop,tab=d.managerTab,details=d.managerProcess;const setTab=(tab:typeof d.managerTab)=>props.runtime.actDesktop({type:'manager-tab',tab});const setDetails=(process:string)=>props.runtime.actDesktop({type:'manager-process',process});
+ const now=capture?.version===2?capture.display.wallTime:props.runtime.platform.clock.wallNow(),shots=capture?.version===2?capture.display.managerShotRate:d.shotHistory.filter(h=>h.at>=now-BALANCE.w3.historyMs).reduce((n,h)=>n+h.pixels,0)/(BALANCE.w3.historyMs/1000),home=homePixelsPerSecond(s);
+ const rows=[{id:'home' as const,name:i18n.t('manager.home'),rate:home},...JOB_IDS.filter(id=>d.jobs[id].assigned).map(id=>({id,name:i18n.t(`desktop.app.${id}`),rate:jobRate(s,id)})),{id:'shots' as const,name:i18n.t('manager.shots'),rate:shots}];
+ const total=rows.reduce((n,r)=>n+r.rate,0),job=JOB_IDS.includes(details as JobId)?details as JobId:null;
+ const tokens=capture?.version===2?capture.display.managerTokenRate:d.feedback.filter(f=>f.completedAt!==null&&f.completedAt>=now-BALANCE.w3.historyMs).reduce((n,f)=>n+(f.reward??BALANCE.w3.feedbackTokens),0)/(BALANCE.w3.historyMs/60000);
+ return <div className="manager-app"><nav>{(['processes','performance'] as const).map(id=><button className={tab===id?'selected':''} key={id} onClick={()=>setTab(id)}>{i18n.t(`manager.${id}`)}</button>)}</nav><article>{tab==='processes'?<><table className="native-table"><thead><tr><th>{i18n.t('manager.name')}</th><th>{i18n.t('manager.rate')}</th><th>{i18n.t('manager.share')}</th></tr></thead><tbody>{rows.map(r=><tr className={details===r.id?'selected':''} key={r.id} onClick={()=>setDetails(r.id)}><td><button onClick={()=>setDetails(r.id)}>{r.name}</button></td><td>{i18n.rate(r.rate)}</td><td>{i18n.t('number.percent',{value:i18n.number(total?r.rate/total*100:0)})}</td></tr>)}<tr><td>{i18n.t('manager.feedback')}</td><td colSpan={2}>{i18n.t('manager.tokens',{count:tokens})}</td></tr></tbody></table><section className="manager-details"><h2>{i18n.t('manager.details')}</h2>{details!=='shots'&&<><p>{i18n.t('manager.color',{factor:BALANCE.spec.color[s.persistent.specs.color]!.multiplier})}</p><p>{i18n.t('manager.refresh',{factor:BALANCE.spec.refresh[s.persistent.specs.refresh]!.multiplier})}</p>{job&&<><p>{i18n.t('manager.features',{factor:BALANCE.w3.featureMultiplier**featureCount(s,job)})}</p><p>{i18n.t('manager.updates',{factor:BALANCE.w3.updateMultiplier**d.jobs[job].updates})}</p><p>{i18n.t('manager.cursors',{count:d.jobs[job].cursors,rate:i18n.rate(jobCursorRate(s,job))})}</p></>}</>}</section></>:<><h1>{i18n.t('manager.performance')}</h1><table className="native-table"><tbody>{(Object.keys(BALANCE.spec) as SpecKey[]).map(key=><tr key={key}><th>{i18n.t(`spec.${key}`)}</th><td>{i18n.spec(key,s.persistent.specs[key])}</td></tr>)}</tbody></table></>}</article></div>;
+}
+export function ExtraApp({app,...props}:Props&{app:AppId}){
+ switch(app){case 'photo':return <PhotoApp {...props}/>;case 'bin':return <BinApp {...props}/>;case 'clock':return <ClockApp {...props}/>;case 'theme':return <ThemeApp {...props}/>;case 'terminal':return <TerminalApp {...props}/>;case 'settings':return <SettingsApp {...props}/>;case 'manager':return <ManagerApp {...props}/>;default:return null;}
+}

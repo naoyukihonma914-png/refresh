@@ -119,7 +119,7 @@ def main():
         page.locator('.debug-panel').evaluate("e=>e.style.visibility='visible'")
         assert page.locator('.intro-note').count() == 0
         saved = page.evaluate("JSON.parse(localStorage.getItem('refresh.save'))")
-        assert saved['schemaVersion'] == 7 and saved['run']['version'] == 'v1'
+        assert saved['schemaVersion'] == 8 and saved['run']['version'] == 'v1'
         assert saved['resources']['pixels'] == 0 and saved['run']['seed']['autoCursors'] == 0
         assert saved['run']['seed']['built'] == [] and saved['run']['kumiki']['placed'] == []
         assert saved['persistent']['specs']['color'] == 1 and saved['persistent']['specs']['storage'] == 1

@@ -1,3 +1,5 @@
+import type { DesktopPreferences, PhotoEdit } from './desktopState';
+import { activeScreenshots } from './desktop';
 import { createI18n } from '../content/i18n';
 import { paletteFor } from '../content/kumikiArt';
 import { availableIcons, drawingFor, exportable, targetFor } from './kumiki';
@@ -17,7 +19,7 @@ export interface CaptureSceneV1 {
   version:1;
   display:{ resources:GameState['resources']; specs:GameState['persistent']['specs']; productName:string|null; runVersion:GameState['run']['version']; notation:'compact'|'scientific'; savedAt:number|null; rate:number; parts:number; reward:number; cooldown:number; checks:boolean[]; shotCount:number; shotBytes:number; fileCount:number };
   palette:string[];
-  desktop:Pick<DesktopState,'apps'|'windows'|'active'|'icons'|'cooldownMs'|'fileFolder'|'fileSelection'|'mailSelection'|'notice'|'success'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
+  desktop:{apps:('files'|'mail')[];windows:Record<'tessera'|'note'|'files'|'mail',DesktopState['windows']['tessera']>;active:'tessera'|'note'|'files'|'mail'|null;icons:Record<'tessera'|'note'|'files'|'mail',{x:number;y:number}>;cooldownMs:number;fileFolder:DesktopState['fileFolder'];fileSelection:string|null;mailSelection:number|null;notice:number|null;success:number|null;feedback:(Omit<Feedback,'baseline'|'baselineColor'|'kind'>&{kind:'redraw'|'practice'|'color'|'screenshot'})[]};
   home:{ built:SeedState['built']; cursors:number; skills:GameState['persistent']['seedSkills']; appearance:GameState['persistent']['seedAppearance']; history:SeedState['history']; parts:KumikiState['built']; placed:KumikiState['placed']; design:KumikiState['design']; focus:boolean; interval:number; exportName:string; homeWindow:KumikiState['homeWindow']; rows:KumikiState['generationLog'] };
   editor:{ active:string; picture:Picture|null; target:number[]; documents:string[]; exported:string[]; ready:number; skills:GameState['persistent']['artwork']['skills']; modern:boolean; drift:KumikiState['drift']; guide:KumikiState['guide']['current'] };
   icons:Record<string,Picture>;
@@ -43,15 +45,15 @@ export function projectCaptureV1(state:GameState,language:string):CaptureSceneV1
   const ready=exportable(state);
   const icons=Object.fromEntries(k.exports.filter(e=>e.kind==='icon'&&(e.id==='folder'||e.id==='mail')).map(e=>[e.id,picture(e)]));
   return structuredClone({version:1,
-    display:{resources:state.resources,specs:p.specs,productName:p.productName,runVersion:state.run.version,notation:p.numberNotation,savedAt:state.lastSavedAt,rate:passivePixelsPerSecond(state),parts:screenshotParts(state),reward:screenshotReward(state),cooldown:BALANCE.spec.graphics[p.specs.graphics]!.shotCooldownSeconds*1000,checks:desktopConditions(state),shotCount:p.screenshots.length,shotBytes:p.screenshots.reduce((sum,s)=>sum+screenshotBytes(s),0),fileCount:allFiles.length},
+    display:{resources:state.resources,specs:p.specs,productName:p.productName,runVersion:state.run.version,notation:p.numberNotation,savedAt:state.lastSavedAt,rate:passivePixelsPerSecond(state),parts:10+['tessera','note',...d.apps].filter(id=>d.windows[id as keyof typeof d.windows]?.open&&!d.windows[id as keyof typeof d.windows]?.minimized).length*3+2+d.apps.length+(d.notice!==null||d.success!==null?1:0),reward:(state.run.desktop.jobs?screenshotReward(state):passivePixelsPerSecond(state)*(10+['tessera','note',...d.apps].filter(id=>d.windows[id as keyof typeof d.windows]?.open&&!d.windows[id as keyof typeof d.windows]?.minimized).length*3+2+d.apps.length+(d.notice!==null||d.success!==null?1:0))*.5*1.25**p.specs.resolution),cooldown:BALANCE.spec.graphics[p.specs.graphics]!.shotCooldownSeconds*1000,checks:state.run.desktop.jobs?desktopConditions(state):[1+d.apps.length>=6,d.feedback.filter(f=>f.completedAt!==null).length>=10,['folder','bin','clock','mail','photo','settings'].every(id=>k.exports.some(e=>e.kind==='icon'&&e.id===id)),false,false],shotCount:p.screenshots.length,shotBytes:p.screenshots.reduce((sum,s)=>sum+screenshotBytes(s),0),fileCount:allFiles.length},
     palette:paletteFor(p.specs.color),
     desktop:{apps:d.apps,windows:d.windows,active:d.active,icons:d.icons,cooldownMs:d.cooldownMs,fileFolder:d.fileFolder,fileSelection:d.fileSelection,mailSelection:d.mailSelection,notice:d.notice,success:d.success,feedback},
     home:{built:state.run.seed.built,cursors:state.run.seed.autoCursors,skills:p.seedSkills,appearance:p.seedAppearance,history:p.seedSkills.includes('history')?state.run.seed.history.slice(0,4):[],parts:k.built,placed:k.placed,design:k.design,focus:k.focus,interval:k.interval,exportName:k.exportName,homeWindow:k.homeWindow,rows:k.placed.includes('table')?k.generationLog.slice(-4):[]},
     editor:{active:k.activeDrawing,picture:drawing?picture(drawing):null,target:drawing?targetFor(state,k.activeDrawing,drawing.size):[],documents:availableIcons(state),exported:Object.entries(k.drawings).filter(([,v])=>v.exported).map(([id])=>id),ready:ready.icons.length+ready.parts.length,skills:p.artwork.skills,modern:p.artwork.modern,drift:k.drift,guide:k.guide.collapsed?null:k.guide.current},
-    icons,wallpaper:p.artwork.wallpaper?picture(p.artwork.wallpaper):null,note:p.productionNote??defaultNote(createI18n(language)),files});
+    icons,wallpaper:p.artwork.wallpaper?picture(p.artwork.wallpaper):null,note:p.productionNote??defaultNote(createI18n(language)),files}) as CaptureSceneV1;
 }
 // New scene formats get a new projector/validator; keep V1 readable.
-export const projectCapture=projectCaptureV1;
+
 
 const record=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const num=(v:unknown):v is number=>typeof v==='number'&&Number.isFinite(v)&&v>=0;
@@ -69,7 +71,7 @@ const partIds=['select','button','extensions','switch','slider','input','frame',
 const seedSkills=['keyboard','history','pattern','inherit','hold','marquee'];
 const editorSkills=['fill','mirror','layers','eyedropper','expand','snap','outline','animation','extraParts','wallpaper','modern'];
 const documents=['folder','bin','clock','mail','photo','settings','document','image','music','video','archive','text','chart','terminal','link','star','free'];
-export function isCaptureScene(value:unknown):value is CaptureSceneV1 {
+export function isCaptureSceneV1(value:unknown):value is CaptureSceneV1 {
   if(!record(value)||value.version!==1)return false;
   const {display:d,desktop:w,home:h,editor:e,icons,wallpaper,note,files,palette}=value;
   if(!record(d)||!record(w)||!record(h)||!record(e)||!record(icons)||!text(note)||!Array.isArray(files))return false;
@@ -91,14 +93,14 @@ export function isCaptureScene(value:unknown):value is CaptureSceneV1 {
   if(!Object.entries(icons).every(([id,p])=>['folder','mail'].includes(id)&&pictureValid(p))||!(wallpaper===null||pictureValid(wallpaper)))return false;
   return files.length<=40&&files.every(f=>record(f)&&text(f.id)&&text(f.name)&&['folder','icon','part','home','sketch','note','shot'].includes(f.kind as string)&&(f.at===null||num(f.at))&&num(f.bytes)&&(f.picture===undefined||pictureValid(f.picture))&&(f.shotId===undefined||num(f.shotId))&&(f.partId===undefined||partIds.includes(f.partId as string)));
 }
-const decoded=new WeakMap<Screenshot,{data:string;id:number;scene:CaptureSceneV1}>();
-export function readCapture(shot:Screenshot):CaptureSceneV1 {
+const decoded=new WeakMap<Screenshot,{data:string;id:number;scene:CaptureScene}>();
+export function readCapture(shot:Screenshot):CaptureScene {
   const cached=decoded.get(shot);if(cached?.data===shot.data&&cached.id===shot.id)return cached.scene;
   const scene=decodeCapture(shot.data);
-  if(!isCaptureScene(scene)||scene.files.some(f=>f.shotId!==undefined&&f.shotId>=shot.id))throw new Error('Invalid screenshot scene');
+  if(!isCaptureScene(scene)||scene.files.some(f=>f.shotId!==undefined&&f.shotId>=shot.id)||scene.version===2&&[scene.view.photo.source,scene.view.preferences.wallpaper?.source].some(source=>source?.startsWith('shot:')&&Number(source.slice(5))>=shot.id))throw new Error('Invalid screenshot scene');
   decoded.set(shot,{data:shot.data,id:shot.id,scene});return scene;
 }
-export function encodeScene(scene:CaptureSceneV1):string {
+export function encodeScene(scene:CaptureScene):string {
   if(!isCaptureScene(scene))throw new Error('Invalid screenshot scene');
   return encodeCapture(scene);
 }
@@ -114,10 +116,56 @@ export function restoreScene(shot:Screenshot,catalog:Screenshot[]):GameState {
   state.persistent.artwork.skills=s.editor.skills;state.persistent.artwork.modern=s.editor.modern;state.persistent.artwork.wallpaper=s.wallpaper?drawing(s.wallpaper):null;
   state.run.kumiki.exports=Object.entries(s.icons).map(([id,p])=>({kind:'icon',id,name:null,at:shot.at,size:p.size,frames:p.frames}));
   state.persistent.productionNote=s.note;
-  state.run.desktop={...createDesktopState(),...s.desktop,entered:true,feedbackSerial:Math.max(0,...s.desktop.feedback.map(f=>f.id)),feedback:s.desktop.feedback.map(f=>({...f,baseline:[],baselineColor:'#000000'}))};
+  state.run.desktop={...createDesktopState(),...s.desktop,windows:{...createDesktopState().windows,...s.desktop.windows},icons:{...createDesktopState().icons,...s.desktop.icons},entered:true,feedbackSerial:Math.max(0,...s.desktop.feedback.map(f=>f.id)),feedback:s.desktop.feedback.map(f=>({...f,baseline:[],baselineColor:'#000000'}))};
+  if(s.version===2){state.persistent.desktopPrefs=s.view.preferences;state.run.desktop={...state.run.desktop,...s.view.desktop};if(s.photoPicture)state.persistent.artwork.sketchbook=drawing(s.photoPicture);}
   state.persistent.screenshots=catalog.filter(s=>s.id<shot.id);
   return state;
 }
-export function frozenFiles(scene:CaptureSceneV1,catalog:Screenshot[]):DesktopFile[] {
+export function frozenFiles(scene:CaptureScene,catalog:Screenshot[]):DesktopFile[] {
   return scene.files.map(({picture:p,shotId,partId,...f})=>({...f,...(p?{drawing:{...blankDrawing(p.size),frames:p.frames},...(f.kind==='icon'?{work:{kind:'icon' as const,id:f.id.split(':').at(-1)!,name:null,at:f.at??0,size:p.size,frames:p.frames}}:{})}:{}),...(partId?{work:{kind:'part' as const,id:partId,name:null,at:f.at??0,size:0,frames:[]}}:{}),...(shotId?{shot:catalog.find(s=>s.id===shotId)}:{})}));
 }
+
+export interface CaptureSceneV2 extends Omit<CaptureSceneV1,'version'|'desktop'> {
+ version:2;
+ display:CaptureSceneV1['display']&{wallTime:number;managerShotRate:number;managerTokenRate:number};
+ photoPicture:Picture|null;
+ desktop:Omit<DesktopState,'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'recycled'|'trashCount'|'reservation'|'terminal'|'shotHistory'|'stalled'|'stalledClosed'|'stallMs'|'stallSerial'|'idleMs'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'|'feedback'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
+ view:{preferences:DesktopPreferences;desktop:Pick<DesktopState,'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'reservation'|'terminal'|'stalled'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'>;photo:PhotoEdit};
+}
+export type CaptureScene=CaptureSceneV1|CaptureSceneV2;
+export function projectCapture(state:GameState,language:string):CaptureSceneV2 {
+ const d=state.run.desktop;
+ // V1's document projection remains shared, while the V2 desktop has its own contract.
+ const base=projectCaptureV1(state,language);
+ const {upgrades,builtAt,jobs,workspace,workspaces,fileSort,fileDescending,fileSearch,largeIcons,mailFolder,photo,compare,trash,reservation,terminal,stalled,settingsPage,managerTab,managerProcess,calendarMonth}=d;
+ return structuredClone({...base,files:base.files.map(f=>{if(f.id===d.fileSelection)return f;const {shotId:_id,...row}=f;return row;}),version:2,photoPicture:d.windows.photo.open&&!d.windows.photo.minimized&&d.photo.source==='sketch'?picture(state.persistent.artwork.sketchbook):null,
+  display:{...base.display,parts:screenshotParts(state),reward:screenshotReward(state),rate:passivePixelsPerSecond(state),checks:desktopConditions(state),shotCount:activeScreenshots(state).length,wallTime:state.lastTickAt,managerShotRate:d.shotHistory.filter(h=>h.at>=state.lastTickAt-BALANCE.w3.historyMs).reduce((n,h)=>n+h.pixels,0)/(BALANCE.w3.historyMs/1000),managerTokenRate:d.feedback.filter(f=>f.completedAt!==null&&f.completedAt>=state.lastTickAt-BALANCE.w3.historyMs).reduce((n,f)=>n+(f.reward??BALANCE.w3.feedbackTokens),0)/(BALANCE.w3.historyMs/60000)},
+  icons:Object.fromEntries(state.run.kumiki.exports.filter(e=>e.kind==='icon'&&['folder','bin','clock','mail','photo','settings'].includes(e.id)).map(e=>[e.id,picture(e)])),
+  desktop:{entered:true,enteredAt:0,apps:d.apps,windows:d.windows,active:d.active,icons:d.icons,feedbackMs:0,feedbackSerial:d.feedbackSerial,cooldownMs:d.cooldownMs,fileFolder:d.fileFolder,fileSelection:d.fileSelection,mailSelection:d.mailSelection,notice:d.notice,success:d.success,feedback:base.desktop.feedback},
+  view:{preferences:{...state.persistent.desktopPrefs,lastShotId:0},desktop:{upgrades,builtAt,jobs,workspace,workspaces,fileSort,fileDescending,fileSearch,largeIcons,mailFolder,photo,compare,trash:trash.slice(0,30),reservation,terminal,stalled,settingsPage,managerTab,managerProcess,calendarMonth},photo}});
+}
+// These identifiers and limits belong to scene format 2. Do not use the save validator here.
+const apps2=['tessera','note','files','mail','manager','photo','bin','clock','theme','terminal','settings'];
+const upgrades2=['files','sort','mail','draft','jobs','manager','search','large','photo','crop','compare','bin','undo','folders','clock','timer','calendar','theme','slideshow','iconSize','terminal'];
+const skills2=['snap','direct','burst','daylight','posts','sortMail','virtual','screensaver','autoFeedback'];
+const photo2=(v:unknown)=>record(v)&&text(v.source)&&/^(coast|night|sketch|shot:[1-9][0-9]*)$/.test(v.source)&&typeof v.brightness==='number'&&v.brightness>=.5&&v.brightness<=1.5&&typeof v.tone==='number'&&v.tone>=-50&&v.tone<=50&&num(v.crop)&&v.crop<=40;
+function isCaptureSceneV2(v:unknown):v is CaptureSceneV2 {
+ if(!record(v)||v.version!==2||!record(v.desktop)||!record(v.view)||!record(v.icons))return false;
+ const d=v.desktop,w=v.view,ex=w.desktop,p=w.preferences;
+ if(!record(ex)||!record(p)||!record(d.windows)||!record(d.icons)||!Array.isArray(d.feedback)||!stringIds(d.apps,apps2.filter(id=>!['tessera','note','settings'].includes(id)))||!(d.active===null||apps2.includes(d.active as string)))return false;
+ // Validate all unchanged documents with the immutable V1 validator.
+ const oldFeedback=d.feedback.filter(f=>record(f)&&['redraw','practice','color','screenshot'].includes(f.kind as string));
+ const legacy={...v,version:1,icons:Object.fromEntries(Object.entries(v.icons).filter(([id])=>['folder','mail'].includes(id))),desktop:{...d,apps:[],active:null,feedback:oldFeedback,notice:null,success:null,mailSelection:null}};
+ if(!(v.photoPicture===null||pictureValid(v.photoPicture))||!isCaptureSceneV1(legacy)||!Object.entries(v.icons).every(([id,img])=>documents.includes(id)&&pictureValid(img)))return false;
+ for(const id of apps2){const b=d.windows[id],ip=d.icons[id];if(!record(b)||!['x','y','width','height','z'].every(k=>num(b[k]))||!['open','minimized','maximized'].every(k=>typeof b[k]==='boolean')||!record(ip)||!num(ip.x)||!num(ip.y))return false;}
+ if(d.feedback.length>40||!d.feedback.every(f=>record(f)&&num(f.id)&&['redraw','practice','color','screenshot','sort','search','bright','trash','timer','dark'].includes(f.kind as string)&&text(f.target)&&num(f.at)&&(f.completedAt===null||num(f.completedAt))&&['hikari','ren','maki'].includes(f.sender as string)))return false;
+ if(![d.notice,d.success,d.mailSelection].every(id=>id===null||(d.feedback as Record<string,unknown>[]).some(f=>f.id===id)))return false;
+ if(!record(ex.builtAt)||!Object.entries(ex.builtAt).every(([id,at])=>(id==='desktop'||upgrades2.includes(id))&&num(at)))return false;
+ if(!stringIds(ex.upgrades,upgrades2)||!record(ex.jobs)||!['tessera','files','photo','terminal'].every(id=>{const j=(ex.jobs as Record<string,unknown>)[id];return record(j)&&typeof j.assigned==='boolean'&&num(j.cursors)&&num(j.updates);})||!record(ex.workspaces)||!apps2.every(id=>[0,1].includes((ex.workspaces as Record<string,unknown>)[id] as number))||![0,1].includes(ex.workspace as number))return false;
+ if(!stringIds(p.skills,skills2)||!stringIds(p.disabled,skills2)||!['light','dark'].includes(p.mode as string)||!text(p.accent)||!/^#[0-9a-f]{6}$/i.test(p.accent)||!num(p.radius)||p.radius>8||![32,48,64].includes(p.iconSize as number)||typeof p.slideshow!=='boolean'||!(p.wallpaper===null||photo2(p.wallpaper))||!num(p.lastShotId)||!photo2(w.photo)||!photo2(ex.photo)||!record(v.display)||!num(v.display.wallTime)||!num(v.display.managerShotRate)||!num(v.display.managerTokenRate))return false;
+ if(!['name','date','type'].includes(ex.fileSort as string)||typeof ex.fileDescending!=='boolean'||!text(ex.fileSearch)||typeof ex.largeIcons!=='boolean'||!['all','pending','completed'].includes(ex.mailFolder as string)||typeof ex.compare!=='boolean'||!Array.isArray(ex.trash)||ex.trash.length>30||!ex.trash.every(t=>record(t)&&text(t.id)&&num(t.at)&&num(t.reward)&&typeof t.first==='boolean'))return false;
+ if(ex.reservation!==null&&(!record(ex.reservation)||!num(ex.reservation.at)||typeof ex.reservation.done!=='boolean'||ex.reservation.result!==undefined&&!['captured','skipped','expired'].includes(ex.reservation.result as string)))return false;
+ const t=ex.terminal;
+ return ['processes','performance'].includes(ex.managerTab as string)&&['home','shots','feedback','tessera','files','photo','terminal'].includes(ex.managerProcess as string)&&(ex.calendarMonth===null||num(ex.calendarMonth))&&record(t)&&[60000,3600000].includes(t.interval as number)&&typeof t.running==='boolean'&&num(t.elapsedMs)&&num(t.executions)&&Array.isArray(t.log)&&t.log.length<=20&&t.log.every(l=>record(l)&&num(l.at)&&typeof l.ok==='boolean')&&(ex.stalled===null||apps2.includes(ex.stalled as string))&&['skills','data','specs','general'].includes(ex.settingsPage as string);
+}
+export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value);}

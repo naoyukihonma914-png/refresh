@@ -15,6 +15,7 @@ export class CaptureStore {
   private keys:Set<string>;
   private added:string[]=[];
   private oldIndex:string|null=null;
+  private collectionPending=false;
   constructor(private storage:SaveStorage){
     let index:unknown;try{index=JSON.parse(storage.getItem(INDEX)??'[]');}catch{index=[];}
     this.keys=new Set(Array.isArray(index)?index.filter((v):v is string=>typeof v==='string'&&v.startsWith(CAPTURE_PREFIX)&&v!==INDEX):[]);
@@ -53,6 +54,21 @@ export class CaptureStore {
     for(const key of this.added){try{this.storage.removeItem(key);}catch{/* Preserve the original save even if cleanup is unavailable. */}this.keys.delete(key);}
     try{if(this.oldIndex===null)this.storage.removeItem(INDEX);else this.storage.setItem(INDEX,this.oldIndex);}catch{/* Original primary and backup remain intact. */}
     this.refs.clear();this.values.clear();this.added=[];
+  }
+  collect(primary:string,backup:string|null,previous:string|null){
+    const roots=(raw:string|null):string[]=>{if(!raw)return [];const value=JSON.parse(raw);return (value.persistent?.screenshots??[]).flatMap((s:{sceneRef?:string})=>s.sceneRef?[s.sceneRef]:[]);};
+    const current=roots(primary),currentSet=new Set(current),old=roots(previous);
+    if(!this.collectionPending&&!old.some(ref=>!currentSet.has(ref)))return;
+    this.collectionPending=old.some(ref=>!currentSet.has(ref));
+    try{
+      const keep=new Set([...current,...roots(backup)]);
+      for(const root of [...keep]){const raw=this.values.get(root)??this.storage.getItem(root);if(!raw)throw new Error('Missing capture');const manifest=JSON.parse(raw);for(const key of Object.values(manifest.sections??{}))if(typeof key==='string')keep.add(key);}
+      const obsolete=[...this.keys].filter(k=>!keep.has(k));
+      // Primary and backup are committed already; cleanup failure cannot invalidate a save.
+      this.storage.setItem(INDEX,JSON.stringify([...keep]));
+      for(const key of obsolete){this.storage.removeItem(key);this.values.delete(key);this.keys.delete(key);}
+      this.refs.clear();
+    }catch{this.collectionPending=true;}
   }
   clear(){for(const key of this.keys)this.storage.removeItem(key);this.storage.removeItem(INDEX);this.keys.clear();this.refs.clear();this.values.clear();}
 }

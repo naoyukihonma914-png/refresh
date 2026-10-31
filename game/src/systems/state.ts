@@ -1,9 +1,9 @@
-import { createDesktopState, isDesktopState, isScreenshot, type DesktopState, type Screenshot } from './desktopState';
+import { createDesktopPreferences, isDesktopPreferences, type DesktopPreferences, createDesktopState, isDesktopState, isScreenshot, type DesktopState, type Screenshot } from './desktopState';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -46,6 +46,7 @@ export interface GameState {
     guideArchive: GuideRecord[];
     homeTheme: Record<string, Design>;
     screenshots: Screenshot[];
+    desktopPrefs:DesktopPreferences;
     productionNote: string | null;
     noteUpdatedAt: number | null;
     homeUpdatedAt: number | null;
@@ -74,7 +75,7 @@ export function createInitialState(now: number): GameState {
       playerName: null, productName: null, numberNotation: 'compact',
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
       artwork: createArtwork(),
-      products: [], guideArchive: [], homeTheme: {}, screenshots: [], productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null,
+      products: [], guideArchive: [], homeTheme: {}, screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null,
     },
   };
 }
@@ -110,6 +111,7 @@ export function isGameState(value: unknown): value is GameState {
   if (run.world === 'release' ? !isRecord(run.shipping) || !isCount(run.shipping.productId)
     || !persistent.products.some(p => p.id === (run.shipping as Record<string, unknown>).productId)
     || !isAmount(run.shipping.elapsedMs) || run.shipping.elapsedMs > BALANCE.release.animationMs : run.shipping !== null) return false;
+  if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;
   if (!Array.isArray(persistent.screenshots) || !persistent.screenshots.every(s => isScreenshot(s))
     || persistent.screenshots.some((s, i, shots) => i > 0 && s.id <= shots[i-1]!.id)

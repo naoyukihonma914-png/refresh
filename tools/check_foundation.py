@@ -95,7 +95,7 @@ def main():
         with page.expect_download() as download:
             page.get_by_role("button", name="データをエクスポート", exact=True).click()
         exported = Path(download.value.path()).read_bytes()
-        assert json.loads(exported)["schemaVersion"] == 7
+        assert json.loads(exported)["schemaVersion"] == 8
 
         page.add_init_script("""
           const corruption = sessionStorage.getItem('test-corruption');

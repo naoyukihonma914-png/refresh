@@ -1,3 +1,4 @@
+import { hasUpgrade } from './desktopJobs';
 import { productLabel } from '../content/products';
 import type { I18n } from '../content/i18n';
 import type { Drawing, ExportedWork } from './kumikiState';
@@ -18,8 +19,8 @@ export const defaultNote = (i18n: I18n) => `${i18n.t('intro.note')}\n\n\n${i18n.
 export function fileSize(bytes: number, i18n: I18n): string {
   return bytes < 1024 ? i18n.t('files.bytes',{count:bytes}) : bytes < 1024*1024 ? i18n.t('files.kilobytes',{size:i18n.rate(bytes/1024)}) : i18n.t('files.megabytes',{size:i18n.rate(bytes/(1024*1024))});
 }
-export function desktopFiles(state: GameState, i18n: I18n, folder = state.run.desktop.fileFolder): DesktopFile[] {
-  if (folder === 'screenshots') return state.persistent.screenshots.map(shot => ({ id:`shot:${shot.id}`,kind:'shot',name:i18n.t('files.shot',{count:shot.id}),at:shot.at,bytes:screenshotBytes(shot),shot }));
+export function rawDesktopFiles(state: GameState, i18n: I18n, folder = state.run.desktop.fileFolder): DesktopFile[] {
+  if (folder === 'screenshots') return state.persistent.screenshots.filter(s=>!s.deleted).map(shot => ({ id:`shot:${shot.id}`,kind:'shot',name:i18n.t('files.shot',{count:shot.id}),at:shot.at,bytes:screenshotBytes(shot),shot }));
   const exports = (works: ExportedWork[], prefix: string, version?: string): DesktopFile[] => works.map(work => {
     let name = work.name || i18n.t(work.kind === 'icon' ? `k.icon.${work.id as 'folder'}` : `k.part.${work.id as 'button'}`);
     if (version) name = i18n.t('files.archived',{name,version});
@@ -36,4 +37,15 @@ export function desktopFiles(state: GameState, i18n: I18n, folder = state.run.de
     {id:'sketch',kind:'sketch',name:i18n.t('files.sketch'),at:state.persistent.sketchUpdatedAt,bytes:byteSize(state.persistent.artwork.sketchbook),drawing:state.persistent.artwork.sketchbook},
     {id:'note',kind:'note',name:i18n.t('desktop.app.note'),at:state.persistent.noteUpdatedAt,bytes:byteSize(state.persistent.productionNote ?? defaultNote(i18n))},
   ];
+}
+
+export function desktopFiles(state:GameState,i18n:I18n,folder=state.run.desktop.fileFolder):DesktopFile[] {
+ const d=state.run.desktop;
+ let files=rawDesktopFiles(state,i18n,folder).filter(file=>!d.trash?.some(t=>t.id===file.id));
+ if(hasUpgrade(state,'search')&&d.fileSearch)files=files.filter(f=>f.name.toLocaleLowerCase().includes(d.fileSearch.trim().toLocaleLowerCase()));
+ if(hasUpgrade(state,'sort')){
+  const compare=(a:DesktopFile,b:DesktopFile)=>d.fileSort==='date'?(a.at??0)-(b.at??0):d.fileSort==='type'?a.kind.localeCompare(b.kind):a.name.localeCompare(b.name,i18n.language==='en-XA'?'en':i18n.language);
+  files.sort((a,b)=>(d.fileDescending?-1:1)*compare(a,b));
+ }
+ return files;
 }

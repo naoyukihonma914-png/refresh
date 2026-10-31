@@ -1,4 +1,5 @@
-import { actDesktop, observeTesseraAction, screenshotCapacity, takeScreenshot, type DesktopAction } from './desktop';
+import { hasDesktopSkill } from './desktopJobs';
+import { actDesktop, observeTesseraAction, activeScreenshots, screenshotCapacity, takeScreenshot, type DesktopAction } from './desktop';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { chooseLanguage, createI18n, LOCALES, TEST_LANGUAGE, type MessageKey } from '../content/i18n';
 import type { Platform, TabLease, Unsubscribe } from '../platform/types';
@@ -15,6 +16,7 @@ import { archiveGuide, beginPrototypeRelease, buySpec, canReleasePrototype, ship
 export interface RuntimeSnapshot {
   state: GameState;
   frozenRate?: number;
+  tesseraIntent?:{serial:number;kind:'color'|'drawing'};
   shotHintSerial?: number;
   language: string;
   status: 'starting' | 'ready' | 'blocked' | 'corrupt';
@@ -83,10 +85,10 @@ export class GameRuntime {
     let state = loaded.kind === 'loaded' || loaded.kind === 'recovered' ? loaded.state : this.snapshot.state;
     if (!this.fixture && state.run.seed.built.includes('kumiki') && !state.run.kumiki.entered) state = enterKumiki(state);
     state = { ...state, persistent: { ...state.persistent, numberNotation: this.platform.settings.read().numberNotation ?? state.persistent.numberNotation } };
-    const result = advanceOfflineTime(state, this.platform.clock.wallNow());
+    const result = this.durableTime(state,advanceOfflineTime(state, this.platform.clock.wallNow(),this.snapshot.language),()=>advanceOfflineTime(state,this.platform.clock.wallNow(),this.snapshot.language,false));
     this.publish({
       state: result.state, status: 'ready',
-      notice: loaded.kind === 'recovered' ? 'save.recovered'
+      notice: this.snapshot.notice==='save.failed'?'save.failed':loaded.kind === 'recovered' ? 'save.recovered'
         : loaded.kind === 'unavailable' ? 'save.storageUnavailable' : null,
       offline: loaded.kind !== 'empty' ? offlineNotice(result) : null,
       introVisible: this.platform.launch.fixture === 'intro' || !this.fixture && (loaded.kind === 'empty' || loaded.kind === 'unavailable'),
@@ -135,14 +137,25 @@ export class GameRuntime {
     }
     if (inactive) {
       this.momentum = freshMomentum();
-      const result = advanceOfflineTime(this.snapshot.state, wallNow);
+      const before=this.snapshot.state;
+      const result = this.durableTime(before,advanceOfflineTime(before, wallNow,this.snapshot.language),()=>advanceOfflineTime(before,wallNow,this.snapshot.language,false));
       this.publish({ state: result.state, offline: offlineNotice(result) });
     } else {
-      const result = advanceActiveTime(this.snapshot.state, monotonicElapsed + this.activeRemainderMs);
+      const before=this.snapshot.state,duration=monotonicElapsed+this.activeRemainderMs;
+      const result = this.durableTime(before,advanceActiveTime(before,duration,this.snapshot.language),()=>advanceActiveTime(before,duration,this.snapshot.language,false));
       this.activeRemainderMs = result.remainderMs;
-      this.publish({ state: { ...result.state, lastTickAt: wallNow } });
+      this.publish({state:{...result.state,lastTickAt:wallNow}});
     }
     return inactive;
+  }
+
+  private durableTime(before:GameState,result:TimeResult,withoutCaptures:()=>TimeResult):TimeResult {
+    if(result.state.persistent.screenshots===before.persistent.screenshots)return result;
+    const saved=saveGame(this.platform.storage,result.state,this.platform.clock.wallNow());
+    if(saved.kind==='saved')return {...result,state:saved.state};
+    this.publish({notice:'save.failed'});
+    const fallback=withoutCaptures();
+    return {...fallback,state:{...fallback.state,run:{...fallback.state.run,desktop:{...fallback.state.run.desktop,terminal:{...fallback.state.run.desktop.terminal,running:false}}}}};
   }
 
   persist = () => {
@@ -163,7 +176,8 @@ export class GameRuntime {
       this.momentum = freshMomentum();
       this.persist();
     } else if (this.suspended) {
-      const result = advanceOfflineTime(this.snapshot.state, this.platform.clock.wallNow());
+      const before=this.snapshot.state;
+      const result = this.durableTime(before,advanceOfflineTime(before, this.platform.clock.wallNow(),this.snapshot.language),()=>advanceOfflineTime(before,this.platform.clock.wallNow(),this.snapshot.language,false));
       this.publish({ state: result.state, offline: offlineNotice(result) });
       this.lastActiveAt = this.platform.clock.monotonicNow();
       this.suspended = false;
@@ -233,16 +247,19 @@ export class GameRuntime {
   actDesktop = (action: DesktopAction) => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
-    const state = actDesktop(this.snapshot.state, action, this.platform.clock.wallNow());
+    const state = actDesktop(this.snapshot.state, action, this.platform.clock.wallNow(),this.snapshot.language);
     if (state === this.snapshot.state) return;
-    this.publish({ state, ...(action.type==='fix'&&state.run.desktop.feedback.find(f=>f.id===action.id)?.kind==='screenshot'?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}) });
+    const request=action.type==='fix'?state.run.desktop.feedback.find(f=>f.id===action.id):null;
+    this.publish({state,...(request?.kind==='screenshot'?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}),...(request&&hasDesktopSkill(state,'direct')&&['color','redraw','practice'].includes(request.kind)?{tesseraIntent:{serial:(this.snapshot.tesseraIntent?.serial??0)+1,kind:request.kind==='color'?'color':'drawing'}}:{})});
     if (action.type !== 'rect' && action.type !== 'icon' && action.type !== 'note') this.persist();
   };
+
+  desktopActivity = () => { if(this.canOperate()&&this.snapshot.state.run.world==='desktop'&&this.snapshot.state.run.desktop.idleMs>0)this.publish({state:actDesktop(this.snapshot.state,{type:'activity'},this.platform.clock.wallNow())}); };
 
   takeScreenshot = () => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return false;
     this.advanceForeground();
-    if (this.snapshot.state.persistent.screenshots.length >= screenshotCapacity(this.snapshot.state)) {
+    if (activeScreenshots(this.snapshot.state).length >= screenshotCapacity(this.snapshot.state)) {
       this.publish({ notice: 'desktop.storageFull' }); return false;
     }
     return this.commitReleaseChange(takeScreenshot(this.snapshot.state, this.platform.clock.wallNow(), this.snapshot.language));
@@ -306,7 +323,7 @@ export class GameRuntime {
     if (!this.canOperate()) return false;
     try {
       const state = decodeSave(raw);
-      const result = advanceOfflineTime(state, this.platform.clock.wallNow());
+      const result = advanceOfflineTime(state,this.platform.clock.wallNow(),this.snapshot.language);
       if (canSave(state)||state.persistent.products.length>0) {
         const saved=saveGame(this.platform.storage,result.state,this.platform.clock.wallNow(),{checkpoint:true});
         if(saved.kind!=='saved')throw new Error('Storage unavailable');

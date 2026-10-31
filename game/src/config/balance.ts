@@ -60,7 +60,37 @@ export const BALANCE = {
     ],
   },
   w3: {
-    apps: [{ id: 'files', cost: 300_000 }, { id: 'mail', cost: 470_000 }],
+    apps: [
+      { id: 'files', cost: 300_000 }, { id: 'sort', cost: 380_000 },
+      { id: 'mail', cost: 470_000 }, { id: 'draft', cost: 590_000 },
+      { id: 'jobs', cost: 730_000 }, { id: 'manager', cost: 920_000 },
+      { id: 'search', cost: 1_500_000 }, { id: 'large', cost: 2_400_000 },
+      { id: 'photo', cost: 4_000_000 }, { id: 'crop', cost: 6_500_000 }, { id: 'compare', cost: 11_000_000 },
+      { id: 'bin', cost: 17_000_000 }, { id: 'undo', cost: 28_000_000 }, { id: 'folders', cost: 46_000_000 },
+      { id: 'clock', cost: 75_000_000 }, { id: 'timer', cost: 120_000_000 }, { id: 'calendar', cost: 200_000_000 },
+      { id: 'theme', cost: 320_000_000 }, { id: 'slideshow', cost: 530_000_000 }, { id: 'iconSize', cost: 860_000_000 },
+      { id: 'terminal', cost: 1_400_000_000 },
+    ],
+    jobs: {
+      tessera: { rate: 40, cost: 30_000 }, files: { rate: 150, cost: 150_000 },
+      photo: { rate: 700, cost: 1_500_000 }, terminal: { rate: 6_000, cost: 40_000_000 },
+    },
+    cursorGrowth: 1.15, updateBase: 15, updateGrowth: 6, updateMultiplier: 2, featureMultiplier: 1.25,
+    featureParts: 2, recycleShotSeconds: 5, recycleIconMultiplier: 0.5,
+    autoFeedbackMultiplier:0.5, sortedMailCapacity:5, extraPosts:1, burstMultiplier:2/3,
+    daylight:{morningHour:6,dayHour:10,nightHour:18,morningBrightness:1.15,dayTone:5},
+    timerRequestDelayMs:300_000, timerOfflineMultiplier: 0.5, timerMaxDays: 7, terminalIntervals: [60_000, 3_600_000],
+    maxVisibleJobCursors: 5, jobAnimationMs: 2_000, historyMs: 600_000, maxShotHistory: 400,
+    stallMinMs: 180_000, stallMaxMs: 360_000, restartSeconds: 60,
+    screensaverMs: 120_000, screensaverFrameMs: 5_000, slideshowMs: 60_000,
+    maxNoteLog: 20, maxCommands: 8,
+    skills: [
+      { id: 'snap', band: 1, cost: 2, playful: false }, { id: 'direct', band: 1, cost: 2, playful: false },
+      { id: 'burst', band: 1, cost: 4, playful: false }, { id: 'daylight', band: 1, cost: 3, playful: true },
+      { id: 'posts', band: 2, cost: 15, playful: false }, { id: 'sortMail', band: 2, cost: 15, playful: false },
+      { id: 'virtual', band: 2, cost: 25, playful: true }, { id: 'screensaver', band: 2, cost: 10, playful: true },
+      { id: 'autoFeedback', band: 2, cost: 20, playful: false },
+    ],
     enterMs: 2_000, maxPending: 3, feedbackTokens: 2, redrawCells: 10,
     screenshotBaseParts: 10, partsPerWindow: 3, screenshotMultiplier: 0.5, shotResolutionMultiplier: 1.25,
     baseShotCapacity: 50, storageCapacityMultiplier: 2, requiredApps: 6, requiredFeedback: 10,
@@ -138,3 +168,6 @@ export type KumikiItem = (typeof BALANCE.w2.items)[number]['id'];
 export type KumikiSkill = (typeof BALANCE.w2.skills)[number]['id'];
 export type PartId = Exclude<KumikiItem, 'select' | 'extensions'> | 'tabs' | 'table';
 export type SpecKey = keyof typeof BALANCE.spec;
+
+export type DesktopUpgrade = (typeof BALANCE.w3.apps)[number]['id'];
+export type DesktopSkill = (typeof BALANCE.w3.skills)[number]['id'];

@@ -1,4 +1,4 @@
-import { enterDesktop, buyDesktopApp, focusWindow, advanceDesktopTime, takeScreenshot } from './desktop';
+import { enterDesktop, buyDesktopApp, focusWindow, advanceDesktopTime, takeScreenshot, nextDesktopApp } from './desktop';
 import { BALANCE } from '../config/balance';
 import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
@@ -8,6 +8,7 @@ import { advanceShipping, beginPrototypeRelease, buySpec, releaseEstimate, start
 
 export const FIXTURE_NAMES = [
   'intro',
+  'desktop-jobs','desktop-photo','desktop-ready','desktop-stalled',
   'desktop-early', 'desktop-wait', 'desktop-files', 'desktop-mail', 'desktop-modern', 'desktop-full',
   'foundation-start', 'foundation-saved', 'foundation-offline-capped',
   'seed-start', 'seed-border', 'seed-saved', 'seed-color', 'seed-font',
@@ -29,11 +30,34 @@ export function createFixture(name: string | null, now: number): GameState | nul
     if (name === 'desktop-wait') { next.resources.pixels=20_000; return next; }
     next = buyDesktopApp(next,'files');
     if (name === 'desktop-files') return next;
-    next = buyDesktopApp(next,'mail'); next = focusWindow(next,'tessera');
+    next=buyDesktopApp(next,'sort');next = buyDesktopApp(next,'mail'); next = focusWindow(next,'tessera');
     if (name === 'desktop-modern') {
       next.persistent.artwork.skills.push('modern','fill','layers'); next.persistent.artwork.modern=true;
     }
-    next = advanceDesktopTime(next,720_000,now);
+    next = advanceDesktopTime(next,720_000,now);next.run.desktop.idleMs=0;next.run.desktop.stalled=null;next.run.desktop.stalledClosed=false;next.run.desktop.stallMs=BALANCE.w3.stallMinMs;
+    if(['desktop-jobs','desktop-photo','desktop-ready','desktop-stalled'].includes(name!)){
+      next.resources.pixels=next.run.totalPixelsGenerated=1e12;next.resources.tokens=200;
+      const stop=name==='desktop-jobs'?'jobs':name==='desktop-photo'?'compare':'terminal';
+      while(nextDesktopApp(next)){const id=nextDesktopApp(next)!.id;next=buyDesktopApp(next,id);if(id===stop)break;}
+      next.run.desktop.feedback=[];next.run.desktop.feedbackSerial=0;next.run.desktop.notice=null;
+      for(const id of ['folder','bin','clock','mail','photo','settings']){
+        next=prepareDrawing(next,id);const work=next.run.kumiki.drawings[id]!,target=targetFor(next,id,work.size);
+        for(const color of new Set(target.filter(c=>c>=0)))next=paintDrawing(next,id,target.flatMap((c,i)=>c===color?[i]:[]),color);
+        next=exportKumiki(next,now);
+      }
+      for(const id of ['tessera','files','photo'] as const){if(id!=='tessera'&&!next.run.desktop.apps.includes(id))continue;next.run.desktop.jobs[id]={assigned:true,cursors:8,updates:1};}
+      next=focusWindow(next,'tessera');next=focusWindow(next,'note');
+      if(name!=='desktop-jobs')next=focusWindow(next,'photo');
+      for(const id of ['manager','mail','bin','clock','theme','terminal','settings'] as const)next.run.desktop.windows[id].open=false;
+      if(name==='desktop-stalled')next.run.desktop.stalled='photo';
+      if(name==='desktop-ready'){
+        next.persistent.desktopPrefs.wallpaper={source:'coast',brightness:1.1,tone:0,crop:0};
+        next.run.desktop.terminal={...next.run.desktop.terminal,running:true,executions:1};
+        for(let i=0;i<4;i++){next.run.desktop.cooldownMs=0;next=takeScreenshot(next,now+i,'ja');}
+        next.run.desktop.cooldownMs=0;
+      }
+      return next;
+    }
     if (name === 'desktop-full') {
       for(let i=0;i<BALANCE.w3.baseShotCapacity;i++) { next.run.desktop.cooldownMs=0; next=takeScreenshot(next,now,'ja'); }
       next.run.desktop.cooldownMs=0;

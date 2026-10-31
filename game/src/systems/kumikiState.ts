@@ -5,7 +5,7 @@ const KNOWN_ICONS: readonly string[] = [...ICON_IDS, ...PRACTICE_IDS];
 export const PART_IDS: readonly PartId[] = ['button', 'switch', 'slider', 'input', 'frame', 'taskbar', 'tabs', 'table'];
 export const K_GUIDES = ['entered', 'draw', 'complete', 'export', 'extensions', 'name', 'wall', 'hint'] as const;
 export type KumikiGuide = typeof K_GUIDES[number];
-export interface Drawing { size: number; frames: number[][]; rewarded: boolean[]; exported: boolean; dirty: boolean; name: string | null }
+export interface Drawing { size: number; frames: number[][]; rewarded: boolean[]; exported: boolean; dirty: boolean; name: string | null; earnedPixels?:number }
 export interface Design { color: string; radius: number; textSize: 'small' | 'medium' | 'large'; shadow: boolean }
 export interface ExportedWork { kind: 'icon' | 'part'; id: string; name: string | null; at: number; size: number; frames: number[][] }
 export interface KumikiState {
@@ -26,7 +26,7 @@ export interface Artwork {
   skills: KumikiSkill[]; modern: boolean;
 }
 export function blankDrawing(size: number): Drawing {
-  return { size, frames: [Array<number>(size * size).fill(-1)], rewarded: Array<boolean>(size * size).fill(false), exported: false, dirty: true, name: null };
+  return { size, frames: [Array<number>(size * size).fill(-1)], rewarded: Array<boolean>(size * size).fill(false), exported: false, dirty: true, name: null,earnedPixels:0 };
 }
 export function createArtwork(): Artwork { return { icons: {}, sketchbook: blankDrawing(16), wallpaper: null, skills: [], modern: false }; }
 export function createKumikiState(): KumikiState {
@@ -55,7 +55,7 @@ export function isDrawing(x: unknown): x is Drawing {
   return Array.isArray(x.frames) && x.frames.length >= 1 && x.frames.length <= 2
     && x.frames.every(frame => Array.isArray(frame) && frame.length === cells && frame.every(c => Number.isInteger(c) && c >= -1 && c < 256))
     && Array.isArray(x.rewarded) && x.rewarded.length === cells && x.rewarded.every(v => typeof v === 'boolean')
-    && typeof x.exported === 'boolean' && typeof x.dirty === 'boolean' && (x.name === null || typeof x.name === 'string');
+    && (x.earnedPixels===undefined||amount(x.earnedPixels)) && typeof x.exported === 'boolean' && typeof x.dirty === 'boolean' && (x.name === null || typeof x.name === 'string');
 }
 export function isArtwork(x: unknown): x is Artwork {
   return obj(x) && obj(x.icons) && Object.entries(x.icons).every(([id, drawing]) => KNOWN_ICONS.includes(id) && isDrawing(drawing)) && isDrawing(x.sketchbook)
