@@ -70,6 +70,18 @@ describe('言語ファイルと表示', () => {
     expect(en.duration(11_520_000)).toBe('3 hours 12 min');
     expect(en.t('debug.cursorCount', { count: 1 })).toBe('1 automatic cursor');
     expect(en.t('debug.cursorCount', { count: 2 })).toBe('2 automatic cursors');
+    expect(en.t('seed.generate', { count: 1 })).toBe('Generate 1 pixel');
+    expect(en.t('seed.generate', { count: 2 })).toBe('Generate 2 pixels');
+  });
+
+  it('値段と加算表示を省略せず整数にし、生成ボタンの助数詞を言語ごとに表示する', () => {
+    const ja = createI18n('ja');
+    const en = createI18n('en');
+    expect(ja.integer(4.99)).toBe('4');
+    expect(ja.integer(1_234)).toBe('1,234');
+    expect(en.integer(12_000)).toBe('12,000');
+    expect(ja.t('seed.generateSingle')).toBe('ピクセルを1つ生成する');
+    expect(ja.t('seed.generate', { count: 4 })).toBe('ピクセルを4個生成する');
   });
 
   it('数・時刻・日付を言語に合わせ、資源の単位も切り替える', () => {

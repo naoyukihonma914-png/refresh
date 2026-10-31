@@ -23,6 +23,8 @@ function makePlatform(target = storage): Platform {
     viewport: { size: () => ({ width: 1920, height: 1080 }), subscribe: () => () => {} },
     lifecycle: { onLeave: () => () => {}, onRestore: () => () => {} },
     files: { write: vi.fn(), read: vi.fn(async () => null) },
+    animation: { subscribe: () => () => {}, reducedMotion: () => false },
+    keyboard: { subscribe: () => () => {} },
     every(ms, callback) { const timer = setInterval(callback, ms); return () => clearInterval(timer); },
     confirm: vi.fn(() => true), reload: vi.fn(), setDocumentLanguage: vi.fn(),
     setFullscreen: vi.fn(async () => false), quit: vi.fn(() => false), unlockAchievement: vi.fn(),
@@ -246,4 +248,76 @@ describe('プラットフォームを通した保存・時間処理', () => {
     runtime.dispose(); await start(); runtime.changeLanguage(TEST_LANGUAGE);
     expect(runtime.getSnapshot().language).toBe('en');
   });
+});
+
+describe('段階2の操作と保存', () => {
+  it('実際の生成と購入で保存を解禁し、購入直後の値を保存する', async () => {
+    await start();
+    for (let i = 0; i < 10; i++) runtime.pressSeed();
+    runtime.buildSeed('border');
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    expect(loadGame(storage).kind).toBe('empty');
+    for (let i = 0; i < 20; i++) runtime.pressSeed();
+    runtime.buildSeed('save');
+    const saved = loadGame(storage);
+    expect(saved.kind).toBe('loaded');
+    if (saved.kind === 'loaded') {
+      expect(saved.state.run.seed.built).toEqual(['border', 'save']);
+      expect(saved.state.run.seed.history.map(entry => entry.item)).toEqual(['border', 'save']);
+      expect(saved.state.resources.pixels).toBe(0);
+    }
+    for (let i = 0; i < 8; i++) runtime.pressSeed();
+    runtime.buildSeed('cursor');
+    step(2_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(3);
+  });
+
+  it('タブの所有権を失った後は生成・購入・設定が動かない', async () => {
+    await start(); runtime.addDebugPixels();
+    const previous = runtime.getSnapshot().state;
+    clock.owned = false;
+    runtime.pressSeed(); runtime.buildSeed('border'); runtime.applySeedSettings(['keyboard'], 'none', false);
+    expect(runtime.getSnapshot().state).toBe(previous);
+    expect(runtime.getSnapshot().status).toBe('blocked');
+  });
+
+  it('組木の購入を保存し、実績を1回だけ知らせる。世界2は開始しない', async () => {
+    const fixture = createFixture('seed-motion', clock.wall)!;
+    storage.setItem(SAVE_KEYS.primary, encodeSave(fixture));
+    await start(); runtime.buildSeed('kumiki'); runtime.buildSeed('kumiki');
+    expect(platform.unlockAchievement).toHaveBeenCalledExactlyOnceWith('kumiki-created');
+    expect(runtime.getSnapshot().state.run.world).toBe('seed');
+    expect(runtime.getSnapshot().state.run.seed.built).toContain('kumiki');
+    const saved = loadGame(storage);
+    expect(saved.kind === 'loaded' && saved.state.run.seed.built.includes('kumiki')).toBe(true);
+  });
+
+  it('勢いを保存・読み込み・タブ復帰へ持ち越さない', async () => {
+    const fixture = createFixture('seed-motion', clock.wall)!;
+    storage.setItem(SAVE_KEYS.primary, encodeSave(fixture));
+    await start();
+    for (let i = 0; i < 20; i++) runtime.pressSeed();
+    expect(runtime.getSnapshot().press?.momentum).toBe(1.6);
+    const raw = runtime.exportData();
+    runtime.importData(raw); runtime.pressSeed();
+    expect(runtime.getSnapshot().press?.momentum).toBe(1);
+    for (let i = 0; i < 20; i++) runtime.pressSeed();
+    clock.hidden = true; runtime.visibilityChanged();
+    clock.hidden = false; runtime.visibilityChanged(); runtime.pressSeed();
+    expect(runtime.getSnapshot().press?.momentum).toBe(1);
+  });
+});
+
+it('構成の組み立て中に保存ができた時点ですぐ書き込み、再起動後も続きから組み立てる', async () => {
+  storage.setItem(SAVE_KEYS.primary, encodeSave(createFixture('seed-inheriting', clock.wall)!));
+  await start(); step(3_400);
+  const saved = loadGame(storage);
+  expect(saved.kind).toBe('loaded');
+  if (saved.kind === 'loaded') {
+    expect(saved.state.run.seed.built).toEqual(['border', 'save']);
+    expect(saved.state.run.seed.installer?.elapsedMs).toBe(3_400);
+  }
+  runtime.dispose(); await start(); step(6_600);
+  expect(runtime.getSnapshot().state.run.seed.installer).toBeNull();
+  expect(runtime.getSnapshot().state.run.seed.built).toEqual(['border', 'save', 'color', 'font', 'layout', 'motion']);
 });

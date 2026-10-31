@@ -41,17 +41,17 @@ def main():
         ready(page)
         assert page.title() == 'REFRESH'
         licenses = page.locator('#font-licenses').text_content()
-        assert set(json.loads(licenses)) == {'notoserifjp', 'bizudpgothic', 'dotgothic16'}
+        assert set(json.loads(licenses)) == {'notoserifjp', 'notosansjp', 'bizudpgothic', 'dotgothic16'}
         assert all('SIL OPEN FONT LICENSE' in value for value in json.loads(licenses).values())
         page.evaluate('''async () => {
-          for (const family of ['Refresh Serif', 'Refresh UI', 'Refresh Pixel']) {
+          for (const family of ['Refresh Serif', 'Refresh Sans', 'Refresh UI', 'Refresh Pixel']) {
             await document.fonts.load(`16px "${family}"`, '漢字ABC');
           }
         }''')
-        for family in ['Refresh Serif', 'Refresh UI', 'Refresh Pixel']:
+        for family in ['Refresh Serif', 'Refresh Sans', 'Refresh UI', 'Refresh Pixel']:
             assert page.evaluate('(family) => document.fonts.check(`16px "${family}"`, "漢字ABC")', family)
         assert all(request.startswith(args.base_url.rstrip('/')) for request in requests)
-        checks.append('REFRESHの題名、3書体の読み込み、ライセンス全文、外部通信がないこと')
+        checks.append('REFRESHの題名、4書体の読み込み、ライセンス全文、外部通信がないこと')
 
         for language in ['ja', 'en', 'en-XA']:
             page.locator('.debug-panel select').first.select_option(language)
@@ -120,6 +120,8 @@ def main():
         page = ctx.new_page()
         instant = datetime(2026, 10, 30, 16, 0, tzinfo=timezone.utc)
         page.clock.install(time=instant)
+        # install直後も実時間が僅かに進むため、読込前の未来で停止しておく。
+        page.clock.pause_at(instant + timedelta(minutes=1))
         page.goto(url + '?debug=1')
         ready(page)
         page.get_by_role('button', name='保存済みの状態を試す', exact=True).click()
@@ -142,6 +144,7 @@ def main():
             ctx = context()
             page = ctx.new_page()
             page.clock.install(time=instant)
+            page.clock.pause_at(instant + timedelta(minutes=1))
             page.goto(url + '?debug=1')
             ready(page)
             page.get_by_role('button', name='保存済みの状態を試す', exact=True).click()

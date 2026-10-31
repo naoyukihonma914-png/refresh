@@ -79,6 +79,34 @@ export function createBrowserPlatform(isolated = false): Platform {
       },
       read: readFile,
     },
+    animation: {
+      subscribe(listener) {
+        let frame: number;
+        const tick = (now: number) => { listener(now); frame = requestAnimationFrame(tick); };
+        frame = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(frame);
+      },
+      reducedMotion: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    },
+    keyboard: {
+      subscribe(listener) {
+        const key = (event: KeyboardEvent) => listener({
+          code: event.code, pressed: event.type === 'keydown', repeat: event.repeat,
+          editable: event.ctrlKey || event.metaKey || event.altKey || event.target instanceof HTMLElement
+            && !!event.target.closest('input, textarea, select, button:not(.generate-button), a, [contenteditable="true"], .debug-panel, .page-settings'),
+          preventDefault: () => event.preventDefault(),
+        });
+        const blur = () => listener({ code: 'Space', pressed: false, repeat: false, editable: false, preventDefault() {} });
+        window.addEventListener('keydown', key);
+        window.addEventListener('keyup', key);
+        window.addEventListener('blur', blur);
+        return () => {
+          window.removeEventListener('keydown', key);
+          window.removeEventListener('keyup', key);
+          window.removeEventListener('blur', blur);
+        };
+      },
+    },
     every(milliseconds, listener) {
       const timer = setInterval(listener, milliseconds);
       return () => clearInterval(timer);

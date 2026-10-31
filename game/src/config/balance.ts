@@ -18,6 +18,23 @@ export const BALANCE = {
     border_bonus: 1,
     font_mult: 2,
     color_cursor_mult: 1.5,
+    momentum: { chainMs: 1_000, decayMs: 2_000, increment: 0.06, max: 1.6 },
+    holdPressesPerSecond: 4,
+    maxVisibleCursors: 20,
+    previewItems: 2,
+    floatMs: 800,
+    maxFloatingGains: 12,
+    numberRollMs: 180,
+    hintAfterMs: 300_000,
+    inheritMs: 10_000,
+    skills: [
+      { id: 'keyboard', band: 1, cost: 1, playful: false },
+      { id: 'history', band: 1, cost: 1, playful: false },
+      { id: 'pattern', band: 1, cost: 2, playful: true },
+      { id: 'inherit', band: 2, cost: 12, playful: false },
+      { id: 'hold', band: 2, cost: 10, playful: false },
+      { id: 'marquee', band: 2, cost: 10, playful: true },
+    ],
   },
   spec: {
     color: [
@@ -78,4 +95,5 @@ export const BALANCE = {
 } as const;
 
 export type SeedItem = (typeof BALANCE.w1.items)[number]['id'];
+export type SeedSkill = (typeof BALANCE.w1.skills)[number]['id'];
 export type SpecKey = keyof typeof BALANCE.spec;

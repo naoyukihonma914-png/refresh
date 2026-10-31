@@ -1,12 +1,24 @@
-import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
+import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameState } from './state';
 import type { SaveStorage } from '../platform/storage';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
 export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup' } as const;
 
-// 実在する旧版ができたら、その版から次版への変換をここに追加する。
-// 過去の試作は別仕様なので、旧セーブの形式を推測して読み込まない。
-const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {};
+// 段階1で実際に配布した第1版だけを変換する。試作の形式は推測しない。
+const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
+  1(data) {
+    const old = data as GameState;
+    const defaults = createInitialState(0);
+    return { ...old, schemaVersion: 2,
+      run: { ...old.run, seed: { ...old.run?.seed,
+        history: [], guide: defaults.run.seed.guide, lastActionAt: 0, installer: null,
+      } },
+      persistent: { ...old.persistent,
+        seedSkills: [], seedAppearance: defaults.persistent.seedAppearance,
+      },
+    };
+  },
+};
 
 export function decodeSave(raw: string): GameState {
   let data: unknown = JSON.parse(raw);

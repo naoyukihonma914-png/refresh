@@ -40,7 +40,8 @@ def main():
         response = page.goto(url)
         assert response.status == 200
         ready(page)
-        assert page.get_by_role("button").count() == 0
+        assert page.locator(".debug-panel").count() == 0
+        assert page.locator(".generate-button").count() == 1
         assert page.get_by_text("ピクセル: 0", exact=True).count() == 1
 
         for width, height in [(1920, 1080), (1366, 768), (2560, 1440), (1080, 1920)]:
@@ -91,7 +92,7 @@ def main():
         with page.expect_download() as download:
             page.get_by_role("button", name="データを書き出す", exact=True).click()
         exported = Path(download.value.path()).read_bytes()
-        assert json.loads(exported)["schemaVersion"] == 1
+        assert json.loads(exported)["schemaVersion"] == 2
 
         page.add_init_script("""
           const corruption = sessionStorage.getItem('test-corruption');

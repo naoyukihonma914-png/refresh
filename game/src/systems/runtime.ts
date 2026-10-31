@@ -1,4 +1,4 @@
-import { BALANCE, type SpecKey } from '../config/balance';
+import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { chooseLanguage, createI18n, LOCALES, TEST_LANGUAGE, type MessageKey } from '../content/i18n';
 import type { Platform, TabLease, Unsubscribe } from '../platform/types';
 import { creditPixels } from './economy';
@@ -6,6 +6,8 @@ import { createFixture } from './fixtures';
 import { clearGame, decodeSave, encodeSave, loadGame, saveGame } from './save';
 import { canSave, createInitialState, type GameState } from './state';
 import { advanceActiveTime, advanceOfflineTime, isInactiveGap, type TimeResult } from './time';
+import { applySeedSkills, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
+import type { GuideId } from './state';
 
 export interface RuntimeSnapshot {
   state: GameState;
@@ -13,6 +15,7 @@ export interface RuntimeSnapshot {
   status: 'starting' | 'ready' | 'blocked' | 'corrupt';
   notice: MessageKey | null;
   offline: Omit<TimeResult, 'state'> | null;
+  press: { serial: number; pixels: number; momentum: number; at: number; x: number; y: number } | null;
 }
 
 function offlineNotice(result: TimeResult): RuntimeSnapshot['offline'] {
@@ -30,6 +33,8 @@ export class GameRuntime {
   private activeRemainderMs = 0;
   private suspended = false;
   private disposed = false;
+  private momentum = freshMomentum();
+  private pressSerial = 0;
   readonly fixture: boolean;
   readonly platform: Platform;
 
@@ -41,7 +46,7 @@ export class GameRuntime {
     const language = chooseLanguage(this.platform.settings.read().language, platform.preferredLanguages);
     this.snapshot = {
       state: fixture ?? createInitialState(now), language,
-      status: 'starting', notice: null, offline: null,
+      status: 'starting', notice: null, offline: null, press: null,
     };
     this.platform.setDocumentLanguage(language, createI18n(language).direction);
   }
@@ -87,8 +92,11 @@ export class GameRuntime {
     this.lastAutosaveAt = this.platform.clock.monotonicNow();
     this.stopTimer = this.platform.every(BALANCE.time.tickMs, () => {
       if (this.suspended || this.platform.visibility.isHidden() || !this.canOperate()) return;
+      const before = this.snapshot.state.run.seed;
       const inactive = this.advanceForeground();
-      if (inactive || this.platform.clock.monotonicNow() - this.lastAutosaveAt >= BALANCE.time.autosaveMs) this.persist();
+      const after = this.snapshot.state.run.seed;
+      if (inactive || before.built.length !== after.built.length || before.guide.seen.length !== after.guide.seen.length
+        || this.platform.clock.monotonicNow() - this.lastAutosaveAt >= BALANCE.time.autosaveMs) this.persist();
     });
   }
 
@@ -110,6 +118,7 @@ export class GameRuntime {
     const inactive = isInactiveGap(monotonicElapsed, wallElapsed);
     this.lastActiveAt = now;
     if (inactive) {
+      this.momentum = freshMomentum();
       const result = advanceOfflineTime(this.snapshot.state, wallNow);
       this.publish({ state: result.state, offline: offlineNotice(result) });
     } else {
@@ -135,6 +144,7 @@ export class GameRuntime {
       if (this.suspended) return;
       this.advanceForeground();
       this.suspended = true;
+      this.momentum = freshMomentum();
       this.persist();
     } else if (this.suspended) {
       const result = advanceOfflineTime(this.snapshot.state, this.platform.clock.wallNow());
@@ -164,6 +174,39 @@ export class GameRuntime {
 
   reload = () => { this.platform.reload(); };
 
+  pressSeed = (position = { x: 50, y: 50 }) => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    if (this.advanceForeground()) this.persist();
+    const now = this.platform.clock.monotonicNow();
+    const result = pressSeed(this.snapshot.state, this.momentum, now);
+    this.momentum = result.momentum;
+    this.publish({ state: result.state, press: { serial: ++this.pressSerial, pixels: result.pixels, momentum: result.momentum.value, at: now, ...position } });
+  };
+
+  buildSeed = (id: SeedItem | 'cursor') => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    const previous = this.snapshot.state;
+    const state = buildSeed(previous, id, this.platform.clock.wallNow());
+    if (state === previous) return;
+    this.publish({ state });
+    this.persist();
+    if (id === 'kumiki') this.platform.unlockAchievement('kumiki-created');
+  };
+
+  readSeedGuide = (id: GuideId | 'close' | 'listen') => {
+    if (!this.canOperate()) return;
+    this.publish({ state: readGuide(this.snapshot.state, id) });
+    this.persist();
+  };
+
+  applySeedSettings = (selected: readonly SeedSkill[], pattern: GameState['persistent']['seedAppearance']['pattern'], marquee: boolean) => {
+    if (!this.canOperate()) return;
+    this.advanceForeground();
+    this.publish({ state: applySeedSkills(this.snapshot.state, selected, pattern, marquee) });
+    this.persist();
+  };
+
   // 段階1の動作確認用。通常画面には呼び出し口を置かない。
   addDebugPixels = () => {
     if (!this.canOperate()) return;
@@ -177,7 +220,7 @@ export class GameRuntime {
     this.advanceForeground();
     const state = this.snapshot.state;
     if (canSave(state)) return;
-    this.publish({ state: { ...state, run: { ...state.run, seed: { built: ['border', 'save'], autoCursors: 1 } } } });
+    this.publish({ state: { ...state, run: { ...state.run, seed: { ...state.run.seed, built: ['border', 'save'], autoCursors: 1 } } } });
     this.persist();
   };
 
@@ -212,8 +255,9 @@ export class GameRuntime {
       const result = advanceOfflineTime(state, this.platform.clock.wallNow());
       if (!canSave(state) && !clearGame(this.platform.storage)) throw new Error('Storage unavailable');
       this.activeRemainderMs = 0;
+      this.momentum = freshMomentum();
       this.lastActiveAt = this.platform.clock.monotonicNow();
-      this.publish({ state: result.state, offline: offlineNotice(result), notice: null });
+      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null });
       this.persist();
       return true;
     } catch {
@@ -232,7 +276,8 @@ export class GameRuntime {
     if (this.disposed || !this.lease?.isOwner()) return;
     if (this.snapshot.status !== 'ready' && this.snapshot.status !== 'corrupt') return;
     if (!clearGame(this.platform.storage)) { this.publish({ notice: 'save.failed' }); return; }
-    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null });
+    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null, press: null });
+    this.momentum = freshMomentum();
     this.activeRemainderMs = 0;
     this.lastActiveAt = this.platform.clock.monotonicNow();
     this.suspended = this.platform.visibility.isHidden();
