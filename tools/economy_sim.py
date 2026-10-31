@@ -63,21 +63,22 @@ CONFIG = {
             ("メール", 600_000),
             ("メール：返信の下書き", 800_000),
             ("持ち場", 1_000_000),
+            ("タスクマネージャー", 1_500_000),
             ("ファイル：検索", 2_000_000),
             ("ファイル：大きいアイコン表示", 3_500_000),
-            ("写真", 5_000_000),
-            ("写真：切り抜き", 8_000_000),
-            ("写真：比べて見る", 11_000_000),
-            ("ごみ箱", 15_000_000),
-            ("ごみ箱：元に戻す", 22_000_000),
-            ("メール：フォルダ分け", 30_000_000),
-            ("時計", 40_000_000),
-            ("時計：タイマー", 55_000_000),
-            ("時計：カレンダー", 75_000_000),
-            ("テーマ", 100_000_000),
-            ("テーマ：壁紙のスライドショー", 140_000_000),
-            ("テーマ：アイコンの大きさ", 190_000_000),
-            ("ターミナル", 250_000_000),
+            ("写真", 15_000_000),
+            ("写真：切り抜き", 24_000_000),
+            ("写真：比べて見る", 33_000_000),
+            ("ごみ箱", 45_000_000),
+            ("ごみ箱：元に戻す", 66_000_000),
+            ("メール：フォルダ分け", 90_000_000),
+            ("時計", 120_000_000),
+            ("時計：タイマー", 165_000_000),
+            ("時計：カレンダー", 225_000_000),
+            ("テーマ", 300_000_000),
+            ("テーマ：壁紙のスライドショー", 420_000_000),
+            ("テーマ：アイコンの大きさ", 570_000_000),
+            ("ターミナル", 750_000_000),
         ],
         # アプリの小さな機能：画面に写る部品が増える。持ち場になるアプリなら、その窓の働きも上がる
         "feature_parts": 2,
@@ -105,6 +106,13 @@ CONFIG = {
     },
     # リリース
     "release": {"base": 25, "exp": 0.4, "per_element": 0.05},
+    # 長く遊べる仕組み（2026-10-31）
+    "longplay": {
+        "achievement_bonus": 0.01,   # 実績1つごとに全生成 +1%（足し算）
+        "icon_synergy": 0.005,        # デスクトップのジョブ：エクスポートしたアイコン1つごとに +1%（上限50）
+        "icon_synergy_cap": 50,
+        "cursor_synergy": 0.001,     # デスクトップのジョブ：素の画面のオートカーソル1台ごとに +0.2%
+    },
 }
 
 
@@ -133,7 +141,17 @@ class Run:
 
     # ---- 倍率
     def color(self):
-        return self.c["spec"]["color_mult"][self.spec["color"]]
+        # 色深度の倍率に、実績のボーナスをまとめて掛ける（全生成に効く）
+        return self.c["spec"]["color_mult"][self.spec["color"]] * (1 + self.c["longplay"]["achievement_bonus"] * self.achievements())
+
+    def achievements(self):
+        """この区間で取れる実績の数（おおよそ）。素の画面・Tessera・リリース・デスクトップ"""
+        a = sum(1 for x in ("保存", "組木を作る", "タスクバー", "ファイル", "写真", "ターミナル") if self.has(x))
+        a += (self.cursors >= 10) + (self.cursors >= 50)
+        a += (self.icons_done >= 1) + (self.icons_done >= 6) + (self.icons_done >= 16)
+        a += (self.mails >= 10) + (self.mails >= 50)
+        a += 2 if self.label != "v0.1" else 0
+        return a
 
     def hz(self):
         return self.spec["hz"] / 30
@@ -166,6 +184,8 @@ class Run:
                 f = sum(1 for x in self.owned if x.startswith(name + "："))
                 r += n * base * (self.c["w3"]["update_mult"] ** lv) * self.c["w3"]["feature_post_mult"] ** f
         r *= self.color() * self.hz()
+        lp = self.c["longplay"]
+        r *= (1 + lp["icon_synergy"] * min(self.icons_done, lp["icon_synergy_cap"])) * (1 + lp["cursor_synergy"] * self.cursors)
         if self.has("ごみ箱"):
             r *= self.c["w3"]["recycle_mult"]
         return r
