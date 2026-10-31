@@ -32,7 +32,7 @@ npm run build
 npm run dev
 ```
 
-ビルド結果は書体とライセンスを含む `game/dist/index.html` だけ（約5.02MB）。外部への通信は不要。
+ビルド結果は書体とライセンスを含む `game/dist/index.html` だけ（約5.04MB）。外部への通信は不要。
 ダブルクリック起動はユーザー側で検証成功済み（2026-10-31）。今回も外部参照のない単一HTMLの構成を維持している。
 Pages の次回公開では、見本を残したまま `/refresh/play/` にゲームが加わる。
 
@@ -46,7 +46,7 @@ Tesseraでは薄いテンプレートを描いてピクセルを稼ぎ、完成�
 パーツはホーム画面に置いて初めて働く。「プラグイン」を作ると、Tesseraの道具と「このページの設定」を開ける。
 初回は16色の壁に当たると試作版の3条件が現れる。そろったら、手放すものと残るものを確認してリリースする。
 出荷画面で7日分の売上が入り、性能を購入できる。256色を買って「次のバージョンを作り始める」と、v1の素の画面へ戻る。
-絵・トークン・プラグイン・名前・やりとり・製品の記録は残る。保存形式は第6版で、第1〜第5版から移行できる。
+絵・トークン・プラグイン・名前・やりとり・製品の記録は残る。保存形式は第7版で、第1〜第6版から移行できる。撮影は独立した場面形式と共有データとして別保存し、エクスポートでは内容を含む1つのJSONにまとまる。
 実際の生成・購入・1.5マス/秒の描画による自動プレイでは40.20分で出荷し、268ドルで256色を買えた。
 作り直したTesseraでは前のアイコンをテンプレートに使え、またピクセルとトークンを得られる。256色・タスクバー・20万ピクセルがそろうとデスクトップとして組み立てられる。
 
@@ -92,8 +92,11 @@ Tesseraでは薄いテンプレートを描いてピクセルを稼ぎ、完成�
 - `?state=desktop-modern`：デスクトップの中の新調したTessera
 - `?state=desktop-full`：スクリーンショット50枚で保存上限
 
-単体テストは `npm test`（187件）。ブラウザ確認は `tools/check_desktop.py`、`tools/check_release.py`、`tools/check_stage3_updates.py`、`tools/check_kumiki.py`、`tools/check_seed.py`、`tools/check_foundation.py`、`tools/check_review_fixes.py`。
+単体テストは `npm test`（200件）。ブラウザ確認は `tools/check_stage5_review.py`、`tools/check_desktop.py`、`tools/check_release.py`、`tools/check_stage3_updates.py`、`tools/check_kumiki.py`、`tools/check_seed.py`、`tools/check_foundation.py`、`tools/check_review_fixes.py`。
 実行の前提と結果は `docs/実装メモ.md` に記録する。
 
 書体の再生成は `tools/vendor_fonts.py`。対象文字の一覧と取得元は `tools/font_subsets/`、
 ライセンスと生成の記録は `game/src/assets/fonts/` にある。通常のビルドでは再生成しない。
+
+200枚・400枚の保存の計測は `node tools/measure_capture_save.mjs --exports game/artifacts/review5/exports`。
+続けて `python tools/check_stage5_review.py` で実際のブラウザー保存を確認する。測定値と条件は実装メモの冒頭に記録している。

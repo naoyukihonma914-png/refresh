@@ -1,3 +1,4 @@
+import { readCapture } from './captureScene';
 import { ICON_IDS, PRACTICE_IDS } from '../content/kumikiArt';
 import { BALANCE } from '../config/balance';
 export const APP_IDS = ['tessera', 'note', 'files', 'mail'] as const;
@@ -9,7 +10,7 @@ export interface Rect { x: number; y: number; width: number; height: number }
 export interface WindowState extends Rect { open: boolean; minimized: boolean; maximized: boolean; z: number; restore: Rect | null }
 export type FeedbackKind = 'redraw' | 'practice' | 'color' | 'screenshot';
 export interface Feedback {
-  id: number; kind: FeedbackKind; target: string; baseline: number[]; baselineColor: string;
+  id: number; sender: 'hikari' | 'ren' | 'maki'; kind: FeedbackKind; target: string; baseline: number[]; baselineColor: string;
   at: number; completedAt: number | null;
 }
 export interface DesktopState {
@@ -43,7 +44,7 @@ export function isDesktopState(x: unknown): x is DesktopState {
   const requests = x.feedback;
   if (!requests.every(f => obj(f) && count(f.id) && f.id > 0 && ['redraw','practice','color','screenshot'].includes(f.kind as string)
     && (f.kind === 'redraw' ? ICON_IDS.includes(f.target as 'folder') : f.kind === 'practice' ? PRACTICE_IDS.includes(f.target as 'document') : f.target === (f.kind === 'color' ? 'primary' : '')) && Array.isArray(f.baseline) && f.baseline.length <= 16384 && f.baseline.every(c => Number.isInteger(c) && c >= -1 && c < 256)
-    && typeof f.baselineColor === 'string' && /^#[0-9a-f]{6}$/i.test(f.baselineColor) && amount(f.at) && (f.completedAt === null || amount(f.completedAt)))) return false;
+    && ['hikari','ren','maki'].includes(f.sender as string) && typeof f.baselineColor === 'string' && /^#[0-9a-f]{6}$/i.test(f.baselineColor) && amount(f.at) && (f.completedAt === null || amount(f.completedAt)))) return false;
   if (new Set(requests.map(f => f.id)).size !== requests.length || requests.some(f => f.id > (x.feedbackSerial as number)) || requests.filter(f => f.completedAt === null).length > BALANCE.w3.maxPending) return false;
   return [x.notice,x.success,x.mailSelection].every(id => id === null || requests.some(f => f.id === id))
     && ['root','exports','screenshots'].includes(x.fileFolder as string) && (x.fileSelection === null || typeof x.fileSelection === 'string');
@@ -70,11 +71,7 @@ export function decodeCapture(data: string): unknown {
     return pixels;
   });
 }
-export function isScreenshot(x: unknown, validate: (v: unknown) => boolean): x is Screenshot {
+export function isScreenshot(x: unknown): x is Screenshot {
   if (!obj(x) || !count(x.id) || x.id === 0 || !amount(x.at) || !(typeof x.language === 'string' && x.language.length > 0) || typeof x.data !== 'string') return false;
-  try {
-    const scene: unknown = decodeCapture(x.data);
-    return obj(scene) && obj(scene.persistent) && Array.isArray(scene.persistent.screenshots) && scene.persistent.screenshots.length === 0
-      && obj(scene.run) && scene.run.world === 'desktop' && validate(scene);
-  } catch { return false; }
+  try { readCapture(x as unknown as Screenshot); return true; } catch { return false; }
 }

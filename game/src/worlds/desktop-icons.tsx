@@ -7,11 +7,11 @@ export function PixelArt({ frames, size, palette, frame = 0, grey = false, style
     {(frames[frame] ?? frames[0] ?? []).map((color,i) => color < 0 ? null : <rect key={i} x={i%size} y={Math.floor(i/size)} width="1" height="1" fill={grey ? '#8b8b8b' : palette[color]} />)}
   </svg>;
 }
-export function AppIcon({ app, state, frame = 0 }: { app: AppId; state: GameState; frame?: number }) {
+export function AppIcon({ app, state, frame = 0, palette }: { palette?:string[]; app: AppId; state: GameState; frame?: number }) {
   if (app === 'files' || app === 'mail') {
     const id = app === 'files' ? 'folder' : 'mail';
     const work = state.run.kumiki.exports.find(e => e.kind === 'icon' && e.id === id);
-    return <PixelArt frames={work?.frames ?? [iconTemplate(id,16)]} size={work?.size ?? 16} palette={paletteFor(state.persistent.specs.color)} frame={frame} grey={!work} />;
+    return <PixelArt frames={work?.frames ?? [iconTemplate(id,16)]} size={work?.size ?? 16} palette={palette??paletteFor(state.persistent.specs.color)} frame={frame} grey={!work} />;
   }
   return app === 'tessera' ? <svg viewBox="0 0 48 48" aria-hidden="true" className="app-icon"><path fill="#cba967" d="M6 7h22v12H18v22H6z"/><path fill="#537e9a" d="M30 7h12v34H20V29h10z"/><path fill="#e3d5b8" d="M20 21h8v6h-8z"/></svg>
     : <svg viewBox="0 0 48 48" aria-hidden="true" className="app-icon"><path fill="#fff" stroke="#999" d="M10 4h21l8 8v32H10z"/><path fill="#e5e5e5" stroke="#999" d="M31 4v9h8"/><path stroke="#6b8293" strokeWidth="2" d="M16 20h17M16 25h17M16 30h17M16 35h12"/></svg>;

@@ -110,7 +110,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
   };
   return <main className={[className, state.run.restartMs > 0 && 'is-restarting', preview && 'is-preview'].filter(Boolean).join(' ')}>
     {settings ? <PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={() => setSettings(false)} /> : <div className="seed-content">
-      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{state.persistent.products.length?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName)}):i18n.t('foundation.goal')}
+      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{(state.run.version!=='v0.1'||state.persistent.products.length)?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName)}):i18n.t('foundation.goal')}
         {!embedded && <button className="text-button goal-progress" onClick={() => setConditions(!conditions)} aria-expanded={conditions}>{i18n.t('seed.goalProgress', { done: 0, total: 5 })}</button>}
       </p>
       {conditions && <section className="release-conditions"><h2>{i18n.t('seed.conditions')}</h2><ul>
@@ -133,7 +133,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
         <progress max={BALANCE.w1.inheritMs} value={seed.installer.elapsedMs} aria-label={i18n.t('installer.title')} />
         <p>{i18n.t('installer.progress', { done: seed.built.length, total: seed.installer.items.length })}</p></section>}
       <p className="pixels-line"><RollingPixels value={state.resources.pixels} now={now} enabled={motion} i18n={i18n} />
-        {seed.autoCursors > 0 && <span className="passive-rate" data-rate={passivePixelsPerSecond(state)}>{i18n.t('seed.rate', { pixels: i18n.rate(passivePixelsPerSecond(state)) })}</span>}
+        {seed.autoCursors > 0 && <span className="passive-rate" data-rate={passivePixelsPerSecond(state)}>{i18n.t('seed.rate', { pixels: i18n.rate(snapshot.frozenRate ?? passivePixelsPerSecond(state)) })}</span>}
       </p>
       <p className="generator-line"><span className="generator-anchor" ref={anchor}>
         <button type="button" className="generate-button" data-part="primary" onClick={event => {

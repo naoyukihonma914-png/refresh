@@ -14,6 +14,8 @@ import { archiveGuide, beginPrototypeRelease, buySpec, canReleasePrototype, ship
 
 export interface RuntimeSnapshot {
   state: GameState;
+  frozenRate?: number;
+  shotHintSerial?: number;
   language: string;
   status: 'starting' | 'ready' | 'blocked' | 'corrupt';
   notice: MessageKey | null;
@@ -233,7 +235,7 @@ export class GameRuntime {
     this.advanceForeground();
     const state = actDesktop(this.snapshot.state, action, this.platform.clock.wallNow());
     if (state === this.snapshot.state) return;
-    this.publish({ state });
+    this.publish({ state, ...(action.type==='fix'&&state.run.desktop.feedback.find(f=>f.id===action.id)?.kind==='screenshot'?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}) });
     if (action.type !== 'rect' && action.type !== 'icon' && action.type !== 'note') this.persist();
   };
 
@@ -305,11 +307,11 @@ export class GameRuntime {
     try {
       const state = decodeSave(raw);
       const result = advanceOfflineTime(state, this.platform.clock.wallNow());
-      if (!canSave(state)) {
-        if (state.persistent.products.length > 0) {
-          if (saveGame(this.platform.storage, result.state, this.platform.clock.wallNow(), { checkpoint: true }).kind !== 'saved') throw new Error('Storage unavailable');
-        } else if (!clearGame(this.platform.storage)) throw new Error('Storage unavailable');
-      }
+      if (canSave(state)||state.persistent.products.length>0) {
+        const saved=saveGame(this.platform.storage,result.state,this.platform.clock.wallNow(),{checkpoint:true});
+        if(saved.kind!=='saved')throw new Error('Storage unavailable');
+        result.state=saved.state;
+      } else if(!clearGame(this.platform.storage))throw new Error('Storage unavailable');
       this.activeRemainderMs = 0;
       this.momentum = freshMomentum();
       this.lastActiveAt = this.platform.clock.monotonicNow();

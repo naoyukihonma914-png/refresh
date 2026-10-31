@@ -488,7 +488,7 @@
     "files.type.sketch": "Sketch",
     "files.type.note": "Text document",
     "files.type.shot": "Screenshot",
-    "files.home": "Home.ui",
+    "files.home": "Home screen.ui",
     "files.sketch": "Sketch",
     "files.shot": "Screenshot {count}",
     "files.archived": "{name} ({version})",
@@ -529,6 +529,10 @@
     "number.unit.21": "Sx",
     "number.unit.24": "Sp",
     "foundation.goalNamed": "Finish this screen and release it as {product}.",
-    "effect.screenshotAdd": "Screenshot +{value}"
+    "effect.screenshotAdd": "Screenshot +{value}",
+    "feedback.sender.hikari": "Hikari Mizuno",
+    "feedback.sender.ren": "Ren Takase",
+    "feedback.sender.maki": "Maki Saeki",
+    "desktop.fix.screenshot": "Arrange windows and capture"
   }
 }

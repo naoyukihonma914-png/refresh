@@ -16,7 +16,7 @@ export function enterKumiki(state: GameState): GameState {
   if (state.run.kumiki.entered) return state;
   const k = { ...createKumikiState(), entered: true, enteredAt: state.elapsedMs,
     lastActionAt: state.elapsedMs, underlays: structuredClone(state.persistent.artwork.icons), design: structuredClone(state.persistent.homeTheme) };
-  let next: GameState = { ...state, run: { ...state.run, world: 'kumiki', kumiki: k } };
+  let next: GameState = { ...state, persistent:{...state.persistent,homeUpdatedAt:state.lastTickAt}, run: { ...state.run, world: 'kumiki', kumiki: k } };
   next = prepareDrawing(next, 'folder');
   next = kGuide(kGuide(next, 'entered'), 'draw');
   return withK(next, { ...next.run.kumiki, guide: { ...next.run.kumiki.guide, current: next.run.version === 'v0.1' ? 'entered' : null } });
@@ -143,7 +143,13 @@ export function exportKumiki(state: GameState, now: number): GameState {
   if (!['kumiki','desktop'].includes(state.run.world)) return state;
   const ready = exportable(state);
   if (!ready.icons.length && !ready.parts.length) return state;
-  const next = structuredClone(state);
+  const next:GameState = {
+    ...state,resources:{...state.resources},
+    run:{...state.run,kumiki:{...state.run.kumiki,
+      drawings:Object.fromEntries(Object.entries(state.run.kumiki.drawings).map(([id,d])=>[id,ready.icons.includes(id)?{...d}:d])),
+      exports:[...state.run.kumiki.exports]}},
+    persistent:{...state.persistent,artwork:{...state.persistent.artwork,icons:{...state.persistent.artwork.icons}}},
+  };
   let tokens = 0;
   const customName = next.run.kumiki.placed.includes('input') ? next.run.kumiki.exportName.trim().slice(0, BALANCE.w2.maxName) : '';
   for (const id of ready.icons) {
@@ -253,7 +259,7 @@ export type KumikiAction =
   | { type: 'extensions' }
   | { type: 'exit' };
 
-export function actKumiki(state: GameState, action: KumikiAction, now: number): GameState {
+function reduceKumiki(state: GameState, action: KumikiAction, now: number): GameState {
   if (!['kumiki','desktop'].includes(state.run.world)) return state;
   switch (action.type) {
     case 'prepare': {
@@ -279,4 +285,13 @@ export function actKumiki(state: GameState, action: KumikiAction, now: number): 
     case 'extensions': return !state.run.kumiki.built.includes('extensions') ? state : kGuide(state, 'extensions');
     case 'exit': return state.run.world === 'desktop' ? state : state.persistent.specs.color > 0 ? enterDesktop(state) : !state.run.kumiki.built.includes('taskbar') ? state : kGuide(withK(state, { ...state.run.kumiki, exitInspected: true }), 'wall');
   }
+}
+
+export function actKumiki(state:GameState,action:KumikiAction,now:number):GameState {
+  const next=reduceKumiki(state,action,now);
+  if(next===state)return state;
+  const drawingEdit=['paint','fill','restore','frame'].includes(action.type);
+  const sketch=drawingEdit&&'id' in action&&action.id==='free';
+  const home=['build','place','configure','design','repair','modern'].includes(action.type);
+  return sketch||home?{...next,persistent:{...next.persistent,...(sketch?{sketchUpdatedAt:now}:{}),...(home?{homeUpdatedAt:now}:{})}}:next;
 }

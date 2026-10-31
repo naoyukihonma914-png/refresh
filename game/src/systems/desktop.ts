@@ -1,8 +1,9 @@
+import { encodeScene, projectCapture, restoreScene } from './captureScene';
 import { BALANCE } from '../config/balance';
 import { ICON_IDS, PRACTICE_IDS, homeButtonColor } from '../content/kumikiArt';
 import { availableIcons, drawingFor } from './kumiki';
 import { creditPixels, passivePixelsPerSecond } from './economy';
-import { MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH, APP_IDS, createDesktopState, decodeCapture, encodeCapture, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
+import { MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH, APP_IDS, createDesktopState, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
 import type { GameState } from './state';
 export const withDesktop = (state: GameState, desktop: DesktopState): GameState => ({ ...state, run: { ...state.run, desktop } });
 export const installedApps = (state: GameState): AppId[] => ['tessera', 'note', ...state.run.desktop.apps];
@@ -47,7 +48,10 @@ function newFeedback(state: GameState, at: number): Feedback | null {
   if (pending.length >= BALANCE.w3.maxPending) return null;
   const primaryColor = state.run.kumiki.design.primary?.color ?? homeButtonColor(state.persistent.specs.color);
   const candidates: { kind: Feedback['kind']; target: string }[] = [];
-  const redraw = ICON_IDS.find(id => state.run.kumiki.exports.some(e => e.kind === 'icon' && e.id === id) && !pending.some(f => f.kind === 'redraw' && f.target === id));
+  const redraw = [...ICON_IDS].sort((a,b) => {
+    const last=(id:string)=>d.feedback.filter(f=>f.kind==='redraw'&&f.target===id).at(-1)?.id??0;
+    return last(a)-last(b);
+  }).find(id => state.run.kumiki.exports.some(e => e.kind === 'icon' && e.id === id) && !pending.some(f => f.kind === 'redraw' && f.target === id));
   const practice = PRACTICE_IDS.find(id => availableIcons(state).includes(id) && !drawingFor(state,id)?.exported && !pending.some(f => f.kind === 'practice' && f.target === id));
   if (redraw) candidates.push({ kind: 'redraw', target: redraw });
   if (practice) candidates.push({ kind: 'practice', target: practice });
@@ -58,7 +62,7 @@ function newFeedback(state: GameState, at: number): Feedback | null {
   const offset = d.feedback.length ? (order.indexOf(d.feedback.at(-1)!.kind) + 1) % order.length : 0;
   const candidate = Array.from({ length: order.length }, (_,i) => candidates.find(c => c.kind === order[(offset+i)%order.length])).find(Boolean);
   if (!candidate) return null;
-  return { id: d.feedbackSerial + 1, ...candidate, at, completedAt: null,
+  return { id: d.feedbackSerial + 1, sender: (['hikari','ren','maki'] as const)[d.feedbackSerial % 3]!, ...candidate, at, completedAt: null,
     baseline: [...(drawingFor(state,candidate.target)?.frames[0] ?? [])], baselineColor: primaryColor };
 }
 export function advanceDesktopTime(state: GameState, ms: number, now: number, offline = false): GameState {
@@ -101,17 +105,15 @@ export const desktopAppShotGain = (state: GameState) => passivePixelsPerSecond(s
 export const screenshotReward = (state: GameState) => passivePixelsPerSecond(state) * screenshotParts(state) * BALANCE.w3.screenshotMultiplier * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution;
 export function takeScreenshot(state: GameState, now: number, language: string): GameState {
   if (state.run.world !== 'desktop' || state.run.desktop.cooldownMs > 0 || state.persistent.screenshots.length >= screenshotCapacity(state)) return state;
-  const frozen = { ...state, persistent: { ...state.persistent, screenshots: [] } };
-  const shot: Screenshot = { id: (state.persistent.screenshots.at(-1)?.id ?? 0)+1, at: now, language, data: encodeCapture(frozen) };
+  const frozen = projectCapture(state,language);
+  const shot: Screenshot = { id: (state.persistent.screenshots.at(-1)?.id ?? 0)+1, at: now, language, data: encodeScene(frozen) };
   let next = creditPixels(state,screenshotReward(state));
   next = { ...next, persistent: { ...next.persistent, screenshots: [...next.persistent.screenshots,shot] } };
   next = withDesktop(next, { ...next.run.desktop, cooldownMs: BALANCE.spec.graphics[state.persistent.specs.graphics]!.shotCooldownSeconds * BALANCE.time.millisecondsPerSecond });
   return visibleApps(state).length >= 2 ? completeFeedback(next,next.run.desktop.feedback.filter(f => f.kind === 'screenshot').map(f => f.id),now) : next;
 }
 export function restoreScreenshot(shot: Screenshot, catalog: Screenshot[]): GameState {
-  const state = decodeCapture(shot.data) as GameState;
-  // No previous screenshot payload is copied into a capture. Earlier records resolve by ID.
-  return { ...state, persistent: { ...state.persistent, screenshots: catalog.filter(s => s.id < shot.id) } };
+  return restoreScene(shot,catalog);
 }
 export type DesktopAction =
   | { type: 'open' | 'taskbar' | 'minimize' | 'maximize' | 'close'; app: AppId }
@@ -151,7 +153,17 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number)
     case 'mail': return !d.feedback.some(f => f.id === action.id) ? state : withDesktop(state,{ ...d,mailSelection:action.id });
     case 'notice': return action.id !== null && !d.feedback.some(f => f.id === action.id && f.completedAt === null) ? state : withDesktop(state,{ ...d,notice:action.id });
     case 'success-close': return withDesktop(state,{ ...d,success:null });
-    case 'fix': return !d.feedback.some(f => f.id === action.id) ? state : focusWindow(withDesktop(state,{ ...d,notice:null }),d.feedback.find(f => f.id === action.id)!.kind === 'screenshot' ? 'note' : 'tessera');
+    case 'fix': {
+      const request=d.feedback.find(f=>f.id===action.id);if(!request)return state;
+      if(request.kind!=='screenshot')return focusWindow(withDesktop(state,{...d,notice:null}),'tessera');
+      // Keep two real windows visible and give the capture toolbar a clear destination.
+      let next=focusWindow(withDesktop(state,{...d,notice:null}),'tessera');
+      if(next.run.desktop.windows.tessera.maximized)next=actDesktop(next,{type:'maximize',app:'tessera'},now);
+      next=actDesktop(next,{type:'rect',app:'tessera',rect:{x:150,y:64,width:900,height:580}},now);
+      next=focusWindow(next,'note');
+      if(next.run.desktop.windows.note.maximized)next=actDesktop(next,{type:'maximize',app:'note'},now);
+      return focusWindow(actDesktop(next,{type:'rect',app:'note',rect:{x:1100,y:140,width:630,height:650}},now),'note');
+    }
     case 'note': return action.text.length > BALANCE.w3.maxNote ? state : { ...state,persistent:{ ...state.persistent,productionNote:action.text,noteUpdatedAt:now } };
   }
 }

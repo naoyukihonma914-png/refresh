@@ -3,7 +3,7 @@ import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/
 import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -48,6 +48,8 @@ export interface GameState {
     screenshots: Screenshot[];
     productionNote: string | null;
     noteUpdatedAt: number | null;
+    homeUpdatedAt: number | null;
+    sketchUpdatedAt: number | null;
   };
 }
 
@@ -72,7 +74,7 @@ export function createInitialState(now: number): GameState {
       playerName: null, productName: null, numberNotation: 'compact',
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
       artwork: createArtwork(),
-      products: [], guideArchive: [], homeTheme: {}, screenshots: [], productionNote: null, noteUpdatedAt: null,
+      products: [], guideArchive: [], homeTheme: {}, screenshots: [], productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null,
     },
   };
 }
@@ -109,10 +111,10 @@ export function isGameState(value: unknown): value is GameState {
     || !persistent.products.some(p => p.id === (run.shipping as Record<string, unknown>).productId)
     || !isAmount(run.shipping.elapsedMs) || run.shipping.elapsedMs > BALANCE.release.animationMs : run.shipping !== null) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;
-  if (!Array.isArray(persistent.screenshots) || !persistent.screenshots.every(s => isScreenshot(s, isGameState))
+  if (!Array.isArray(persistent.screenshots) || !persistent.screenshots.every(s => isScreenshot(s))
     || persistent.screenshots.some((s, i, shots) => i > 0 && s.id <= shots[i-1]!.id)
     || !(persistent.productionNote === null || typeof persistent.productionNote === 'string' && persistent.productionNote.length <= BALANCE.w3.maxNote)
-    || !(persistent.noteUpdatedAt === null || isAmount(persistent.noteUpdatedAt))) return false;
+    || ![persistent.noteUpdatedAt,persistent.homeUpdatedAt,persistent.sketchUpdatedAt].every(v=>v===null||isAmount(v))) return false;
   if (!isKumikiState(run.kumiki) || !isArtwork(persistent.artwork)) return false;
   if (run.totalPixelsGenerated < resources.pixels) return false;
   if (!isRecord(run.seed) || !Array.isArray(run.seed.built) || !isCount(run.seed.autoCursors)) return false;

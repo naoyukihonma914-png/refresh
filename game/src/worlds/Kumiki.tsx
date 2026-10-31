@@ -22,7 +22,7 @@ const TOOL_PATHS = {
   fill: 'M4 12L12 4L20 12L12 20Z M3 13H21',
   eyedropper: 'M4 20L5 15L15 5L19 9L9 19Z M13 3L21 11',
 };
-export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = false, interactive = true }: { embedded?: boolean; preview?: boolean; interactive?: boolean; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
+export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = false, interactive = true, previewReady, previewDocuments, previewPalette }: { previewPalette?:string[]; previewReady?: number; previewDocuments?: string[]; embedded?: boolean; preview?: boolean; interactive?: boolean; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
   const { state } = snapshot;
   const k = state.run.kumiki;
   const act = preview ? () => {} : runtime.actKumiki;
@@ -51,16 +51,16 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const undo = useRef<{ id: string; frames: number[][] }[]>([]);
   const redo = useRef<{ id: string; frames: number[][] }[]>([]);
   const [historyVersion, setHistoryVersion] = useState(0);
-  const palette = useMemo(() => paletteFor(state.persistent.specs.color), [state.persistent.specs.color]);
+  const palette = useMemo(() => previewPalette??paletteFor(state.persistent.specs.color), [state.persistent.specs.color,previewPalette]);
   const drawing = drawingFor(state, drawingId);
   const target = useMemo(() => targetFor(state, drawingId, drawing?.size ?? 16), [state.run.kumiki.underlays, drawingId, drawing?.size]);
   const ready = exportable(state);
-  const readyCount = ready.icons.length + ready.parts.length;
+  const readyCount = previewReady ?? ready.icons.length + ready.parts.length;
   const next = nextKumikiItem(state);
   const nextCost = BALANCE.w2.items.find(item => item.id === next)?.cost ?? 0;
   const parts = ownedParts(state);
   const mature = k.built.includes('select');
-  const entered = state.elapsedMs - k.enteredAt < BALANCE.w2.enterMs;
+  const entered = !preview && state.elapsedMs - k.enteredAt < BALANCE.w2.enterMs;
   const tokensVisible = k.tokenDiscovered || state.resources.tokens > 0;
   const prototype = k.exitInspected && state.persistent.specs.color === 0;
   const releaseChecks = prototypeConditions(state);
@@ -237,7 +237,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         <section className="icon-panel">
         <div className="editor-heading"><h2>{i18n.t(drawingId === 'free' ? 'k.file.free' : 'k.document')}</h2>
           <select aria-label={i18n.t('k.document')} value={drawingId} onChange={event => openDrawing(event.target.value)}>
-            {availableIcons(state).map(id => <option key={id} value={id}>{i18n.t(`k.icon.${id as 'folder'}`)}</option>)}
+            {(previewDocuments ?? availableIcons(state)).map(id => <option key={id} value={id}>{i18n.t(`k.icon.${id as 'folder'}`)}</option>)}
             <option value="free">{i18n.t('k.file.free')}</option>
           </select>
           {drawing && <span>{i18n.t('k.grid', { size: drawing.size })}</span>}

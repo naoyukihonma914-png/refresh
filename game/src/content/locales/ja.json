@@ -448,7 +448,7 @@
     "files.type.sketch": "スケッチ",
     "files.type.note": "テキスト文書",
     "files.type.shot": "スクリーンショット",
-    "files.home": "ホーム.ui",
+    "files.home": "ホーム画面.ui",
     "files.sketch": "スケッチ",
     "files.shot": "スクリーンショット {count}",
     "files.archived": "{name}（{version}）",
@@ -489,6 +489,10 @@
     "number.unit.21": "",
     "number.unit.24": "𥝱",
     "foundation.goalNamed": "この画面を作り上げて、{product} としてリリースする。",
-    "effect.screenshotAdd": "スクリーンショット +{value}"
+    "effect.screenshotAdd": "スクリーンショット +{value}",
+    "feedback.sender.hikari": "水野 ひかり",
+    "feedback.sender.ren": "高瀬 蓮",
+    "feedback.sender.maki": "佐伯 真紀",
+    "desktop.fix.screenshot": "窓を並べて撮る"
   }
 }

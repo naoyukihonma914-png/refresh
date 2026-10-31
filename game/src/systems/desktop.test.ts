@@ -68,7 +68,7 @@ describe('デスクトップ',()=>{
     s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1,'en');
     const scene=restoreScreenshot(first,s.persistent.screenshots);expect(scene.persistent.productionNote).toBe('制作途中の記録');expect(scene.run.desktop.windows.note.x).toBe(430);
     const second=restoreScreenshot(s.persistent.screenshots[1]!,s.persistent.screenshots);expect(second.persistent.screenshots).toEqual([first]);
-    expect((decodeCapture(s.persistent.screenshots[1]!.data) as typeof s).persistent.screenshots).toEqual([]);
+    expect(decodeCapture(s.persistent.screenshots[1]!.data)).not.toHaveProperty('persistent');
     expect(decodeSave(encodeSave(s))).toEqual(s);
   });
   it('待ち時間は能動時間だけで進み、不在中には撮影しない。上限時には報酬も記録も増えない',()=>{
@@ -124,7 +124,7 @@ describe('デスクトップ',()=>{
   });
   it('第5版の製品・絵・性能・資源を保持してデスクトップの初期状態を補い、新形式を往復できる',()=>{
     const old=JSON.parse(encodeSave(createFixture('release-v1-tessera',now)!));old.schemaVersion=5;delete old.run.desktop;delete old.persistent.screenshots;delete old.persistent.productionNote;delete old.persistent.noteUpdatedAt;
-    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(6);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
+    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(7);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
     for(const fixture of ['desktop-early','desktop-files','desktop-mail','desktop-modern','desktop-full']){const s=createFixture(fixture,now)!;expect(isGameState(s),fixture).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);}
     expect(BALANCE.spec.storage[1].price).toBe(60);
   });
