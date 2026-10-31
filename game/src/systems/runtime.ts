@@ -1,3 +1,4 @@
+import { actDesktop, observeTesseraAction, screenshotCapacity, takeScreenshot, type DesktopAction } from './desktop';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { chooseLanguage, createI18n, LOCALES, TEST_LANGUAGE, type MessageKey } from '../content/i18n';
 import type { Platform, TabLease, Unsubscribe } from '../platform/types';
@@ -79,6 +80,7 @@ export class GameRuntime {
     if (loaded.kind === 'corrupt') { this.publish({ status: 'corrupt' }); return; }
     let state = loaded.kind === 'loaded' || loaded.kind === 'recovered' ? loaded.state : this.snapshot.state;
     if (!this.fixture && state.run.seed.built.includes('kumiki') && !state.run.kumiki.entered) state = enterKumiki(state);
+    state = { ...state, persistent: { ...state.persistent, numberNotation: this.platform.settings.read().numberNotation ?? state.persistent.numberNotation } };
     const result = advanceOfflineTime(state, this.platform.clock.wallNow());
     this.publish({
       state: result.state, status: 'ready',
@@ -180,7 +182,7 @@ export class GameRuntime {
     if (this.canOperate() && !this.suspended && this.advanceForeground()) this.persist();
     const i18n = createI18n(language);
     this.platform.setDocumentLanguage(language, i18n.direction);
-    const stored = language === TEST_LANGUAGE || this.platform.settings.write({ language });
+    const stored = language === TEST_LANGUAGE || this.platform.settings.write({ ...this.platform.settings.read(), language });
     this.publish({ language, notice: stored ? this.snapshot.notice : 'settings.failed' });
   };
 
@@ -195,6 +197,8 @@ export class GameRuntime {
 
   pressSeed = (position: { x: number; y: number; target?: 'primary' | 'button' } = { x: 50, y: 50 }) => {
     if (!this.canOperate() || this.snapshot.state.run.world === 'release' || this.snapshot.introVisible || this.suspended || this.platform.visibility.isHidden()) return;
+    const desktop = this.snapshot.state.run.desktop;
+    if (this.snapshot.state.run.world === 'desktop' && (desktop.active !== 'tessera' || desktop.windows.tessera.minimized || !desktop.windows.tessera.open)) return;
     if (this.advanceForeground()) this.persist();
     const now = this.platform.clock.monotonicNow();
     const result = pressSeed(this.snapshot.state, this.momentum, now);
@@ -218,10 +222,28 @@ export class GameRuntime {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
     const previous = this.snapshot.state;
-    const state = actKumiki(previous, action, this.platform.clock.wallNow());
+    const state = observeTesseraAction(previous, actKumiki(previous, action, this.platform.clock.wallNow()), action.type, this.platform.clock.wallNow());
     if (previous === state) return;
     this.publish({ state });
     if (action.type !== 'paint' && action.type !== 'fill') this.persist();
+  };
+
+  actDesktop = (action: DesktopAction) => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    const state = actDesktop(this.snapshot.state, action, this.platform.clock.wallNow());
+    if (state === this.snapshot.state) return;
+    this.publish({ state });
+    if (action.type !== 'rect' && action.type !== 'icon' && action.type !== 'note') this.persist();
+  };
+
+  takeScreenshot = () => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return false;
+    this.advanceForeground();
+    if (this.snapshot.state.persistent.screenshots.length >= screenshotCapacity(this.snapshot.state)) {
+      this.publish({ notice: 'desktop.storageFull' }); return false;
+    }
+    return this.commitReleaseChange(takeScreenshot(this.snapshot.state, this.platform.clock.wallNow(), this.snapshot.language));
   };
 
   readSeedGuide = (id: GuideId | 'close' | 'listen') => {
@@ -326,6 +348,19 @@ export class GameRuntime {
     this.persist();
   };
 
+  setProductName = (name: string) => {
+    if (!this.canOperate() || this.snapshot.state.run.world === 'release') return;
+    const productName = [...name].slice(0, BALANCE.release.maxProductName).join('') || null;
+    this.publish({ state: { ...this.snapshot.state, persistent: { ...this.snapshot.state.persistent, productName } } });
+  };
+
+  setNumberNotation = (numberNotation: 'compact' | 'scientific') => {
+    if (!this.canOperate() || !['compact','scientific'].includes(numberNotation)) return;
+    const stored = this.platform.settings.write({ ...this.platform.settings.read(), numberNotation });
+    this.publish({ state: { ...this.snapshot.state, persistent: { ...this.snapshot.state.persistent, numberNotation } }, notice: stored ? this.snapshot.notice : 'settings.failed' });
+    this.persist();
+  };
+
   cancelPrototypeRelease = () => { if (this.canOperate()) this.publish({ releaseConfirmation: false }); };
 
   private commitReleaseChange(state: GameState, checkpoint = false): boolean {
@@ -343,7 +378,7 @@ export class GameRuntime {
     const before = saveGame(this.platform.storage, this.snapshot.state, this.platform.clock.wallNow());
     if (before.kind !== 'saved') { this.publish({ notice: 'save.failed' }); return; }
     this.publish({ state: before.state });
-    const state = beginPrototypeRelease(before.state, this.platform.clock.wallNow(), this.platform.animation.reducedMotion());
+    const state = beginPrototypeRelease({ ...before.state, persistent: { ...before.state.persistent, productName: before.state.persistent.productName?.trim() || null } }, this.platform.clock.wallNow(), this.platform.animation.reducedMotion());
     if (!this.commitReleaseChange(state)) return;
     this.momentum = freshMomentum();
     this.publish({ releaseConfirmation: false, press: null, offline: null });

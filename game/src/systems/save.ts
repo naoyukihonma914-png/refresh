@@ -1,3 +1,4 @@
+import { createDesktopState } from './desktopState';
 import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameState } from './state';
 import type { SaveStorage } from '../platform/storage';
 import { createArtwork, createKumikiState } from './kumikiState';
@@ -32,8 +33,8 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   3(data) {
     const next = { ...(data as GameState), schemaVersion: 4 };
     const projected = { ...next, schemaVersion: SCHEMA_VERSION,
-      run: { ...next.run, shipping: null, restartMs: 0 },
-      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {} },
+      run: { ...next.run, shipping: null, restartMs: 0, desktop: createDesktopState() },
+      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], productionNote: null, noteUpdatedAt: null },
     };
     if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
     const palette = paletteFor(1);
@@ -63,6 +64,11 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
       run: { ...old.run, shipping: null, restartMs: 0 },
       persistent: { ...old.persistent, products: [], guideArchive: [], homeTheme: {} },
     };
+  },
+  5(data) {
+    const old = data as GameState;
+    return { ...old, schemaVersion: 6, run: { ...old.run, desktop: createDesktopState() },
+      persistent: { ...old.persistent, productName: null, numberNotation: 'compact', products: (old.persistent.products ?? []).map(p => ({ ...p, name: null })), screenshots: [], productionNote: null, noteUpdatedAt: null } };
   },
 };
 

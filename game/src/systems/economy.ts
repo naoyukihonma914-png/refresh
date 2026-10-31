@@ -19,7 +19,7 @@ export function cursorPressesPerSecond(state: GameState): number {
 export function cursorPixelsPerSecond(state: GameState): number {
   if (state.run.world === 'release') return 0;
   const k = state.run.kumiki;
-  if (state.run.world === 'kumiki' && k.placed.includes('switch') && k.focus) return 0;
+  if (['kumiki','desktop'].includes(state.run.world) && k.placed.includes('switch') && k.focus) return 0;
   const button = k.placed.includes('button') ? BALANCE.w2.buttonMultiplier : 1;
   const slider = k.placed.includes('slider') ? 1 + (k.interval - BALANCE.w2.intervalMin) / (BALANCE.w2.intervalMax - BALANCE.w2.intervalMin) * (BALANCE.w2.sliderMultiplier - 1) : 1;
   return manualClickValue(state) * cursorPressesPerSecond(state) * button * slider;

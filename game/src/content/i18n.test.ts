@@ -122,3 +122,11 @@ describe('言語ファイルと表示', () => {
     }
   });
 });
+
+it('兆より上の数を日本語・英語で読みやすくし、指数表記と境界の繰り上げも共通で扱う',()=>{
+  const ja=createI18n('ja'), en=createI18n('en');
+  expect(ja.pixels(1.23e16)).toBe('1.23京');expect(ja.pixels(1.23e20)).toBe('1.23垓');expect(ja.pixels(1.23e24)).toBe('1.23𥝱');
+  expect(ja.price(9999.999e12)).toBe('1京');expect(en.pixels(1.23e15)).toBe('1.23Qa');expect(en.pixels(1.23e18)).toBe('1.23Qi');expect(en.pixels(1.23e21)).toBe('1.23Sx');
+  expect(createI18n('ja',{numberNotation:'scientific'}).pixels(1.23e20)).toBe('1.23e20');
+  expect(ja.rate(1.234e20)).toBe('1.2垓');
+});

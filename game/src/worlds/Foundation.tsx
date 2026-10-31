@@ -1,3 +1,5 @@
+import { Estimate } from '../components/Estimate';
+import { productLabel } from '../content/products';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { BALANCE, type SeedItem } from '../config/balance';
 import type { I18n } from '../content/i18n';
@@ -32,7 +34,7 @@ function RollingPixels({ value, now, enabled, i18n }: { value: number; now: numb
   return <span className="pixel-count" data-value={value}>{i18n.t('foundation.pixels', { pixels: i18n.pixels(roll.displayed) })}</span>;
 }
 
-export function Foundation({ snapshot, i18n, runtime, embedded = false, preview = false, children }: { snapshot: RuntimeSnapshot; i18n: I18n; runtime: GameRuntime; embedded?: boolean; preview?: boolean; children?: ReactNode }) {
+export function Foundation({ snapshot, i18n, runtime, embedded = false, preview = false, interactive = true, children }: { snapshot: RuntimeSnapshot; i18n: I18n; runtime: GameRuntime; embedded?: boolean; preview?: boolean; interactive?: boolean; children?: ReactNode }) {
   const { state, offline, press } = snapshot;
   const { seed } = state.run;
   const has = (id: SeedItem) => seed.built.includes(id);
@@ -53,25 +55,26 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
   useEffect(() => runtime.platform.keyboard.subscribe(key => {
     if (key.code !== 'Space') return;
     if (!key.pressed) { held.current = false; return; }
-    if (preview || key.editable || settings) return;
+    if (preview || !interactive || key.editable || settings) return;
     key.preventDefault();
     if (!skills.includes('keyboard') && !skills.includes('hold')) return;
     if (key.repeat || held.current) return;
     held.current = true;
     lastHeld.current = runtime.platform.clock.monotonicNow();
     runtime.pressSeed();
-  }), [runtime, skills, settings, preview]);
+  }), [runtime, skills, settings, preview, interactive]);
   useEffect(() => {
-    if (preview || !skills.includes('hold') || settings) return;
+    if (preview || !interactive || !skills.includes('hold') || settings) return;
     const interval = 1_000 / (BALANCE.w1.holdPressesPerSecond * BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier);
     return runtime.platform.every(interval, () => {
       const time = runtime.platform.clock.monotonicNow();
       if (held.current && time - lastHeld.current >= interval) { lastHeld.current = time; runtime.pressSeed(); }
     });
-  }, [runtime, skills, settings, state.persistent.specs.refresh, preview]);
+  }, [runtime, skills, settings, state.persistent.specs.refresh, preview, interactive]);
+  useEffect(() => { if (!interactive) held.current = false; }, [interactive]);
   const items = visibleSeedItems(state);
   const guide = seed.guide;
-  const showCursors = Math.min(BALANCE.w1.maxVisibleCursors, seed.autoCursors);
+  const showCursors = Math.min(state.run.world === 'desktop' ? BALANCE.w3.compactCursors : BALANCE.w1.maxVisibleCursors, seed.autoCursors);
   const generate = manualClickValue(state);
   const activePress = motion && press && press.target === 'primary' && now - press.at < BALANCE.w1.numberRollMs;
   const cursorsWorking = !(embedded && state.run.kumiki.placed.includes('switch') && state.run.kumiki.focus);
@@ -103,11 +106,11 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
     return <li key={id}>{has('layout') && <span>{name}{effect && <small className="purchase-effect">{effect}</small>}</span>}
       <button className="build-button" disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)} aria-label={label} aria-description={effect || undefined}>
         {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : <>{label}{effect && <small className="purchase-effect">{effect}</small>}</>}
-      </button></li>;
+      </button><Estimate cost={cost} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} i18n={i18n} runtime={runtime} preview={preview}/></li>;
   };
   return <main className={[className, state.run.restartMs > 0 && 'is-restarting', preview && 'is-preview'].filter(Boolean).join(' ')}>
     {settings ? <PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={() => setSettings(false)} /> : <div className="seed-content">
-      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{i18n.t('foundation.goal')}
+      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{state.persistent.products.length?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName)}):i18n.t('foundation.goal')}
         {!embedded && <button className="text-button goal-progress" onClick={() => setConditions(!conditions)} aria-expanded={conditions}>{i18n.t('seed.goalProgress', { done: 0, total: 5 })}</button>}
       </p>
       {conditions && <section className="release-conditions"><h2>{i18n.t('seed.conditions')}</h2><ul>
@@ -156,7 +159,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
           {i18n.t('seed.gain', { pixels: i18n.integer(item.pixels) })}</span>)}
       </span></p>
       {children}
-      {seed.autoCursors > BALANCE.w1.maxVisibleCursors && <p className="cursor-summary">{i18n.t('seed.cursors', { count: seed.autoCursors })}</p>}
+      {seed.autoCursors > (state.run.world === 'desktop' ? BALANCE.w3.compactCursors : BALANCE.w1.maxVisibleCursors) && <p className="cursor-summary">{i18n.t('seed.cursors', { count: seed.autoCursors })}</p>}
       <hr />
       {!has('kumiki') && <><p className="available-heading"><span>{i18n.t('seed.available')}</span></p><ul className="build-list">
         {canSave(state) && purchase('cursor')}{items.map(purchase)}</ul></>}

@@ -11,3 +11,6 @@
 これに `tools/vendor_fonts.py` の `RANGES` と、言語ファイル・用語集の文字を加える。
 英数字はASCII・Latin-1・Latin Extended-A、かなはひらがな・カタカナ・小書きかな・全角半角を対象とする。
 漢字全体のUnicode範囲は指定しない。通常のビルドは同梱済みの書体を使い、これらの取得やPythonは不要。
+
+DotGothic16にない「𥝱」は、CSSで次に指定した同梱BIZ UDPGothicへフォールバックする。
+`vendor_fonts.py` と書体のmanifestに対応を明示し、`--check`で代替書体の字形も確認する。

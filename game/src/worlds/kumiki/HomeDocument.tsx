@@ -6,10 +6,10 @@ import { ownedParts, hasKSkill } from '../../systems/kumiki';
 import { Foundation, useAnimationClock } from '../Foundation';
 import { manualClickValue } from '../../systems/economy';
 import { designStyle } from './design';
-export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop, preview = false }: {
+export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop, preview = false, interactive = true }: {
   runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n; selected: string | null; onSelect(id: string): void;
   selecting: boolean; dragPart: PartId | null; onDrop(id: PartId): void;
-  preview?: boolean;
+  preview?: boolean; interactive?: boolean;
 }) {
   const { state } = snapshot;
   const k = state.run.kumiki;
@@ -85,7 +85,7 @@ export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, sele
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d={['M3 12H13','M3 3H13V13H3Z','M3 3L13 13M13 3L3 13'][index]} /></svg>
       </button>)}</div></header>}
     <div className="home-body" hidden={k.homeWindow === 'minimized' || k.homeWindow === 'closed'}>
-      <Foundation snapshot={snapshot} runtime={runtime} i18n={i18n} embedded preview={preview}>
+      <Foundation snapshot={snapshot} runtime={runtime} i18n={i18n} embedded preview={preview} interactive={interactive}>
         <div className="home-part-list">
           {ownedParts(state).filter(id => id !== 'frame' && id !== 'taskbar' && (id !== 'table' || !k.placed.includes('tabs') || recordTab)).map(id => slot(id, items[id]))}
           {ownedParts(state).includes('frame') && !k.placed.includes('frame') && slot('frame', items.frame)}

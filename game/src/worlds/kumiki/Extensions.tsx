@@ -1,3 +1,4 @@
+import { ProductSettings } from '../../components/ProductSettings';
 import { useState } from 'react';
 import { BALANCE } from '../../config/balance';
 import type { I18n } from '../../content/i18n';
@@ -28,7 +29,7 @@ export function Extensions({ runtime, snapshot, i18n }: { runtime: GameRuntime; 
         </div>)}
       </fieldset>)}
       {hasKSkill(state, 'modern') && <p><label><input type="checkbox" checked={state.persistent.artwork.modern} onChange={event => runtime.actKumiki({ type: 'modern', enabled: event.target.checked })} />{i18n.t('k.modernView')}</label></p>}
-      <p><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} /></p>
+      <ProductSettings state={state} runtime={runtime} i18n={i18n}/><p><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} /></p>
       <section className="k-data"><h2>{i18n.t('data.title')}</h2>
         <button onClick={runtime.downloadData}>{i18n.t('data.export')}</button>
         <button onClick={() => { void runtime.requestImport(); }}>{i18n.t('data.import')}</button>

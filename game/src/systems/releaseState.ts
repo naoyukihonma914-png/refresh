@@ -11,7 +11,7 @@ export interface ProductScreen {
   history: SeedState['history'];
 }
 export interface ProductRecord {
-  id: number; version: 'v0.1'; releasedAt: number; author: string | null;
+  id: number; name: string | null; version: 'v0.1'; releasedAt: number; author: string | null;
   generatedPixels: number; builtCount: number; revenue: number;
   screen: ProductScreen; exports: ExportedWork[];
 }
@@ -23,7 +23,7 @@ const amount = (x: unknown): x is number => typeof x === 'number' && Number.isFi
 const count = (x: unknown): x is number => amount(x) && Number.isSafeInteger(x);
 const ids = (x: unknown, allowed: readonly unknown[]): x is string[] => Array.isArray(x) && new Set(x).size === x.length && x.every(id => allowed.includes(id));
 export function isProductRecord(x: unknown): x is ProductRecord {
-  if (!obj(x) || !count(x.id) || x.id < 1 || x.version !== 'v0.1' || !amount(x.releasedAt)
+  if (!obj(x) || !(x.name === null || typeof x.name === 'string' && [...x.name].length <= BALANCE.release.maxProductName) || !count(x.id) || x.id < 1 || x.version !== 'v0.1' || !amount(x.releasedAt)
     || x.author !== null && typeof x.author !== 'string' || !amount(x.generatedPixels) || !count(x.builtCount) || !count(x.revenue)) return false;
   const s = x.screen;
   if (!obj(s) || !amount(s.pixels) || !count(s.cursors) || !ids(s.built, BALANCE.w1.items.map(i => i.id))

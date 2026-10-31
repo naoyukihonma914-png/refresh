@@ -83,7 +83,7 @@ def main():
         page.get_by_role('button',name='ファイル',exact=True).click()
         with page.expect_download() as d:page.get_by_role('button',name='データをエクスポート',exact=True).click()
         raw=Path(d.value.path()).read_text();state=json.loads(raw)
-        assert state['schemaVersion']==5
+        assert state['schemaVersion']==6
         assert state['persistent']['artwork']['sketchbook']['frames'][0][0]>=0
         assert state['run']['kumiki']['drawings']['folder']['exported']
         ctx.close()

@@ -71,15 +71,18 @@ def main():
         assert page.locator('.k-condition-popover input:checked').count() == 3
         page.get_by_role('button', name='リリースする', exact=True).click()
         dialog = page.get_by_role('dialog', name='試作版のリリース', exact=True)
-        assert 'ピクセルと、作ったパーツや構成は手放す' in dialog.inner_text()
-        assert 'プラグインと、これから上げる性能は残り' in dialog.inner_text()
+        assert 'ピクセルと、作ったパーツや構成は手放します' in dialog.inner_text()
+        assert 'プラグインと性能、描いたアイコン' in dialog.inner_text()
         before = page.locator('.k-toolbar [data-pixels]').get_attribute('data-pixels')
         dialog.get_by_role('button', name='もう少し作る', exact=True).click()
         assert page.locator('.shipping-page').count() == 0
         assert page.locator('.k-toolbar [data-pixels]').get_attribute('data-pixels') == before
         page.get_by_role('button', name='リリースする', exact=True).click()
+        dialog.get_by_label('製品の名前',exact=True).fill('私の画面')
         dialog.get_by_role('button', name='リリースする', exact=True).click()
         page.locator('.shipping-page').wait_for()
+        assert '私の画面 試作版 v0.1' in page.locator('.shipping-header').inner_text()
+        assert '次の版' in page.locator('.next-version-theme').inner_text()
         assert page.locator('.revenue-total').inner_text() == '0 ドル'
         assert page.locator('.spec-table tr[data-spec] button:not(:disabled)').count() == 0
         assert page.locator('.product-details').inner_text().find('Aoi') >= 0
@@ -108,7 +111,7 @@ def main():
         assert page.locator('[data-spec="color"] button').is_disabled()
         assert page.locator('.product-preview .seed-page.modern-colors').count() == 0
         page.locator('[data-spec="storage"] button').click()
-        assert page.locator('.available-dollars').inner_text() == '3'
+        assert page.locator('.available-dollars').inner_text() == '43'
         assert page.locator('.next-version button').is_enabled()
         page.locator('.debug-panel').evaluate("e=>e.style.visibility='hidden'")
         page.locator('.next-version button').click()
@@ -116,12 +119,12 @@ def main():
         page.locator('.debug-panel').evaluate("e=>e.style.visibility='visible'")
         assert page.locator('.intro-note').count() == 0
         saved = page.evaluate("JSON.parse(localStorage.getItem('refresh.save'))")
-        assert saved['schemaVersion'] == 5 and saved['run']['version'] == 'v1'
+        assert saved['schemaVersion'] == 6 and saved['run']['version'] == 'v1'
         assert saved['resources']['pixels'] == 0 and saved['run']['seed']['autoCursors'] == 0
         assert saved['run']['seed']['built'] == [] and saved['run']['kumiki']['placed'] == []
         assert saved['persistent']['specs']['color'] == 1 and saved['persistent']['specs']['storage'] == 1
         assert len(saved['persistent']['artwork']['icons']) == 6 and len(saved['persistent']['products']) == 1
-        assert saved['persistent']['playerName'] == 'Aoi' and saved['resources']['dollars'] == 3
+        assert saved['persistent']['playerName'] == 'Aoi' and saved['resources']['dollars'] == 43
         page.reload(); ready(page); page.clock.run_for(1000)
         assert page.locator('.pixel-count').get_attribute('data-value') == '0'
         assert 'おかえりなさい' in page.locator('.guide-body').inner_text()
@@ -136,7 +139,7 @@ def main():
         assert page.locator('.seed-page.modern-colors').count() == 1
         assert page.locator('.seed-page').evaluate('e=>getComputedStyle(e).backgroundColor') == 'rgb(232, 237, 241)'
         assert page.locator('.generate-button').evaluate('e=>getComputedStyle(e).backgroundColor') == 'rgb(40, 91, 117)'
-        checks.append('256色200ドル・ストレージ100ドルの支払い、製品の16色は保持。リセット後も性能・絵・作者・記録を保存し、作り直したカラーは256色の配色')
+        checks.append('256色200ドル・ストレージ60ドルの支払い、製品の16色は保持。リセット後も性能・絵・作者・記録を保存し、作り直したカラーは256色の配色')
 
         page.evaluate("()=>{const b=[...document.querySelectorAll('.debug-panel button')].find(b=>b.textContent==='ピクセルを足す');for(let i=0;i<25;i++)b.click()}")
         for name,cost in [('フォント',700),('レイアウト',2000),('アニメーション',4500),('Tessera ',12000)]:
@@ -164,9 +167,10 @@ def main():
         assert page.get_by_role('button',name='リリースする',exact=True).count() == 0
         page.get_by_role('button',name='デスクトップとして組み立てる',exact=True).click()
         assert page.locator('.kumiki').count() == 1 and page.locator('.shipping-page').count() == 0
-        assert page.get_by_text('デスクトップの組み立てに必要なパーツがそろいました。',exact=True).count() == 1
+        assert page.locator('.desktop').count() == 1
+        assert page.locator('.desktop-shortcut').count() == 2
         ctx.close()
-        checks.append('7項目の性能購入と残高、v1のTesseraでもデスクトップへは進まない段階5との境界')
+        checks.append('7項目の性能購入と残高、v1のTesseraから段階5のデスクトップへ組み立てる')
 
         ctx,page=scene('kumiki-modern')
         shadow=page.locator('.shadow-setting')

@@ -1,3 +1,4 @@
+import { enterDesktop, buyDesktopApp, focusWindow, advanceDesktopTime, takeScreenshot } from './desktop';
 import { BALANCE } from '../config/balance';
 import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
@@ -7,6 +8,7 @@ import { advanceShipping, beginPrototypeRelease, buySpec, releaseEstimate, start
 
 export const FIXTURE_NAMES = [
   'intro',
+  'desktop-early', 'desktop-wait', 'desktop-files', 'desktop-mail', 'desktop-modern', 'desktop-full',
   'foundation-start', 'foundation-saved', 'foundation-offline-capped',
   'seed-start', 'seed-border', 'seed-saved', 'seed-color', 'seed-font',
   'seed-layout', 'seed-motion', 'seed-complete', 'seed-return', 'seed-inheriting',
@@ -19,6 +21,25 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
   if (name === 'intro') return state;
+  if (name?.startsWith('desktop-')) {
+    let next = createFixture('release-v1-tessera',now)!;
+    next.resources.pixels = 2_000_000; next.run.totalPixelsGenerated = 4_000_000;
+    next = enterDesktop(next); next.elapsedMs += BALANCE.w3.enterMs;
+    if (name === 'desktop-early') return next;
+    if (name === 'desktop-wait') { next.resources.pixels=20_000; return next; }
+    next = buyDesktopApp(next,'files');
+    if (name === 'desktop-files') return next;
+    next = buyDesktopApp(next,'mail'); next = focusWindow(next,'tessera');
+    if (name === 'desktop-modern') {
+      next.persistent.artwork.skills.push('modern','fill','layers'); next.persistent.artwork.modern=true;
+    }
+    next = advanceDesktopTime(next,720_000,now);
+    if (name === 'desktop-full') {
+      for(let i=0;i<BALANCE.w3.baseShotCapacity;i++) { next.run.desktop.cooldownMs=0; next=takeScreenshot(next,now,'ja'); }
+      next.run.desktop.cooldownMs=0;
+    }
+    return next;
+  }
   if (name?.startsWith('release-')) {
     let next = createFixture('kumiki-wall', now)!;
     for (const id of ['clock', 'mail', 'photo', 'settings']) {
