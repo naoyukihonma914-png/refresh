@@ -5,6 +5,7 @@ import { createI18n } from './content/i18n';
 import type { GameRuntime } from './systems/runtime';
 import { Foundation } from './worlds/Foundation';
 import { Kumiki } from './worlds/Kumiki';
+import { Intro } from './worlds/Intro';
 
 export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }) {
   const snapshot = useSyncExternalStore(runtime.subscribe, runtime.getSnapshot);
@@ -21,7 +22,9 @@ export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }
           <p>{i18n.t('save.corrupt')}</p>
           <button onClick={() => runtime.requestReset(true)}>{i18n.t('system.startNew')}</button>
         </div>}
-        {snapshot.status === 'ready' && (snapshot.state.run.world === 'kumiki'
+        {snapshot.status === 'ready' && (snapshot.introVisible
+          ? <Intro i18n={i18n} onStart={runtime.startGame} />
+          : snapshot.state.run.world === 'kumiki'
           ? <Kumiki key={snapshot.state.createdAt} snapshot={snapshot} i18n={i18n} runtime={runtime} />
           : <Foundation snapshot={snapshot} i18n={i18n} runtime={runtime} />)}
         {snapshot.notice && <p className="runtime-notice" role="alert">{i18n.t(snapshot.notice)}</p>}

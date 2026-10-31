@@ -5,6 +5,7 @@ import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, place
 import { blankDrawing } from './kumikiState';
 
 export const FIXTURE_NAMES = [
+  'intro',
   'foundation-start', 'foundation-saved', 'foundation-offline-capped',
   'seed-start', 'seed-border', 'seed-saved', 'seed-color', 'seed-font',
   'seed-layout', 'seed-motion', 'seed-complete', 'seed-return', 'seed-inheriting',
@@ -15,6 +16,7 @@ export const FIXTURE_NAMES = [
 export function createFixture(name: string | null, now: number): GameState | null {
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
+  if (name === 'intro') return state;
   if (name?.startsWith('kumiki-')) {
     state.run.seed.built = BALANCE.w1.items.map(item => item.id);
     state.run.seed.autoCursors = 12;

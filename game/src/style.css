@@ -3,6 +3,7 @@
 @font-face { font-family: 'Refresh UI'; src: url('./assets/fonts/biz-udpgothic-regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
 @font-face { font-family: 'Refresh UI'; src: url('./assets/fonts/biz-udpgothic-bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: block; }
 @font-face { font-family: 'Refresh Pixel'; src: url('./assets/fonts/dotgothic16.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: 'Refresh Mono'; src: url('./assets/fonts/biz-udgothic-regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
 :root { color: #000; background: #fff; font-family: 'Times New Roman', 'Refresh Serif', serif; font-synthesis: none; }
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; inline-size: 100%; block-size: 100%; }
@@ -19,6 +20,11 @@ body { overflow: hidden; }
 button, select { font-family: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: default; }
+.intro-note { inline-size: 100%; block-size: 100%; overflow: auto; padding: 8px; background: #fff; color: #000; }
+.intro-note pre { margin: 0; font: 18px/1.6 'Refresh Mono', monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.intro-note p { margin: 24px 0 0; }
+.intro-note button { font: 13.33px 'Refresh Sans', sans-serif; padding: 1px 6px; background: #efefef; color: #000; border: 1px solid #767676; border-radius: 2px; }
+.purchase-effect { display: inline; margin-inline-start: 10px; font-size: 12px; font-weight: 400; }
 .debug-panel { position: fixed; inset-inline-end: 12px; inset-block-end: 12px; z-index: 1; inline-size: 430px; max-inline-size: calc(100vw - 24px); max-block-size: calc(100vh - 24px); overflow: auto; margin: 0; padding: 12px; color: #1a1a1a; background: #f3f3f3; border: 1px solid #aaa; border-radius: 0; font: 13px 'Segoe UI', 'Refresh UI', sans-serif; }
 .debug-panel legend { background: #f3f3f3; padding: 0 4px; }
 .debug-panel p { margin: 0 0 8px; }
@@ -52,17 +58,17 @@ button { white-space: normal; overflow-wrap: anywhere; }
 .seed-page .cursor-summary { font-size: 13.33px; }
 .seed-page.has-border .generate-button, .seed-page.has-border .build-button { border: 2px solid #000; border-radius: 0; }
 .seed-page.has-border hr { border-block-start: 2px solid #000; border-block-end: 0; }
-.seed-page.has-color { --seed-bg: #c0c0c0; --seed-surface: #fff; --seed-ink: #000; --seed-accent: #000080; --seed-line: #808080; background-color: var(--seed-bg); color: var(--seed-ink); }
+.seed-page.has-color { --seed-bg: #c0c0c0; --seed-surface: #c0c0c0; --seed-ink: #000; --seed-accent: #000080; --seed-button: #008080; --seed-line: #808080; background-color: var(--seed-bg); color: var(--seed-ink); }
 .seed-page.has-color .goal { color: var(--seed-accent); }
 .seed-page.has-color button:not(.text-button), .seed-page.has-color select { background: #c0c0c0; color: #000; border-color: #808080; }
 .seed-page.has-color button:disabled { background: #c0c0c0; color: #808080; border-color: #808080; }
 .seed-page.has-color .text-button { color: #000080; }
 .seed-page.has-color .text-button:hover { color: #800080; }
-.seed-page.has-color .generate-button { background: var(--seed-accent); color: #fff; border-color: #000; }
+.seed-page.has-color .generate-button { background: var(--seed-button); color: #fff; border-color: #000; }
 .seed-page.has-color .build-button:not(:disabled) { background: #008080; color: #fff; border-color: #000080; }
 .seed-page.has-color .guide-notices { background: #fff; }
 .seed-page.has-color hr { border-color: var(--seed-line); }
-.seed-page.has-color.modern-colors { --seed-bg: #e8edf1; --seed-surface: #fff; --seed-ink: #1a2935; --seed-accent: #285b75; --seed-line: #9cabb4; }
+.seed-page.has-color.modern-colors { --seed-bg: #e8edf1; --seed-surface: #fff; --seed-ink: #1a2935; --seed-accent: #285b75; --seed-button: #285b75; --seed-line: #9cabb4; }
 .seed-page.has-color.modern-colors .build-button:not(:disabled) { background: #dce9f0; color: var(--seed-ink); border-color: #718e9e; }
 .seed-page.has-font { font-family: 'Refresh Sans', 'Refresh UI', sans-serif; font-size: 16px; }
 .seed-page.has-font .goal { font-size: 20px; font-weight: 700; }
@@ -197,7 +203,7 @@ button { white-space: normal; overflow-wrap: anywhere; }
 .drawing-scroll canvas { display: block; cursor: crosshair; touch-action: none; image-rendering: pixelated; }
 .drawing-scroll canvas:focus { outline: 1px solid #ffe0a0; }
 .drawing-progress { margin: 8px 14px; color: var(--k-sub); }
-.icon-editor > progress { inline-size: calc(100% - 28px); margin: 0 14px; }
+.icon-panel > progress { inline-size: calc(100% - 28px); margin: 0 14px; }
 .editor-options { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
 .editor-options label { display: flex; align-items: center; gap: 4px; }
 .editor-options select { inline-size: 80px; }
@@ -240,6 +246,23 @@ button { white-space: normal; overflow-wrap: anywhere; }
 .kumiki.is-modern .workbench { background-image: none; }
 .kumiki.is-modern .home-title { background: #f3f3f3; color: #1a1a1a; border-block-end: 1px solid #ccc; }
 .kumiki.is-modern .home-title button { color: #1a1a1a; }
+.kumiki .seed-page.has-color .generate-button { background: var(--seed-button); color: #fff; }
+.kumiki .seed-page.has-color .build-button:not(:disabled) { background: #008080; color: #fff; }
+.kumiki .seed-page.has-color.modern-colors .build-button:not(:disabled) { background: #dce9f0; color: var(--seed-ink); }
+.kumiki.is-modern .k-parts-panel { inline-size: 260px; }
+.kumiki.is-modern .icon-editor { inline-size: 340px; display: flex; flex-direction: column; background: #2f2f2f; border-inline-start-color: #1b1b1b; }
+.kumiki.is-modern .icon-editor > section { flex: none; border-block-end: 1px solid #1b1b1b; }
+.kumiki.is-modern h2 { background: #333; border-block-end: 1px solid #1f1f1f; box-shadow: none; font-weight: 700; min-block-size: 30px; }
+.kumiki.is-modern .editor-heading { background: #333; border-block-end: 1px solid #1f1f1f; min-block-size: 30px; }
+.kumiki.is-modern .editor-heading h2 { min-block-size: 0; background: transparent; }
+.kumiki.is-modern .drawing-scroll { inline-size: calc(100% - 24px); block-size: 300px; margin: 12px; box-shadow: none; padding: 0; background: #262626; }
+.kumiki.is-modern .editor-options { padding-block: 8px; }
+.kumiki.is-modern .property-panel { padding: 0 0 10px; border-block-start: 0; }
+.kumiki.is-modern .property-panel > p, .kumiki.is-modern .property-panel > label { margin-inline: 12px; }
+.kumiki.is-modern .property-panel label { min-block-size: 24px; margin-block: 8px; }
+.kumiki.is-modern .icon-editor > .layer-list { flex: 1 0 150px; min-block-size: 150px; }
+.kumiki.is-modern .layer-list button { min-block-size: 28px; border: 0; border-radius: 0; padding-inline: 28px 12px; background: transparent; }
+.kumiki.is-modern .layer-list button.active { background: #0067c0; color: #fff; }
 .kumiki.is-entering .home-document { transform-origin: 0 0; animation: kumiki-arrive 1.2s ease-out both; z-index: 10; }
 .kumiki.is-entering .k-tools, .kumiki.is-entering .k-parts-panel, .kumiki.is-entering .icon-editor, .kumiki.is-entering .k-menu, .kumiki.is-entering .k-toolbar { animation: kumiki-build 1.2s ease-out both; }
 .kumiki.is-renewing { animation: kumiki-renew 2s ease-out both; }

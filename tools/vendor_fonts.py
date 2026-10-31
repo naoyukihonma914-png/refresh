@@ -27,6 +27,7 @@ FONTS = [
     ('noto-sans-jp', 'notosansjp', 'NotoSansJP[wght].ttf'),
     ('biz-udpgothic-regular', 'bizudpgothic', 'BIZUDPGothic-Regular.ttf'),
     ('biz-udpgothic-bold', 'bizudpgothic', 'BIZUDPGothic-Bold.ttf'),
+    ('biz-udgothic-regular', 'bizudgothic', 'BIZUDGothic-Regular.ttf'),
     ('dotgothic16', 'dotgothic16', 'DotGothic16-Regular.ttf'),
 ]
 # 全漢字の範囲は含めない。かな・通常の句読点・記号とラテン文字を明示する。

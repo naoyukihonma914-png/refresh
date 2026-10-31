@@ -4,7 +4,7 @@ import type { I18n } from '../content/i18n';
 import { canSave } from '../systems/state';
 import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
 import { canBuildSeed, cursorPrice, visibleSeedItems } from '../systems/seed';
-import { cursorPressesPerSecond, manualClickValue } from '../systems/economy';
+import { cursorPixelsPerSecond, cursorPressesPerSecond, manualClickValue, passivePixelsPerSecond } from '../systems/economy';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { PageSettings } from './PageSettings';
 import { designStyle } from './kumiki/design';
@@ -94,9 +94,14 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, children
     const cost = id === 'cursor' ? cursorPrice(state) : BALANCE.w1.items.find(item => item.id === id)!.cost;
     const label = i18n.t(`seed.buy.${id}`, { cost: i18n.integer(cost) });
     const name = id === 'cursor' ? i18n.t('seed.cursor') : i18n.t(`item.${id}`);
-    return <li key={id}>{has('layout') && <span>{name}</span>}
-      <button className="build-button" disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)} aria-label={label}>
-        {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : label}
+    const effect = id === 'border' ? i18n.t('effect.clickAdd', { value: BALANCE.w1.border_bonus })
+      : id === 'color' ? i18n.t('effect.cursorMult', { value: BALANCE.w1.color_cursor_mult })
+        : id === 'font' ? i18n.t('effect.clickMult', { value: BALANCE.w1.font_mult })
+          : id === 'motion' ? i18n.t('effect.momentum', { value: BALANCE.w1.momentum.max })
+            : id === 'cursor' ? i18n.t('effect.cursorRate', { value: cursorPixelsPerSecond(state) }) : '';
+    return <li key={id}>{has('layout') && <span>{name}{effect && <small className="purchase-effect">{effect}</small>}</span>}
+      <button className="build-button" disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)} aria-label={label} aria-description={effect || undefined}>
+        {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : <>{label}{effect && <small className="purchase-effect">{effect}</small>}</>}
       </button></li>;
   };
   return <main className={className}>
@@ -122,7 +127,9 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, children
       {seed.installer && <section className="installer" role="status"><p>{i18n.t('installer.title')}</p>
         <progress max={BALANCE.w1.inheritMs} value={seed.installer.elapsedMs} aria-label={i18n.t('installer.title')} />
         <p>{i18n.t('installer.progress', { done: seed.built.length, total: seed.installer.items.length })}</p></section>}
-      <p className="pixels-line"><RollingPixels value={state.resources.pixels} now={now} enabled={motion} i18n={i18n} /></p>
+      <p className="pixels-line"><RollingPixels value={state.resources.pixels} now={now} enabled={motion} i18n={i18n} />
+        {seed.autoCursors > 0 && <span className="passive-rate" data-rate={passivePixelsPerSecond(state)}>{i18n.t('seed.rate', { pixels: passivePixelsPerSecond(state) })}</span>}
+      </p>
       <p className="generator-line"><span className="generator-anchor" ref={anchor}>
         <button type="button" className="generate-button" data-part="primary" onClick={event => {
           const rect = event.currentTarget.getBoundingClientRect();

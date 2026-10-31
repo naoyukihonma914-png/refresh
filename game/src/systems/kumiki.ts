@@ -1,5 +1,5 @@
 import { BALANCE, type KumikiItem, type KumikiSkill, type PartId } from '../config/balance';
-import { ICON_IDS, PRACTICE_IDS, iconTemplate, paletteFor, scaleArt } from '../content/kumikiArt';
+import { ICON_IDS, PRACTICE_IDS, homeButtonColor, iconTemplate, paletteFor, scaleArt } from '../content/kumikiArt';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import { blankDrawing, createKumikiState, PART_IDS, type Design, type Drawing, type KumikiGuide, type KumikiState } from './kumikiState';
 import type { GameState } from './state';
@@ -195,7 +195,7 @@ export function configureKumiki(state: GameState, change: Partial<Pick<KumikiSta
 }
 export function changeDesign(state: GameState, part: string, design: Design): GameState {
   if (!state.run.kumiki.built.includes('select') || part !== 'primary' && !state.run.kumiki.placed.includes(part as PartId)
-    || !paletteFor(state.persistent.specs.color).includes(design.color) || !Number.isFinite(design.radius) || design.radius < 0 || design.radius > 16
+    || !(paletteFor(state.persistent.specs.color).includes(design.color) || (part === 'primary' || part === 'button') && design.color === homeButtonColor(state.persistent.specs.color)) || !Number.isFinite(design.radius) || design.radius < 0 || design.radius > 16
     || !['small', 'medium', 'large'].includes(design.textSize)) return state;
   return withK(state, { ...state.run.kumiki, design: { ...state.run.kumiki.design, [part]: design } });
 }

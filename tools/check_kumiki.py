@@ -29,8 +29,8 @@ def folder():
     def box(x,y,w,h,c):
         for j in range(y,y+h):
             for i in range(x,x+w):cells[(i,j)]=0 if i==x or i==x+w-1 or j==y or j==y+h-1 else c
-    box(1,3,6,3,3);box(1,5,14,9,3)
-    for x in range(2,14):cells[(x,6)]=11
+    box(1,3,6,3,7);box(1,5,14,9,7)
+    for x in range(2,14):cells[(x,6)]=8
     return cells
 
 def main():
@@ -70,7 +70,7 @@ def main():
         page.get_by_role('button',name='やり直す',exact=True).click()
         assert balance(page)==before+10
         page.get_by_role('button',name='編集',exact=True).click()
-        for color in [0,3,11]:
+        for color in [0,7,8]:
             page.locator('.palette-swatches button').nth(color).click()
             for (x,y),c in folder().items():
                 if c==color:cell(page,x,y)
@@ -81,9 +81,9 @@ def main():
         page.locator('.editor-heading select').select_option('free')
         before=balance(page);cell(page,0,0);assert balance(page)==before
         page.get_by_role('button',name='ファイル',exact=True).click()
-        with page.expect_download() as d:page.get_by_role('button',name='データを書き出す',exact=True).click()
+        with page.expect_download() as d:page.get_by_role('button',name='データをエクスポート',exact=True).click()
         raw=Path(d.value.path()).read_text();state=json.loads(raw)
-        assert state['schemaVersion']==3
+        assert state['schemaVersion']==4
         assert state['persistent']['artwork']['sketchbook']['frames'][0][0]>=0
         assert state['run']['kumiki']['drawings']['folder']['exported']
         ctx.close()
@@ -92,27 +92,27 @@ def main():
         assert page.locator('.editor-heading select').input_value()=='free'
         assert page.locator('.token-count').count()==1
         restored.close()
-        checks.append('入りたての簡素な姿、実際にフォルダを描いて書き出し、戻す・やり直すの二重報酬防止、自由帳の無報酬と保存・再開')
+        checks.append('入りたての簡素な姿、実際にフォルダを描いて書き出し、戻す・やり直すの二重報酬防止、スケッチの無報酬と保存・再開')
 
         ctx,page=scene('kumiki-mature')
         source=page.locator('.part-list button').filter(has_text='スイッチ')
         target=page.locator('[data-slot="switch"]')
         source.drag_to(target)
         target.locator('input[type=checkbox]').wait_for()
-        page.get_by_label('集中モード',exact=True).check()
+        page.get_by_label('フォーカスモード',exact=True).check()
         before=balance(page);cursor=page.locator('.auto-cursor').first.get_attribute('style')
         page.clock.run_for(1000);assert balance(page)==before
         assert page.locator('.auto-cursor').first.get_attribute('style')==cursor
-        page.get_by_text('自動カーソルは休んでいます',exact=True).wait_for()
-        page.get_by_label('集中モード',exact=True).uncheck()
+        page.get_by_text('オートカーソルは休んでいます',exact=True).wait_for()
+        page.get_by_label('フォーカスモード',exact=True).uncheck()
         page.get_by_role('button',name='選択ツール',exact=True).click()
         page.locator('.generate-button').first.click()
         page.locator('.property-panel').wait_for()
-        page.locator('.property-panel select').first.select_option('#008080')
-        assert page.locator('.generate-button').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(0, 128, 128)'
+        page.locator('.property-panel select').first.select_option('#1f3f7a')
+        assert page.locator('.generate-button').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(31, 63, 122)'
         page.locator('.property-panel input[type=range]').focus();page.keyboard.press('End')
         assert page.locator('.generate-button').first.evaluate('e=>getComputedStyle(e).borderRadius')=='16px'
-        page.locator('.k-menu > button').filter(has_text='拡張機能').click()
+        page.locator('.k-menu > button').filter(has_text='プラグイン').click()
         row=page.locator('.extension-row').filter(has_text='塗りつぶし')
         row.get_by_role('button',name='取得する',exact=True).click()
         assert row.get_by_role('button',name='取得済み',exact=True).is_disabled()
@@ -122,7 +122,7 @@ def main():
         page.get_by_role('button',name='適用',exact=True).click()
         assert page.get_by_role('checkbox',name='キーボードで押す',exact=False).is_disabled()
         ctx.close()
-        checks.append('部品をドラッグして置く、集中モード、選択ツールの配色・角の丸み、拡張機能の取得、ホーム画面の設定')
+        checks.append('部品をドラッグして置く、フォーカスモード、選択ツールの配色・角の丸み、プラグインの取得、ホーム画面の設定')
 
         ctx,page=scene('kumiki-wall')
         assert page.get_by_role('button',name='デスクトップとして組み立てる',exact=True).is_disabled()
@@ -155,12 +155,12 @@ def main():
         page.locator('.editor-heading select').select_option('free')
         cell(page,1,1)
         page.get_by_role('button',name='壁紙にする',exact=True).click()
-        page.get_by_text('自由帳の絵を壁紙として保存しました。',exact=True).wait_for()
-        page.locator('.k-menu > button').filter(has_text='拡張機能').click()
+        page.get_by_text('スケッチの絵を壁紙として保存しました。',exact=True).wait_for()
+        page.locator('.k-menu > button').filter(has_text='プラグイン').click()
         page.get_by_label('新調した道具の見た目',exact=True).uncheck()
         assert 'is-modern' not in page.locator('.kumiki').get_attribute('class')
         ctx.close()
-        checks.append('新調した道具・2コマ目・自由帳から壁紙の保存・古い姿への切り替え')
+        checks.append('新調した道具・2コマ目・スケッチから壁紙の保存・古い姿への切り替え')
 
         for language in ['ja','en','en-XA']:
             ctx=context();page=ctx.new_page()

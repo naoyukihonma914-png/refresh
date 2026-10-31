@@ -48,6 +48,18 @@
     "subset_codepoints": 3032
   },
   {
+    "file": "biz-udgothic-regular.woff2",
+    "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/bizudgothic/BIZUDGothic-Regular.ttf",
+    "source_sha256": "709fcd41e3209fb765da750472f55ccdf925653e9fa7e1eb007cb65c8f749c75",
+    "woff2_sha256": "66eb9bf9d00a506036e33a3ecbc0ee4edfdf82c0dbcda3b65bb529219a208646",
+    "license": "bizudgothic-OFL.txt",
+    "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
+    "charset_sha256": "3277917318a2d22e2322c87efdb8a0c432e6c95caed048a22e2728fc9336d599",
+    "fonttools_version": "4.61.1",
+    "source_codepoints": 11741,
+    "subset_codepoints": 3032
+  },
+  {
     "file": "dotgothic16.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/dotgothic16/DotGothic16-Regular.ttf",
     "source_sha256": "3ad9af88726d42b40f7f365f0dcac785af73cf20ea6f1d5b44e57cc21150b8f1",

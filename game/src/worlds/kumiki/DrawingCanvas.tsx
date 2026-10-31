@@ -3,8 +3,9 @@ import type { I18n } from '../../content/i18n';
 import type { Drawing } from '../../systems/kumikiState';
 
 export type DrawingTool = 'pencil' | 'eraser' | 'fill' | 'eyedropper' | 'select';
-export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18n, onStroke, onBegin, onEnd, onPosition }: {
+export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18n, modern = false, onStroke, onBegin, onEnd, onPosition }: {
   drawing: Drawing; target: number[]; palette: string[]; frame: number; zoom: number; tool: DrawingTool; i18n: I18n;
+  modern?: boolean;
   onStroke(cells: number[], tool: DrawingTool): void; onBegin(): void; onEnd(): void; onPosition(x: number, y: number): void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -19,17 +20,17 @@ export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18
     ctx.clearRect(0, 0, 512, 512);
     for (let i = 0; i < pixels.length; i++) {
       const x = i % size * cell, y = Math.floor(i / size) * cell;
-      ctx.fillStyle = (i % size + Math.floor(i / size)) % 2 ? '#d9d6cf' : '#cfccc4';
+      ctx.fillStyle = modern ? (i % size + Math.floor(i / size)) % 2 ? '#3a3a3a' : '#343434' : (i % size + Math.floor(i / size)) % 2 ? '#d9d6cf' : '#cfccc4';
       ctx.fillRect(x, y, cell, cell);
       if (target[i]! >= 0 && pixels[i] === -1) {
         ctx.globalAlpha = 0.28; ctx.fillStyle = palette[target[i]!] ?? '#000'; ctx.fillRect(x, y, cell, cell); ctx.globalAlpha = 1;
       }
       if (pixels[i]! >= 0) { ctx.fillStyle = palette[pixels[i]!] ?? '#000'; ctx.fillRect(x, y, cell, cell); }
-      if (size <= 32) { ctx.strokeStyle = '#8d8a83'; ctx.lineWidth = 0.7; ctx.strokeRect(x, y, cell, cell); }
+      if (size <= 32) { ctx.strokeStyle = modern ? '#4a4a4a' : '#8d8a83'; ctx.lineWidth = 0.7; ctx.strokeRect(x, y, cell, cell); }
     }
     ctx.strokeStyle = '#b8452f'; ctx.lineWidth = 2;
     ctx.strokeRect(cursor % size * cell + 1, Math.floor(cursor / size) * cell + 1, cell - 2, cell - 2);
-  }, [drawing, target, palette, frame, cursor, size]);
+  }, [drawing, target, palette, frame, cursor, size, modern]);
   const point = (event: PointerEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = Math.max(0, Math.min(size - 1, Math.floor((event.clientX - rect.left) / rect.width * size)));
@@ -45,7 +46,7 @@ export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18
   };
   const finish = () => { if (previous.current !== null) { previous.current = null; onEnd(); } };
   return <div className="drawing-scroll"><canvas ref={ref} width={512} height={512} tabIndex={0}
-    aria-label={i18n.t('k.drawHint')} style={{ inlineSize: 384 * zoom, blockSize: 384 * zoom }}
+    aria-label={i18n.t('k.drawHint')} style={{ inlineSize: (modern ? 288 : 384) * zoom, blockSize: (modern ? 288 : 384) * zoom }}
     onPointerDown={event => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); onBegin(); stroke(point(event)); }}
     onPointerMove={event => { const cell = point(event); if (previous.current !== null && tool !== 'fill' && tool !== 'eyedropper') stroke(cell); }}
     onPointerUp={finish} onPointerCancel={finish} onLostPointerCapture={finish}

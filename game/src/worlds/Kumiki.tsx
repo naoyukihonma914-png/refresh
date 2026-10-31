@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { BALANCE, type PartId } from '../config/balance';
-import { BASE_PALETTE, paletteFor } from '../content/kumikiArt';
+import { BASE_PALETTE, homeButtonColor, paletteFor } from '../content/kumikiArt';
 import type { I18n } from '../content/i18n';
 import { availableIcons, drawingFor, exportable, hasKSkill, nextKumikiItem, ownedParts, prototypeConditions, targetFor } from '../systems/kumiki';
 import { passivePixelsPerSecond } from '../systems/economy';
@@ -27,7 +27,7 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
   const [frame, setFrame] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [mirror, setMirror] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(state.persistent.artwork.modern ? 'primary' : null);
   const [extensions, setExtensions] = useState(false);
   const [menu, setMenu] = useState<'file' | 'edit' | null>(null);
   const [conditions, setConditions] = useState(false);
@@ -58,7 +58,7 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
   const tokensVisible = k.tokenDiscovered || state.resources.tokens > 0;
   const prototype = k.exitInspected && state.persistent.specs.color === 0;
   const releaseChecks = prototypeConditions(state);
-  const defaultDesign: Design = { color: BASE_PALETTE[4]!, radius: 0, textSize: 'medium', shadow: false };
+  const defaultDesign: Design = { color: selected === 'primary' || selected === 'button' ? homeButtonColor(state.persistent.specs.color) : BASE_PALETTE[11]!, radius: 0, textSize: 'medium', shadow: false };
   const design = selected ? k.design[selected] ?? defaultDesign : defaultDesign;
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -67,20 +67,20 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
     if (!root) return;
     const home = root.querySelector<HTMLElement>('.home-document');
     const origin = root.getBoundingClientRect();
+    const previousAnimation = home?.style.animation;
     if (home) {
-      const previousAnimation = home.style.animation;
       home.style.animation = 'none';
       const rect = home.getBoundingClientRect(), scale = origin.width / 1920;
       root.style.setProperty('--arrive-x', `${-(rect.left - origin.left) / scale}px`);
       root.style.setProperty('--arrive-y', `${-(rect.top - origin.top) / scale}px`);
       root.style.setProperty('--arrive-scale', `${1920 / (rect.width / scale)}`);
-      home.style.animation = previousAnimation;
     }
     const node = selected ? root.querySelector<HTMLElement>(`[data-part="${selected}"]`) : null;
     if (node) {
       const rect = node.getBoundingClientRect(), scale = origin.width / 1920;
       setDimensions({ width: Math.round(rect.width / scale), height: Math.round(rect.height / scale) });
     }
+    if (home) home.style.animation = previousAnimation ?? '';
   }, [selected, design.radius, design.textSize, k.placed.length, mature]);
   useEffect(() => {
     if (previousModern.current !== state.persistent.artwork.modern && state.persistent.artwork.modern) setRenewing(true);
@@ -129,6 +129,10 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
     if (tool === 'eyedropper') { const selectedColor = k.design[id]?.color ?? defaultDesign.color; setColor(Math.max(0, palette.indexOf(selectedColor))); }
     else setSelected(id);
   };
+  const layers = hasKSkill(state, 'layers') && <section className="layer-list"><h2>{i18n.t('k.layers')}</h2>{['primary', ...k.placed].map(id => <button key={id} className={selected === id ? 'active' : ''} onClick={() => { setTool('select'); selectPart(id); }}>{id === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${id as PartId}`)}</button>)}</section>;
+  const effect = next === 'button' ? i18n.t('effect.home', { value: BALANCE.w2.buttonMultiplier })
+    : next === 'switch' ? i18n.t('effect.focus', { value: BALANCE.w2.focusMultiplier })
+      : next === 'slider' ? i18n.t('effect.interval', { value: BALANCE.w2.sliderMultiplier }) : '';
   return <main ref={host} className={['kumiki', mature && 'is-mature', state.persistent.artwork.modern && 'is-modern', entered && 'is-entering', renewing && 'is-renewing'].filter(Boolean).join(' ')}
     onPointerUp={event => {
       const id = dragRef.current;
@@ -192,9 +196,9 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
           onDragEnd={() => { dragRef.current = null; setDragPart(null); }} onClick={() => k.placed.includes(id) ? selectPart(id) : (dragRef.current = id, setDragPart(id))}>
           <span>{i18n.t(`k.part.${id}`)}</span><small>{i18n.t(k.placed.includes(id) ? 'k.placed' : 'k.place')}</small>
         </button>)}</div></>}
-        {mature && next && <section className="next-component"><h2>{i18n.t('k.next')}</h2><p>{i18n.t(`k.part.${next}`)}</p><button disabled={state.resources.pixels < nextCost}
+        {mature && next && <section className="next-component"><h2>{i18n.t('k.next')}</h2><p>{i18n.t(`k.part.${next}`)}{effect && <small className="purchase-effect">{effect}</small>}</p><button disabled={state.resources.pixels < nextCost}
           onClick={() => act({ type: 'build', id: next })}>{i18n.t('seed.buildPrice', { cost: i18n.integer(nextCost) })}</button></section>}
-        {hasKSkill(state, 'layers') && <section className="layer-list"><h2>{i18n.t('k.layers')}</h2>{['primary', ...k.placed].map(id => <button key={id} className={selected === id ? 'active' : ''} onClick={() => { setTool('select'); selectPart(id); }}>{id === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${id as PartId}`)}</button>)}</section>}
+        {!state.persistent.artwork.modern && layers}
         {parts.length > 0 && <section className="desktop-exit"><button disabled={!k.built.includes('taskbar') || state.persistent.specs.color === 0 || state.resources.pixels < BALANCE.w2.desktopCost}
           onClick={() => { act({ type: 'exit' }); setConditions(true); }}>{i18n.t('k.desktop')}</button>
           <p>{i18n.t('k.desktopPrice', { pixels: i18n.integer(BALANCE.w2.desktopCost) })}</p>
@@ -216,6 +220,7 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
         </section>}
       </section>
       <aside className="icon-editor">
+        <section className="icon-panel">
         <div className="editor-heading"><h2>{i18n.t(drawingId === 'free' ? 'k.file.free' : 'k.document')}</h2>
           <select aria-label={i18n.t('k.document')} value={drawingId} onChange={event => openDrawing(event.target.value)}>
             {availableIcons(state).map(id => <option key={id} value={id}>{i18n.t(`k.icon.${id as 'folder'}`)}</option>)}
@@ -223,7 +228,7 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
           </select>
           {drawing && <span>{i18n.t('k.grid', { size: drawing.size })}</span>}
         </div>
-        {drawing && <><DrawingCanvas drawing={drawing} target={target} palette={palette} frame={frame} zoom={zoom} tool={tool} i18n={i18n} onBegin={begin} onEnd={runtime.persist} onStroke={stroke} onPosition={(x, y) => setPosition({ x, y })} />
+        {drawing && <><DrawingCanvas drawing={drawing} target={target} palette={palette} frame={frame} zoom={zoom} tool={tool} i18n={i18n} modern={state.persistent.artwork.modern} onBegin={begin} onEnd={runtime.persist} onStroke={stroke} onPosition={(x, y) => setPosition({ x, y })} />
           <p className="drawing-progress">{i18n.t('k.progress', { total: target.filter(c => c >= 0).length, done: target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length })}</p>
           <progress max={Math.max(1, target.filter(c => c >= 0).length)} value={target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length} aria-label={i18n.t('k.progress', { total: target.filter(c => c >= 0).length, done: target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length })} />
           <div className="editor-options"><label>{i18n.t('k.zoom')}<select value={zoom} onChange={event => setZoom(Number(event.target.value))}>{[1,2,3,4].map(value => <option key={value} value={value}>{i18n.t('k.zoomValue', { count: value * 100 })}</option>)}</select></label>
@@ -234,13 +239,15 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
             {drawingId === 'free' && hasKSkill(state, 'wallpaper') && <button onClick={() => { act({ type: 'wallpaper' }); setWallpaperNotice(true); }}>{i18n.t('k.wallpaper')}</button>}
           </div>{wallpaperNotice && <p role="status">{i18n.t('k.wallpaperSaved')}</p>}
         </>}
-        {selected && k.built.includes('select') && <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{selected === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${selected as PartId}`)}</p>
-          <label>{i18n.t('k.fillColor')}<select value={design.color} onChange={event => change({ color: event.target.value })}>{palette.map(c => <option value={c} key={c}>{c}</option>)}</select></label>
+        </section>
+        {k.built.includes('select') && (selected ? <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{selected === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${selected as PartId}`)}</p>
+          <label>{i18n.t('k.fillColor')}<select value={design.color} onChange={event => change({ color: event.target.value })}>{!palette.includes(design.color) && <option value={design.color}>{design.color}</option>}{palette.map(c => <option value={c} key={c}>{c}</option>)}</select></label>
           <label>{i18n.t('k.radius')}<input type="range" min={0} max={16} value={design.radius} onChange={event => change({ radius: Number(event.target.value) })} /><output>{i18n.number(design.radius)}</output></label>
           <label>{i18n.t('k.textSize')}<select value={design.textSize} onChange={event => change({ textSize: event.target.value as Design['textSize'] })}>{(['small','medium','large'] as const).map(id => <option key={id} value={id}>{i18n.t(`k.${id}`)}</option>)}</select></label>
           <label><input type="checkbox" checked={design.shadow} onChange={event => change({ shadow: event.target.checked })} />{i18n.t('k.shadow')}</label>
           {hasKSkill(state, 'snap') && <p>{i18n.t('k.dimensions', dimensions)}</p>}
-        </section>}
+        </section> : state.persistent.artwork.modern && <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{i18n.t('k.choosePart')}</p></section>)}
+        {state.persistent.artwork.modern && layers}
         {k.guide.current && !k.guide.collapsed && <section className="k-comment"><h3>{i18n.t(`k.guide.${k.guide.current}.title`)}</h3><p>{i18n.t(`k.guide.${k.guide.current}`)}</p><p>{i18n.t('guide.signature')}</p>
           {k.guide.current === 'name' && <form onSubmit={event => { event.preventDefault(); act({ type: 'name', name }); readGuide('close'); }}><label>{i18n.t('k.playerName')}<input value={name} maxLength={BALANCE.w2.maxName} onChange={event => setName(event.target.value)} /></label><button type="submit">{i18n.t('k.answer')}</button></form>}
           <button onClick={() => readGuide('close')}>{i18n.t('guide.close')}</button>

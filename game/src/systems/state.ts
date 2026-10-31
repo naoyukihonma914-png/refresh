@@ -1,7 +1,7 @@
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { createArtwork, createKumikiState, isArtwork, isKumikiState, type Artwork, type KumikiState } from './kumikiState';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint'] as const;
 export type GuideId = typeof GUIDE_IDS[number];

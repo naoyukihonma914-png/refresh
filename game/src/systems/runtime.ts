@@ -16,6 +16,7 @@ export interface RuntimeSnapshot {
   status: 'starting' | 'ready' | 'blocked' | 'corrupt';
   notice: MessageKey | null;
   offline: Omit<TimeResult, 'state'> | null;
+  introVisible: boolean;
   press: { serial: number; pixels: number; momentum: number; at: number; x: number; y: number; target: 'primary' | 'button' } | null;
 }
 
@@ -47,7 +48,7 @@ export class GameRuntime {
     const language = chooseLanguage(this.platform.settings.read().language, platform.preferredLanguages);
     this.snapshot = {
       state: fixture ?? createInitialState(now), language,
-      status: 'starting', notice: null, offline: null, press: null,
+      status: 'starting', notice: null, offline: null, press: null, introVisible: false,
     };
     this.platform.setDocumentLanguage(language, createI18n(language).direction);
   }
@@ -82,6 +83,7 @@ export class GameRuntime {
       notice: loaded.kind === 'recovered' ? 'save.recovered'
         : loaded.kind === 'unavailable' ? 'save.storageUnavailable' : null,
       offline: loaded.kind !== 'empty' ? offlineNotice(result) : null,
+      introVisible: this.platform.launch.fixture === 'intro' || !this.fixture && (loaded.kind === 'empty' || loaded.kind === 'unavailable'),
     });
     this.lastActiveAt = this.platform.clock.monotonicNow();
     this.suspended = this.platform.visibility.isHidden();
@@ -119,6 +121,10 @@ export class GameRuntime {
     const wallElapsed = wallNow - this.snapshot.state.lastTickAt;
     const inactive = isInactiveGap(monotonicElapsed, wallElapsed);
     this.lastActiveAt = now;
+    if (this.snapshot.introVisible) {
+      this.publish({ state: { ...this.snapshot.state, lastTickAt: wallNow } });
+      return false;
+    }
     if (inactive) {
       this.momentum = freshMomentum();
       const result = advanceOfflineTime(this.snapshot.state, wallNow);
@@ -176,8 +182,15 @@ export class GameRuntime {
 
   reload = () => { this.platform.reload(); };
 
+  startGame = () => {
+    if (!this.canOperate() || !this.snapshot.introVisible) return;
+    this.lastActiveAt = this.platform.clock.monotonicNow();
+    this.activeRemainderMs = 0;
+    this.publish({ introVisible: false, state: { ...this.snapshot.state, lastTickAt: this.platform.clock.wallNow() } });
+  };
+
   pressSeed = (position: { x: number; y: number; target?: 'primary' | 'button' } = { x: 50, y: 50 }) => {
-    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    if (!this.canOperate() || this.snapshot.introVisible || this.suspended || this.platform.visibility.isHidden()) return;
     if (this.advanceForeground()) this.persist();
     const now = this.platform.clock.monotonicNow();
     const result = pressSeed(this.snapshot.state, this.momentum, now);
@@ -186,7 +199,7 @@ export class GameRuntime {
   };
 
   buildSeed = (id: SeedItem | 'cursor') => {
-    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    if (!this.canOperate() || this.snapshot.introVisible || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
     const previous = this.snapshot.state;
     const state = buildSeed(previous, id, this.platform.clock.wallNow());
@@ -269,7 +282,7 @@ export class GameRuntime {
       this.activeRemainderMs = 0;
       this.momentum = freshMomentum();
       this.lastActiveAt = this.platform.clock.monotonicNow();
-      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null });
+      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null, introVisible: false });
       this.persist();
       return true;
     } catch {
@@ -288,7 +301,7 @@ export class GameRuntime {
     if (this.disposed || !this.lease?.isOwner()) return;
     if (this.snapshot.status !== 'ready' && this.snapshot.status !== 'corrupt') return;
     if (!clearGame(this.platform.storage)) { this.publish({ notice: 'save.failed' }); return; }
-    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null, press: null });
+    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null, press: null, introVisible: true });
     this.momentum = freshMomentum();
     this.activeRemainderMs = 0;
     this.lastActiveAt = this.platform.clock.monotonicNow();

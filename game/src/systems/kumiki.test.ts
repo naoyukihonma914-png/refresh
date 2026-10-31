@@ -232,7 +232,7 @@ describe('部品・拡張機能と生成', () => {
     state = through('input');
     state = actKumiki(state, { type: 'name', name: '  作者  ' }, now);
     expect(state.persistent.playerName).toBe('作者');
-    state = changeDesign(state, 'primary', { color: '#008080', radius: 4, textSize: 'large', shadow: true });
+    state = changeDesign(state, 'primary', { color: '#1f3f7a', radius: 4, textSize: 'large', shadow: true });
     state = placePart(state, 'input'); state = configureKumiki(state, { exportName: '自分のボタン' });
     state = exportKumiki(state, now);
     expect(state.run.kumiki.exports.find(e => e.id === 'button')?.name).toBe('自分のボタン');

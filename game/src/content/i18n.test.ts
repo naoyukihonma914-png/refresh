@@ -68,8 +68,8 @@ describe('言語ファイルと表示', () => {
     expect(en.duration(2_000)).toBe('2 seconds');
     expect(en.duration(3_600_000)).toBe('1 hour');
     expect(en.duration(11_520_000)).toBe('3 hours 12 min');
-    expect(en.t('debug.cursorCount', { count: 1 })).toBe('1 automatic cursor');
-    expect(en.t('debug.cursorCount', { count: 2 })).toBe('2 automatic cursors');
+    expect(en.t('debug.cursorCount', { count: 1 })).toBe('1 auto cursor');
+    expect(en.t('debug.cursorCount', { count: 2 })).toBe('2 auto cursors');
     expect(en.t('seed.generate', { count: 1 })).toBe('Generate 1 pixel');
     expect(en.t('seed.generate', { count: 2 })).toBe('Generate 2 pixels');
   });

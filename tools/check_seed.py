@@ -13,6 +13,9 @@ ARTIFACTS = ROOT / 'game/artifacts/stage2'
 
 
 def ready(page):
+    page.locator(".intro-note, .foundation").first.wait_for()
+    if page.locator(".intro-note").count():
+        page.locator(".intro-note button").click()
     page.locator('.seed-page').wait_for()
     page.evaluate('async () => { await document.fonts.ready; }')
 
@@ -62,22 +65,22 @@ def main():
         assert pixels(page) == 0  # 素のbuttonの標準動作でも先取りできない
         page.evaluate('''() => { for(let i=0;i<10;i++) document.querySelector('.generate-button').click(); }''')
         assert pixels(page) == 10
-        page.get_by_role('button', name='枠線を作る（10 ピクセル）', exact=True).click()
+        page.get_by_role('button', name='ボーダーを作る（10 ピクセル）', exact=True).click()
         assert 'has-border' in page.locator('.seed-page').get_attribute('class')
         assert page.evaluate("localStorage.getItem('refresh.save')") is None
         page.evaluate('''() => { for(let i=0;i<20;i++) document.querySelector('.generate-button').click(); }''')
-        page.get_by_role('button', name='保存を作る（40 ピクセル）', exact=True).click()
+        page.get_by_role('button', name='セーブを作る（40 ピクセル）', exact=True).click()
         assert '保存しました' in page.locator('.save-status').inner_text()
         assert page.locator('.build-button').count() == 1
         assert page.evaluate("JSON.parse(localStorage.getItem('refresh.save')).run.seed.built") == ['border','save']
         page.get_by_role('button', name='ピクセルを足す', exact=True).click()
-        page.get_by_role('button', name='自動カーソルを作る（15 ピクセル）', exact=True).click()
+        page.get_by_role('button', name='オートカーソルを作る（15 ピクセル）', exact=True).click()
         assert page.locator('.auto-cursor').count() == 1
         before = pixels(page)
         page.wait_for_timeout(1200)
         assert pixels(page) >= before + 1
         assert page.locator('.pixel-gain').count() == 0
-        page.get_by_role('button', name='色を作る（200 ピクセル）', exact=True).click()
+        page.get_by_role('button', name='カラーを作る（200 ピクセル）', exact=True).click()
         assert 'はじめまして' in page.locator('.guide-body').inner_text()
         page.get_by_role('button', name='あとで', exact=True).click()
         assert page.locator('.guide-body').count() == 0
@@ -86,7 +89,7 @@ def main():
         page.get_by_role('button', name='お知らせ（1）', exact=True).click()
         page.get_by_role('button', name='話を聞く', exact=True).click()
         assert '道具が要ります' in page.locator('.guide-body').inner_text()
-        checks.append('手動生成、スペース解禁前の抑止、枠線・保存・最初の自動カーソル・色、保存とガイドの再開')
+        checks.append('手動生成、スペース解禁前の抑止、ボーダー・保存・最初のオートカーソル・色、保存とガイドの再開')
         assert all(req.startswith(args.base_url.rstrip('/')) for req in requests)
         ctx.close()
 
@@ -98,14 +101,14 @@ def main():
             assert_layout(page)
             if fixture == 'seed-layout':
                 assert page.locator('.build-button').count() == 3  # カーソルと2つ先
-                assert page.get_by_role('button', name='組木を作る（12,000 ピクセル）', exact=True).is_disabled()
-                assert '組木は' in page.locator('.guide-body').inner_text()
+                assert page.get_by_role('button', name='Tessera を作る（12,000 ピクセル）', exact=True).is_disabled()
+                assert 'Tessera（テッセラ）は' in page.locator('.guide-body').inner_text()
             if fixture == 'seed-motion':
                 assert page.locator('.auto-cursor').count() == 20
                 assert '24' in page.locator('.cursor-summary').inner_text()
                 page.locator('.generate-button').click(position={'x':20, 'y':10})
                 assert page.locator('.pixel-gain').count() == 1
-                page.get_by_role('button', name='組木を作る（12,000 ピクセル）', exact=True).click()
+                page.get_by_role('button', name='Tessera を作る（12,000 ピクセル）', exact=True).click()
                 page.locator('.kumiki').wait_for()
                 assert page.locator('.seed-page.is-embedded').count() == 1
             page.screenshot(path=str(ARTIFACTS / f'{fixture}.png'))
@@ -158,7 +161,7 @@ def main():
         for count in range(24, 32):
             cost = math.ceil(15 * 1.15 ** count)
             assert cursor.inner_text() == f'{cost:,} で作る'
-            assert cursor.get_attribute('aria-label') == f'自動カーソルを作る（{cost:,} ピクセル）'
+            assert cursor.get_attribute('aria-label') == f'オートカーソルを作る（{cost:,} ピクセル）'
             before = pixels(page)
             cursor.click()
             assert pixels(page) == before - cost

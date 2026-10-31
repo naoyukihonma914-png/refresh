@@ -2,11 +2,12 @@ import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameStat
 import type { SaveStorage } from '../platform/storage';
 import { createArtwork, createKumikiState } from './kumikiState';
 import { enterKumiki } from './kumiki';
+import { LEGACY_COLOR_MAP, legacyPalette, paletteFor } from '../content/kumikiArt';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
 export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup' } as const;
 
-// 実際に配布した第1・第2版を順に変換する。試作の形式は推測しない。
+// 配布・PRで使用した第1〜第3版を順に変換する。試作の形式は推測しない。
 const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   1(data) {
     const old = data as GameState;
@@ -22,11 +23,34 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   },
   2(data) {
     const old = data as GameState;
-    let next = { ...old, schemaVersion: 3 as const,
+    const next = { ...old, schemaVersion: 3,
       run: { ...old.run, kumiki: createKumikiState() },
       persistent: { ...old.persistent, artwork: createArtwork() },
     };
-    if (next.run.seed?.built?.includes('kumiki')) next = enterKumiki(next);
+    return next;
+  },
+  3(data) {
+    const next = { ...(data as GameState), schemaVersion: SCHEMA_VERSION };
+    if (!isGameState(next)) throw new Error('保存データの内容が不正です');
+    const palette = paletteFor(1);
+    const rgb = (color: string) => [1, 3, 5].map(start => parseInt(color.slice(start, start + 2), 16));
+    const oldPalette = legacyPalette();
+    const mapping = oldPalette.map((color, index) => {
+      if (index < LEGACY_COLOR_MAP.length) return LEGACY_COLOR_MAP[index]!;
+      const exact = palette.indexOf(color);
+      if (exact >= 0) return exact;
+      const source = rgb(color);
+      const distances = palette.map(c => rgb(c).reduce((sum, value, i) => sum + (value - source[i]!) ** 2, 0));
+      return distances.indexOf(Math.min(...distances));
+    });
+    const frames = (items: number[][]) => items.map(frame => frame.map(color => color < 0 ? color : mapping[color]!));
+    const k = next.run.kumiki, art = next.persistent.artwork;
+    for (const drawing of [...Object.values(k.drawings), ...Object.values(k.underlays), ...Object.values(art.icons), art.sketchbook, ...(art.wallpaper ? [art.wallpaper] : [])]) drawing.frames = frames(drawing.frames);
+    for (const work of k.exports) work.frames = frames(work.frames);
+    for (const design of Object.values(k.design)) {
+      const index = oldPalette.indexOf(design.color.toLowerCase());
+      if (index >= 0) design.color = palette[mapping[index]!]!;
+    }
     return next;
   },
 };
@@ -39,6 +63,7 @@ export function decodeSave(raw: string): GameState {
     return value.schemaVersion as number;
   };
   let version = versionOf(data);
+  const migrated = version < SCHEMA_VERSION;
   if (version > SCHEMA_VERSION) throw new Error('新しい版で保存されたデータです');
   while (version < SCHEMA_VERSION) {
     const migrate = migrations[version];
@@ -49,7 +74,7 @@ export function decodeSave(raw: string): GameState {
     version = next;
   }
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
-  return data;
+  return migrated && data.run.seed.built.includes('kumiki') && !data.run.kumiki.entered ? enterKumiki(data) : data;
 }
 
 export function encodeSave(state: GameState): string {

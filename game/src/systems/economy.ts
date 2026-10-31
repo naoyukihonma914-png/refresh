@@ -16,13 +16,15 @@ export function cursorPressesPerSecond(state: GameState): number {
     * BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier;
 }
 
-export function passivePixelsPerSecond(state: GameState): number {
+export function cursorPixelsPerSecond(state: GameState): number {
   const k = state.run.kumiki;
   if (state.run.world === 'kumiki' && k.placed.includes('switch') && k.focus) return 0;
   const button = k.placed.includes('button') ? BALANCE.w2.buttonMultiplier : 1;
   const slider = k.placed.includes('slider') ? 1 + (k.interval - BALANCE.w2.intervalMin) / (BALANCE.w2.intervalMax - BALANCE.w2.intervalMin) * (BALANCE.w2.sliderMultiplier - 1) : 1;
-  return state.run.seed.autoCursors * manualClickValue(state) * cursorPressesPerSecond(state) * button * slider;
+  return manualClickValue(state) * cursorPressesPerSecond(state) * button * slider;
 }
+
+export const passivePixelsPerSecond = (state: GameState): number => state.run.seed.autoCursors * cursorPixelsPerSecond(state);
 
 export function advanceHomeGeneration(state: GameState, ms: number): GameState {
   const k = state.run.kumiki;
