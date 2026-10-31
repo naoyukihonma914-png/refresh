@@ -8,6 +8,7 @@ import { cursorPixelsPerSecond, cursorPressesPerSecond, manualClickValue, passiv
 import { LanguageSelect } from '../components/LanguageSelect';
 import { PageSettings } from './PageSettings';
 import { designStyle } from './kumiki/design';
+import { GuideHistory } from '../components/GuideHistory';
 
 export function useAnimationClock(runtime: GameRuntime, enabled: boolean, refresh: number) {
   const [now, setNow] = useState(() => runtime.platform.clock.monotonicNow());
@@ -31,7 +32,7 @@ function RollingPixels({ value, now, enabled, i18n }: { value: number; now: numb
   return <span className="pixel-count" data-value={value}>{i18n.t('foundation.pixels', { pixels: i18n.pixels(roll.displayed) })}</span>;
 }
 
-export function Foundation({ snapshot, i18n, runtime, embedded = false, children }: { snapshot: RuntimeSnapshot; i18n: I18n; runtime: GameRuntime; embedded?: boolean; children?: ReactNode }) {
+export function Foundation({ snapshot, i18n, runtime, embedded = false, preview = false, children }: { snapshot: RuntimeSnapshot; i18n: I18n; runtime: GameRuntime; embedded?: boolean; preview?: boolean; children?: ReactNode }) {
   const { state, offline, press } = snapshot;
   const { seed } = state.run;
   const has = (id: SeedItem) => seed.built.includes(id);
@@ -41,7 +42,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, children
   const held = useRef(false);
   const anchor = useRef<HTMLSpanElement>(null);
   const motion = has('motion') && !runtime.platform.animation.reducedMotion();
-  const now = useAnimationClock(runtime, seed.autoCursors > 0 || has('motion') || state.persistent.seedSkills.includes('hold'), state.persistent.specs.refresh);
+  const now = useAnimationClock(runtime, !preview && (seed.autoCursors > 0 || has('motion') || state.persistent.seedSkills.includes('hold')), state.persistent.specs.refresh);
   const [floating, setFloating] = useState<NonNullable<RuntimeSnapshot['press']>[]>([]);
   useEffect(() => {
     if (!motion || !press) { setFloating([]); return; }
@@ -52,22 +53,22 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, children
   useEffect(() => runtime.platform.keyboard.subscribe(key => {
     if (key.code !== 'Space') return;
     if (!key.pressed) { held.current = false; return; }
-    if (key.editable || settings) return;
+    if (preview || key.editable || settings) return;
     key.preventDefault();
     if (!skills.includes('keyboard') && !skills.includes('hold')) return;
     if (key.repeat || held.current) return;
     held.current = true;
     lastHeld.current = runtime.platform.clock.monotonicNow();
     runtime.pressSeed();
-  }), [runtime, skills, settings]);
+  }), [runtime, skills, settings, preview]);
   useEffect(() => {
-    if (!skills.includes('hold') || settings) return;
+    if (preview || !skills.includes('hold') || settings) return;
     const interval = 1_000 / (BALANCE.w1.holdPressesPerSecond * BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier);
     return runtime.platform.every(interval, () => {
       const time = runtime.platform.clock.monotonicNow();
       if (held.current && time - lastHeld.current >= interval) { lastHeld.current = time; runtime.pressSeed(); }
     });
-  }, [runtime, skills, settings, state.persistent.specs.refresh]);
+  }, [runtime, skills, settings, state.persistent.specs.refresh, preview]);
   const items = visibleSeedItems(state);
   const guide = seed.guide;
   const showCursors = Math.min(BALANCE.w1.maxVisibleCursors, seed.autoCursors);
@@ -98,13 +99,13 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, children
       : id === 'color' ? i18n.t('effect.cursorMult', { value: BALANCE.w1.color_cursor_mult })
         : id === 'font' ? i18n.t('effect.clickMult', { value: BALANCE.w1.font_mult })
           : id === 'motion' ? i18n.t('effect.momentum', { value: BALANCE.w1.momentum.max })
-            : id === 'cursor' ? i18n.t('effect.cursorRate', { value: cursorPixelsPerSecond(state) }) : '';
+            : id === 'cursor' ? i18n.t('effect.cursorRate', { value: i18n.rate(cursorPixelsPerSecond(state)) }) : '';
     return <li key={id}>{has('layout') && <span>{name}{effect && <small className="purchase-effect">{effect}</small>}</span>}
       <button className="build-button" disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)} aria-label={label} aria-description={effect || undefined}>
         {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : <>{label}{effect && <small className="purchase-effect">{effect}</small>}</>}
       </button></li>;
   };
-  return <main className={className}>
+  return <main className={[className, state.run.restartMs > 0 && 'is-restarting', preview && 'is-preview'].filter(Boolean).join(' ')}>
     {settings ? <PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={() => setSettings(false)} /> : <div className="seed-content">
       <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{i18n.t('foundation.goal')}
         {!embedded && <button className="text-button goal-progress" onClick={() => setConditions(!conditions)} aria-expanded={conditions}>{i18n.t('seed.goalProgress', { done: 0, total: 5 })}</button>}
@@ -123,18 +124,19 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, children
               {guide.seen.length > 1 && <button className="text-button" onClick={() => setArchive(!archive)}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>}
             </div></>}
         {archive && <ul className="notice-archive">{guide.seen.map(id => <li key={id}><button className="text-button" onClick={() => runtime.readSeedGuide(id)}>{i18n.t('guide.read', { title: i18n.t(`guide.${id}.title`) })}</button></li>)}</ul>}
+        {archive && <GuideHistory state={state} i18n={i18n} />}
       </section>}
       {seed.installer && <section className="installer" role="status"><p>{i18n.t('installer.title')}</p>
         <progress max={BALANCE.w1.inheritMs} value={seed.installer.elapsedMs} aria-label={i18n.t('installer.title')} />
         <p>{i18n.t('installer.progress', { done: seed.built.length, total: seed.installer.items.length })}</p></section>}
       <p className="pixels-line"><RollingPixels value={state.resources.pixels} now={now} enabled={motion} i18n={i18n} />
-        {seed.autoCursors > 0 && <span className="passive-rate" data-rate={passivePixelsPerSecond(state)}>{i18n.t('seed.rate', { pixels: passivePixelsPerSecond(state) })}</span>}
+        {seed.autoCursors > 0 && <span className="passive-rate" data-rate={passivePixelsPerSecond(state)}>{i18n.t('seed.rate', { pixels: i18n.rate(passivePixelsPerSecond(state)) })}</span>}
       </p>
       <p className="generator-line"><span className="generator-anchor" ref={anchor}>
         <button type="button" className="generate-button" data-part="primary" onClick={event => {
           const rect = event.currentTarget.getBoundingClientRect();
           runtime.pressSeed(event.detail === 0 ? undefined : { x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
-        }} disabled={!!seed.installer}
+        }} disabled={preview || !!seed.installer || state.run.restartMs > 0}
           style={{ '--press-depth': activePress ? `${1 + (press.momentum - 1) * 5}px` : autoPressed ? '1px' : '0px',
             ...(embedded ? designStyle(state.run.kumiki.design.primary) : {}),
           } as CSSProperties}>

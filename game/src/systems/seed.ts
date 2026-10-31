@@ -16,7 +16,7 @@ export function cursorPrice(state: GameState): number {
 }
 
 export function canBuildSeed(state: GameState, id: SeedItem | 'cursor'): boolean {
-  if (state.run.seed.installer) return false;
+  if (state.run.world === 'release' || state.run.seed.installer || state.run.restartMs > 0) return false;
   if (id === 'cursor') return state.run.seed.built.includes('save')
     && Number.isFinite(cursorPrice(state)) && state.resources.pixels >= cursorPrice(state);
   const next = visibleSeedItems(state)[0];
@@ -66,7 +66,7 @@ export function momentumAt(momentum: Momentum, now: number): number {
 }
 
 export function pressSeed(state: GameState, momentum: Momentum, now: number) {
-  if (state.run.seed.installer) return { state, momentum, pixels: 0 };
+  if (state.run.world === 'release' || state.run.seed.installer || state.run.restartMs > 0) return { state, momentum, pixels: 0 };
   const motion = state.run.seed.built.includes('motion');
   const decayed = motion ? momentumAt(momentum, now) : 1;
   const value = motion && momentum.lastPressAt !== null && now - momentum.lastPressAt <= BALANCE.w1.momentum.chainMs
@@ -103,7 +103,7 @@ export function applySeedSkills(state: GameState, selected: readonly SeedSkill[]
   };
 }
 
-// 後のリリース処理から呼ぶ入口。リリース自体や世界2はここでは実装しない。
+// リリース後の作り直し。永続データを複製し、今の構成だけを初期化する。
 export function createSeedVersion(previous: GameState, version: 'v1' | 'v2', now: number): GameState {
   const next = createInitialState(now);
   next.run.version = version;

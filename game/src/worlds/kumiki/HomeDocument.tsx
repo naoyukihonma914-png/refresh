@@ -6,9 +6,10 @@ import { ownedParts, hasKSkill } from '../../systems/kumiki';
 import { Foundation, useAnimationClock } from '../Foundation';
 import { manualClickValue } from '../../systems/economy';
 import { designStyle } from './design';
-export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop }: {
+export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop, preview = false }: {
   runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n; selected: string | null; onSelect(id: string): void;
   selecting: boolean; dragPart: PartId | null; onDrop(id: PartId): void;
+  preview?: boolean;
 }) {
   const { state } = snapshot;
   const k = state.run.kumiki;
@@ -26,7 +27,7 @@ export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, sele
     setMeasure(b.width ? { x: (b.left - a.left) / scale + root.scrollLeft, y: (b.top - a.top) / scale + root.scrollTop,
       width: b.width / scale, height: b.height / scale } : null);
   }, [selected, k.placed.length, k.design, k.homeWindow, state.persistent.artwork.skills]);
-  const clock = useAnimationClock(runtime, state.run.seed.built.includes('motion'), state.persistent.specs.refresh);
+  const clock = useAnimationClock(runtime, !preview && state.run.seed.built.includes('motion'), state.persistent.specs.refresh);
   const [floating, setFloating] = useState<NonNullable<RuntimeSnapshot['press']>[]>([]);
   useEffect(() => {
     const press = snapshot.press;
@@ -84,7 +85,7 @@ export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, sele
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d={['M3 12H13','M3 3H13V13H3Z','M3 3L13 13M13 3L3 13'][index]} /></svg>
       </button>)}</div></header>}
     <div className="home-body" hidden={k.homeWindow === 'minimized' || k.homeWindow === 'closed'}>
-      <Foundation snapshot={snapshot} runtime={runtime} i18n={i18n} embedded>
+      <Foundation snapshot={snapshot} runtime={runtime} i18n={i18n} embedded preview={preview}>
         <div className="home-part-list">
           {ownedParts(state).filter(id => id !== 'frame' && id !== 'taskbar' && (id !== 'table' || !k.placed.includes('tabs') || recordTab)).map(id => slot(id, items[id]))}
           {ownedParts(state).includes('frame') && !k.placed.includes('frame') && slot('frame', items.frame)}

@@ -9,6 +9,7 @@ import { advanceActiveTime, advanceOfflineTime, isInactiveGap, type TimeResult }
 import { applySeedSkills, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
 import type { GuideId } from './state';
 import { actKumiki, enterKumiki, type KumikiAction } from './kumiki';
+import { archiveGuide, beginPrototypeRelease, buySpec, canReleasePrototype, shippingComplete, startNextVersion } from './release';
 
 export interface RuntimeSnapshot {
   state: GameState;
@@ -17,6 +18,7 @@ export interface RuntimeSnapshot {
   notice: MessageKey | null;
   offline: Omit<TimeResult, 'state'> | null;
   introVisible: boolean;
+  releaseConfirmation: boolean;
   press: { serial: number; pixels: number; momentum: number; at: number; x: number; y: number; target: 'primary' | 'button' } | null;
 }
 
@@ -48,7 +50,7 @@ export class GameRuntime {
     const language = chooseLanguage(this.platform.settings.read().language, platform.preferredLanguages);
     this.snapshot = {
       state: fixture ?? createInitialState(now), language,
-      status: 'starting', notice: null, offline: null, press: null, introVisible: false,
+      status: 'starting', notice: null, offline: null, press: null, introVisible: false, releaseConfirmation: false,
     };
     this.platform.setDocumentLanguage(language, createI18n(language).direction);
   }
@@ -97,9 +99,11 @@ export class GameRuntime {
     this.stopTimer = this.platform.every(BALANCE.time.tickMs, () => {
       if (this.suspended || this.platform.visibility.isHidden() || !this.canOperate()) return;
       const before = this.snapshot.state.run.seed;
+      const wasShippingComplete = shippingComplete(this.snapshot.state);
       const inactive = this.advanceForeground();
       const after = this.snapshot.state.run.seed;
       if (inactive || before.built.length !== after.built.length || before.guide.seen.length !== after.guide.seen.length
+        || !wasShippingComplete && shippingComplete(this.snapshot.state)
         || this.platform.clock.monotonicNow() - this.lastAutosaveAt >= BALANCE.time.autosaveMs) this.persist();
     });
   }
@@ -190,10 +194,11 @@ export class GameRuntime {
   };
 
   pressSeed = (position: { x: number; y: number; target?: 'primary' | 'button' } = { x: 50, y: 50 }) => {
-    if (!this.canOperate() || this.snapshot.introVisible || this.suspended || this.platform.visibility.isHidden()) return;
+    if (!this.canOperate() || this.snapshot.state.run.world === 'release' || this.snapshot.introVisible || this.suspended || this.platform.visibility.isHidden()) return;
     if (this.advanceForeground()) this.persist();
     const now = this.platform.clock.monotonicNow();
     const result = pressSeed(this.snapshot.state, this.momentum, now);
+    if (result.state === this.snapshot.state) return;
     this.momentum = result.momentum;
     this.publish({ state: result.state, press: { serial: ++this.pressSerial, pixels: result.pixels, momentum: result.momentum.value, at: now, ...position, target: position.target ?? 'primary' } });
   };
@@ -226,7 +231,7 @@ export class GameRuntime {
   };
 
   applySeedSettings = (selected: readonly SeedSkill[], pattern: GameState['persistent']['seedAppearance']['pattern'], marquee: boolean) => {
-    if (!this.canOperate()) return;
+    if (!this.canOperate() || this.snapshot.state.run.world === 'release') return;
     this.advanceForeground();
     this.publish({ state: applySeedSkills(this.snapshot.state, selected, pattern, marquee) });
     this.persist();
@@ -234,7 +239,7 @@ export class GameRuntime {
 
   // 段階1の動作確認用。通常画面には呼び出し口を置かない。
   addDebugPixels = () => {
-    if (!this.canOperate()) return;
+    if (!this.canOperate() || this.snapshot.state.run.world === 'release') return;
     this.advanceForeground();
     this.publish({ state: creditPixels(this.snapshot.state, BALANCE.debug.addPixels) });
     this.persist();
@@ -278,11 +283,15 @@ export class GameRuntime {
     try {
       const state = decodeSave(raw);
       const result = advanceOfflineTime(state, this.platform.clock.wallNow());
-      if (!canSave(state) && !clearGame(this.platform.storage)) throw new Error('Storage unavailable');
+      if (!canSave(state)) {
+        if (state.persistent.products.length > 0) {
+          if (saveGame(this.platform.storage, result.state, this.platform.clock.wallNow(), { checkpoint: true }).kind !== 'saved') throw new Error('Storage unavailable');
+        } else if (!clearGame(this.platform.storage)) throw new Error('Storage unavailable');
+      }
       this.activeRemainderMs = 0;
       this.momentum = freshMomentum();
       this.lastActiveAt = this.platform.clock.monotonicNow();
-      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null, introVisible: false });
+      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null, introVisible: false, releaseConfirmation: false });
       this.persist();
       return true;
     } catch {
@@ -301,11 +310,58 @@ export class GameRuntime {
     if (this.disposed || !this.lease?.isOwner()) return;
     if (this.snapshot.status !== 'ready' && this.snapshot.status !== 'corrupt') return;
     if (!clearGame(this.platform.storage)) { this.publish({ notice: 'save.failed' }); return; }
-    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null, press: null, introVisible: true });
+    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null, press: null, introVisible: true, releaseConfirmation: false });
     this.momentum = freshMomentum();
     this.activeRemainderMs = 0;
     this.lastActiveAt = this.platform.clock.monotonicNow();
     this.suspended = this.platform.visibility.isHidden();
     this.startTimer();
+  };
+
+  requestPrototypeRelease = () => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    if (!canReleasePrototype(this.snapshot.state)) return;
+    this.publish({ releaseConfirmation: true, state: archiveGuide(this.snapshot.state, { kind: 'release', id: 'confirm', version: 'v0.1' }) });
+    this.persist();
+  };
+
+  cancelPrototypeRelease = () => { if (this.canOperate()) this.publish({ releaseConfirmation: false }); };
+
+  private commitReleaseChange(state: GameState, checkpoint = false): boolean {
+    if (!this.canOperate() || state === this.snapshot.state) return false;
+    const result = saveGame(this.platform.storage, state, this.platform.clock.wallNow(), { checkpoint });
+    if (result.kind !== 'saved') { this.publish({ notice: 'save.failed' }); return false; }
+    this.publish({ state: result.state, notice: null });
+    this.lastAutosaveAt = this.platform.clock.monotonicNow();
+    return true;
+  }
+
+  confirmPrototypeRelease = () => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden() || !this.snapshot.releaseConfirmation) return;
+    this.advanceForeground();
+    const before = saveGame(this.platform.storage, this.snapshot.state, this.platform.clock.wallNow());
+    if (before.kind !== 'saved') { this.publish({ notice: 'save.failed' }); return; }
+    this.publish({ state: before.state });
+    const state = beginPrototypeRelease(before.state, this.platform.clock.wallNow(), this.platform.animation.reducedMotion());
+    if (!this.commitReleaseChange(state)) return;
+    this.momentum = freshMomentum();
+    this.publish({ releaseConfirmation: false, press: null, offline: null });
+    this.platform.unlockAchievement('prototype-released');
+  };
+
+  purchaseSpec = (key: SpecKey) => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    this.commitReleaseChange(buySpec(this.snapshot.state, key));
+  };
+
+  startNextVersion = () => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    if (!this.commitReleaseChange(startNextVersion(this.snapshot.state, this.platform.clock.wallNow()), true)) return;
+    this.momentum = freshMomentum(); this.activeRemainderMs = 0;
+    this.lastActiveAt = this.platform.clock.monotonicNow();
+    this.publish({ press: null, offline: null, introVisible: false, releaseConfirmation: false });
   };
 }

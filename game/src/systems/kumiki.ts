@@ -14,7 +14,7 @@ export function kGuide(state: GameState, id: KumikiGuide): GameState {
 export function enterKumiki(state: GameState): GameState {
   if (state.run.kumiki.entered) return state;
   const k = { ...createKumikiState(), entered: true, enteredAt: state.elapsedMs,
-    lastActionAt: state.elapsedMs, underlays: structuredClone(state.persistent.artwork.icons) };
+    lastActionAt: state.elapsedMs, underlays: structuredClone(state.persistent.artwork.icons), design: structuredClone(state.persistent.homeTheme) };
   let next: GameState = { ...state, run: { ...state.run, world: 'kumiki', kumiki: k } };
   next = prepareDrawing(next, 'folder');
   next = kGuide(kGuide(next, 'entered'), 'draw');

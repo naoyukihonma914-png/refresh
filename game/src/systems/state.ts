@@ -1,9 +1,10 @@
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
-import { createArtwork, createKumikiState, isArtwork, isKumikiState, type Artwork, type KumikiState } from './kumikiState';
+import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
+import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
-export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint'] as const;
+export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
 export interface SeedState {
   built: SeedItem[];
@@ -25,7 +26,9 @@ export interface GameState {
   resources: { pixels: number; tokens: number; dollars: number };
   run: {
     version: 'v0.1' | 'v1' | 'v2';
-    world: 'seed' | 'kumiki';
+    world: 'seed' | 'kumiki' | 'release';
+    shipping: ShippingState | null;
+    restartMs: number;
     totalPixelsGenerated: number;
     seed: SeedState;
     kumiki: KumikiState;
@@ -35,6 +38,9 @@ export interface GameState {
     seedSkills: SeedSkill[];
     seedAppearance: { pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean };
     artwork: Artwork;
+    products: ProductRecord[];
+    guideArchive: GuideRecord[];
+    homeTheme: Record<string, Design>;
   };
 }
 
@@ -47,7 +53,7 @@ export function createInitialState(now: number): GameState {
     elapsedMs: 0,
     resources: { pixels: 0, tokens: 0, dollars: 0 },
     run: {
-      version: 'v0.1', world: 'seed', totalPixelsGenerated: 0,
+      version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
       seed: {
         built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
@@ -59,6 +65,7 @@ export function createInitialState(now: number): GameState {
       playerName: null,
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
       artwork: createArtwork(),
+      products: [], guideArchive: [], homeTheme: {},
     },
   };
 }
@@ -87,7 +94,13 @@ export function isGameState(value: unknown): value is GameState {
   const persistent = value.persistent;
   if (!isRecord(resources) || !isRecord(run) || !isRecord(persistent)) return false;
   if (!isAmount(resources.pixels) || !isAmount(resources.tokens) || !isAmount(resources.dollars)) return false;
-  if (!['v0.1', 'v1', 'v2'].includes(run.version as string) || !['seed', 'kumiki'].includes(run.world as string) || !isAmount(run.totalPixelsGenerated)) return false;
+  if (!['v0.1', 'v1', 'v2'].includes(run.version as string) || !['seed', 'kumiki', 'release'].includes(run.world as string) || !isAmount(run.totalPixelsGenerated)) return false;
+  if (!isAmount(run.restartMs) || run.restartMs > BALANCE.release.restartMs || !isGuideArchive(persistent.guideArchive) || !isDesignMap(persistent.homeTheme)) return false;
+  if (!Array.isArray(persistent.products) || !persistent.products.every(isProductRecord)
+    || new Set(persistent.products.map(p => p.id)).size !== persistent.products.length) return false;
+  if (run.world === 'release' ? !isRecord(run.shipping) || !isCount(run.shipping.productId)
+    || !persistent.products.some(p => p.id === (run.shipping as Record<string, unknown>).productId)
+    || !isAmount(run.shipping.elapsedMs) || run.shipping.elapsedMs > BALANCE.release.animationMs : run.shipping !== null) return false;
   if (!isKumikiState(run.kumiki) || !isArtwork(persistent.artwork)) return false;
   if (run.totalPixelsGenerated < resources.pixels) return false;
   if (!isRecord(run.seed) || !Array.isArray(run.seed.built) || !isCount(run.seed.autoCursors)) return false;

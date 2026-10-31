@@ -38,6 +38,17 @@ export function createKumikiState(): KumikiState {
 const obj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
 const amount = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x >= 0;
 const ids = (x: unknown, allowed: readonly unknown[]): x is string[] => Array.isArray(x) && new Set(x).size === x.length && x.every(id => allowed.includes(id));
+export function isDesignMap(x: unknown): x is Record<string, Design> {
+  return obj(x) && Object.entries(x).every(([id, d]) => (id === 'primary' || PART_IDS.includes(id as PartId)) && obj(d) && typeof d.color === 'string' && /^#[0-9a-f]{6}$/i.test(d.color)
+    && amount(d.radius) && d.radius <= 16 && ['small', 'medium', 'large'].includes(d.textSize as string) && typeof d.shadow === 'boolean');
+}
+export function isExportedWork(e: unknown): e is ExportedWork {
+  return obj(e) && ['icon', 'part'].includes(e.kind as string) && typeof e.id === 'string'
+    && (e.kind === 'icon' ? KNOWN_ICONS.includes(e.id) : PART_IDS.includes(e.id as PartId))
+    && (e.name === null || typeof e.name === 'string') && amount(e.at) && Number.isInteger(e.size) && Array.isArray(e.frames)
+    && (e.kind === 'part' ? e.size === 0 && e.frames.length === 0 : [16,32,64,128].includes(e.size as number) && isDrawing({ size: e.size, frames: e.frames,
+      rewarded: Array<boolean>((e.size as number) ** 2).fill(false), exported: true, dirty: false, name: null }));
+}
 export function isDrawing(x: unknown): x is Drawing {
   if (!obj(x) || ![16, 32, 64, 128].includes(x.size as number)) return false;
   const cells = (x.size as number) ** 2;
@@ -67,11 +78,5 @@ export function isKumikiState(x: unknown): x is KumikiState {
     || x.guide.current !== null && !x.guide.seen.includes(x.guide.current as string)) return false;
   if (x.drift !== null && (!obj(x.drift) || !PART_IDS.includes(x.drift.part as PartId)
     || !['dx', 'dy', 'angle'].every(key => typeof x.drift === 'object' && Number.isFinite((x.drift as Record<string, unknown>)[key])))) return false;
-  if (!obj(x.design) || !Object.entries(x.design).every(([id, d]) => (id === 'primary' || PART_IDS.includes(id as PartId)) && obj(d) && typeof d.color === 'string' && /^#[0-9a-f]{6}$/i.test(d.color)
-    && amount(d.radius) && d.radius <= 16 && ['small', 'medium', 'large'].includes(d.textSize as string) && typeof d.shadow === 'boolean')) return false;
-  return Array.isArray(x.exports) && x.exports.every(e => obj(e) && ['icon', 'part'].includes(e.kind as string) && typeof e.id === 'string'
-    && (e.kind === 'icon' ? KNOWN_ICONS.includes(e.id) : PART_IDS.includes(e.id as PartId))
-    && (e.name === null || typeof e.name === 'string') && amount(e.at) && Number.isInteger(e.size) && Array.isArray(e.frames)
-    && (e.kind === 'part' ? e.size === 0 && e.frames.length === 0 : [16,32,64,128].includes(e.size as number) && isDrawing({ size: e.size, frames: e.frames,
-      rewarded: Array<boolean>((e.size as number) ** 2).fill(false), exported: true, dirty: false, name: null })));
+  return isDesignMap(x.design) && Array.isArray(x.exports) && x.exports.every(isExportedWork);
 }
