@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>見本：素の画面 ④（今のウェブ・誌面風）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&amp;display=swap">
+<style>body{margin:0}</style>
+<style>html,body{background:#0e0f11} #stage{transform-origin:0 0;width:1920px;height:1080px}</style>
+</head>
+<body>
+<!-- 見本（静止画）。1920×1080で設計。画面が狭いときは縮小して表示する -->
+<!-- 場面：②と同じ。素の画面の段の④：今の上品な誌面風（ユーザーが示した高級ホテルのサイトが手本） -->
+<!-- 見た目：全面の写真の上に、字間を広げた小さな見出し・明朝体の大きな製品名・白い四角のボタン、茶色の帯に明朝体の中央寄せの大見出し、写真の帯に細い線の囲みと線のアイコンのアップグレード。写真は見本用の海岸の写真の切り抜き -->
+<!-- 進化の段：①→②→③→④これ -->
+<div id="frame"><div id="stage">
+<div style="width:1920px;height:1080px;overflow:hidden;background:#5b3b2c;font-family:'Shippori Mincho',serif;color:#fff">
+ <div style="position:relative;height:560px;background:url('assets/wallpaper-coast.jpg') center 35%/cover no-repeat">
+  <div style="position:absolute;inset:0;background:linear-gradient(rgba(20,20,20,.45),rgba(20,20,20,.1) 60%,rgba(20,20,20,.25))"></div>
+  <div style="position:absolute;left:0;right:0;top:46px;display:flex;justify-content:flex-end;gap:30px;padding:0 60px;font-size:14px;letter-spacing:2px"><span>更新履歴</span><span>このページの設定</span><span>日本語</span></div>
+  <div style="position:absolute;left:0;right:0;top:150px;text-align:center">
+   <div style="font-size:15px;letter-spacing:10px">ようこそ</div>
+   <div style="font-size:110px;line-height:1.2;margin-top:10px;letter-spacing:8px;text-shadow:0 2px 20px rgba(0,0,0,.35)">無題</div>
+   <div style="font-size:15px;letter-spacing:12px;margin-top:4px">第 一 版</div>
+   <div style="display:inline-block;margin-top:34px;padding:10px 44px;background:#fff;color:#5b3b2c;font-size:15px;letter-spacing:4px">ピクセルを4個生成する</div>
+   <div style="margin-top:14px;font-size:14px;letter-spacing:3px">ピクセル　836,240　｜　毎秒 +24　｜　オートカーソル 41台</div>
+  </div></div>
+ <div style="text-align:center;padding-top:56px">
+  <div style="font-size:42px;line-height:1.6;letter-spacing:4px">この画面を作り上げて、<br>v1.0 としてリリースする。</div>
+  <div style="margin-top:22px;font-size:14px;letter-spacing:6px;color:#e8d6c8">いまの進み具合　零 ／ 五</div></div>
+ <div style="position:absolute;left:0;right:0;top:860px;height:260px;background:url('assets/wallpaper-coast.jpg') center 80%/cover no-repeat"><div style="position:absolute;inset:0;background:rgba(30,20,10,.45)"></div>
+  <div style="position:relative;display:flex;justify-content:center;gap:30px;padding-top:20px"><div style="width:300px;height:220px;border:1px solid rgba(255,255,255,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;text-align:center"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linejoin="round"><path d="M12 4l-5 9h4l-2 7 8-11h-4l3-5z"/></svg><div style="font-size:18px;line-height:1.6">オートカーソル</div><div style="font-size:14px;letter-spacing:2px">46 ピクセル</div></div><div style="width:300px;height:220px;border:1px solid rgba(255,255,255,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;text-align:center"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linejoin="round"><path d="M4 8h16M4 12h16M4 16h16M8 4v16M16 4v16"/></svg><div style="font-size:18px;line-height:1.6">背景の模様</div><div style="font-size:14px;letter-spacing:2px">2 トークン</div></div><div style="width:300px;height:220px;border:1px solid rgba(255,255,255,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;text-align:center"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1" stroke-linejoin="round"><path d="M5 12a7 7 0 1 1 2 5M5 18v-5h5"/></svg><div style="font-size:18px;line-height:1.6">構成を引き継ぐ</div><div style="font-size:14px;letter-spacing:2px">12 トークン</div></div></div></div>
+</div>
+</div></div>
+<script>
+function fit(){var s=Math.min(1,window.innerWidth/1920);var st=document.getElementById('stage');st.style.transform='scale('+s+')';document.getElementById('frame').style.height=(1080*s)+'px';}
+window.addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>
