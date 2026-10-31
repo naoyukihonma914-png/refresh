@@ -1,0 +1,33 @@
+@font-face { font-family: 'Refresh Serif'; src: url('./assets/fonts/noto-serif-jp.woff2') format('woff2'); font-weight: 200 900; font-style: normal; font-display: block; }
+@font-face { font-family: 'Refresh UI'; src: url('./assets/fonts/biz-udpgothic-regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: 'Refresh UI'; src: url('./assets/fonts/biz-udpgothic-bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: 'Refresh Pixel'; src: url('./assets/fonts/dotgothic16.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+:root { color: #000; background: #fff; font-family: 'Times New Roman', 'Refresh Serif', serif; font-synthesis: none; }
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; inline-size: 100%; block-size: 100%; }
+body { overflow: hidden; }
+#root { display: flex; align-items: center; justify-content: center; }
+.stage-frame { position: relative; flex: none; }
+.stage { position: absolute; inset-block-start: 0; inset-inline-start: 0; transform-origin: 0 0; background: #fff; overflow: hidden; }
+.foundation, .system-message { padding: 8px; font: 16px 'Times New Roman', 'Refresh Serif', serif; }
+.foundation p { margin: 16px 0; }
+.save-status { font-size: 13.33px; }
+.foundation .language-select select { margin-inline-start: 8px; }
+.runtime-notice { position: absolute; inset-inline-start: 8px; inset-block-end: 8px; font-size: 14px; }
+.screen-notice { position: fixed; inset-inline-start: 0; inset-block-end: 0; margin: 0; padding: 4px 8px; background: #fff; font: 13px 'Segoe UI', 'Refresh UI', sans-serif; }
+button, select { font-family: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+.debug-panel { position: fixed; inset-inline-end: 12px; inset-block-end: 12px; z-index: 1; inline-size: 430px; max-inline-size: calc(100vw - 24px); max-block-size: calc(100vh - 24px); overflow: auto; margin: 0; padding: 12px; color: #1a1a1a; background: #f3f3f3; border: 1px solid #aaa; border-radius: 0; font: 13px 'Segoe UI', 'Refresh UI', sans-serif; }
+.debug-panel legend { background: #f3f3f3; padding: 0 4px; }
+.debug-panel p { margin: 0 0 8px; }
+.debug-panel label { display: flex; justify-content: space-between; align-items: center; margin-block-start: 6px; }
+.debug-panel select { inline-size: min(200px, 55%); }
+.debug-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-block-start: 8px; }
+
+.foundation, .system-message, .runtime-notice { overflow-wrap: anywhere; }
+button, select { min-block-size: 24px; max-inline-size: 100%; }
+button { white-space: normal; overflow-wrap: anywhere; }
+.debug-panel label { gap: 8px; flex-wrap: wrap; }
+.debug-panel label select { flex: 0 1 200px; min-inline-size: 0; }
+.debug-panel .cursor-count { margin-block-start: 8px; }

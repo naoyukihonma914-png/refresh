@@ -1,5 +1,7 @@
 node_modules/
 /dist/
+game/dist/
+game/artifacts/
 .DS_Store
 Thumbs.db
 *.log
