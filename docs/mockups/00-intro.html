@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>見本：導入（制作ノート.txt）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic&amp;family=Noto+Sans+JP:wght@400&amp;display=swap">
+<style>body{margin:0}</style>
+<style>html,body{background:#0e0f11} #stage{transform-origin:0 0;width:1920px;height:1080px}</style>
+</head>
+<body>
+<!-- 見本（静止画）。1920×1080で設計。画面が狭いときは縮小して表示する -->
+<!-- 場面：ゲームを新しく始めた直後。素の画面の前に、自分が書いた計画のメモが開く。ブラウザでテキストファイルを開いたときのような、白地に等幅の文字だけ -->
+<!-- 下の［はじめる］を押すと、素の画面（01）が始まる -->
+<div id="frame"><div id="stage">
+<div style="width:1920px;height:1080px;box-sizing:border-box;padding:8px;background:#ffffff;color:#000000;position:relative;overflow:hidden">
+<pre style="margin:0;font-family:'BIZ UDGothic',monospace;font-size:18px;line-height:1.6;white-space:pre-wrap">制作ノート.txt
+
+この画面は、ピクセルでできている。
+ボタンを押すと、ピクセルが1つ生まれる。
+ピクセルを集めれば、ボーダーもカラーもフォントも作れる。
+作ったものは、そのままこの画面になる。
+
+目標：この画面を作り上げて、v1.0 としてリリースする。
+</pre>
+<p style="margin:24px 0 0">
+  <button type="button" style="font-family:'Noto Sans JP',Arial,sans-serif;font-size:13.33px;padding:1px 6px;background:#efefef;color:#000000;border:1px solid #767676;border-radius:2px;line-height:normal">はじめる</button>
+</p>
+</div>
+</div></div>
+<script>
+function fit(){var s=Math.min(1,window.innerWidth/1920);var st=document.getElementById('stage');st.style.transform='scale('+s+')';document.getElementById('frame').style.height=(1080*s)+'px';}
+window.addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>
