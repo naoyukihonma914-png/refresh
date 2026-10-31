@@ -1,3 +1,4 @@
+import { productLabel } from '../content/products';
 import { BALANCE, type SpecKey } from '../config/balance';
 import type { I18n } from '../content/i18n';
 import { canBuySpec, canStartNextVersion, dailySales, displayedSales, shippingComplete, shippingProduct, SPEC_ORDER } from '../systems/release';
@@ -24,13 +25,13 @@ export function Release({ runtime, snapshot, i18n }: { runtime: GameRuntime; sna
   const total = days.reduce((a, b) => a + b, 0), available = state.resources.dollars - product.revenue + total;
   const complete = shippingComplete(state);
   return <main className="shipping-page">
-    <header className="shipping-header"><span className="publisher-mark" aria-hidden="true" /><b>{i18n.t('release.publisher')}</b><span>{i18n.t('release.path', { product: i18n.t('release.product'), version: i18n.t('release.prototype') })}</span></header>
+    <header className="shipping-header"><span className="publisher-mark" aria-hidden="true" /><b>{i18n.t('release.publisher')}</b><span>{i18n.t('release.path', { product: product.name?.trim() || i18n.t('product.untitled'), version: i18n.t('release.prototype') })}</span></header>
     <div className="shipping-columns">
       <div className="shipping-left">
         <section><h1>{i18n.t('release.products')}</h1><div className="shipping-box product-details">
           <ProductPreview product={product} runtime={runtime} snapshot={snapshot} i18n={i18n} />
           <table><tbody>
-            <tr><th scope="row">{i18n.t('release.name')}</th><td>{i18n.t('release.product')}</td></tr>
+            <tr><th scope="row">{i18n.t('release.name')}</th><td>{productLabel(i18n,product.name,i18n.t('release.prototype'))}</td></tr>
             <tr><th scope="row">{i18n.t('release.version')}</th><td>{i18n.t('release.prototype')}</td></tr>
             {product.author !== null && <tr><th scope="row">{i18n.t('release.author')}</th><td>{product.author}</td></tr>}
             <tr><th scope="row">{i18n.t('release.contents')}</th><td>{i18n.t('release.summary', { built: product.builtCount, icons: product.exports.filter(work => work.kind === 'icon').length })}</td></tr>
@@ -51,15 +52,15 @@ export function Release({ runtime, snapshot, i18n }: { runtime: GameRuntime; sna
             const enabled = canBuySpec(state, key);
             return <tr key={key} data-spec={key} className={key === 'color' && level === 0 ? 'recommended-spec' : ''}>
               <th scope="row">{i18n.t(`spec.${key}`)}</th><td>{i18n.spec(key, level)}</td><td>{next ? i18n.spec(key, level + 1) : i18n.t('release.maximum')}</td>
-              <td>{next ? specEffect(key, level, i18n) : i18n.t('settings.owned')}</td><td className={!enabled ? 'unaffordable' : ''}>{next ? i18n.integer(next.price) : ''}</td>
-              <td>{next && <button className={key === 'color' && level === 0 ? 'shipping-primary' : ''} disabled={!enabled} aria-label={i18n.t('release.buySpec', { name: i18n.t(`spec.${key}`), dollars: i18n.integer(next.price) })}
+              <td>{next ? specEffect(key, level, i18n) : i18n.t('settings.owned')}</td><td className={!enabled ? 'unaffordable' : ''}>{next ? i18n.price(next.price) : ''}</td>
+              <td>{next && <button className={key === 'color' && level === 0 ? 'shipping-primary' : ''} disabled={!enabled} aria-label={i18n.t('release.buySpec', { name: i18n.t(`spec.${key}`), dollars: i18n.price(next.price) })}
                 title={!complete ? i18n.t('release.salesPending') : !enabled && next.price <= state.resources.dollars ? i18n.t('release.reserve') : undefined} onClick={() => runtime.purchaseSpec(key)}>{i18n.t('release.buy')}</button>}</td>
             </tr>;
           })}
         </tbody></table></div>
         <p className="carry-dollars">{i18n.t('release.carryDollars')}</p>
         {!complete ? <p role="status">{i18n.t('release.salesPending')}</p> : state.persistent.specs.color === 0 && <p>{i18n.t('release.buyColorFirst')}</p>}
-        <div className="next-version"><button disabled={!canStartNextVersion(state)} onClick={runtime.startNextVersion}>{i18n.t('release.startNext')}</button></div>
+        <div className="next-version"><p className="next-version-theme">{i18n.t('release.nextTheme')}</p><button disabled={!canStartNextVersion(state)} onClick={runtime.startNextVersion}>{i18n.t('release.startNext')}</button></div>
       </section>
     </div>
   </main>;

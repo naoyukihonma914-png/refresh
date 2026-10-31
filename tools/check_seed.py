@@ -107,6 +107,7 @@ def main():
                 assert page.locator('.auto-cursor').count() == 20
                 assert '24' in page.locator('.cursor-summary').inner_text()
                 page.locator('.generate-button').click(position={'x':20, 'y':10})
+                page.locator('.pixel-gain').first.wait_for(state='attached')
                 assert page.locator('.pixel-gain').count() == 1
                 page.get_by_role('button', name='Tessera を作る（12,000 ピクセル）', exact=True).click()
                 page.locator('.kumiki').wait_for()
