@@ -24,6 +24,7 @@ export const BALANCE = {
     previewItems: 2,
     floatMs: 800,
     maxFloatingGains: 12,
+    gainOffsets: [-24, 24, -48, 48, 0, -72, 72],
     numberRollMs: 180,
     hintAfterMs: 300_000,
     inheritMs: 10_000,
@@ -34,6 +35,28 @@ export const BALANCE = {
       { id: 'inherit', band: 2, cost: 12, playful: false },
       { id: 'hold', band: 2, cost: 10, playful: false },
       { id: 'marquee', band: 2, cost: 10, playful: true },
+    ],
+  },
+  w2: {
+    items: [
+      { id: 'select', cost: 4_000 }, { id: 'button', cost: 9_000 },
+      { id: 'extensions', cost: 15_000 }, { id: 'switch', cost: 20_000 },
+      { id: 'slider', cost: 32_000 }, { id: 'input', cost: 45_000 },
+      { id: 'frame', cost: 65_000 }, { id: 'taskbar', cost: 90_000 },
+    ],
+    desktopCost: 200_000, dotValue: 10, focusMultiplier: 2, buttonMultiplier: 1.5,
+    partTokens: 1, intervalMin: 1, intervalMax: 10, sliderMultiplier: 1.2,
+    driftMinMs: 180_000, driftMaxMs: 360_000, driftMinPx: 6, driftMaxPx: 14,
+    driftAngle: 3, snapPx: 8, repairSeconds: 30, hintMs: 300_000,
+    enterMs: 1_200, upgradeMs: 2_000, undoLimit: 30, maxName: 80,
+    animationFrameMs: 500, generationLogLimit: 20,
+    skills: [
+      { id: 'fill', band: 1, cost: 2 }, { id: 'mirror', band: 1, cost: 3 },
+      { id: 'layers', band: 1, cost: 1 }, { id: 'eyedropper', band: 1, cost: 1 },
+      { id: 'expand', band: 1, cost: 1 }, { id: 'snap', band: 2, cost: 15 },
+      { id: 'outline', band: 2, cost: 20 }, { id: 'animation', band: 2, cost: 20 },
+      { id: 'extraParts', band: 2, cost: 15 }, { id: 'wallpaper', band: 2, cost: 10 },
+      { id: 'modern', band: 2, cost: 25 },
     ],
   },
   spec: {
@@ -96,4 +119,7 @@ export const BALANCE = {
 
 export type SeedItem = (typeof BALANCE.w1.items)[number]['id'];
 export type SeedSkill = (typeof BALANCE.w1.skills)[number]['id'];
+export type KumikiItem = (typeof BALANCE.w2.items)[number]['id'];
+export type KumikiSkill = (typeof BALANCE.w2.skills)[number]['id'];
+export type PartId = Exclude<KumikiItem, 'select' | 'extensions'> | 'tabs' | 'table';
 export type SpecKey = keyof typeof BALANCE.spec;

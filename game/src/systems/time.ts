@@ -1,7 +1,8 @@
 import { BALANCE } from '../config/balance';
-import { creditPixels, passivePixelsPerSecond } from './economy';
+import { advanceHomeGeneration } from './economy';
 import type { GameState } from './state';
 import { advanceSeedInstaller, updateSeedGuide } from './seed';
+import { advanceKumikiTimers } from './kumiki';
 
 export interface TimeResult {
   state: GameState;
@@ -19,9 +20,10 @@ export function isInactiveGap(monotonicElapsedMs: number, wallElapsedMs: number)
 }
 
 function applyTime(state: GameState, elapsedMs: number, creditedMs: number, capped: boolean): TimeResult {
-  const pixels = passivePixelsPerSecond(state) * creditedMs / BALANCE.time.millisecondsPerSecond;
+  const generated = advanceHomeGeneration(state, creditedMs);
+  const pixels = generated.resources.pixels - state.resources.pixels;
   return {
-    state: { ...creditPixels(state, pixels), elapsedMs: state.elapsedMs + creditedMs },
+    state: { ...generated, elapsedMs: state.elapsedMs + creditedMs },
     elapsedMs, creditedMs, pixels, capped, remainderMs: 0,
   };
 }
@@ -33,7 +35,8 @@ export function advanceActiveTime(state: GameState, elapsedMs: number): TimeResu
   const elapsed = Math.max(0, elapsedMs);
   const creditedMs = Math.floor(elapsed / BALANCE.time.tickMs) * BALANCE.time.tickMs;
   const result = applyTime(state, elapsed, creditedMs, false);
-  return { ...result, state: updateSeedGuide(advanceSeedInstaller(result.state, creditedMs)), remainderMs: elapsed - creditedMs };
+  const next = advanceSeedInstaller(result.state, creditedMs);
+  return { ...result, state: next.run.world === 'kumiki' ? advanceKumikiTimers(next, creditedMs) : updateSeedGuide(next), remainderMs: elapsed - creditedMs };
 }
 
 // 閉じていた・裏のタブだった時間だけ、端末時計の差で計算する。
@@ -45,6 +48,6 @@ export function advanceOfflineTime(state: GameState, wallNow: number): TimeResul
   const result = applyTime(state, elapsedMs, Math.min(elapsedMs, limit), elapsedMs > limit);
   // 時計が戻った差は0にし、次回の不在は現在の時計を基準にする。
   return { ...result, state: { ...result.state, lastTickAt: wallNow,
-    run: { ...result.state.run, seed: { ...result.state.run.seed, lastActionAt: result.state.elapsedMs } },
+    run: { ...result.state.run, seed: { ...result.state.run.seed, lastActionAt: result.state.elapsedMs }, kumiki: { ...result.state.run.kumiki, lastActionAt: result.state.elapsedMs } },
   } };
 }

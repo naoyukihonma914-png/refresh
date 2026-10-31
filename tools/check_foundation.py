@@ -92,7 +92,7 @@ def main():
         with page.expect_download() as download:
             page.get_by_role("button", name="データを書き出す", exact=True).click()
         exported = Path(download.value.path()).read_bytes()
-        assert json.loads(exported)["schemaVersion"] == 2
+        assert json.loads(exported)["schemaVersion"] == 3
 
         page.add_init_script("""
           const corruption = sessionStorage.getItem('test-corruption');

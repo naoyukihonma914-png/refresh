@@ -1,6 +1,7 @@
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
+import { createArtwork, createKumikiState, isArtwork, isKumikiState, type Artwork, type KumikiState } from './kumikiState';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -24,14 +25,16 @@ export interface GameState {
   resources: { pixels: number; tokens: number; dollars: number };
   run: {
     version: 'v0.1' | 'v1' | 'v2';
-    world: 'seed';
+    world: 'seed' | 'kumiki';
     totalPixelsGenerated: number;
     seed: SeedState;
+    kumiki: KumikiState;
   };
   persistent: {
     specs: Record<SpecKey, number>; playerName: string | null;
     seedSkills: SeedSkill[];
     seedAppearance: { pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean };
+    artwork: Artwork;
   };
 }
 
@@ -49,11 +52,13 @@ export function createInitialState(now: number): GameState {
         built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
       },
+      kumiki: createKumikiState(),
     },
     persistent: {
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
       playerName: null,
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
+      artwork: createArtwork(),
     },
   };
 }
@@ -82,7 +87,8 @@ export function isGameState(value: unknown): value is GameState {
   const persistent = value.persistent;
   if (!isRecord(resources) || !isRecord(run) || !isRecord(persistent)) return false;
   if (!isAmount(resources.pixels) || !isAmount(resources.tokens) || !isAmount(resources.dollars)) return false;
-  if (!['v0.1', 'v1', 'v2'].includes(run.version as string) || run.world !== 'seed' || !isAmount(run.totalPixelsGenerated)) return false;
+  if (!['v0.1', 'v1', 'v2'].includes(run.version as string) || !['seed', 'kumiki'].includes(run.world as string) || !isAmount(run.totalPixelsGenerated)) return false;
+  if (!isKumikiState(run.kumiki) || !isArtwork(persistent.artwork)) return false;
   if (run.totalPixelsGenerated < resources.pixels) return false;
   if (!isRecord(run.seed) || !Array.isArray(run.seed.built) || !isCount(run.seed.autoCursors)) return false;
   const itemIds: readonly unknown[] = BALANCE.w1.items.map(item => item.id);

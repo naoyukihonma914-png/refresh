@@ -1,10 +1,12 @@
 import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameState } from './state';
 import type { SaveStorage } from '../platform/storage';
+import { createArtwork, createKumikiState } from './kumikiState';
+import { enterKumiki } from './kumiki';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
 export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup' } as const;
 
-// 段階1で実際に配布した第1版だけを変換する。試作の形式は推測しない。
+// 実際に配布した第1・第2版を順に変換する。試作の形式は推測しない。
 const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   1(data) {
     const old = data as GameState;
@@ -17,6 +19,15 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
         seedSkills: [], seedAppearance: defaults.persistent.seedAppearance,
       },
     };
+  },
+  2(data) {
+    const old = data as GameState;
+    let next = { ...old, schemaVersion: 3 as const,
+      run: { ...old.run, kumiki: createKumikiState() },
+      persistent: { ...old.persistent, artwork: createArtwork() },
+    };
+    if (next.run.seed?.built?.includes('kumiki')) next = enterKumiki(next);
+    return next;
   },
 };
 

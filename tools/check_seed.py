@@ -106,8 +106,8 @@ def main():
                 page.locator('.generate-button').click(position={'x':20, 'y':10})
                 assert page.locator('.pixel-gain').count() == 1
                 page.get_by_role('button', name='組木を作る（12,000 ピクセル）', exact=True).click()
-                assert page.locator('.seed-complete').inner_text() == '組木ができました。'
-                assert page.locator('.seed-page').count() == 1
+                page.locator('.kumiki').wait_for()
+                assert page.locator('.seed-page.is-embedded').count() == 1
             page.screenshot(path=str(ARTIFACTS / f'{fixture}.png'))
         # 見本を同じ同梱書体で比較する。外部書体への参照だけ検査中に止める。
         page.route('https://**/*', lambda route: route.abort())
