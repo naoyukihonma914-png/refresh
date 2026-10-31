@@ -83,7 +83,7 @@ def main():
         page.get_by_role('button',name='ファイル',exact=True).click()
         with page.expect_download() as d:page.get_by_role('button',name='データをエクスポート',exact=True).click()
         raw=Path(d.value.path()).read_text();state=json.loads(raw)
-        assert state['schemaVersion']==4
+        assert state['schemaVersion']==5
         assert state['persistent']['artwork']['sketchbook']['frames'][0][0]>=0
         assert state['run']['kumiki']['drawings']['folder']['exported']
         ctx.close()
@@ -129,10 +129,10 @@ def main():
         assert '256色' in page.locator('.desktop-exit').inner_text()
         page.locator('.k-menu-end button').first.click()
         assert page.locator('.k-condition-popover input:checked').count()==3
-        assert page.get_by_role('button',name='リリースする',exact=True).count()==0
+        assert page.get_by_role('button',name='リリースする',exact=True).count()==1
         assert page.locator('.kumiki').count()==1
         ctx.close()
-        checks.append('16色の表示要件とv0.1の準備3条件、段階4のリリースへ進まないこと')
+        checks.append('16色の表示要件とv0.1の準備3条件、確認前は作業画面を保つこと')
 
         ctx,page=scene('kumiki-drift')
         drift=page.locator('.part-shifted');rect=drift.bounding_box();before=balance(page)

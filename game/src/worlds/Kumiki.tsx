@@ -9,6 +9,8 @@ import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
 import { DrawingCanvas, type DrawingTool } from './kumiki/DrawingCanvas';
 import { HomeDocument } from './kumiki/HomeDocument';
 import { Extensions } from './kumiki/Extensions';
+import { canFundNextVersion, canReleasePrototype, releaseEstimate } from '../systems/release';
+import { GuideHistory } from '../components/GuideHistory';
 
 const TOOL_PATHS = {
   pencil: 'M4 20L6 14L16 4L20 8L10 18Z M14 6L18 10 M6 14L10 18',
@@ -161,11 +163,12 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
       {k.built.includes('extensions') && <button className={extensions ? 'active' : ''} onClick={() => { setExtensions(!extensions); act({ type: 'extensions' }); }}>{i18n.t('k.extensions')}</button>}
       <div className="k-menu-end">
         {(tokensVisible || k.exitInspected) && <button onClick={() => setConditions(!conditions)}>{i18n.t('k.releaseProgress', { version: prototype ? 'v0.1' : 'v1.0', done: prototype ? releaseChecks.filter(Boolean).length : 0, total: prototype ? releaseChecks.length : 5 })}</button>}
+        {canReleasePrototype(state) && !snapshot.releaseConfirmation && <button className="prototype-release" onClick={runtime.requestPrototypeRelease}>{i18n.t('release.action')}</button>}
         <button aria-expanded={archive} onClick={() => setArchive(!archive)}>{i18n.t('k.comments')}</button>
       </div>
     </nav>
     <header className="k-toolbar"><span>{i18n.t('k.home')}</span><b data-pixels={state.resources.pixels}>{i18n.t('k.pixels', { pixels: i18n.pixels(state.resources.pixels) })}</b>
-      <span>{i18n.t('k.rate', { pixels: i18n.number(passivePixelsPerSecond(state)) })}</span>
+      <span>{i18n.t('k.rate', { pixels: i18n.rate(passivePixelsPerSecond(state)) })}</span>
       {tokensVisible && <span className="token-count">{i18n.t('k.tokens', { count: state.resources.tokens })}</span>}
       <span className="current-tool">{i18n.t(`k.tool.${tool}`)}</span>
       <button className={`export-button ${readyCount ? 'can-export' : ''}`} disabled={!readyCount} onClick={() => {
@@ -176,6 +179,12 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
     </header>
     {conditions && <section className="k-condition-popover"><h2>{i18n.t('k.conditions')}</h2>
       {(prototype ? ['parts', 'icons', 'buttons'] as const : ['apps', 'requests', 'icons', 'wallpaper', 'automation'] as const).map((id, index) => <p key={id}><input type="checkbox" readOnly checked={prototype && !!releaseChecks[index]} />{i18n.t(prototype ? `k.condition.${id as 'parts' | 'icons' | 'buttons'}` : `seed.condition.${id as 'apps' | 'requests' | 'icons' | 'wallpaper' | 'automation'}`)}</p>)}
+    </section>}
+    {snapshot.releaseConfirmation && <section className="k-release-confirm k-comment" role="dialog" aria-label={i18n.t('release.confirm.title')}>
+      <h3>{i18n.t('release.confirm.title')}</h3><p>{i18n.t('release.confirm')}</p><p>{i18n.t('guide.signature')}</p>
+      <p>{i18n.t('release.estimate', { dollars: i18n.integer(releaseEstimate(state)) })}</p>
+      {!canFundNextVersion(state) && <p>{i18n.t('release.needRevenue', { dollars: BALANCE.spec.color[BALANCE.release.prototypeColorLevel]!.price })}</p>}
+      <div className="release-confirm-actions"><button disabled={!canFundNextVersion(state)} onClick={runtime.confirmPrototypeRelease}>{i18n.t('release.action')}</button><button onClick={runtime.cancelPrototypeRelease}>{i18n.t('release.keepWorking')}</button></div>
     </section>}
     <div className="k-body">
       <aside className="k-tools">
@@ -217,6 +226,7 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
         </div>}
         {exportsOpen && <section className="exports-list"><h2>{i18n.t('k.exports')}</h2>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
           {k.exports.map(work => <button key={work.kind + work.id} onClick={() => { setExportsOpen(false); if (work.kind === 'icon') openDrawing(work.id); else if (k.placed.includes(work.id as PartId)) { setTool('select'); selectPart(work.id); } else { dragRef.current = work.id as PartId; setDragPart(work.id as PartId); } }}>{work.name || (work.kind === 'icon' ? i18n.t(`k.icon.${work.id as 'folder'}`) : i18n.t(`k.part.${work.id as PartId}`))}</button>)}
+          {state.persistent.products.length > 0 && <><h2>{i18n.t('release.pastExports')}</h2><ul>{state.persistent.products.flatMap(product => product.exports.map(work => <li key={`${product.id}:${work.kind}:${work.id}`}>{i18n.t('release.guideRead', { version: i18n.t('release.prototype'), title: work.name || i18n.t(work.kind === 'icon' ? `k.icon.${work.id as 'folder'}` : `k.part.${work.id as PartId}`) })}</li>))}</ul></>}
         </section>}
       </section>
       <aside className="icon-editor">
@@ -244,7 +254,7 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
           <label>{i18n.t('k.fillColor')}<select value={design.color} onChange={event => change({ color: event.target.value })}>{!palette.includes(design.color) && <option value={design.color}>{design.color}</option>}{palette.map(c => <option value={c} key={c}>{c}</option>)}</select></label>
           <label>{i18n.t('k.radius')}<input type="range" min={0} max={16} value={design.radius} onChange={event => change({ radius: Number(event.target.value) })} /><output>{i18n.number(design.radius)}</output></label>
           <label>{i18n.t('k.textSize')}<select value={design.textSize} onChange={event => change({ textSize: event.target.value as Design['textSize'] })}>{(['small','medium','large'] as const).map(id => <option key={id} value={id}>{i18n.t(`k.${id}`)}</option>)}</select></label>
-          <label><input type="checkbox" checked={design.shadow} onChange={event => change({ shadow: event.target.checked })} />{i18n.t('k.shadow')}</label>
+          <label className="shadow-setting"><input type="checkbox" checked={design.shadow} onChange={event => change({ shadow: event.target.checked })} />{i18n.t('k.shadow')}</label>
           {hasKSkill(state, 'snap') && <p>{i18n.t('k.dimensions', dimensions)}</p>}
         </section> : state.persistent.artwork.modern && <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{i18n.t('k.choosePart')}</p></section>)}
         {state.persistent.artwork.modern && layers}
@@ -252,7 +262,7 @@ export function Kumiki({ runtime, snapshot, i18n }: { runtime: GameRuntime; snap
           {k.guide.current === 'name' && <form onSubmit={event => { event.preventDefault(); act({ type: 'name', name }); readGuide('close'); }}><label>{i18n.t('k.playerName')}<input value={name} maxLength={BALANCE.w2.maxName} onChange={event => setName(event.target.value)} /></label><button type="submit">{i18n.t('k.answer')}</button></form>}
           <button onClick={() => readGuide('close')}>{i18n.t('guide.close')}</button>
         </section>}
-        {archive && <section className="comment-archive"><h2>{i18n.t('k.comments')}</h2>{k.guide.seen.map(id => <button key={id} onClick={() => readGuide(id)}>{i18n.t(`k.guide.${id}.title`)}</button>)}</section>}
+        {archive && <section className="comment-archive"><h2>{i18n.t('k.comments')}</h2>{k.guide.seen.map(id => <button key={id} onClick={() => readGuide(id)}>{i18n.t(`k.guide.${id}.title`)}</button>)}<GuideHistory state={state} i18n={i18n} /></section>}
         {snapshot.offline && <section className="k-comment" role="status"><p>{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}</p></section>}
       </aside>
     </div>

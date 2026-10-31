@@ -7,7 +7,7 @@ export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
 export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup' } as const;
 
-// 配布・PRで使用した第1〜第3版を順に変換する。試作の形式は推測しない。
+// 配布・PRで使用した第1〜第4版を順に変換する。試作の形式は推測しない。
 const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   1(data) {
     const old = data as GameState;
@@ -30,8 +30,12 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     return next;
   },
   3(data) {
-    const next = { ...(data as GameState), schemaVersion: SCHEMA_VERSION };
-    if (!isGameState(next)) throw new Error('保存データの内容が不正です');
+    const next = { ...(data as GameState), schemaVersion: 4 };
+    const projected = { ...next, schemaVersion: SCHEMA_VERSION,
+      run: { ...next.run, shipping: null, restartMs: 0 },
+      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {} },
+    };
+    if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
     const palette = paletteFor(1);
     const rgb = (color: string) => [1, 3, 5].map(start => parseInt(color.slice(start, start + 2), 16));
     const oldPalette = legacyPalette();
@@ -52,6 +56,13 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
       if (index >= 0) design.color = palette[mapping[index]!]!;
     }
     return next;
+  },
+  4(data) {
+    const old = data as GameState;
+    return { ...old, schemaVersion: 5,
+      run: { ...old.run, shipping: null, restartMs: 0 },
+      persistent: { ...old.persistent, products: [], guideArchive: [], homeTheme: {} },
+    };
   },
 };
 
@@ -111,8 +122,8 @@ export type SaveResult =
   | { kind: 'saved'; state: GameState }
   | { kind: 'locked' | 'failed'; state: GameState };
 
-export function saveGame(storage: SaveStorage, state: GameState, now: number): SaveResult {
-  if (!canSave(state)) return { kind: 'locked', state };
+export function saveGame(storage: SaveStorage, state: GameState, now: number, { checkpoint = false } = {}): SaveResult {
+  if (!canSave(state) && !(checkpoint && state.persistent.products.length > 0)) return { kind: 'locked', state };
   const saved = { ...state, lastSavedAt: now };
   try {
     const raw = encodeSave(saved);

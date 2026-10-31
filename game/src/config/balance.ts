@@ -59,6 +59,12 @@ export const BALANCE = {
       { id: 'modern', band: 2, cost: 25 },
     ],
   },
+  release: {
+    base: 25, pixelUnit: 10_000, exponent: 0.4, perElement: 0.05,
+    animationMs: 8_000, restartMs: 1_000,
+    dailyWeights: [88, 61, 47, 38, 29, 22, 18],
+    prototypeColorLevel: 1,
+  },
   spec: {
     color: [
       { price: 0, multiplier: 1 },

@@ -6,6 +6,7 @@ import type { GameRuntime } from './systems/runtime';
 import { Foundation } from './worlds/Foundation';
 import { Kumiki } from './worlds/Kumiki';
 import { Intro } from './worlds/Intro';
+import { Release } from './worlds/Release';
 
 export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }) {
   const snapshot = useSyncExternalStore(runtime.subscribe, runtime.getSnapshot);
@@ -24,6 +25,8 @@ export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }
         </div>}
         {snapshot.status === 'ready' && (snapshot.introVisible
           ? <Intro i18n={i18n} onStart={runtime.startGame} />
+          : snapshot.state.run.world === 'release'
+          ? <Release snapshot={snapshot} i18n={i18n} runtime={runtime} />
           : snapshot.state.run.world === 'kumiki'
           ? <Kumiki key={snapshot.state.createdAt} snapshot={snapshot} i18n={i18n} runtime={runtime} />
           : <Foundation snapshot={snapshot} i18n={i18n} runtime={runtime} />)}

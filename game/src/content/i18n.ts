@@ -38,6 +38,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
   const locale = LOCALES[pseudo ? 'en' : language] ?? LOCALES.en!;
   const intl = locale._meta.intl;
   const number = new Intl.NumberFormat(intl, { maximumFractionDigits: 2 });
+  const rate = new Intl.NumberFormat(intl, { maximumFractionDigits: 1 });
   const integer = new Intl.NumberFormat(intl, { maximumFractionDigits: 0 });
   const compact = new Intl.NumberFormat(intl, { notation: 'compact', maximumFractionDigits: 2 });
   const plural = new Intl.PluralRules(intl);
@@ -74,6 +75,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
     t,
     duration,
     number: (value: number) => number.format(value),
+    rate: (value: number) => rate.format(value),
     integer: (value: number) => integer.format(Math.floor(value)),
     pixels: (value: number) => value >= locale._meta.compactThreshold ? compact.format(value) : integer.format(Math.floor(value)),
     price: (value: number) => compact.format(value),

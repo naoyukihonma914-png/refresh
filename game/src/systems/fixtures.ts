@@ -3,6 +3,7 @@ import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
 import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, targetFor } from './kumiki';
 import { blankDrawing } from './kumikiState';
+import { advanceShipping, beginPrototypeRelease, buySpec, releaseEstimate, startNextVersion } from './release';
 
 export const FIXTURE_NAMES = [
   'intro',
@@ -10,6 +11,7 @@ export const FIXTURE_NAMES = [
   'seed-start', 'seed-border', 'seed-saved', 'seed-color', 'seed-font',
   'seed-layout', 'seed-motion', 'seed-complete', 'seed-return', 'seed-inheriting',
   'kumiki-early', 'kumiki-mature', 'kumiki-wall', 'kumiki-modern', 'kumiki-drift',
+  'release-ready', 'release-counting', 'release-complete', 'release-rich', 'release-restarting', 'release-rebuilt', 'release-v1-tessera',
 ] as const;
 
 // 実セーブと混ざらないよう、ランタイムは固定状態ではメモリ内の保存領域を使う。
@@ -17,6 +19,43 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
   if (name === 'intro') return state;
+  if (name?.startsWith('release-')) {
+    let next = createFixture('kumiki-wall', now)!;
+    for (const id of ['clock', 'mail', 'photo', 'settings']) {
+      next = prepareDrawing(next, id);
+      const drawing = next.run.kumiki.drawings[id]!;
+      const target = targetFor(next, id, drawing.size);
+      for (const color of new Set(target.filter(c => c >= 0))) next = paintDrawing(next, id, target.flatMap((c, i) => c === color ? [i] : []), color);
+      next = exportKumiki(next, now);
+    }
+    next.persistent.playerName = 'Aoi';
+    next.resources.pixels = 51_872;
+    next.run.seed.autoCursors = 41;
+    next.run.totalPixelsGenerated = 1_000_000;
+    next.run.totalPixelsGenerated *= (303.5 / releaseEstimate(next)) ** (1 / BALANCE.release.exponent);
+    if (name === 'release-ready') return next;
+    next = beginPrototypeRelease(next, now);
+    next = advanceShipping(next, name === 'release-counting' ? 2_400 : BALANCE.release.animationMs);
+    if (name === 'release-rich') { next.resources.dollars = 1_000_000; return next; }
+    if (name === 'release-restarting' || name === 'release-rebuilt' || name === 'release-v1-tessera') {
+      next = startNextVersion(buySpec(next, 'color'), now);
+      if (name === 'release-rebuilt') {
+        next.run.restartMs = 0;
+        next.run.seed.built = ['border', 'save', 'color']; next.run.seed.autoCursors = 1;
+        next.resources.pixels = 2_236; next.run.totalPixelsGenerated = 5_000;
+        next.lastSavedAt = now;
+      }
+      if (name === 'release-v1-tessera') {
+        next.run.restartMs = 0;
+        next.run.seed.built = BALANCE.w1.items.map(item => item.id); next.run.seed.autoCursors = 41;
+        next.resources.pixels = 1_000_000; next.run.totalPixelsGenerated = 2_000_000;
+        next = enterKumiki(next);
+        for (const item of BALANCE.w2.items) next = buildKumiki(next, item.id);
+        for (const part of ownedParts(next)) next = placePart(next, part);
+      }
+    }
+    return next;
+  }
   if (name?.startsWith('kumiki-')) {
     state.run.seed.built = BALANCE.w1.items.map(item => item.id);
     state.run.seed.autoCursors = 12;

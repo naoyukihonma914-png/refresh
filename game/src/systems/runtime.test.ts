@@ -337,6 +337,93 @@ describe('段階2の操作と保存', () => {
   });
 });
 
+describe('出荷の保存と再開', () => {
+  const prepare = async () => {
+    storage.setItem(SAVE_KEYS.primary, encodeSave(createFixture('release-ready', clock.wall)!));
+    await start();
+  };
+
+  it('確認を取り消して作業へ戻れ、承認後だけ出荷する。再読み込み・再押下で二重に入金しない', async () => {
+    await prepare();
+    const before = runtime.getSnapshot().state.resources;
+    runtime.requestPrototypeRelease();
+    expect(runtime.getSnapshot().releaseConfirmation).toBe(true);
+    runtime.cancelPrototypeRelease();
+    expect(runtime.getSnapshot().state.resources).toEqual(before);
+    runtime.requestPrototypeRelease(); runtime.confirmPrototypeRelease(); runtime.confirmPrototypeRelease();
+    expect(runtime.getSnapshot().state.run.world).toBe('release');
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(303);
+    expect(platform.unlockAchievement).toHaveBeenCalledExactlyOnceWith('prototype-released');
+    step(2_400); runtime.leave();
+    runtime.dispose(); clock.wall += 3 * hour;
+    await start();
+    expect(runtime.getSnapshot().state.run.shipping!.elapsedMs).toBe(2_400);
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(303);
+    expect(runtime.getSnapshot().offline).toBeNull();
+    step(5_600); runtime.purchaseSpec('color'); runtime.purchaseSpec('storage');
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(3);
+    runtime.startNextVersion(); runtime.startNextVersion();
+    expect(runtime.getSnapshot().state.run.version).toBe('v1');
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().introVisible).toBe(false);
+    expect(runtime.getSnapshot().state.persistent.products).toHaveLength(1);
+    expect(runtime.getSnapshot().state.persistent.specs.color).toBe(1);
+    expect(runtime.getSnapshot().state.persistent.specs.storage).toBe(1);
+  });
+
+  it.each([1, 2])('出荷の前後の保存（%i回目）が失敗したら元の構成を残し、再試行で一度だけ入金する', async failAt => {
+    await prepare(); runtime.requestPrototypeRelease();
+    const write = storage.setItem; let writes = 0;
+    storage.setItem = (key, value) => {
+      if (key === SAVE_KEYS.primary && ++writes === failAt) throw new Error('Quota exceeded');
+      write(key, value);
+    };
+    runtime.confirmPrototypeRelease();
+    expect(runtime.getSnapshot().notice).toBe('save.failed');
+    expect(runtime.getSnapshot().state.run.world).toBe('kumiki');
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(0);
+    const loaded = loadGame(storage);
+    expect(loaded.kind === 'loaded' && loaded.state.run.world).toBe('kumiki');
+    storage.setItem = write; runtime.confirmPrototypeRelease();
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(303);
+    expect(runtime.getSnapshot().state.persistent.products).toHaveLength(1);
+  });
+
+  it('リセット直後の保存が失敗したら出荷画面を保ち、再試行後はセーブ未作成でもv1の記録が残る', async () => {
+    await prepare(); runtime.requestPrototypeRelease(); runtime.confirmPrototypeRelease();
+    step(8_000); runtime.purchaseSpec('color');
+    const write = storage.setItem;
+    storage.setItem = (key, value) => { if (key === SAVE_KEYS.primary) throw new Error('Quota exceeded'); write(key, value); };
+    runtime.startNextVersion();
+    expect(runtime.getSnapshot().state.run.world).toBe('release');
+    expect(runtime.getSnapshot().notice).toBe('save.failed');
+    storage.setItem = write; runtime.startNextVersion();
+    const checkpoint = loadGame(storage);
+    expect(checkpoint.kind === 'loaded' && checkpoint.state.run.version).toBe('v1');
+    step(1_000); runtime.pressSeed();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(1.5);
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    expect(runtime.getSnapshot().state.persistent.products).toHaveLength(1);
+  });
+
+  it('タブの所有権を失ったら出荷と性能購入を止める', async () => {
+    await prepare(); runtime.requestPrototypeRelease(); clock.owned = false;
+    runtime.confirmPrototypeRelease(); runtime.purchaseSpec('color');
+    expect(runtime.getSnapshot().status).toBe('blocked');
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(0);
+    expect(platform.unlockAchievement).not.toHaveBeenCalled();
+  });
+
+  it('動きを減らす設定では集計の演出を省略して購入できる', async () => {
+    platform.animation.reducedMotion = () => true;
+    await prepare(); runtime.requestPrototypeRelease(); runtime.confirmPrototypeRelease(); runtime.purchaseSpec('color');
+    expect(runtime.getSnapshot().state.persistent.specs.color).toBe(1);
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(103);
+  });
+});
+
 it('構成の組み立て中に保存ができた時点ですぐ書き込み、再起動後も続きから組み立てる', async () => {
   storage.setItem(SAVE_KEYS.primary, encodeSave(createFixture('seed-inheriting', clock.wall)!));
   await start(); step(3_400);

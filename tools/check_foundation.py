@@ -95,7 +95,7 @@ def main():
         with page.expect_download() as download:
             page.get_by_role("button", name="データをエクスポート", exact=True).click()
         exported = Path(download.value.path()).read_bytes()
-        assert json.loads(exported)["schemaVersion"] == 4
+        assert json.loads(exported)["schemaVersion"] == 5
 
         page.add_init_script("""
           const corruption = sessionStorage.getItem('test-corruption');
@@ -183,7 +183,7 @@ def main():
         except Error as error:
             if "ERR_BLOCKED_BY_ADMINISTRATOR" not in str(error):
                 raise
-            limitations.append("file:// は環境のブラウザポリシーで拒否され、ダブルクリックの実動作は未確認")
+            limitations.append("この環境の file:// はブラウザポリシーで拒否。ダブルクリック起動はユーザー側で検証成功済み（2026-10-31）")
         file_context.close()
 
         disconnected = browser.new_context(locale="ja-JP", timezone_id="Asia/Tokyo")

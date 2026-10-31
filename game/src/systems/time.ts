@@ -3,6 +3,7 @@ import { advanceHomeGeneration } from './economy';
 import type { GameState } from './state';
 import { advanceSeedInstaller, updateSeedGuide } from './seed';
 import { advanceKumikiTimers } from './kumiki';
+import { advanceShipping } from './release';
 
 export interface TimeResult {
   state: GameState;
@@ -34,15 +35,18 @@ export function advanceActiveTime(state: GameState, elapsedMs: number): TimeResu
   if (!Number.isFinite(elapsedMs)) throw new Error('Invalid active duration');
   const elapsed = Math.max(0, elapsedMs);
   const creditedMs = Math.floor(elapsed / BALANCE.time.tickMs) * BALANCE.time.tickMs;
+  if (state.run.world === 'release') return { state: advanceShipping(state, creditedMs), elapsedMs: elapsed, creditedMs, pixels: 0, capped: false, remainderMs: elapsed - creditedMs };
   const result = applyTime(state, elapsed, creditedMs, false);
   const next = advanceSeedInstaller(result.state, creditedMs);
-  return { ...result, state: next.run.world === 'kumiki' ? advanceKumikiTimers(next, creditedMs) : updateSeedGuide(next), remainderMs: elapsed - creditedMs };
+  const progressed = next.run.world === 'kumiki' ? advanceKumikiTimers(next, creditedMs) : updateSeedGuide(next);
+  return { ...result, state: { ...progressed, run: { ...progressed.run, restartMs: Math.max(0, progressed.run.restartMs - creditedMs) } }, remainderMs: elapsed - creditedMs };
 }
 
 // 閉じていた・裏のタブだった時間だけ、端末時計の差で計算する。
 export function advanceOfflineTime(state: GameState, wallNow: number): TimeResult {
   if (!Number.isFinite(wallNow) || wallNow < 0) throw new Error('Invalid wall time');
   const elapsedMs = Math.max(0, wallNow - state.lastTickAt);
+  if (state.run.world === 'release') return { state: { ...state, lastTickAt: wallNow }, elapsedMs, creditedMs: 0, pixels: 0, capped: false, remainderMs: 0 };
   const limit = BALANCE.spec.storage[state.persistent.specs.storage]!.offlineHours
     * BALANCE.time.millisecondsPerHour;
   const result = applyTime(state, elapsedMs, Math.min(elapsedMs, limit), elapsedMs > limit);

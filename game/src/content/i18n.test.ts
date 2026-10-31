@@ -98,6 +98,13 @@ describe('言語ファイルと表示', () => {
     expect(ja.date(0)).not.toBe(en.date(0));
   });
 
+  it('毎秒量は小数1桁までに丸め、整数には小数点を付けない', () => {
+    const ja = createI18n('ja'), en = createI18n('en');
+    expect(ja.rate(6.75)).toBe('6.8'); expect(ja.rate(81)).toBe('81');
+    expect(en.rate(0.06)).toBe('0.1'); expect(en.rate(1_234.56)).toBe('1,234.6');
+    expect(ja.number(6.75)).toBe('6.75'); // 倍率などの表示は変えない。
+  });
+
   it('試験用の言語で文章を約1.4倍に伸ばしても差し込みは残る', () => {
     const en = createI18n('en');
     const test = createI18n(TEST_LANGUAGE);
