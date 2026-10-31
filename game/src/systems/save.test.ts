@@ -2,10 +2,39 @@ import { describe, expect, it } from 'vitest';
 import { createFixture } from './fixtures';
 import { clearGame, createMemoryStorage, decodeSave, encodeSave, loadGame, SAVE_KEYS, saveGame } from './save';
 import { createInitialState, isGameState } from './state';
+import { LEGACY_COLOR_MAP, paletteFor } from '../content/kumikiArt';
+import { completeDrawing } from './kumiki';
 
 const savedState = () => createFixture('foundation-saved', 1_000)!;
 
 describe('保存と読み込み', () => {
+  it('第3版の描画・テンプレート・エクスポート・スケッチと色設定を新しいパレットへ移し、報酬記録を保つ', () => {
+    const old = JSON.parse(encodeSave(createFixture('kumiki-mature', 1_000)!));
+    old.schemaVersion = 3;
+    // 第3版が保存していた色番号で、完成したフォルダを再現する。
+    for (const drawing of [...Object.values(old.run.kumiki.drawings), ...Object.values(old.persistent.artwork.icons)] as { frames: number[][] }[]) {
+      drawing.frames = drawing.frames.map(frame => frame.map(color => color < 0 ? color : LEGACY_COLOR_MAP.indexOf(color)));
+    }
+    const drawing = old.run.kumiki.drawings.folder;
+    drawing.frames[0][0] = 11; drawing.rewarded[0] = true;
+    old.run.kumiki.underlays.folder = structuredClone(drawing);
+    old.persistent.artwork.sketchbook = structuredClone(drawing);
+    old.persistent.artwork.wallpaper = structuredClone(drawing);
+    old.persistent.artwork.icons.folder = structuredClone(drawing);
+    old.run.kumiki.exports[0].frames[0][0] = 11;
+    old.run.kumiki.design.primary = { color: '#000080', radius: 4, textSize: 'medium', shadow: false };
+    const next = decodeSave(JSON.stringify(old));
+    expect(next.schemaVersion).toBe(4);
+    for (const art of [next.run.kumiki.drawings.folder, next.run.kumiki.underlays.folder, next.persistent.artwork.sketchbook, next.persistent.artwork.wallpaper, next.persistent.artwork.icons.folder]) {
+      expect(art!.frames[0]![0]).toBe(LEGACY_COLOR_MAP[11]);
+      expect(art!.rewarded[0]).toBe(true);
+    }
+    expect(next.run.kumiki.exports[0]!.frames[0]![0]).toBe(LEGACY_COLOR_MAP[11]);
+    expect(next.run.kumiki.design.primary!.color).toBe(paletteFor(0)[11]);
+    expect(next.resources).toEqual(old.resources);
+    expect(completeDrawing(next, 'folder')).toBe(true);
+    expect(decodeSave(encodeSave(next))).toEqual(next);
+  });
   it('保存を作るまでは、保存領域に何も書かない', () => {
     const storage = createMemoryStorage();
     expect(saveGame(storage, createInitialState(1_000), 2_000).kind).toBe('locked');
@@ -66,7 +95,7 @@ describe('保存と読み込み', () => {
   });
 
   it('今後の版・未対応の旧版を推測で読み込まない', () => {
-    expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 3 }))).toThrow('新しい版');
+    expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 5 }))).toThrow('新しい版');
     expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 0 }))).toThrow('対応していません');
     expect(() => decodeSave('{}')).toThrow();
   });

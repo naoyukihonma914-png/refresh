@@ -16,8 +16,27 @@ export function cursorPressesPerSecond(state: GameState): number {
     * BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier;
 }
 
-export function passivePixelsPerSecond(state: GameState): number {
-  return state.run.seed.autoCursors * manualClickValue(state) * cursorPressesPerSecond(state);
+export function cursorPixelsPerSecond(state: GameState): number {
+  const k = state.run.kumiki;
+  if (state.run.world === 'kumiki' && k.placed.includes('switch') && k.focus) return 0;
+  const button = k.placed.includes('button') ? BALANCE.w2.buttonMultiplier : 1;
+  const slider = k.placed.includes('slider') ? 1 + (k.interval - BALANCE.w2.intervalMin) / (BALANCE.w2.intervalMax - BALANCE.w2.intervalMin) * (BALANCE.w2.sliderMultiplier - 1) : 1;
+  return manualClickValue(state) * cursorPressesPerSecond(state) * button * slider;
+}
+
+export const passivePixelsPerSecond = (state: GameState): number => state.run.seed.autoCursors * cursorPixelsPerSecond(state);
+
+export function advanceHomeGeneration(state: GameState, ms: number): GameState {
+  const k = state.run.kumiki;
+  const rate = passivePixelsPerSecond(state);
+  if (!k.placed.includes('slider') || rate === 0) return creditPixels(state, rate * ms / BALANCE.time.millisecondsPerSecond);
+  const period = k.interval * BALANCE.time.millisecondsPerSecond;
+  const until = period - k.batchMs;
+  const remainder = ms < until ? k.batchMs + ms : (ms - until) % period;
+  const pixels = ms < until ? 0 : k.bank + rate * (ms - remainder) / BALANCE.time.millisecondsPerSecond;
+  const bank = ms < until ? k.bank + rate * ms / BALANCE.time.millisecondsPerSecond : rate * remainder / BALANCE.time.millisecondsPerSecond;
+  const next = creditPixels(state, pixels);
+  return { ...next, run: { ...next.run, kumiki: { ...next.run.kumiki, bank, batchMs: remainder } } };
 }
 
 export function creditPixels(state: GameState, pixels: number): GameState {
@@ -28,6 +47,9 @@ export function creditPixels(state: GameState, pixels: number): GameState {
   return {
     ...state,
     resources: { ...state.resources, pixels: balance },
-    run: { ...state.run, totalPixelsGenerated: total },
+    run: { ...state.run, totalPixelsGenerated: total,
+      kumiki: pixels > 0 && state.run.kumiki.placed.includes('table')
+        ? { ...state.run.kumiki, generationLog: [...state.run.kumiki.generationLog.slice(-(BALANCE.w2.generationLogLimit - 1)), { at: state.lastTickAt, pixels }] } : state.run.kumiki,
+    },
   };
 }

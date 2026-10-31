@@ -93,7 +93,7 @@ export function createBrowserPlatform(isolated = false): Platform {
         const key = (event: KeyboardEvent) => listener({
           code: event.code, pressed: event.type === 'keydown', repeat: event.repeat,
           editable: event.ctrlKey || event.metaKey || event.altKey || event.target instanceof HTMLElement
-            && !!event.target.closest('input, textarea, select, button:not(.generate-button), a, [contenteditable="true"], .debug-panel, .page-settings'),
+            && !!event.target.closest('input, textarea, select, canvas, button:not(.generate-button), a, [contenteditable="true"], .debug-panel, .page-settings'),
           preventDefault: () => event.preventDefault(),
         });
         const blur = () => listener({ code: 'Space', pressed: false, repeat: false, editable: false, preventDefault() {} });

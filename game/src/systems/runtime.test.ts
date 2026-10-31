@@ -41,7 +41,7 @@ beforeEach(() => {
 
 afterEach(() => { runtime?.dispose(); vi.useRealTimers(); });
 
-async function start() { runtime = new GameRuntime(platform); await runtime.start(); }
+async function start() { runtime = new GameRuntime(platform); await runtime.start(); runtime.startGame(); }
 
 function step(ms: number, wallDelta = ms) {
   clock.wall += wallDelta - ms;
@@ -53,6 +53,35 @@ function step(ms: number, wallDelta = ms) {
     remaining -= delta;
   }
 }
+
+describe('制作ノートからの開始', () => {
+  it('新規だけに表示し、読む時間と開始前の生成をゲームの進行へ加えない', async () => {
+    runtime = new GameRuntime(platform); await runtime.start();
+    expect(runtime.getSnapshot().introVisible).toBe(true);
+    step(300_000); runtime.pressSeed(); runtime.buildSeed('border'); runtime.leave();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    expect(runtime.getSnapshot().state.elapsedMs).toBe(0);
+    expect(loadGame(storage).kind).toBe('empty');
+    runtime.startGame(); runtime.pressSeed();
+    expect(runtime.getSnapshot().introVisible).toBe(false);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(1);
+    runtime.dispose(); runtime = new GameRuntime(platform); await runtime.start();
+    expect(runtime.getSnapshot().introVisible).toBe(true);
+  });
+
+  it('セーブ後の再開やv1以降には表示せず、初期化するとまた表示する', async () => {
+    for (const version of ['v0.1', 'v1', 'v2'] as const) {
+      const saved = createFixture('foundation-saved', clock.wall)!; saved.run.version = version;
+      storage.setItem(SAVE_KEYS.primary, encodeSave(saved));
+      runtime = new GameRuntime(platform); await runtime.start();
+      expect(runtime.getSnapshot().introVisible).toBe(false);
+      runtime.dispose();
+    }
+    runtime = new GameRuntime(platform); await runtime.start(); runtime.reset();
+    expect(runtime.getSnapshot().introVisible).toBe(true);
+    expect(loadGame(storage).kind).toBe('empty');
+  });
+});
 
 describe('プラットフォームを通した保存・時間処理', () => {
   it('保存解禁前は10秒ごとの処理でも保存しない', async () => {
@@ -281,12 +310,12 @@ describe('段階2の操作と保存', () => {
     expect(runtime.getSnapshot().status).toBe('blocked');
   });
 
-  it('組木の購入を保存し、実績を1回だけ知らせる。世界2は開始しない', async () => {
+  it('組木の購入と世界2の開始を保存し、実績を1回だけ知らせる', async () => {
     const fixture = createFixture('seed-motion', clock.wall)!;
     storage.setItem(SAVE_KEYS.primary, encodeSave(fixture));
     await start(); runtime.buildSeed('kumiki'); runtime.buildSeed('kumiki');
     expect(platform.unlockAchievement).toHaveBeenCalledExactlyOnceWith('kumiki-created');
-    expect(runtime.getSnapshot().state.run.world).toBe('seed');
+    expect(runtime.getSnapshot().state.run.world).toBe('kumiki');
     expect(runtime.getSnapshot().state.run.seed.built).toContain('kumiki');
     const saved = loadGame(storage);
     expect(saved.kind === 'loaded' && saved.state.run.seed.built.includes('kumiki')).toBe(true);
@@ -320,4 +349,14 @@ it('構成の組み立て中に保存ができた時点ですぐ書き込み、�
   runtime.dispose(); await start(); step(6_600);
   expect(runtime.getSnapshot().state.run.seed.installer).toBeNull();
   expect(runtime.getSnapshot().state.run.seed.built).toEqual(['border', 'save', 'color', 'font', 'layout', 'motion']);
+});
+
+it('描画の報酬済み記録を保存し、再起動後に同じマスを塗っても二重加算しない', async () => {
+  storage.setItem(SAVE_KEYS.primary, encodeSave(createFixture('kumiki-early', clock.wall)!));
+  await start();
+  runtime.actKumiki({ type: 'paint', id: 'folder', cells: [49], color: 0, frame: 0, mirror: false });
+  expect(runtime.getSnapshot().state.resources.pixels).toBe(10);
+  runtime.leave(); runtime.dispose(); await start();
+  runtime.actKumiki({ type: 'paint', id: 'folder', cells: [49], color: 0, frame: 0, mirror: false });
+  expect(runtime.getSnapshot().state.resources.pixels).toBe(10);
 });

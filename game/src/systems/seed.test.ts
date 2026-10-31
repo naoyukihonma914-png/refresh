@@ -26,7 +26,7 @@ describe('素の画面の生成・購入・ガイド', () => {
     expect(canBuildSeed(state, 'kumiki')).toBe(false);
     state = buildSeed(state, 'motion', 6_000);
     const completed = buildSeed(state, 'kumiki', 7_000);
-    expect(completed.run.world).toBe('seed');
+    expect(completed.run.world).toBe('kumiki');
     expect(visibleSeedItems(completed)).toEqual([]);
     expect(buildSeed(completed, 'kumiki', 8_000)).toBe(completed);
     expect(completed.resources.tokens).toBe(0);
@@ -159,7 +159,7 @@ describe('素朴なページ設定と次のバージョンへの入口', () => {
     old.run.seed = { built: state.run.seed.built, autoCursors: state.run.seed.autoCursors };
     delete old.persistent.seedSkills; delete old.persistent.seedAppearance;
     const migrated = decodeSave(JSON.stringify(old));
-    expect(migrated.schemaVersion).toBe(2);
+    expect(migrated.schemaVersion).toBe(4);
     expect(migrated.resources).toEqual(state.resources);
     expect(migrated.persistent.specs).toEqual(state.persistent.specs);
     expect(migrated.run.seed.built).toEqual(state.run.seed.built);

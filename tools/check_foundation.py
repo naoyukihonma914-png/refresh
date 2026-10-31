@@ -17,6 +17,9 @@ ARTIFACTS = ROOT / "game/artifacts/stage1"
 
 
 def ready(page):
+    page.locator(".intro-note, .foundation").first.wait_for()
+    if page.locator(".intro-note").count():
+        page.locator(".intro-note button").click()
     page.locator(".foundation").wait_for()
     page.evaluate("async () => { await document.fonts.ready; }")
 
@@ -90,9 +93,9 @@ def main():
         checks.append("後から開いたタブの操作停止・先のタブを閉じて再読み込みで再開")
 
         with page.expect_download() as download:
-            page.get_by_role("button", name="データを書き出す", exact=True).click()
+            page.get_by_role("button", name="データをエクスポート", exact=True).click()
         exported = Path(download.value.path()).read_bytes()
-        assert json.loads(exported)["schemaVersion"] == 2
+        assert json.loads(exported)["schemaVersion"] == 4
 
         page.add_init_script("""
           const corruption = sessionStorage.getItem('test-corruption');

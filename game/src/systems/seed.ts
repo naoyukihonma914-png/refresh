@@ -1,6 +1,7 @@
 import { BALANCE, type SeedItem, type SeedSkill } from '../config/balance';
 import { creditPixels, manualClickValue } from './economy';
 import { createInitialState, type GameState, type GuideId } from './state';
+import { enterKumiki } from './kumiki';
 
 export function visibleSeedItems(state: GameState): SeedItem[] {
   const { built, autoCursors } = state.run.seed;
@@ -44,7 +45,7 @@ export function buildSeed(state: GameState, id: SeedItem | 'cursor', now: number
   if (!canBuildSeed(state, id)) return state;
   const seed = state.run.seed;
   const cost = id === 'cursor' ? cursorPrice(state) : BALANCE.w1.items.find(item => item.id === id)!.cost;
-  return updateSeedGuide({ ...state,
+  const next = updateSeedGuide({ ...state,
     resources: { ...state.resources, pixels: Math.max(0, state.resources.pixels - cost) },
     run: { ...state.run, seed: { ...seed,
       built: id === 'cursor' ? seed.built : [...seed.built, id],
@@ -52,6 +53,7 @@ export function buildSeed(state: GameState, id: SeedItem | 'cursor', now: number
       history: [...seed.history, { item: id, at: now }], lastActionAt: state.elapsedMs,
     } },
   });
+  return id === 'kumiki' ? enterKumiki(next) : next;
 }
 
 export interface Momentum { value: number; lastPressAt: number | null }

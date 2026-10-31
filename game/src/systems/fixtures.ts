@@ -1,17 +1,57 @@
 import { BALANCE } from '../config/balance';
 import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
+import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, targetFor } from './kumiki';
+import { blankDrawing } from './kumikiState';
 
 export const FIXTURE_NAMES = [
+  'intro',
   'foundation-start', 'foundation-saved', 'foundation-offline-capped',
   'seed-start', 'seed-border', 'seed-saved', 'seed-color', 'seed-font',
   'seed-layout', 'seed-motion', 'seed-complete', 'seed-return', 'seed-inheriting',
+  'kumiki-early', 'kumiki-mature', 'kumiki-wall', 'kumiki-modern', 'kumiki-drift',
 ] as const;
 
 // 実セーブと混ざらないよう、ランタイムは固定状態ではメモリ内の保存領域を使う。
 export function createFixture(name: string | null, now: number): GameState | null {
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
+  if (name === 'intro') return state;
+  if (name?.startsWith('kumiki-')) {
+    state.run.seed.built = BALANCE.w1.items.map(item => item.id);
+    state.run.seed.autoCursors = 12;
+    state.resources.pixels = 1_000_000; state.run.totalPixelsGenerated = 2_000_000;
+    state.lastSavedAt = now;
+    if (name === 'kumiki-modern') {
+      state.run.version = 'v2'; state.persistent.specs.color = 1; state.persistent.specs.resolution = 1;
+      state.persistent.artwork.skills = BALANCE.w2.skills.map(skill => skill.id);
+      state.persistent.artwork.modern = true;
+      state.persistent.artwork.sketchbook = blankDrawing(32);
+    }
+    let next = enterKumiki(state);
+    if (name === 'kumiki-early') { next.resources.pixels = 0; return next; }
+    for (const item of BALANCE.w2.items) {
+      next = buildKumiki(next, item.id);
+      if (name === 'kumiki-mature' && item.id === 'switch') break;
+    }
+    for (const part of ownedParts(next)) if (name !== 'kumiki-mature' || part === 'button') next = placePart(next, part);
+    for (const id of ['folder', 'bin']) {
+      next = prepareDrawing(next, id);
+      const drawing = next.run.kumiki.drawings[id]!;
+      const target = targetFor(next, id, drawing.size);
+      for (const color of new Set(target.filter(c => c >= 0))) next = paintDrawing(next, id, target.flatMap((c,i) => c === color ? [i] : []), color);
+      next = exportKumiki(next, now);
+    }
+    next = prepareDrawing(next, 'clock');
+    const clock = next.run.kumiki.drawings.clock!;
+    const target = targetFor(next, 'clock', clock.size);
+    for (const color of new Set(target.filter(c => c >= 0))) next = paintDrawing(next, 'clock', target.flatMap((c,i) => c === color && i < target.length / 2 ? [i] : []), color);
+    next.resources.pixels = name === 'kumiki-wall' ? BALANCE.w2.desktopCost : 31_240;
+    next.run.kumiki.guide.current = name === 'kumiki-wall' ? 'wall' : 'export';
+    if (next.run.version !== 'v0.1') { next.run.kumiki.guide.current = null; next.run.kumiki.guide.collapsed = true; }
+    if (name === 'kumiki-drift') next.run.kumiki.drift = { part: 'switch', dx: 10, dy: -6, angle: 3 };
+    return next;
+  }
   if (name?.startsWith('seed-')) {
     if (name === 'seed-start') { state.resources.pixels = state.run.totalPixelsGenerated = 7; return state; }
     const end = name === 'seed-border' ? 'border' : name === 'seed-saved' ? 'save'
