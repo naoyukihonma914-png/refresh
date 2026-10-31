@@ -1,0 +1,323 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { GameRuntime } from './runtime';
+import { BALANCE } from '../config/balance';
+import { TEST_LANGUAGE } from '../content/i18n';
+import { createFixture } from './fixtures';
+import { createMemoryStorage, createSettingsStorage, SETTINGS_KEY } from '../platform/storage';
+import type { Platform } from '../platform/types';
+import { encodeSave, loadGame, SAVE_KEYS } from './save';
+
+const hour = BALANCE.time.millisecondsPerHour;
+let storage: ReturnType<typeof createMemoryStorage>;
+let runtime: GameRuntime;
+let platform: Platform;
+let clock: { wall: number; mono: number; hidden: boolean; owned: boolean };
+
+function makePlatform(target = storage): Platform {
+  return {
+    storage: target, settings: createSettingsStorage(target), launch: { debug: true, fixture: null },
+    preferredLanguages: ['ja-JP'],
+    clock: { wallNow: () => clock.wall, monotonicNow: () => clock.mono },
+    tabs: { acquire: vi.fn(async () => ({ acquired: clock.owned, isOwner: () => clock.owned, release() {} })) },
+    visibility: { isHidden: () => clock.hidden, subscribe: () => () => {} },
+    viewport: { size: () => ({ width: 1920, height: 1080 }), subscribe: () => () => {} },
+    lifecycle: { onLeave: () => () => {}, onRestore: () => () => {} },
+    files: { write: vi.fn(), read: vi.fn(async () => null) },
+    animation: { subscribe: () => () => {}, reducedMotion: () => false },
+    keyboard: { subscribe: () => () => {} },
+    every(ms, callback) { const timer = setInterval(callback, ms); return () => clearInterval(timer); },
+    confirm: vi.fn(() => true), reload: vi.fn(), setDocumentLanguage: vi.fn(),
+    setFullscreen: vi.fn(async () => false), quit: vi.fn(() => false), unlockAchievement: vi.fn(),
+    createPreview: () => makePlatform(createMemoryStorage()),
+  };
+}
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  storage = createMemoryStorage();
+  clock = { wall: 1_800_000_000_000, mono: 0, hidden: false, owned: true };
+  platform = makePlatform();
+});
+
+afterEach(() => { runtime?.dispose(); vi.useRealTimers(); });
+
+async function start() { runtime = new GameRuntime(platform); await runtime.start(); }
+
+function step(ms: number, wallDelta = ms) {
+  clock.wall += wallDelta - ms;
+  for (let remaining = ms; remaining > 0;) {
+    const delta = Math.min(remaining, BALANCE.time.tickMs);
+    clock.mono += delta;
+    clock.wall += delta;
+    vi.advanceTimersByTime(delta);
+    remaining -= delta;
+  }
+}
+
+describe('プラットフォームを通した保存・時間処理', () => {
+  it('保存解禁前は10秒ごとの処理でも保存しない', async () => {
+    await start(); step(20_000); runtime.leave();
+    expect(loadGame(storage).kind).toBe('empty');
+  });
+
+  it('解禁直後と単調時計で10秒ごとに保存する', async () => {
+    await start(); runtime.enableDebugSave();
+    expect(loadGame(storage).kind).toBe('loaded');
+    step(10_000);
+    const saved = loadGame(storage);
+    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10);
+  });
+
+  it('端末時計を戻しても能動時間と自動保存は止まらない', async () => {
+    await start(); runtime.enableDebugSave();
+    step(10_000, -hour);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(10);
+    const saved = loadGame(storage);
+    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10);
+    expect(runtime.getSnapshot().offline).toBeNull();
+    step(1_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(11);
+  });
+
+  it('単調時計が進まない長い停止も端末時計の差から検出し、上限まで保存する', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.wall += 3 * hour;
+    clock.mono += 100;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    expect(runtime.getSnapshot().offline?.capped).toBe(true);
+    const saved = loadGame(storage);
+    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBe(7_200);
+    step(1_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_201);
+  });
+
+  it('開いたまま3時間処理が止まった場合は2時間分だけ加算し、次の処理で重ねない', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.wall += 3 * hour; clock.mono += 3 * hour;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    runtime.persist();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+  });
+
+  it('短い処理遅れは能動時間として計算し、留守の知らせを出さない', async () => {
+    await start(); runtime.enableDebugSave();
+    const elapsed = BALANCE.time.inactivityGapMs - BALANCE.time.tickMs;
+    clock.wall += elapsed; clock.mono += elapsed;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(elapsed / 1_000);
+    expect(runtime.getSnapshot().offline).toBeNull();
+  });
+
+  it('長い停止の端末時計差が負でも0で再開し、その後の能動生成は続く', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.wall -= hour; clock.mono += 3 * hour;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    step(1_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(1);
+  });
+
+  it('持っているストレージの上限を開いたままの停止にも適用する', async () => {
+    await start(); runtime.enableDebugSave(); runtime.changeDebugSpec('storage', 1);
+    clock.wall += 6 * hour; clock.mono += 6 * hour;
+    vi.advanceTimersByTime(100);
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(14_400);
+  });
+
+  it('端数の能動時間は複数回の保存をまたいで残る', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.mono += 50; runtime.persist();
+    clock.mono += 50; runtime.persist();
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(0.1);
+  });
+
+  it('再開した不在分を保存し、再読み込みで重複付与しない', async () => {
+    const state = createFixture('foundation-saved', clock.wall - 3 * hour)!;
+    storage.setItem(SAVE_KEYS.primary, encodeSave(state));
+    await start();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    expect(runtime.getSnapshot().offline).toBeNull();
+  });
+
+  it('裏のタブは端末時計で上限まで計算し、復帰時に単調時計の基準を更新する', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.hidden = true; runtime.visibilityChanged();
+    clock.wall += 3 * hour; clock.mono += 3 * hour;
+    runtime.leave();
+    clock.hidden = false; runtime.visibilityChanged();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    expect(runtime.getSnapshot().offline?.capped).toBe(true);
+    step(1_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_201);
+  });
+
+  it('不在中に時計が戻っても0扱いで復帰し、能動生成は続く', async () => {
+    await start(); runtime.enableDebugSave();
+    clock.hidden = true; runtime.visibilityChanged();
+    clock.wall -= hour; clock.mono += 3_000;
+    clock.hidden = false; runtime.visibilityChanged();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    step(1_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(1);
+  });
+
+  it('固定状態の保存と言語設定は実データに影響しない', async () => {
+    storage.setItem(SAVE_KEYS.primary, '実際の保存データ');
+    platform.settings.write({ language: 'ja' });
+    platform.launch.fixture = 'foundation-saved';
+    await start(); runtime.addDebugPixels(); runtime.changeLanguage('en');
+    expect(storage.getItem(SAVE_KEYS.primary)).toBe('実際の保存データ');
+    expect(platform.settings.read().language).toBe('ja');
+  });
+
+  it('両方壊れた場合は確認待ちのまま書き込みと時間を止める', async () => {
+    storage.setItem(SAVE_KEYS.primary, '壊れたデータ');
+    await start(); step(20_000); runtime.persist(); runtime.addDebugPixels();
+    expect(runtime.getSnapshot().status).toBe('corrupt');
+    expect(storage.getItem(SAVE_KEYS.primary)).toBe('壊れたデータ');
+    runtime.requestReset(true);
+    expect(runtime.getSnapshot().status).toBe('ready');
+    expect(loadGame(storage).kind).toBe('empty');
+  });
+
+  it('不正な読み込みファイルで現在の状態を変えない', async () => {
+    await start(); runtime.enableDebugSave();
+    const state = runtime.getSnapshot().state;
+    expect(runtime.importData('{')).toBe(false);
+    expect(runtime.getSnapshot().state).toEqual(state);
+    expect(runtime.getSnapshot().notice).toBe('data.importFailed');
+  });
+
+  it('解禁前のデータを読み込んだら以前のセーブを復活させない', async () => {
+    await start(); const initial = runtime.exportData(); runtime.enableDebugSave();
+    expect(runtime.importData(initial)).toBe(true);
+    expect(loadGame(storage).kind).toBe('empty');
+  });
+
+  it('書き出しはプラットフォームの窓口を呼ぶ', async () => {
+    await start(); runtime.downloadData();
+    expect(platform.files.write).toHaveBeenCalledWith('画面の保存データ.json', runtime.exportData());
+  });
+
+  it('読み込みの確認を取り消したら現在のデータを変えない', async () => {
+    await start(); runtime.enableDebugSave();
+    vi.mocked(platform.files.read).mockResolvedValue(runtime.exportData());
+    vi.mocked(platform.confirm).mockReturnValue(false);
+    const state = runtime.getSnapshot().state;
+    await runtime.requestImport();
+    expect(runtime.getSnapshot().state).toEqual(state);
+  });
+
+  it('初期化は2回確認し、2回目の取り消しでも記録を残す', async () => {
+    await start(); runtime.enableDebugSave();
+    vi.mocked(platform.confirm).mockReturnValueOnce(true).mockReturnValueOnce(false);
+    runtime.requestReset();
+    expect(platform.confirm).toHaveBeenCalledTimes(2);
+    expect(loadGame(storage).kind).toBe('loaded');
+    runtime.requestReset();
+    expect(loadGame(storage).kind).toBe('empty');
+  });
+
+  it('後から開いたタブは停止し、読み直しは窓口を呼ぶ', async () => {
+    clock.owned = false;
+    await start(); runtime.addDebugPixels(); runtime.reload();
+    expect(runtime.getSnapshot().status).toBe('blocked');
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    expect(platform.reload).toHaveBeenCalledOnce();
+  });
+
+  it('言語は進捗の保存前から設定として保存され、次の起動で使われる', async () => {
+    await start(); runtime.changeLanguage('en');
+    expect(storage.getItem(SETTINGS_KEY)).not.toBeNull();
+    expect(loadGame(storage).kind).toBe('empty');
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().language).toBe('en');
+  });
+
+  it('試験用の言語は開発用でだけ選べ、通常の言語設定を上書きしない', async () => {
+    await start(); runtime.changeLanguage('en'); runtime.changeLanguage(TEST_LANGUAGE);
+    expect(runtime.getSnapshot().language).toBe(TEST_LANGUAGE);
+    expect(platform.settings.read().language).toBe('en');
+    platform.launch.debug = false;
+    runtime.dispose(); await start(); runtime.changeLanguage(TEST_LANGUAGE);
+    expect(runtime.getSnapshot().language).toBe('en');
+  });
+});
+
+describe('段階2の操作と保存', () => {
+  it('実際の生成と購入で保存を解禁し、購入直後の値を保存する', async () => {
+    await start();
+    for (let i = 0; i < 10; i++) runtime.pressSeed();
+    runtime.buildSeed('border');
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
+    expect(loadGame(storage).kind).toBe('empty');
+    for (let i = 0; i < 20; i++) runtime.pressSeed();
+    runtime.buildSeed('save');
+    const saved = loadGame(storage);
+    expect(saved.kind).toBe('loaded');
+    if (saved.kind === 'loaded') {
+      expect(saved.state.run.seed.built).toEqual(['border', 'save']);
+      expect(saved.state.run.seed.history.map(entry => entry.item)).toEqual(['border', 'save']);
+      expect(saved.state.resources.pixels).toBe(0);
+    }
+    for (let i = 0; i < 8; i++) runtime.pressSeed();
+    runtime.buildSeed('cursor');
+    step(2_000);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(3);
+  });
+
+  it('タブの所有権を失った後は生成・購入・設定が動かない', async () => {
+    await start(); runtime.addDebugPixels();
+    const previous = runtime.getSnapshot().state;
+    clock.owned = false;
+    runtime.pressSeed(); runtime.buildSeed('border'); runtime.applySeedSettings(['keyboard'], 'none', false);
+    expect(runtime.getSnapshot().state).toBe(previous);
+    expect(runtime.getSnapshot().status).toBe('blocked');
+  });
+
+  it('組木の購入を保存し、実績を1回だけ知らせる。世界2は開始しない', async () => {
+    const fixture = createFixture('seed-motion', clock.wall)!;
+    storage.setItem(SAVE_KEYS.primary, encodeSave(fixture));
+    await start(); runtime.buildSeed('kumiki'); runtime.buildSeed('kumiki');
+    expect(platform.unlockAchievement).toHaveBeenCalledExactlyOnceWith('kumiki-created');
+    expect(runtime.getSnapshot().state.run.world).toBe('seed');
+    expect(runtime.getSnapshot().state.run.seed.built).toContain('kumiki');
+    const saved = loadGame(storage);
+    expect(saved.kind === 'loaded' && saved.state.run.seed.built.includes('kumiki')).toBe(true);
+  });
+
+  it('勢いを保存・読み込み・タブ復帰へ持ち越さない', async () => {
+    const fixture = createFixture('seed-motion', clock.wall)!;
+    storage.setItem(SAVE_KEYS.primary, encodeSave(fixture));
+    await start();
+    for (let i = 0; i < 20; i++) runtime.pressSeed();
+    expect(runtime.getSnapshot().press?.momentum).toBe(1.6);
+    const raw = runtime.exportData();
+    runtime.importData(raw); runtime.pressSeed();
+    expect(runtime.getSnapshot().press?.momentum).toBe(1);
+    for (let i = 0; i < 20; i++) runtime.pressSeed();
+    clock.hidden = true; runtime.visibilityChanged();
+    clock.hidden = false; runtime.visibilityChanged(); runtime.pressSeed();
+    expect(runtime.getSnapshot().press?.momentum).toBe(1);
+  });
+});
+
+it('構成の組み立て中に保存ができた時点ですぐ書き込み、再起動後も続きから組み立てる', async () => {
+  storage.setItem(SAVE_KEYS.primary, encodeSave(createFixture('seed-inheriting', clock.wall)!));
+  await start(); step(3_400);
+  const saved = loadGame(storage);
+  expect(saved.kind).toBe('loaded');
+  if (saved.kind === 'loaded') {
+    expect(saved.state.run.seed.built).toEqual(['border', 'save']);
+    expect(saved.state.run.seed.installer?.elapsedMs).toBe(3_400);
+  }
+  runtime.dispose(); await start(); step(6_600);
+  expect(runtime.getSnapshot().state.run.seed.installer).toBeNull();
+  expect(runtime.getSnapshot().state.run.seed.built).toEqual(['border', 'save', 'color', 'font', 'layout', 'motion']);
+});

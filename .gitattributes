@@ -1,0 +1,2 @@
+# 配布元のライセンス文書は、改行と行末空白も含めて原文を保つ。
+game/src/assets/fonts/*-OFL.txt -whitespace
