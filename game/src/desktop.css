@@ -249,3 +249,25 @@
 @keyframes terminal-job-scroll { to {transform:translateY(-20px)} }
 @media (prefers-reduced-motion:reduce) { .terminal-job-stream p {animation:none;} }
 .desktop-frozen .terminal-job-stream p { animation:none; }
+.photo-surface { position:relative; width:100%; height:100%; overflow:hidden; }
+.photo-surface > svg { position:absolute; pointer-events:none; }
+.photo-surface-content { position:absolute; inset:0; }
+.desktop-wallpaper-surface { position:absolute; inset:0; pointer-events:none; }
+.job-control-anchor { position:relative; z-index:25; flex:none; }
+.job-control-anchor .job-slot { display:grid; place-items:center; margin:0 0 0 10px; }
+.job-controls { position:absolute; left:0; top:28px; width:320px; max-height:270px; overflow:auto; box-sizing:border-box; padding:10px; background:#f9f9f9; border:1px solid #b8b8b8; border-radius:4px; box-shadow:0 4px 10px #0003; color:#222; user-select:text; }
+.job-controls .job-metrics { display:flex; justify-content:space-between; padding:0 2px 8px; border-bottom:1px solid #ddd; }
+.job-controls .job-purchase { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 8px; padding:8px 0; border-bottom:1px solid #ddd; }
+.job-controls .job-purchase .estimate { grid-column:1/-1; }
+.job-controls .job-remove { margin-top:8px; width:100%; }
+.window-title.job-drop-target { outline:2px dashed var(--desktop-accent); outline-offset:-3px; }
+.working-cursors { bottom:24px; }
+.working-cursors .job-activity { position:absolute; right:52px; bottom:0; background:#f3f3f3d9; }
+.job-assignment-menu { position:absolute; bottom:52px; left:8px; z-index:50; min-width:280px; padding:6px; background:#f9f9f9; color:#222; border:1px solid #bbb; border-radius:4px; box-shadow:0 4px 10px #0003; }
+.job-assignment-menu > header { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:8px; border-bottom:1px solid #ddd; }
+.job-assignment-menu > button { width:100%; display:flex; gap:10px; align-items:center; padding:6px 8px; min-height:34px; border:0; background:transparent; color:inherit; text-align:left; }
+.job-assignment-menu > button:hover,.job-assignment-menu > button:focus-visible { background:#cce4f7; }
+.job-assignment-menu > button:disabled { opacity:.45; }
+.job-assignment-menu > button > .pixel-art,.job-assignment-menu > button > .app-icon { width:20px; height:20px; }
+.job-assignment-menu small { margin-left:auto; font-size:11px; }
+.desktop-dark .job-controls,.desktop-dark .job-assignment-menu { background:#262626; color:#fff; border-color:#555; }

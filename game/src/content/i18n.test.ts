@@ -130,3 +130,9 @@ it('兆より上の数を日本語・英語で読みやすくし、指数表記�
   expect(createI18n('ja',{numberNotation:'scientific'}).pixels(1.23e20)).toBe('1.23e20');
   expect(ja.rate(1.234e20)).toBe('1.2垓');
 });
+
+it('カレンダーの見出しは年と月だけを、その言語の順序で表示する',()=>{
+ const stamp=new Date(2026,10,1).getTime();
+ expect(createI18n('ja').month(stamp)).toBe('2026年11月');
+ expect(createI18n('en').month(stamp)).toBe('November 2026');
+});

@@ -1,3 +1,4 @@
+import { PhotoSurface } from './PhotoSurface';
 import { ExtraApp, JobControls, WorkingCursors, Photograph } from './DesktopApps';
 import type { DesktopProps as Props } from './desktopTypes';
 import { JOB_IDS, type JobId } from '../systems/desktopState';
@@ -28,17 +29,22 @@ function FeedbackBody({ feedback: f, i18n }: { feedback: Feedback; i18n: I18n })
   return <p className="feedback-body">{i18n.t(`feedback.body.${f.kind}`,{name:feedbackName(f,i18n),count:BALANCE.w3.redrawCells,time:i18n.time(Number(f.target)||0)})}</p>;
 }
 function fixLabel(f:Feedback){return f.kind==='screenshot'?'desktop.fix.screenshot':f.kind==='sort'||f.kind==='search'?'desktop.fix.files':f.kind==='bright'?'desktop.fix.photo':f.kind==='trash'?'desktop.fix.bin':f.kind==='timer'?'desktop.fix.clock':f.kind==='dark'?'desktop.fix.theme':'desktop.fix.tessera';}
-function DesktopWindow({ app, children, ...props }: Props & {app: AppId; children: ReactNode}) {
+function DesktopWindow({ app, children,jobMenu,onJobMenu, ...props }: Props & {app: AppId; children: ReactNode;jobMenu:JobId|null;onJobMenu:(app:JobId|null)=>void}) {
   const { runtime, snapshot, i18n, preview } = props;
   const d = snapshot.state.run.desktop, w = d.windows[app];
   const active = d.active === app;
+  const jobApp=JOB_IDS.includes(app as JobId)?app as JobId:null,canAssign=hasUpgrade(snapshot.state,'jobs')&&jobApp!==null;
+  const assigned=jobApp!==null&&d.jobs[jobApp].assigned;
+  const [dropTarget,setDropTarget]=useState(false);const jobButton=useRef<HTMLButtonElement>(null);
+  useEffect(()=>{if(jobMenu===app&&(!assigned||!active||w.minimized||!w.open))onJobMenu(null);},[assigned,active,w.minimized,w.open,jobMenu,app,onJobMenu]);
   const drag = useRef<{ x:number; y:number; scale:number; kind:'move'|'resize'; rect:typeof w } | null>(null);
   const host = useRef<HTMLDivElement>(null);
+  useLayoutEffect(()=>{if(jobMenu!==app)return;const menu=host.current?.querySelector<HTMLElement>('.job-controls'),anchor=jobButton.current?.parentElement;if(menu&&anchor){menu.style.left=`${Math.min(0,w.width-anchor.offsetLeft-328)}px`;menu.style.maxHeight=`${w.height-44}px`;}},[jobMenu,app,w.width,w.height]);
   const end = () => { if (drag.current) {
     if(drag.current.kind==='move'&&hasDesktopSkill(snapshot.state,'snap')){const node=host.current!,left=parseFloat(node.style.left);if(left<=8||left+parseFloat(node.style.width)>=1912)runtime.actDesktop({type:'rect',app,rect:{x:left<=8?0:960,y:0,width:960,height:1032}});}
     drag.current = null; runtime.persist(); } };
   const start = (event: React.PointerEvent<HTMLElement>, kind:'move'|'resize') => {
-    if (preview || event.button !== 0 || w.maximized || kind === 'move' && (event.target as HTMLElement).closest('button')) return;
+    if (preview || event.button !== 0 || w.maximized || kind === 'move' && (event.target as HTMLElement).closest('button,.job-controls')) return;
     event.preventDefault(); event.currentTarget.setPointerCapture(event.pointerId);
     drag.current = {x:event.clientX,y:event.clientY,scale:host.current!.getBoundingClientRect().width / host.current!.offsetWidth,kind,rect:{...w}};
   };
@@ -50,16 +56,19 @@ function DesktopWindow({ app, children, ...props }: Props & {app: AppId; childre
   return <section ref={host} className={`desktop-window ${active?'is-active':''} ${w.maximized?'is-maximized':''} app-${app}`} data-app={app}
     style={{left:w.x,top:w.y,width:w.width,height:w.height,zIndex:w.z+10,display:w.minimized?'none':undefined}}
     onPointerDownCapture={() => { if (!preview && !active) runtime.actDesktop({type:'open',app}); }} aria-label={i18n.t(`desktop.app.${app}`)}>
-    <header className="window-title" onPointerDown={e=>start(e,'move')} onPointerMove={move} onPointerUp={end} onLostPointerCapture={end}
-      onDoubleClick={event=>{ if (!(event.target as HTMLElement).closest('button') && !preview) runtime.actDesktop({type:'maximize',app}); }}>
+    <header data-job-target={canAssign?app:undefined} className={`window-title ${dropTarget?'job-drop-target':''}`} onDragOver={event=>{if(canAssign&&event.dataTransfer.types.includes('text/refresh-job')){event.preventDefault();setDropTarget(true);}}} onDragLeave={()=>setDropTarget(false)} onDrop={event=>{setDropTarget(false);if(canAssign&&event.dataTransfer.getData('text/refresh-job')==='cursor'){event.preventDefault();if(!assigned)runtime.actDesktop({type:'job-assign',app:jobApp!});}}} onPointerDown={e=>start(e,'move')} onPointerMove={move} onPointerUp={end} onLostPointerCapture={end}
+      onDoubleClick={event=>{ if (!(event.target as HTMLElement).closest('button,.job-controls') && !preview) runtime.actDesktop({type:'maximize',app}); }}>
       <AppIcon app={app} state={snapshot.state} palette={props.capture?.palette}/><span>{i18n.t(`desktop.app.${app}`)}{JOB_IDS.includes(app as JobId)&&hasUpgrade(snapshot.state,'jobs')?` 1.${d.jobs[app as JobId].updates}`:''}{d.stalled===app?i18n.t('desktop.stalled'):''}</span>
-      {hasUpgrade(snapshot.state,'jobs')&&JOB_IDS.includes(app as JobId)&&<button className={`job-slot ${d.jobs[app as JobId].assigned?'assigned':''}`} aria-label={i18n.t('jobs.slot',{app:i18n.t(`desktop.app.${app}`)})} aria-pressed={d.jobs[app as JobId].assigned} disabled={!d.jobs[app as JobId].assigned&&JOB_IDS.filter(id=>d.jobs[id].assigned).length>=jobCapacity(snapshot.state)} title={i18n.t(!d.jobs[app as JobId].assigned&&JOB_IDS.filter(id=>d.jobs[id].assigned).length>=jobCapacity(snapshot.state)?'jobs.reachLimit':'jobs.assign')} onClick={()=>runtime.actDesktop({type:'job-assign',app:app as JobId})} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();if(e.dataTransfer.getData('text/refresh-job')==='cursor'&&!d.jobs[app as JobId].assigned)runtime.actDesktop({type:'job-assign',app:app as JobId});}}><CursorGlyph/></button>}
+      {canAssign&&assigned&&<div className="job-control-anchor" onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();onJobMenu(null);jobButton.current?.focus();}}}>
+        <button ref={jobButton} className="job-slot assigned" aria-label={i18n.t('jobs.slot',{app:i18n.t(`desktop.app.${app}`)})} aria-expanded={jobMenu===app} aria-haspopup="dialog" onClick={()=>onJobMenu(jobMenu===app?null:jobApp)}><CursorGlyph/></button>
+        {jobMenu===app&&<JobControls {...props} app={jobApp!}/>}
+      </div>}
       {hasDesktopSkill(snapshot.state,'virtual')&&<button className="workspace-move" aria-label={i18n.t('desktop.moveWorkspace')} title={i18n.t('desktop.moveWorkspace')} onClick={()=>runtime.actDesktop({type:'move-workspace',app})}><LineIcon kind="workspace"/></button>}
       {d.stalled===app&&<button className="win-button restart-button" title={i18n.t('desktop.restartReward',{count:BALANCE.w3.restartSeconds})} onClick={()=>runtime.actDesktop({type:'restart',app})}>{i18n.t('desktop.restart')}</button>}
       <div className="window-controls">{(['minimize',w.maximized?'restore':'maximize','close'] as const).map(kind=><button key={kind} className={kind==='close'?'window-close':''} aria-label={i18n.t(`desktop.${kind}`)} onClick={()=>runtime.actDesktop({type:kind==='restore'?'maximize':kind,app})}><LineIcon kind={kind}/></button>)}</div>
     </header>
     <div className={`window-content ${d.stalled===app?'is-stalled':''}`} inert={d.stalled===app||preview}>{children}</div>
-    {hasUpgrade(snapshot.state,'jobs')&&JOB_IDS.includes(app as JobId)&&<><WorkingCursors {...props} app={app as JobId}/><JobControls {...props} app={app as JobId}/></>}
+    {hasUpgrade(snapshot.state,'jobs')&&JOB_IDS.includes(app as JobId)&&<WorkingCursors {...props} app={app as JobId}/>}
     {!w.maximized && <button className="window-resize" aria-label={i18n.t('desktop.resize')} onPointerDown={e=>start(e,'resize')} onPointerMove={move} onPointerUp={end} onLostPointerCapture={end}
       onKeyDown={e=>{ if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();runtime.actDesktop({type:'rect',app,rect:{...w,width:w.width+(e.key==='ArrowRight'?16:e.key==='ArrowLeft'?-16:0),height:w.height+(e.key==='ArrowDown'?16:e.key==='ArrowUp'?-16:0)}});runtime.persist();} }}><LineIcon kind="resize"/></button>}
   </section>;
@@ -148,6 +157,9 @@ function FilesApp(props: Props) {
 function DesktopScene(props: Props) {
   const {runtime,snapshot,i18n,preview=false}=props;
   const {state}=snapshot,d=state.run.desktop,prefs=state.persistent.desktopPrefs;
+  const [jobMenu,setJobMenu]=useState<JobId|null>(null),[assignments,setAssignments]=useState(false);
+  const assignmentMenu=useRef<HTMLElement>(null),jobSource=useRef<HTMLButtonElement>(null);
+  useLayoutEffect(()=>{if(assignments)assignmentMenu.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();},[assignments]);
   const [upgrades,setUpgrades]=useState(false),[conditions,setConditions]=useState(false),[notifications,setNotifications]=useState(false),[flash,setFlash]=useState(false),[frame,setFrame]=useState(0);
   useEffect(()=>{if(preview||!state.persistent.artwork.skills.includes('animation'))return;return runtime.platform.every(BALANCE.w2.animationFrameMs,()=>setFrame(f=>1-f));},[runtime,preview,state.persistent.artwork.skills]);
   useEffect(()=>{if(!flash)return;const stop=runtime.platform.every(180,()=>{setFlash(false);stop();});return stop;},[flash,runtime]);
@@ -172,13 +184,12 @@ function DesktopScene(props: Props) {
   const saverShots=activeScreenshots(state),saverShot=saver?saverShots[Math.floor(d.idleMs/BALANCE.w3.screensaverFrameMs)%saverShots.length]:null;
   const upgradeApp=(id:DesktopUpgrade):AppId=>FEATURE_APPS[id as keyof typeof FEATURE_APPS]??(id==='jobs'?'tessera':id as AppId);
   const upgradeEffect=(id:DesktopUpgrade)=>FEATURE_APPS[id as keyof typeof FEATURE_APPS]?i18n.t('effect.featureParts',{count:BALANCE.w3.featureParts})+(JOB_IDS.includes(upgradeApp(id) as JobId)?` · ${i18n.t('jobs.feature',{factor:BALANCE.w3.featureMultiplier})}`:''):id==='jobs'?i18n.t('jobs.capacity',{used:0,capacity:jobCapacity(state)}):i18n.t('effect.screenshotAdd',{value:i18n.pixels(desktopAppShotGain(state))});
-  return <main style={{'--desktop-accent':prefs.accent,'--window-radius':`${prefs.radius}px`} as React.CSSProperties} onKeyDownCapture={event=>{if(saver){event.preventDefault();event.stopPropagation();runtime.desktopActivity();}}} onPointerMove={()=>!preview&&runtime.desktopActivity()} onKeyDown={()=>!preview&&runtime.desktopActivity()} onPointerDown={event=>{if(!preview)runtime.desktopActivity();if(saver){event.preventDefault();return;}const target=event.target as HTMLElement;if(!target.closest('.desktop-upgrades,.taskbar-pixels'))setUpgrades(false);if(!target.closest('.desktop-conditions,.taskbar-progress'))setConditions(false);if(!target.closest('.notification-center,.notification-button'))setNotifications(false);}} className={`desktop ${prefs.mode==='dark'?'desktop-dark':''} ${entered?'desktop-entering':''} ${preview?'desktop-frozen':'desktop-live'}`}>
-    <svg className="desktop-filters" aria-hidden="true"><defs><filter id={preview?'coast-256-preview':'coast-256'} colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncR type="discrete" tableValues="0 .2 .4 .6 .8 1"/><feFuncG type="discrete" tableValues="0 .2 .4 .6 .8 1"/><feFuncB type="discrete" tableValues="0 .2 .4 .6 .8 1"/></feComponentTransfer></filter></defs></svg>
-    <img className="desktop-wallpaper" src={coast} alt="" draggable={false} style={{filter:state.persistent.specs.color===1?`url(#${preview?'coast-256-preview':'coast-256'})`:undefined}}/>
+  return <main style={{'--desktop-accent':prefs.accent,'--window-radius':`${prefs.radius}px`} as React.CSSProperties} onKeyDownCapture={event=>{if(saver){event.preventDefault();event.stopPropagation();runtime.desktopActivity();}}} onPointerMove={()=>!preview&&runtime.desktopActivity()} onKeyDown={()=>!preview&&runtime.desktopActivity()} onPointerDown={event=>{if(!preview)runtime.desktopActivity();if(saver){event.preventDefault();return;}const target=event.target as HTMLElement;if(!target.closest('.job-control-anchor'))setJobMenu(null);if(!target.closest('.job-assignment-menu,.taskbar-job-source'))setAssignments(false);if(!target.closest('.desktop-upgrades,.taskbar-pixels'))setUpgrades(false);if(!target.closest('.desktop-conditions,.taskbar-progress'))setConditions(false);if(!target.closest('.notification-center,.notification-button'))setNotifications(false);}} className={`desktop ${prefs.mode==='dark'?'desktop-dark':''} ${entered?'desktop-entering':''} ${preview?'desktop-frozen':'desktop-live'}`}>
+    <PhotoSurface specs={state.persistent.specs} className="desktop-wallpaper-surface"><img className="desktop-wallpaper" src={coast} alt="" draggable={false}/></PhotoSurface>
     {wallpaper&&<Photograph {...props} edit={wallpaper} wallpaper/>}
     {!wallpaper&&state.persistent.artwork.wallpaper&&<PixelArt frames={state.persistent.artwork.wallpaper.frames} size={state.persistent.artwork.wallpaper.size} palette={props.capture?.palette??paletteFor(state.persistent.specs.color)} style={{position:'absolute',inset:0,width:'100%',height:'100%'}}/>}
     {apps.filter(app=>app!=='settings').map(app=><DesktopShortcut key={app} {...props} app={app} frame={frame}/>)}
-    {apps.filter(app=>d.windows[app].open&&(!hasDesktopSkill(state,'virtual')||d.workspaces[app]===d.workspace)).map(app=><DesktopWindow key={app} {...props} app={app}>
+    {apps.filter(app=>d.windows[app].open&&(!hasDesktopSkill(state,'virtual')||d.workspaces[app]===d.workspace)).map(app=><DesktopWindow key={app} {...props} app={app} jobMenu={jobMenu} onJobMenu={setJobMenu}>
       {app==='tessera'?<Kumiki runtime={runtime} snapshot={snapshot} i18n={i18n} embedded preview={preview} previewPalette={props.capture?.palette} previewReady={props.capture?.editor.ready} previewDocuments={props.capture?.editor.documents} interactive={!preview&&d.active===app&&!d.windows[app].minimized}/>:app==='note'?<NoteApp {...props}/>:app==='files'?<FilesApp {...props}/>:app==='mail'?<MailApp {...props}/>:<ExtraApp {...props} app={app}/>}
     </DesktopWindow>)}
     <div ref={toolbar} className={`screenshot-toolbar ${shotHint?'shot-hint':''}`}><LineIcon kind="capture"/><strong>{i18n.t('desktop.shot')}</strong><span>{i18n.t('desktop.parts',{count:props.capture?.display.parts??screenshotParts(state)})}</span><span>{i18n.t('desktop.reward',{pixels:i18n.pixels(props.capture?.display.reward??screenshotReward(state))})}</span>
@@ -197,7 +208,13 @@ function DesktopScene(props: Props) {
       {following&&<div className="upgrade-next"><span>{i18n.t('desktop.next')}</span><strong>{i18n.t(`desktop.app.${following.id}`)}<small className="purchase-effect">{upgradeEffect(following.id)}</small></strong><small>{i18n.t('desktop.build',{cost:i18n.price(following.cost)})}</small></div>}
       {!next&&<div className="upgrade-next"><strong>{i18n.t('desktop.streaming')}</strong><span>{state.persistent.specs.refresh<2?i18n.t('desktop.streamingRequirement',{spec:i18n.spec('refresh',state.persistent.specs.refresh)}):i18n.t('desktop.streamingLater')}</span></div>}
     </section>}
-    <footer ref={taskbar} className="desktop-taskbar">{hasUpgrade(state,'jobs')&&<button className="taskbar-job-source" draggable title={i18n.t('jobs.drag')} onDragStart={e=>e.dataTransfer.setData('text/refresh-job','cursor')} onClick={()=>runtime.actDesktop({type:'open',app:'tessera'})}><CursorGlyph/><span>{i18n.t('jobs.cursor')}<small>{i18n.t('jobs.capacity',{used:JOB_IDS.filter(id=>d.jobs[id].assigned).length,capacity:jobCapacity(state)})}</small></span></button>}
+    {assignments&&<section ref={assignmentMenu} className="job-assignment-menu" role="menu" aria-label={i18n.t('jobs.assignmentMenu')} onKeyDown={event=>{
+      if(event.key==='Escape'){setAssignments(false);jobSource.current?.focus();event.preventDefault();}
+      if(['ArrowDown','ArrowUp'].includes(event.key)){const buttons=Array.from(assignmentMenu.current!.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')),at=buttons.indexOf(event.target as HTMLButtonElement);buttons[(at+(event.key==='ArrowDown'?1:buttons.length-1))%buttons.length]?.focus();event.preventDefault();}
+    }}><header>{i18n.t('jobs.assignmentMenu')}<small>{i18n.t('jobs.capacity',{used:JOB_IDS.filter(id=>d.jobs[id].assigned).length,capacity:jobCapacity(state)})}</small></header>
+      {JOB_IDS.filter(id=>id==='tessera'||d.apps.includes(id)).map(app=><button key={app} role="menuitemcheckbox" aria-checked={d.jobs[app].assigned} disabled={!d.jobs[app].assigned&&JOB_IDS.filter(id=>d.jobs[id].assigned).length>=jobCapacity(state)} onClick={()=>{runtime.actDesktop({type:'job-assign',app});if(!d.jobs[app].assigned)runtime.actDesktop({type:'open',app});setAssignments(false);jobSource.current?.focus();}}><AppIcon app={app} state={state}/><span>{i18n.t(`desktop.app.${app}`)}</span><small>{i18n.t(d.jobs[app].assigned?'jobs.remove':'jobs.assign')}</small></button>)}
+    </section>}
+    <footer ref={taskbar} className="desktop-taskbar">{hasUpgrade(state,'jobs')&&<button ref={jobSource} className="taskbar-job-source" aria-expanded={assignments} aria-haspopup="menu" draggable title={i18n.t('jobs.drag')} onDragStart={e=>{setAssignments(false);e.dataTransfer.setData('text/refresh-job','cursor');}} onKeyDown={event=>{if(event.key==='ArrowDown'){event.preventDefault();setAssignments(true);}}} onClick={()=>setAssignments(!assignments)}><CursorGlyph/><span>{i18n.t('jobs.cursor')}<small>{i18n.t('jobs.capacity',{used:JOB_IDS.filter(id=>d.jobs[id].assigned).length,capacity:jobCapacity(state)})}</small></span></button>}
       {hasDesktopSkill(state,'virtual')&&<nav className="taskbar-workspaces">{([0,1] as const).map(workspace=><button key={workspace} aria-label={i18n.t('desktop.workspace',{count:workspace+1})} aria-pressed={d.workspace===workspace} onClick={()=>runtime.actDesktop({type:'workspace',workspace})}>{i18n.integer(workspace+1)}</button>)}</nav>}<div className="taskbar-apps">{apps.filter(app=>!['note','settings'].includes(app)||d.windows[app].open).map(app=><button key={app} aria-label={i18n.t(`desktop.app.${app}`)} title={i18n.t(`desktop.app.${app}`)} className={`${d.windows[app].open?'running':''} ${d.active===app&&!d.windows[app].minimized?'active':''}`} onClick={()=>runtime.actDesktop({type:'taskbar',app})}><AppIcon app={app} state={state} palette={props.capture?.palette} frame={frame}/></button>)}</div>
       <div className="taskbar-right"><button className="taskbar-progress" aria-expanded={conditions} onClick={()=>{setConditions(!conditions);setUpgrades(false);}}>{i18n.t('desktop.progress',{product:productLabel(i18n,state.persistent.productName),done:checks.filter(Boolean).length,total:checks.length})}</button>
         <button className="taskbar-pixels" aria-expanded={upgrades} onClick={()=>{setUpgrades(!upgrades);setConditions(false);}}><i className="pixel-resource"/><span><b data-desktop-pixels={state.resources.pixels}>{i18n.t('desktop.pixels',{pixels:i18n.pixels(state.resources.pixels)})}</b><small>{i18n.t('desktop.rate',{pixels:i18n.rate(props.capture?.display.rate??passivePixelsPerSecond(state))})}</small></span></button>

@@ -41,11 +41,11 @@ def main():
   if not args.visual_only:
    ctx,page=scene('desktop-early');assert not page.locator('.taskbar-clock').count();assert not page.locator('.job-slot').count()
    page.locator('.desktop-live > .desktop-taskbar .taskbar-tokens').click();assert win(page,'settings').is_visible();assert win(page,'settings').locator('.desktop-skill').count()==9;ctx.close();checks.append('初期状態には未解放の操作を出さず、トークンから設定を開ける')
-   ctx,page=scene();w=open_app(page,'tessera');slot=w.locator('.job-slot');slot.click();assert not state(page)['run']['desktop']['jobs']['tessera']['assigned']
-   page.locator('.desktop-live > .desktop-taskbar .taskbar-job-source').drag_to(slot);assert state(page)['run']['desktop']['jobs']['tessera']['assigned']
-   before=state(page);w.locator('.job-controls button').nth(1).click();after=state(page);assert after['run']['desktop']['jobs']['tessera']['cursors']==9
-   assert after['resources']['pixels']<before['resources']['pixels'];assert w.locator('.working-cursors > svg').count()==5
-   w.locator('.job-controls button').nth(2).click();assert state(page)['run']['desktop']['jobs']['tessera']['updates']==2
+   ctx,page=scene();w=open_app(page,'tessera');slot=w.locator('.job-slot');slot.click();w.get_by_role('button',name='ジョブを外す',exact=True).click();assert not state(page)['run']['desktop']['jobs']['tessera']['assigned']
+   page.locator('.desktop-live > .desktop-taskbar .taskbar-job-source').drag_to(w.locator('.window-title'));slot.click();assert state(page)['run']['desktop']['jobs']['tessera']['assigned']
+   before=state(page);w.locator('.job-controls button').nth(0).click();after=state(page);assert after['run']['desktop']['jobs']['tessera']['cursors']==9
+   assert after['resources']['pixels']<before['resources']['pixels'];assert w.locator('.working-cursors > svg:not(.job-activity)').count()==5
+   w.locator('.job-controls button').nth(1).click();assert state(page)['run']['desktop']['jobs']['tessera']['updates']==2
    ctx.close();checks.append('ジョブのドラッグ割当・台数購入・更新・最大5カーソル表示')
    ctx,page=scene();w=open_app(page,'files');w=maximize(page,'files')
    w.get_by_role('button',name='更新日時で並べ替え',exact=True).click();assert state(page)['run']['desktop']['fileSort']=='date'

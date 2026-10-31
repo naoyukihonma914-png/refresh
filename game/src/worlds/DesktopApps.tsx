@@ -1,3 +1,4 @@
+import { PhotoSurface } from './PhotoSurface';
 import { useState, type CSSProperties } from 'react';
 import { BALANCE, type SpecKey } from '../config/balance';
 import { productLabel } from '../content/products';
@@ -5,7 +6,7 @@ import { iconTemplate, paletteFor } from '../content/kumikiArt';
 import coast from '../assets/wallpaper/coast.webp';
 import { JOB_IDS, type AppId, type JobId, type PhotoEdit } from '../systems/desktopState';
 import { activeScreenshots } from '../systems/desktop';
-import { featureCount, hasDesktopSkill, hasUpgrade, jobCapacity, jobCursorCost, jobCursorRate, jobRate, jobUpdateCost } from '../systems/desktopJobs';
+import { featureCount, hasDesktopSkill, hasUpgrade, jobCursorCost, jobCursorRate, jobRate, jobUpdateCost } from '../systems/desktopJobs';
 import { homePixelsPerSecond, passivePixelsPerSecond } from '../systems/economy';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { ProductSettings } from '../components/ProductSettings';
@@ -20,9 +21,9 @@ export function Photograph({edit,wallpaper=false,...props}:Props&{edit:PhotoEdit
  const shot=edit.source.startsWith('shot:')?(props.catalog??s.persistent.screenshots).find(x=>x.id===Number(edit.source.slice(5))):null;
  const drawing=(wallpaper?s.persistent.artwork.wallpaper:null)??s.persistent.artwork.sketchbook;
  const style={filter:`brightness(${edit.brightness}) sepia(${Math.abs(edit.tone)/100}) hue-rotate(${edit.tone*2}deg)`,transform:`scale(${1/(1-edit.crop/50)})`} as CSSProperties;
- return <div className={`photograph ${wallpaper?'wallpaper-photo':''}`} style={{filter:wallpaper&&s.persistent.specs.color===1?`url(#${props.preview?'coast-256-preview':'coast-256'})`:undefined}}><div className="photo-transform" style={style}>
+ return <div className={`photograph ${wallpaper?'wallpaper-photo':''}`} ><PhotoSurface specs={s.persistent.specs}><div className="photo-transform" style={style}>
  {edit.source==='sketch'?<PixelArt frames={drawing.frames} size={drawing.size} palette={props.capture?.palette??paletteFor(s.persistent.specs.color)}/>:shot?<ScreenshotPreview {...props} shot={shot} catalog={props.catalog??s.persistent.screenshots}/>:<img src={edit.source==='night'?night:coast} alt={wallpaper?'':i18n.t(edit.source==='night'?'photo.night':'photo.coast')} draggable={false}/>}
- </div></div>;
+ </div></PhotoSurface></div>;
 }
 function JobActivity({app,...props}:Props&{app:JobId}) {
  const s=props.snapshot.state,phase=props.preview||props.runtime.platform.animation.reducedMotion()?0.5:(s.elapsedMs%BALANCE.w3.jobAnimationMs)/BALANCE.w3.jobAnimationMs,palette=props.capture?.palette??paletteFor(s.persistent.specs.color);
@@ -32,17 +33,19 @@ function JobActivity({app,...props}:Props&{app:JobId}) {
 }
 export function JobControls({app,...props}:Props&{app:JobId}){
  const {snapshot,runtime,i18n,preview}=props,s=snapshot.state,j=s.run.desktop.jobs[app];
- if(!hasUpgrade(s,'jobs'))return null;
+ if(!hasUpgrade(s,'jobs')||!j.assigned)return null;
  const cost=jobCursorCost(s,app),updateCost=jobUpdateCost(s,app),rate=passivePixelsPerSecond(s);
- return <div className="job-controls"><div>{j.assigned&&j.cursors>0&&<JobActivity {...props} app={app}/>}<span>{i18n.t('jobs.count',{count:j.cursors})}</span><span>{i18n.t('jobs.rate',{rate:i18n.rate(jobRate(s,app))})}</span>
- <button className="win-button" disabled={!j.assigned&&JOB_IDS.filter(id=>s.run.desktop.jobs[id].assigned).length>=jobCapacity(s)} onClick={()=>runtime.actDesktop({type:'job-assign',app})}>{i18n.t(j.assigned?'jobs.remove':'jobs.assign')}</button></div>
- <div><button className="win-button" disabled={s.resources.pixels<cost} onClick={()=>runtime.actDesktop({type:'job-buy',app})}>{i18n.t('jobs.buy',{cost:i18n.price(cost)})}</button><span>{i18n.t('jobs.effect',{rate:i18n.rate(jobCursorRate(s,app))})}</span><Estimate cost={cost} pixels={s.resources.pixels} rate={rate} i18n={i18n} runtime={runtime} preview={preview}/>
- <button className="win-button" disabled={s.resources.pixels<updateCost||j.cursors===0} title={i18n.t('jobs.update',{version:`1.${j.updates}`,next:`1.${j.updates+1}`})} onClick={()=>runtime.actDesktop({type:'job-update',app})}>{i18n.t('jobs.updateCost',{cost:i18n.price(updateCost)})}</button><span>{i18n.t('jobs.double',{factor:BALANCE.w3.updateMultiplier})}</span><Estimate cost={updateCost} pixels={s.resources.pixels} rate={rate} i18n={i18n} runtime={runtime} preview={preview}/></div></div>;
+ return <div className="job-controls" role="dialog" aria-label={i18n.t('jobs.menu',{app:i18n.t(`desktop.app.${app}`)})}>
+  <div className="job-metrics"><b>{i18n.t('jobs.count',{count:j.cursors})}</b><span>{i18n.t('jobs.rate',{rate:i18n.rate(jobRate(s,app))})}</span></div>
+  <div className="job-purchase"><button className="win-button" disabled={s.resources.pixels<cost} onClick={()=>runtime.actDesktop({type:'job-buy',app})}>{i18n.t('jobs.buy',{cost:i18n.price(cost)})}</button><span>{i18n.t('jobs.effect',{rate:i18n.rate(jobCursorRate(s,app))})}</span><Estimate cost={cost} pixels={s.resources.pixels} rate={rate} i18n={i18n} runtime={runtime} preview={preview}/></div>
+  <div className="job-purchase"><button className="win-button" disabled={s.resources.pixels<updateCost||j.cursors===0} title={i18n.t('jobs.update',{version:`1.${j.updates}`,next:`1.${j.updates+1}`})} onClick={()=>runtime.actDesktop({type:'job-update',app})}>{i18n.t('jobs.updateCost',{cost:i18n.price(updateCost)})}</button><span>{i18n.t('jobs.double',{factor:BALANCE.w3.updateMultiplier})}</span><Estimate cost={updateCost} pixels={s.resources.pixels} rate={rate} i18n={i18n} runtime={runtime} preview={preview}/></div>
+  <button className="win-button job-remove" onClick={()=>runtime.actDesktop({type:'job-assign',app})}>{i18n.t('jobs.remove')}</button>
+ </div>;
 }
 export function WorkingCursors({app,...props}:Props&{app:JobId}){
  const {snapshot,i18n,preview,runtime}=props,s=snapshot.state,j=s.run.desktop.jobs[app];if(!j.assigned||!j.cursors)return null;
  return <div className={`working-cursors job-motion-${app} ${preview||runtime.platform.animation.reducedMotion()?'no-motion':''}`} aria-label={i18n.t('jobs.count',{count:j.cursors})}>
- {Array.from({length:Math.min(j.cursors,BALANCE.w3.maxVisibleJobCursors)},(_,i)=><svg key={i} viewBox="0 0 16 20" aria-hidden="true" style={{left:`${14+i*15}%`,animationDelay:`${-i*.37}s`}}><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="#fff" stroke="#283744"/></svg>)}<span>{i18n.t('jobs.count',{count:j.cursors})}</span></div>;
+ <JobActivity {...props} app={app}/>{Array.from({length:Math.min(j.cursors,BALANCE.w3.maxVisibleJobCursors)},(_,i)=><svg key={i} viewBox="0 0 16 20" aria-hidden="true" style={{left:`${14+i*15}%`,animationDelay:`${-i*.37}s`}}><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="#fff" stroke="#283744"/></svg>)}<span>{i18n.t('jobs.count',{count:j.cursors})}</span></div>;
 }
 export function PhotoApp(props:Props){
  const {snapshot,runtime,i18n}=props,s=snapshot.state,d=s.run.desktop,edit=d.photo;
@@ -73,7 +76,7 @@ export function ClockApp(props:Props){
  return <div className="clock-app"><h2>{i18n.t('clock.now')}</h2><div className="clock-time">{i18n.time(now)}</div><p>{i18n.date(now)}</p>
  {hasUpgrade(s,'timer')&&<section><h2>{i18n.t('clock.timer')}</h2><label>{i18n.t('clock.reserveAt')}<input type="text" inputMode="numeric" placeholder={i18n.t('clock.timeExample')} aria-label={i18n.t('clock.reserveAt')} value={at} onChange={e=>setAt(e.target.value)}/></label><button className="win-button accent" disabled={scheduledAt===null} onClick={()=>scheduledAt!==null&&runtime.actDesktop({type:'reserve',at:scheduledAt})}>{i18n.t('clock.reserve')}</button>
  {d.reservation&&<p>{d.reservation.done?i18n.t(d.reservation.result==='expired'?'clock.expired':d.reservation.result==='skipped'?'clock.skipped':'clock.done'):i18n.t('clock.scheduled',{time:i18n.dateTime(d.reservation.at)})}<button className="win-button" onClick={()=>runtime.actDesktop({type:'cancel-reservation'})}>{i18n.t('clock.cancel')}</button></p>}<p className="muted">{i18n.t('clock.offline')}</p></section>}
- {hasUpgrade(s,'calendar')&&<section className="clock-calendar"><header><button className="win-button" aria-label={i18n.t('clock.previous')} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()-1,1))}><LineIcon kind="back"/></button><h2>{i18n.date(month.getTime())}</h2><button className="win-button" aria-label={i18n.t('clock.next')} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()+1,1))}><LineIcon kind="forward"/></button></header><div className="calendar-days">{Array.from({length:7},(_,i)=><b key={`weekday${i}`} className="calendar-weekday">{i18n.t(`clock.weekday.${i as 0}`)}</b>)}{Array.from({length:month.getDay()},(_,i)=><span key={`blank${i}`}/>)}{Array.from({length:days},(_,i)=>{const date=new Date(month.getFullYear(),month.getMonth(),i+1),dayEvents=events.filter(e=>new Date(e.at).toDateString()===date.toDateString());return <span key={i} className={dayEvents.length?'has-events':''} title={dayEvents.map(e=>e.name).join('\n')||i18n.t('clock.noEvents')}>{i18n.integer(i+1)}</span>;})}</div>{events.filter(e=>new Date(e.at).getMonth()===month.getMonth()&&new Date(e.at).getFullYear()===month.getFullYear()).map((e,i)=><p key={i}>{i18n.date(e.at)}　{e.name}</p>)}</section>}</div>;
+ {hasUpgrade(s,'calendar')&&<section className="clock-calendar"><header><button className="win-button" aria-label={i18n.t('clock.previous')} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()-1,1))}><LineIcon kind="back"/></button><h2>{i18n.month(month.getTime())}</h2><button className="win-button" aria-label={i18n.t('clock.next')} onClick={()=>setMonth(new Date(month.getFullYear(),month.getMonth()+1,1))}><LineIcon kind="forward"/></button></header><div className="calendar-days">{Array.from({length:7},(_,i)=><b key={`weekday${i}`} className="calendar-weekday">{i18n.t(`clock.weekday.${i as 0}`)}</b>)}{Array.from({length:month.getDay()},(_,i)=><span key={`blank${i}`}/>)}{Array.from({length:days},(_,i)=>{const date=new Date(month.getFullYear(),month.getMonth(),i+1),dayEvents=events.filter(e=>new Date(e.at).toDateString()===date.toDateString());return <span key={i} className={dayEvents.length?'has-events':''} title={dayEvents.map(e=>e.name).join('\n')||i18n.t('clock.noEvents')}>{i18n.integer(i+1)}</span>;})}</div>{events.filter(e=>new Date(e.at).getMonth()===month.getMonth()&&new Date(e.at).getFullYear()===month.getFullYear()).map((e,i)=><p key={i}>{i18n.date(e.at)}　{e.name}</p>)}</section>}</div>;
 }
 export function ThemeApp({snapshot,runtime,i18n}:Props){
  const s=snapshot.state,p=s.persistent.desktopPrefs;
