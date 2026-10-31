@@ -8,6 +8,8 @@
 | Tessera | Tessera | 画面のパーツを作るアプリ。日本語の最初の案内だけ「Tessera（テッセラ）」 |
 | 余白社 | Yohaku | デザインの「余白」から。架空の小さな販売元 |
 | 榎本 湊 | Minato Enomoto | 余白社の担当。姓はEnomoto、名はMinato |
+| 高瀬 蓮 | Ren Takase | 架空の利用者。姓はTakase、名はRen |
+| 佐伯 真紀 | Maki Saeki | 架空の利用者。姓はSaeki、名はMaki |
 | 水野 ひかり | Hikari Mizuno | 架空の利用者。姓はMizuno、名はHikari |
 | ピクセル | pixel / pixels | 画面の中身を作る資源。英語は数に合わせる |
 | トークン | token / tokens | 道具や設定を便利にする資源 |

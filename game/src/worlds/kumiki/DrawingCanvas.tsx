@@ -3,9 +3,9 @@ import type { I18n } from '../../content/i18n';
 import type { Drawing } from '../../systems/kumikiState';
 
 export type DrawingTool = 'pencil' | 'eraser' | 'fill' | 'eyedropper' | 'select';
-export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18n, modern = false, onStroke, onBegin, onEnd, onPosition }: {
+export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18n, modern = false, compact = false, onStroke, onBegin, onEnd, onPosition }: {
   drawing: Drawing; target: number[]; palette: string[]; frame: number; zoom: number; tool: DrawingTool; i18n: I18n;
-  modern?: boolean;
+  modern?: boolean; compact?: boolean;
   onStroke(cells: number[], tool: DrawingTool): void; onBegin(): void; onEnd(): void; onPosition(x: number, y: number): void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -46,7 +46,7 @@ export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18
   };
   const finish = () => { if (previous.current !== null) { previous.current = null; onEnd(); } };
   return <div className="drawing-scroll"><canvas ref={ref} width={512} height={512} tabIndex={0}
-    aria-label={i18n.t('k.drawHint')} style={{ inlineSize: (modern ? 288 : 384) * zoom, blockSize: (modern ? 288 : 384) * zoom }}
+    aria-label={i18n.t('k.drawHint')} style={{ inlineSize: (compact ? 208 : modern ? 288 : 384) * zoom, blockSize: (compact ? 208 : modern ? 288 : 384) * zoom }}
     onPointerDown={event => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); onBegin(); stroke(point(event)); }}
     onPointerMove={event => { const cell = point(event); if (previous.current !== null && tool !== 'fill' && tool !== 'eyedropper') stroke(cell); }}
     onPointerUp={finish} onPointerCancel={finish} onLostPointerCapture={finish}

@@ -3,6 +3,7 @@ import { App } from './App';
 import { GameRuntime } from './systems/runtime';
 import { browserRoot, createBrowserPlatform } from './platform/browser';
 import './style.css';
+import './desktop.css';
 
 const platform = createBrowserPlatform();
 const runtime = new GameRuntime(platform);

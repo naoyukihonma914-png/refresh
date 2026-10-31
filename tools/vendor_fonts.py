@@ -30,6 +30,8 @@ FONTS = [
     ('biz-udgothic-regular', 'bizudgothic', 'BIZUDGothic-Regular.ttf'),
     ('dotgothic16', 'dotgothic16', 'DotGothic16-Regular.ttf'),
 ]
+# DotGothic16には𥝱がない。CSSで次に指定した同梱BIZ UDPGothicへ任せる。
+FALLBACKS = {'dotgothic16': {'𥝱': 'biz-udpgothic-regular.woff2'}}
 # 全漢字の範囲は含めない。かな・通常の句読点・記号とラテン文字を明示する。
 RANGES = [
     (0x0020, 0x007E), (0x00A0, 0x017F),  # ASCII、Latin-1、Latin Extended-A
@@ -106,8 +108,9 @@ def build_font(entry, characters, locale_characters, charset_hash, cache):
         'source_codepoints': len(source_characters), 'subset_codepoints': len(font.getBestCmap()),
     }
     missing = [char for char in locale_characters if not char.isspace() and ord(char) not in font.getBestCmap()]
-    if missing:
+    if missing and any(char not in FALLBACKS.get(name, {}) for char in missing):
         raise ValueError(f'{name}: locale characters missing: {sorted(missing)}')
+    result['fallbacks'] = {char: FALLBACKS[name][char] for char in missing} if missing else {}
     print(path.name, path.stat().st_size, result['subset_codepoints'], flush=True)
     return result
 
@@ -121,7 +124,11 @@ def check_fonts(characters, locale_characters, charset_hash):
         font = TTFont(path)
         cmap = set(font.getBestCmap())
         assert all(chr(point) in characters for point in cmap), path.name
-        assert all(char.isspace() or ord(char) in cmap for char in locale_characters), path.name
+        fallbacks = entry.get('fallbacks', {})
+        assert all(char.isspace() or ord(char) in cmap or char in fallbacks for char in locale_characters), path.name
+        for char, fallback in fallbacks.items():
+            assert FALLBACKS.get(path.stem, {}).get(char) == fallback
+            assert ord(char) in TTFont(ROOT / fallback).getBestCmap(), (char, fallback)
         assert 'SIL OPEN FONT LICENSE' in (ROOT / entry['license']).read_text(encoding='utf-8')
     print('Subset checks passed:', len(characters), 'requested codepoints')
 

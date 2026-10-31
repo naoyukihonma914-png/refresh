@@ -124,7 +124,7 @@ describe('試作版のリリース', () => {
     expect(state.resources.dollars).toBe(103); expect(state.persistent.specs.color).toBe(1);
     expect(shippingProduct(state)!.screen.specs.color).toBe(0);
     state = buySpec(state, 'storage');
-    expect(state.resources.dollars).toBe(3); expect(state.persistent.specs.storage).toBe(1);
+    expect(state.resources.dollars).toBe(43); expect(state.persistent.specs.storage).toBe(1);
     expect(buySpec(state, 'memory')).toBe(state);
     expect(canStartNextVersion(state)).toBe(true);
   });
@@ -197,7 +197,7 @@ describe('試作版のリリース', () => {
     delete old.run.shipping; delete old.run.restartMs;
     delete old.persistent.products; delete old.persistent.guideArchive; delete old.persistent.homeTheme;
     const migrated = decodeSave(JSON.stringify(old));
-    expect(migrated.schemaVersion).toBe(5); expect(migrated.resources).toEqual(old.resources);
+    expect(migrated.schemaVersion).toBe(7); expect(migrated.resources).toEqual(old.resources);
     const state = shipped(); expect(decodeSave(encodeSave(state))).toEqual(state);
     for (const mutate of [
       (s: typeof state) => { s.run.shipping!.productId = 99; },

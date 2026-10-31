@@ -1,3 +1,4 @@
+import { Desktop } from './worlds/Desktop';
 import { useMemo, useSyncExternalStore } from 'react';
 import { DebugPanel } from './components/DebugPanel';
 import { Stage } from './components/Stage';
@@ -10,7 +11,7 @@ import { Release } from './worlds/Release';
 
 export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }) {
   const snapshot = useSyncExternalStore(runtime.subscribe, runtime.getSnapshot);
-  const i18n = useMemo(() => createI18n(snapshot.language), [snapshot.language]);
+  const i18n = useMemo(() => createI18n(snapshot.language, {numberNotation:snapshot.state.persistent.numberNotation}), [snapshot.language,snapshot.state.persistent.numberNotation]);
   return (
     <>
       <Stage platform={runtime.platform} i18n={i18n}>
@@ -27,6 +28,8 @@ export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }
           ? <Intro i18n={i18n} onStart={runtime.startGame} />
           : snapshot.state.run.world === 'release'
           ? <Release snapshot={snapshot} i18n={i18n} runtime={runtime} />
+          : snapshot.state.run.world === 'desktop'
+          ? <Desktop key={snapshot.state.createdAt} snapshot={snapshot} i18n={i18n} runtime={runtime} />
           : snapshot.state.run.world === 'kumiki'
           ? <Kumiki key={snapshot.state.createdAt} snapshot={snapshot} i18n={i18n} runtime={runtime} />
           : <Foundation snapshot={snapshot} i18n={i18n} runtime={runtime} />)}

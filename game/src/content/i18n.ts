@@ -1,3 +1,4 @@
+import { formatGameNumber } from './numbers';
 import ja from './locales/ja.json';
 import type { SpecKey } from '../config/balance';
 
@@ -33,16 +34,17 @@ function expandText(text: string): string {
   return `[${expanded}]`;
 }
 
-export function createI18n(language: string, { strictInterpolation = import.meta.env.DEV } = {}) {
+export function createI18n(language: string, { strictInterpolation = import.meta.env.DEV, numberNotation = 'compact' as 'compact' | 'scientific' } = {}) {
   const pseudo = language === TEST_LANGUAGE;
   const locale = LOCALES[pseudo ? 'en' : language] ?? LOCALES.en!;
   const intl = locale._meta.intl;
   const number = new Intl.NumberFormat(intl, { maximumFractionDigits: 2 });
   const rate = new Intl.NumberFormat(intl, { maximumFractionDigits: 1 });
   const integer = new Intl.NumberFormat(intl, { maximumFractionDigits: 0 });
-  const compact = new Intl.NumberFormat(intl, { notation: 'compact', maximumFractionDigits: 2 });
+
   const plural = new Intl.PluralRules(intl);
   const time = new Intl.DateTimeFormat(intl, { hour: '2-digit', minute: '2-digit' });
+  const dateTime = new Intl.DateTimeFormat(intl, { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
   const date = new Intl.DateTimeFormat(intl, { year: 'numeric', month: 'short', day: 'numeric' });
 
   function t(key: MessageKey, params: Record<string, string | number> = {}): string {
@@ -60,6 +62,8 @@ export function createI18n(language: string, { strictInterpolation = import.meta
     });
   }
 
+  const gameNumber = (value: number, threshold: number, digits: number) => formatGameNumber(value, {intl, language:locale._meta.id, threshold, digits, notation:numberNotation, unit:exponent=>t(`number.unit.${exponent}` as MessageKey)});
+
   function duration(milliseconds: number): string {
     const seconds = Math.floor(Math.max(0, milliseconds) / 1_000);
     const minutes = Math.floor(seconds / 60);
@@ -75,11 +79,12 @@ export function createI18n(language: string, { strictInterpolation = import.meta
     t,
     duration,
     number: (value: number) => number.format(value),
-    rate: (value: number) => rate.format(value),
+    rate: (value: number) => value >= locale._meta.compactThreshold ? gameNumber(value,locale._meta.compactThreshold,1) : rate.format(value),
     integer: (value: number) => integer.format(Math.floor(value)),
-    pixels: (value: number) => value >= locale._meta.compactThreshold ? compact.format(value) : integer.format(Math.floor(value)),
-    price: (value: number) => compact.format(value),
+    pixels: (value: number) => gameNumber(Math.floor(value),locale._meta.compactThreshold,2),
+    price: (value: number) => gameNumber(value,locale._meta.id === 'ja' ? 10_000 : 1_000,2),
     time: (timestamp: number) => time.format(timestamp),
+    dateTime: (timestamp: number) => dateTime.format(timestamp),
     date: (timestamp: number) => date.format(timestamp),
     spec: (key: SpecKey, level: number) => t(`spec.${key}.${level}` as MessageKey),
     languageName: (id: string) => id === TEST_LANGUAGE ? t('language.test')

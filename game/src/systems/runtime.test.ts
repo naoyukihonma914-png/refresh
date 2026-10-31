@@ -361,7 +361,7 @@ describe('出荷の保存と再開', () => {
     expect(runtime.getSnapshot().state.resources.dollars).toBe(303);
     expect(runtime.getSnapshot().offline).toBeNull();
     step(5_600); runtime.purchaseSpec('color'); runtime.purchaseSpec('storage');
-    expect(runtime.getSnapshot().state.resources.dollars).toBe(3);
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(43);
     runtime.startNextVersion(); runtime.startNextVersion();
     expect(runtime.getSnapshot().state.run.version).toBe('v1');
     expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
@@ -446,4 +446,23 @@ it('描画の報酬済み記録を保存し、再起動後に同じマスを塗�
   runtime.leave(); runtime.dispose(); await start();
   runtime.actKumiki({ type: 'paint', id: 'folder', cells: [49], color: 0, frame: 0, mirror: false });
   expect(runtime.getSnapshot().state.resources.pixels).toBe(10);
+});
+
+describe('段階5の保存と製品名',()=>{
+  it('撮影の保存が失敗したら報酬・クールダウン・撮影記録を進めず、再試行で一度だけ保存する',async()=>{
+    storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('desktop-early',clock.wall)!));await start();
+    const before=runtime.getSnapshot().state, write=storage.setItem;
+    storage.setItem=(key,value)=>{if(key===SAVE_KEYS.primary)throw new Error('Quota exceeded');write(key,value);};
+    expect(runtime.takeScreenshot()).toBe(false);expect(runtime.getSnapshot().state.resources).toEqual(before.resources);expect(runtime.getSnapshot().state.persistent.screenshots).toEqual([]);expect(runtime.getSnapshot().state.run.desktop.cooldownMs).toBe(0);
+    storage.setItem=write;expect(runtime.takeScreenshot()).toBe(true);expect(runtime.getSnapshot().state.persistent.screenshots).toHaveLength(1);expect(runtime.takeScreenshot()).toBe(false);
+    runtime.dispose();await start();expect(runtime.getSnapshot().state.persistent.screenshots).toHaveLength(1);expect(runtime.getSnapshot().state.run.desktop.cooldownMs).toBe(30_000);
+  });
+  it('製品名は作者と別に保存され、空白は無題、20文字まで。出荷後の改名は過去の製品名を変えない',async()=>{
+    storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('release-ready',clock.wall)!));await start();
+    runtime.requestPrototypeRelease();runtime.setProductName('星'.repeat(21));expect([...runtime.getSnapshot().state.persistent.productName!]).toHaveLength(20);
+    runtime.setProductName('  私の画面  ');runtime.confirmPrototypeRelease();expect(runtime.getSnapshot().state.persistent.products[0]!.name).toBe('私の画面');expect(runtime.getSnapshot().state.persistent.products[0]!.author).toBe('Aoi');
+    step(8000);runtime.purchaseSpec('color');runtime.startNextVersion();runtime.setProductName('次の名前');runtime.persist();
+    expect(runtime.getSnapshot().state.persistent.productName).toBe('次の名前');expect(runtime.getSnapshot().state.persistent.products[0]!.name).toBe('私の画面');
+    runtime.setNumberNotation('scientific');runtime.dispose();await start();expect(runtime.getSnapshot().state.persistent.numberNotation).toBe('scientific');
+  });
 });

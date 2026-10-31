@@ -107,7 +107,7 @@ export function applySeedSkills(state: GameState, selected: readonly SeedSkill[]
 export function createSeedVersion(previous: GameState, version: 'v1' | 'v2', now: number): GameState {
   const next = createInitialState(now);
   next.run.version = version;
-  next.persistent = structuredClone(previous.persistent);
+  next.persistent = {...structuredClone({...previous.persistent,screenshots:[]}),screenshots:[...previous.persistent.screenshots]};
   next.resources.tokens = previous.resources.tokens;
   next.resources.dollars = previous.resources.dollars;
   if (previous.persistent.seedSkills.includes('inherit')) {

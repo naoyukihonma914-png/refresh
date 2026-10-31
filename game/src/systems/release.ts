@@ -45,7 +45,7 @@ export function beginPrototypeRelease(original: GameState, now: number, reducedM
     specs: p.specs, seedSkills: p.seedSkills, pattern: p.seedAppearance.pattern, marquee: p.seedAppearance.marquee,
     kumikiSkills: p.artwork.skills, modern: p.artwork.modern, log: k.generationLog, history: state.run.seed.history,
   });
-  const product: ProductRecord = { id: p.products.length + 1, version: 'v0.1', releasedAt: now, author: p.playerName,
+  const product: ProductRecord = { id: p.products.length + 1, name: p.productName, version: 'v0.1', releasedAt: now, author: p.playerName,
     generatedPixels: state.run.totalPixelsGenerated, builtCount: screen.built.length + screen.kumikiBuilt.length,
     revenue: releaseEstimate(state), screen, exports: structuredClone(uniqueExports(state)) };
   let next: GameState = { ...state, resources: { ...state.resources, dollars: state.resources.dollars + product.revenue },

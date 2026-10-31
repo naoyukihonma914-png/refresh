@@ -1,3 +1,6 @@
+import { captureStore } from '../platform/captures';
+import { migrateCaptureV6 } from './captureMigration';
+import { createDesktopState } from './desktopState';
 import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameState } from './state';
 import type { SaveStorage } from '../platform/storage';
 import { createArtwork, createKumikiState } from './kumikiState';
@@ -32,8 +35,8 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   3(data) {
     const next = { ...(data as GameState), schemaVersion: 4 };
     const projected = { ...next, schemaVersion: SCHEMA_VERSION,
-      run: { ...next.run, shipping: null, restartMs: 0 },
-      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {} },
+      run: { ...next.run, shipping: null, restartMs: 0, desktop: createDesktopState() },
+      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
     };
     if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
     const palette = paletteFor(1);
@@ -64,10 +67,29 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
       persistent: { ...old.persistent, products: [], guideArchive: [], homeTheme: {} },
     };
   },
+  5(data) {
+    const old = data as GameState;
+    return { ...old, schemaVersion: 6, run: { ...old.run, desktop: createDesktopState() },
+      persistent: { ...old.persistent, productName: null, numberNotation: 'compact', products: (old.persistent.products ?? []).map(p => ({ ...p, name: null })), screenshots: [], productionNote: null, noteUpdatedAt: null } };
+  },
+  6(data) {
+    const old=data as GameState;
+    return {...old,schemaVersion:7,persistent:{...old.persistent,homeUpdatedAt:null,sketchUpdatedAt:null,screenshots:old.persistent.screenshots.map(migrateCaptureV6)},
+      run:{...old.run,desktop:{...old.run.desktop,feedback:old.run.desktop.feedback.map(f=>({...f,sender:f.sender??'hikari'}))}}};
+  },
 };
 
-export function decodeSave(raw: string): GameState {
+export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameState {
   let data: unknown = JSON.parse(raw);
+  const stored=data as GameState;
+  if(Array.isArray(stored?.persistent?.screenshots)) {
+    stored.persistent.screenshots=stored.persistent.screenshots.map(shot=>{
+      if('data' in shot)return shot;
+      const ref=(shot as unknown as {sceneRef?:unknown}).sceneRef;
+      if(typeof ref!=='string'||!readScene)throw new Error('Screenshot assets are required');
+      const {id,at,language}=shot;return {id,at,language,data:readScene(ref)};
+    });
+  }
   const versionOf = (value: unknown): number => {
     if (typeof value !== 'object' || value === null || !('schemaVersion' in value)
       || !Number.isSafeInteger(value.schemaVersion)) throw new Error('保存形式を確認できません');
@@ -98,6 +120,8 @@ export type LoadResult =
   | { kind: 'loaded' | 'recovered'; state: GameState }
   | { kind: 'corrupt' | 'unavailable' };
 
+const verifiedPrimary=new WeakMap<SaveStorage,string>();
+
 export function loadGame(storage: SaveStorage): LoadResult {
   let primary: string | null;
   let backup: string | null;
@@ -107,10 +131,13 @@ export function loadGame(storage: SaveStorage): LoadResult {
   } catch {
     return { kind: 'unavailable' };
   }
+  try { captureStore(storage).reload(); } catch { return {kind:'unavailable'}; }
   for (const [raw, kind] of [[primary, 'loaded'], [backup, 'recovered']] as const) {
     if (raw === null) continue;
     try {
-      return { kind, state: decodeSave(raw) };
+      const state=decodeSave(raw,ref=>captureStore(storage).get(ref));
+      if(kind==='loaded')verifiedPrimary.set(storage,raw);
+      return {kind,state};
     } catch {
       // 壊れた主データで予備を上書きしない。
     }
@@ -125,18 +152,24 @@ export type SaveResult =
 export function saveGame(storage: SaveStorage, state: GameState, now: number, { checkpoint = false } = {}): SaveResult {
   if (!canSave(state) && !(checkpoint && state.persistent.products.length > 0)) return { kind: 'locked', state };
   const saved = { ...state, lastSavedAt: now };
+  let scenes:ReturnType<typeof captureStore>|undefined;
   try {
-    const raw = encodeSave(saved);
-    const previous = storage.getItem(SAVE_KEYS.primary);
-    if (previous !== null) {
-      let valid = false;
-      try { decodeSave(previous); valid = true; } catch { /* 予備を保持する */ }
-      if (valid) storage.setItem(SAVE_KEYS.backup, previous);
+    if(!isGameState(saved))throw new Error('Invalid game state');
+    scenes=captureStore(storage);scenes.begin();
+    const screenshots=saved.persistent.screenshots.map(({id,at,language,data})=>({id,at,language,sceneRef:scenes!.put(data)}));
+    const raw=JSON.stringify({...saved,persistent:{...saved.persistent,screenshots}});
+    const previous=storage.getItem(SAVE_KEYS.primary);
+    if(previous!==null){
+      let valid=verifiedPrimary.get(storage)===previous;
+      if(!valid){try{decodeSave(previous,ref=>scenes!.get(ref));valid=true;}catch{/* Preserve the existing backup. */}}
+      if(valid)storage.setItem(SAVE_KEYS.backup,previous);
     }
-    storage.setItem(SAVE_KEYS.primary, raw);
-    return { kind: 'saved', state: saved };
+    scenes.flush();
+    storage.setItem(SAVE_KEYS.primary,raw);
+    scenes.finish();verifiedPrimary.set(storage,raw);
+    return {kind:'saved',state:saved};
   } catch {
-    return { kind: 'failed', state };
+    scenes?.rollback();return {kind:'failed',state};
   }
 }
 
@@ -144,6 +177,8 @@ export function clearGame(storage: SaveStorage): boolean {
   try {
     storage.removeItem(SAVE_KEYS.primary);
     storage.removeItem(SAVE_KEYS.backup);
+    captureStore(storage).clear();
+    verifiedPrimary.delete(storage);
     return true;
   } catch { return false; }
 }

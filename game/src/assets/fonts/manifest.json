@@ -3,72 +3,80 @@
     "file": "noto-serif-jp.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/notoserifjp/NotoSerifJP%5Bwght%5D.ttf",
     "source_sha256": "2fd527ba12b6a44ec30d796d633360da0aeba6c5d4af1304ce12bb4dc15a7dfc",
-    "woff2_sha256": "10efe8b325797d329ce1d602fbd89baff0e06f3d0ae7de12d8a176f48a9445dc",
+    "woff2_sha256": "92744572205cf9c1ca08b981687d25d273dba20718eab1621b7110d3c4d4d5b5",
     "license": "notoserifjp-OFL.txt",
     "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
-    "charset_sha256": "3277917318a2d22e2322c87efdb8a0c432e6c95caed048a22e2728fc9336d599",
+    "charset_sha256": "6c12fe8a63e8a8fbdb14fd41c15e6363b40e444239e8f364106c669ac30c0b9f",
     "fonttools_version": "4.61.1",
     "source_codepoints": 16726,
-    "subset_codepoints": 3160
+    "subset_codepoints": 3163,
+    "fallbacks": {}
   },
   {
     "file": "noto-sans-jp.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/notosansjp/NotoSansJP%5Bwght%5D.ttf",
     "source_sha256": "c2f3b4d463500a2ddcd3849cded1fceeb9fd6d1c32e6cbecd568453ba50fc68f",
-    "woff2_sha256": "b36ee9165505b27d220486ce0fd05c8eff59ca7d017a040005658af1d62e2acb",
+    "woff2_sha256": "4e98c669f01a73044a3e041071113e7af014b7deda9c2108bb3b0e27c0472c54",
     "license": "notosansjp-OFL.txt",
     "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
-    "charset_sha256": "3277917318a2d22e2322c87efdb8a0c432e6c95caed048a22e2728fc9336d599",
+    "charset_sha256": "6c12fe8a63e8a8fbdb14fd41c15e6363b40e444239e8f364106c669ac30c0b9f",
     "fonttools_version": "4.61.1",
     "source_codepoints": 16732,
-    "subset_codepoints": 3160
+    "subset_codepoints": 3163,
+    "fallbacks": {}
   },
   {
     "file": "biz-udpgothic-regular.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/bizudpgothic/BIZUDPGothic-Regular.ttf",
     "source_sha256": "258d7156c165f2ff774b6efee637c22c3b950de0d8a10e501137061bc8085d01",
-    "woff2_sha256": "2275c2c0f70057d9cc97d4d71e8bde972f3c6982b58833d5f28f0698184c1b83",
+    "woff2_sha256": "fbe266b690ed33498d4013dfd10de6d2ac916be228a8eb422bce899ad49cf624",
     "license": "bizudpgothic-OFL.txt",
     "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
-    "charset_sha256": "3277917318a2d22e2322c87efdb8a0c432e6c95caed048a22e2728fc9336d599",
+    "charset_sha256": "6c12fe8a63e8a8fbdb14fd41c15e6363b40e444239e8f364106c669ac30c0b9f",
     "fonttools_version": "4.61.1",
     "source_codepoints": 11741,
-    "subset_codepoints": 3032
+    "subset_codepoints": 3035,
+    "fallbacks": {}
   },
   {
     "file": "biz-udpgothic-bold.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/bizudpgothic/BIZUDPGothic-Bold.ttf",
     "source_sha256": "30eba52fc837e8b62c97d4b82e6706583149fb7294e3712dd71a655eaea80a90",
-    "woff2_sha256": "6db39e50d87e76ae4a76b1f0f6ab6ddaa74303810bb042d520f6362a6ba72f24",
+    "woff2_sha256": "f6b4b9769ec9e2b178facdd374317d4706c8977ddc48638cfcf4f46dbba5b711",
     "license": "bizudpgothic-OFL.txt",
     "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
-    "charset_sha256": "3277917318a2d22e2322c87efdb8a0c432e6c95caed048a22e2728fc9336d599",
+    "charset_sha256": "6c12fe8a63e8a8fbdb14fd41c15e6363b40e444239e8f364106c669ac30c0b9f",
     "fonttools_version": "4.61.1",
     "source_codepoints": 11741,
-    "subset_codepoints": 3032
+    "subset_codepoints": 3035,
+    "fallbacks": {}
   },
   {
     "file": "biz-udgothic-regular.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/bizudgothic/BIZUDGothic-Regular.ttf",
     "source_sha256": "709fcd41e3209fb765da750472f55ccdf925653e9fa7e1eb007cb65c8f749c75",
-    "woff2_sha256": "66eb9bf9d00a506036e33a3ecbc0ee4edfdf82c0dbcda3b65bb529219a208646",
+    "woff2_sha256": "a2e492c555952573e374994f21909c278082eb1c0d37a159332f0d32dd2f0c18",
     "license": "bizudgothic-OFL.txt",
     "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
-    "charset_sha256": "3277917318a2d22e2322c87efdb8a0c432e6c95caed048a22e2728fc9336d599",
+    "charset_sha256": "6c12fe8a63e8a8fbdb14fd41c15e6363b40e444239e8f364106c669ac30c0b9f",
     "fonttools_version": "4.61.1",
     "source_codepoints": 11741,
-    "subset_codepoints": 3032
+    "subset_codepoints": 3035,
+    "fallbacks": {}
   },
   {
     "file": "dotgothic16.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/dotgothic16/DotGothic16-Regular.ttf",
     "source_sha256": "3ad9af88726d42b40f7f365f0dcac785af73cf20ea6f1d5b44e57cc21150b8f1",
-    "woff2_sha256": "4de440c7d0fe19554d31661bd118c4a536e5a8bd566cdc4bae1c83fce6145876",
+    "woff2_sha256": "82bbe3098788810e8995bb1244883fe71ec06000e1538da0931ffed80369e4a5",
     "license": "dotgothic16-OFL.txt",
     "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
-    "charset_sha256": "3277917318a2d22e2322c87efdb8a0c432e6c95caed048a22e2728fc9336d599",
+    "charset_sha256": "6c12fe8a63e8a8fbdb14fd41c15e6363b40e444239e8f364106c669ac30c0b9f",
     "fonttools_version": "4.61.1",
     "source_codepoints": 8231,
-    "subset_codepoints": 2910
+    "subset_codepoints": 2912,
+    "fallbacks": {
+      "\ud855\udf71": "biz-udpgothic-regular.woff2"
+    }
   }
 ]

@@ -1,3 +1,4 @@
+import { advanceDesktopTime } from './desktop';
 import { BALANCE } from '../config/balance';
 import { advanceHomeGeneration } from './economy';
 import type { GameState } from './state';
@@ -38,8 +39,9 @@ export function advanceActiveTime(state: GameState, elapsedMs: number): TimeResu
   if (state.run.world === 'release') return { state: advanceShipping(state, creditedMs), elapsedMs: elapsed, creditedMs, pixels: 0, capped: false, remainderMs: elapsed - creditedMs };
   const result = applyTime(state, elapsed, creditedMs, false);
   const next = advanceSeedInstaller(result.state, creditedMs);
-  const progressed = next.run.world === 'kumiki' ? advanceKumikiTimers(next, creditedMs) : updateSeedGuide(next);
-  return { ...result, state: { ...progressed, run: { ...progressed.run, restartMs: Math.max(0, progressed.run.restartMs - creditedMs) } }, remainderMs: elapsed - creditedMs };
+  const progressed = ['kumiki','desktop'].includes(next.run.world) ? advanceKumikiTimers(next, creditedMs) : updateSeedGuide(next);
+  const desktop = advanceDesktopTime(progressed, creditedMs, state.lastTickAt + creditedMs);
+  return { ...result, state: { ...desktop, run: { ...desktop.run, restartMs: Math.max(0, desktop.run.restartMs - creditedMs) } }, remainderMs: elapsed - creditedMs };
 }
 
 // 閉じていた・裏のタブだった時間だけ、端末時計の差で計算する。
@@ -50,6 +52,7 @@ export function advanceOfflineTime(state: GameState, wallNow: number): TimeResul
   const limit = BALANCE.spec.storage[state.persistent.specs.storage]!.offlineHours
     * BALANCE.time.millisecondsPerHour;
   const result = applyTime(state, elapsedMs, Math.min(elapsedMs, limit), elapsedMs > limit);
+  result.state = advanceDesktopTime(result.state, result.creditedMs, wallNow, true);
   // 時計が戻った差は0にし、次回の不在は現在の時計を基準にする。
   return { ...result, state: { ...result.state, lastTickAt: wallNow,
     run: { ...result.state.run, seed: { ...result.state.run.seed, lastActionAt: result.state.elapsedMs }, kumiki: { ...result.state.run.kumiki, lastActionAt: result.state.elapsedMs } },
