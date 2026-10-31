@@ -45,11 +45,24 @@ describe('素の画面の生成・購入・ガイド', () => {
     const state = evolved();
     expect(manualClickValue(state)).toBe(4);
     expect(passivePixelsPerSecond(state)).toBe(3);
-    expect(cursorPrice(state)).toBeCloseTo(17.25);
+    expect(cursorPrice(state)).toBe(18);
     state.persistent.specs.color = 1; state.persistent.specs.refresh = 1;
     expect(manualClickValue(state)).toBe(6);
     expect(passivePixelsPerSecond(state)).toBe(9);
     expect(buildSeed(state, 'cursor', 0).run.seed.autoCursors).toBe(2);
+  });
+
+  it('カーソルの値段は切り上げた整数にし、その額で購入判定して支払う', () => {
+    const state = evolved();
+    state.resources.pixels = 17.99;
+    expect(canBuildSeed(state, 'cursor')).toBe(false);
+    expect(buildSeed(state, 'cursor', 0)).toBe(state);
+    state.resources.pixels = 18;
+    const next = buildSeed(state, 'cursor', 0);
+    expect(next.resources.pixels).toBe(0);
+    expect(next.run.seed.autoCursors).toBe(2);
+    expect(cursorPrice(next)).toBe(20);
+    expect(next.run.totalPixelsGenerated).toBe(state.run.totalPixelsGenerated);
   });
 
   it('動きの前は勢いも増量もなく、動きの後だけ最大1.6倍・2秒で元に戻る', () => {

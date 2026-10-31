@@ -81,11 +81,11 @@ export function Foundation({ snapshot, i18n, runtime }: { snapshot: RuntimeSnaps
     skills.includes('marquee') && appearance.marquee && 'has-marquee'].filter(Boolean).join(' ');
   const purchase = (id: SeedItem | 'cursor') => {
     const cost = id === 'cursor' ? cursorPrice(state) : BALANCE.w1.items.find(item => item.id === id)!.cost;
-    const label = i18n.t(`seed.buy.${id}`, { cost: i18n.price(cost) });
+    const label = i18n.t(`seed.buy.${id}`, { cost: i18n.integer(cost) });
     const name = id === 'cursor' ? i18n.t('seed.cursor') : i18n.t(`item.${id}`);
     return <li key={id}>{has('layout') && <span>{name}</span>}
       <button className="build-button" disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)} aria-label={label}>
-        {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.price(cost) }) : label}
+        {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : label}
       </button></li>;
   };
   return <main className={className}>
@@ -112,7 +112,7 @@ export function Foundation({ snapshot, i18n, runtime }: { snapshot: RuntimeSnaps
         <progress max={BALANCE.w1.inheritMs} value={seed.installer.elapsedMs} aria-label={i18n.t('installer.title')} />
         <p>{i18n.t('installer.progress', { done: seed.built.length, total: seed.installer.items.length })}</p></section>}
       <p className="pixels-line"><RollingPixels value={state.resources.pixels} now={now} enabled={motion} i18n={i18n} /></p>
-      <p className="generator-line" style={{ minBlockSize: showCursors > 0 ? 70 : undefined }}><span className="generator-anchor">
+      <p className="generator-line"><span className="generator-anchor">
         <button type="button" className="generate-button" onClick={event => {
           const rect = event.currentTarget.getBoundingClientRect();
           runtime.pressSeed(event.detail === 0 ? undefined : { x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
@@ -130,8 +130,8 @@ export function Foundation({ snapshot, i18n, runtime }: { snapshot: RuntimeSnaps
             <path d="M1 1V20L5.5 15.5L9 23L12 21.5L8.5 14H15Z" fill="#000" stroke="#fff" strokeWidth="1.5" /></svg>;
         })}
         {motion && floating.filter(item => now - item.at < BALANCE.w1.floatMs).map(item => <span key={item.serial} className="pixel-gain" aria-hidden="true"
-          style={{ insetInlineStart: `${item.x}%`, insetBlockStart: `${item.y}%`, transform: `translateY(${-36 * Math.max(0, now - item.at) / BALANCE.w1.floatMs}px)`, opacity: Math.max(0, 1 - (now - item.at) / BALANCE.w1.floatMs) }}>
-          {i18n.t('seed.gain', { pixels: i18n.number(item.pixels) })}</span>)}
+          style={{ insetInlineStart: `${item.x}%`, transform: `translate(-50%, ${-36 * Math.max(0, now - item.at) / BALANCE.w1.floatMs}px)`, opacity: Math.max(0, 1 - (now - item.at) / BALANCE.w1.floatMs) }}>
+          {i18n.t('seed.gain', { pixels: i18n.integer(item.pixels) })}</span>)}
       </span></p>
       {seed.autoCursors > BALANCE.w1.maxVisibleCursors && <p className="cursor-summary">{i18n.t('seed.cursors', { count: seed.autoCursors })}</p>}
       <hr />

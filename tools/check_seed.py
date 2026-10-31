@@ -3,6 +3,7 @@ import argparse
 import base64
 from datetime import datetime, timedelta, timezone
 import json
+import math
 from pathlib import Path
 import shutil
 from playwright.sync_api import sync_playwright
@@ -97,14 +98,14 @@ def main():
             assert_layout(page)
             if fixture == 'seed-layout':
                 assert page.locator('.build-button').count() == 3  # カーソルと2つ先
-                assert page.get_by_role('button', name='組木を作る（1.2万 ピクセル）', exact=True).is_disabled()
+                assert page.get_by_role('button', name='組木を作る（12,000 ピクセル）', exact=True).is_disabled()
                 assert '組木は' in page.locator('.guide-body').inner_text()
             if fixture == 'seed-motion':
                 assert page.locator('.auto-cursor').count() == 20
                 assert '24' in page.locator('.cursor-summary').inner_text()
                 page.locator('.generate-button').click(position={'x':20, 'y':10})
                 assert page.locator('.pixel-gain').count() == 1
-                page.get_by_role('button', name='組木を作る（1.2万 ピクセル）', exact=True).click()
+                page.get_by_role('button', name='組木を作る（12,000 ピクセル）', exact=True).click()
                 assert page.locator('.seed-complete').inner_text() == '組木ができました。'
                 assert page.locator('.seed-page').count() == 1
             page.screenshot(path=str(ARTIFACTS / f'{fixture}.png'))
@@ -143,6 +144,48 @@ def main():
                     assert page.locator(scope+' option[value="en"]').inner_text() == 'English'
             ctx.close()
         checks.append('日本語・英語・試験用言語、開始・色・動き・設定を1920×1080と1366×768で確認し、はみ出し・重なりなし')
+
+        ctx = context()
+        page = ctx.new_page()
+        instant = datetime(2026,10,31,0,0,tzinfo=timezone.utc)
+        page.clock.install(time=instant)
+        page.clock.pause_at(instant + timedelta(minutes=1))
+        page.goto(url + '?debug=1&state=seed-motion'); ready(page)
+        assert page.locator('.generate-button').inner_text() == 'ピクセルを4個生成する'
+        cursor = page.locator('.build-button').first
+        assert cursor.evaluate('element => getComputedStyle(element).backgroundColor') == 'rgb(0, 128, 128)'
+        # 時計を止めて自動生成の差をなくし、表示額と支払額が同じことを確認する。
+        for count in range(24, 32):
+            cost = math.ceil(15 * 1.15 ** count)
+            assert cursor.inner_text() == f'{cost:,} で作る'
+            assert cursor.get_attribute('aria-label') == f'自動カーソルを作る（{cost:,} ピクセル）'
+            before = pixels(page)
+            cursor.click()
+            assert pixels(page) == before - cost
+        for language in ['ja','en','en-XA']:
+            page.locator('.debug-panel .language-select select').select_option(language)
+            for width,height in [(1920,1080),(1366,768)]:
+                page.set_viewport_size({'width':width,'height':height})
+                page.wait_for_timeout(100)
+                height = page.locator('.generate-button').bounding_box()['height']
+                for y in [2,height - 4]:
+                    page.locator('.generate-button').click(position={'x':24,'y':y})
+                gains = page.locator('.pixel-gain')
+                gains.nth(1).wait_for(timeout=5_000)
+                assert gains.count() >= 2, (language,width,height)
+                assert all('.' not in text for text in gains.all_text_contents())
+                button = page.locator('.generate-button').bounding_box()
+                for gain in gains.all():
+                    bounds = gain.bounding_box()
+                    assert bounds['y'] + bounds['height'] < button['y'], (bounds,button)
+                assert_layout(page)
+                page.locator('.debug-panel').evaluate("element => element.style.visibility='hidden'")
+                page.screenshot(path=str(ARTIFACTS / f'review-gains-{language}-{width}.png'))
+                page.locator('.debug-panel').evaluate("element => element.style.visibility='visible'")
+                # 試験用言語の加算表示も、消えるまでの動きの間ずっとボタンの外にある。
+                page.clock.run_for(900)
+        ctx.close()
+        checks.append('カーソルの整数価格と実際の支払いの一致、1,000以上の桁区切り、落ち着いた水色、3言語・2画面で整数の加算表示がボタンの上の外側にあること')
 
         ctx = context()
         page = ctx.new_page()

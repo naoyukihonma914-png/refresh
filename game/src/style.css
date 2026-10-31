@@ -45,7 +45,10 @@ button { white-space: normal; overflow-wrap: anywhere; }
 .seed-page .build-list li { margin: 0; }
 .seed-page .generator-anchor { display: inline-block; position: relative; }
 .seed-page .auto-cursor { position: absolute; inline-size: 18px; block-size: 24px; pointer-events: none; z-index: 1; }
-.seed-page .pixel-gain { position: absolute; inset-inline-start: 40%; inset-block-start: -16px; pointer-events: none; font: inherit; white-space: nowrap; }
+.seed-page .pixel-gain { position: absolute; inset-block-end: calc(100% + 6px); pointer-events: none; font: inherit; white-space: nowrap; }
+.seed-page .generator-line:has(.auto-cursor) { min-block-size: 70px; }
+.seed-page.has-motion .generator-line { padding-block-start: 48px; }
+.seed-page.has-motion .generator-line:has(.auto-cursor) { min-block-size: 118px; }
 .seed-page .cursor-summary { font-size: 13.33px; }
 .seed-page.has-border .generate-button, .seed-page.has-border .build-button { border: 2px solid #000; border-radius: 0; }
 .seed-page.has-border hr { border-block-start: 2px solid #000; border-block-end: 0; }
@@ -56,11 +59,11 @@ button { white-space: normal; overflow-wrap: anywhere; }
 .seed-page.has-color .text-button { color: #000080; }
 .seed-page.has-color .text-button:hover { color: #800080; }
 .seed-page.has-color .generate-button { background: var(--seed-accent); color: #fff; border-color: #000; }
-.seed-page.has-color .build-button:not(:disabled) { background: #00ffff; color: #000; border-color: #000080; }
+.seed-page.has-color .build-button:not(:disabled) { background: #008080; color: #fff; border-color: #000080; }
 .seed-page.has-color .guide-notices { background: #fff; }
 .seed-page.has-color hr { border-color: var(--seed-line); }
 .seed-page.has-color.modern-colors { --seed-bg: #e8edf1; --seed-surface: #fff; --seed-ink: #1a2935; --seed-accent: #285b75; --seed-line: #9cabb4; }
-.seed-page.has-color.modern-colors .build-button:not(:disabled) { background: #dce9f0; border-color: #718e9e; }
+.seed-page.has-color.modern-colors .build-button:not(:disabled) { background: #dce9f0; color: var(--seed-ink); border-color: #718e9e; }
 .seed-page.has-font { font-family: 'Refresh Sans', 'Refresh UI', sans-serif; font-size: 16px; }
 .seed-page.has-font .goal { font-size: 20px; font-weight: 700; }
 .seed-page.has-font .available-heading, .seed-page.has-font h2 { font-size: 18px; font-weight: 700; }

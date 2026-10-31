@@ -60,7 +60,7 @@ URL に `?debug=1` を付けると、保存の解禁・ピクセル追加・性�
 - `?state=seed-return`：256色・トークン40の再訪用状態。ページ下部から設定を開ける
 - `?state=seed-inheriting`：前の構成を約10秒で順に組み立てる確認
 
-単体テストは `npm test`（98件）。ブラウザ確認は `tools/check_seed.py`、`tools/check_foundation.py`、`tools/check_review_fixes.py`。
+単体テストは `npm test`（100件）。ブラウザ確認は `tools/check_seed.py`、`tools/check_foundation.py`、`tools/check_review_fixes.py`。
 実行の前提と結果は `docs/実装メモ.md` に記録する。
 
 書体の再生成は `tools/vendor_fonts.py`。対象文字の一覧と取得元は `tools/font_subsets/`、

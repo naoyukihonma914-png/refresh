@@ -87,7 +87,7 @@
     "item.motion": "動き",
     "item.kumiki": "組木を作る",
     "seed.generateSingle": "ピクセルを1つ生成する",
-    "seed.generate": "ピクセルを{count}生成する",
+    "seed.generate": "ピクセルを{count}個生成する",
     "seed.available": "作れるもの",
     "seed.buy.border": "枠線を作る（{cost} ピクセル）",
     "seed.buy.save": "保存を作る（{cost} ピクセル）",

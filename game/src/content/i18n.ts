@@ -74,6 +74,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
     t,
     duration,
     number: (value: number) => number.format(value),
+    integer: (value: number) => integer.format(Math.floor(value)),
     pixels: (value: number) => value >= locale._meta.compactThreshold ? compact.format(value) : integer.format(Math.floor(value)),
     price: (value: number) => compact.format(value),
     time: (timestamp: number) => time.format(timestamp),

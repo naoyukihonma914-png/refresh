@@ -106,7 +106,10 @@
     "item.motion": "Motion",
     "item.kumiki": "Build Kumiki",
     "seed.generateSingle": "Generate 1 pixel",
-    "seed.generate": "Generate {count} pixels",
+    "seed.generate": {
+      "one": "Generate {count} pixel",
+      "other": "Generate {count} pixels"
+    },
     "seed.available": "Things to build",
     "seed.buy.border": "Build borders ({cost} pixels)",
     "seed.buy.save": "Build saving ({cost} pixels)",

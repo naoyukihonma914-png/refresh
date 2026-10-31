@@ -11,7 +11,7 @@ export function visibleSeedItems(state: GameState): SeedItem[] {
 }
 
 export function cursorPrice(state: GameState): number {
-  return BALANCE.w1.cursor_cost * BALANCE.w1.cursor_growth ** state.run.seed.autoCursors;
+  return Math.ceil(BALANCE.w1.cursor_cost * BALANCE.w1.cursor_growth ** state.run.seed.autoCursors);
 }
 
 export function canBuildSeed(state: GameState, id: SeedItem | 'cursor'): boolean {

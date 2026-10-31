@@ -190,7 +190,7 @@ class Run:
 
     def cursor_cost(self):
         w1 = self.c["w1"]
-        return w1["cursor_cost"] * w1["cursor_growth"] ** self.cursors
+        return math.ceil(w1["cursor_cost"] * w1["cursor_growth"] ** self.cursors)
 
     def maybe_cursors(self, next_cost):
         bought = 0
