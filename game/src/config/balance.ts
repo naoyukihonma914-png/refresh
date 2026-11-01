@@ -40,8 +40,7 @@ export const BALANCE = {
   w2: {
     items: [
       { id: 'select', cost: 4_000 }, { id: 'button', cost: 9_000 },
-      { id: 'extensions', cost: 15_000 }, { id: 'switch', cost: 20_000 },
-      { id: 'slider', cost: 32_000 }, { id: 'input', cost: 45_000 },
+      { id: 'extensions', cost: 15_000 }, { id: 'input', cost: 45_000 },
       { id: 'frame', cost: 65_000 }, { id: 'taskbar', cost: 90_000 },
     ],
     desktopCost: 200_000, dotValue: 10, focusMultiplier: 2, buttonMultiplier: 1.5,
@@ -97,6 +96,8 @@ export const BALANCE = {
     baseShotCapacity: 50, storageCapacityMultiplier: 2, requiredApps: 6, requiredFeedback: 10,
     maxNote: 20_000, compactCursors: 8,
   },
+  pageDesign:{buttonFontMin:12,buttonFontMax:36,buttonMinWidth:120,buttonMinHeight:32,width:1920,height:920,grid:8,cardWidth:800,minWidth:320,minHeights:{heading:64,notice:64,generator:160,upgrades:120},compactHeights:{heading:80,notice:80,generator:280,upgrades:160},recommendedHeights:{heading:112,notice:160,generator:176,upgrades:224}},
+  legacyHome:{switchRefund:20_000,sliderRefund:32_000},
   appBuild:{width:640,height:416,grid:8,bodyMinWidth:112,bodyMinHeight:64,controlMinWidth:112,controlMinHeight:48,history:30,layoutBonus:.1},
   appearance:{transitionMs:2_000,gessoRequirement:2,screens:[{width:800,height:600},{width:1024,height:768},{width:1366,height:768}]},
   release: {
@@ -167,7 +168,7 @@ export const BALANCE = {
 
 export type SeedItem = (typeof BALANCE.w1.items)[number]['id'];
 export type SeedSkill = (typeof BALANCE.w1.skills)[number]['id'];
-export type KumikiItem = (typeof BALANCE.w2.items)[number]['id'];
+export type KumikiItem = (typeof BALANCE.w2.items)[number]['id'] | 'switch' | 'slider';
 export type KumikiSkill = (typeof BALANCE.w2.skills)[number]['id'];
 export type PartId = Exclude<KumikiItem, 'select' | 'extensions'> | 'tabs' | 'table';
 export type SpecKey = keyof typeof BALANCE.spec;

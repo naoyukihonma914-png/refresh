@@ -1,3 +1,4 @@
+import { isPageDesign, type PageDesign } from './pageDesign';
 import { type AppProjects } from './appLayout';
 import type { BuiltApp } from './desktopState';
 import { LEGACY_DESKTOP } from './desktopGeometry';
@@ -127,6 +128,7 @@ export function restoreScene(shot:Screenshot,catalog:Screenshot[]):GameState {
   if(s.version>=5)state.run.kumiki={...state.run.kumiki,...(s as CaptureSceneV5).editorView};
   state.run.desktop.screen='screen' in s?{...s.screen}:{...LEGACY_DESKTOP};
   if(s.version>=6){const current=s as CaptureSceneV6;state.run.desktop.projects=structuredClone(current.appProjects);state.run.desktop.editingApp=current.editingApp;}
+  if(s.version>=7){const current=s as CaptureSceneV7;state.run.seed.page=structuredClone(current.page);state.run.kumiki.legacyBonus=current.legacyBonus;}
   state.persistent.screenshots=catalog.filter(s=>s.id<shot.id);
   return state;
 }
@@ -141,7 +143,7 @@ export interface CaptureSceneV2 extends Omit<CaptureSceneV1,'version'|'desktop'>
  desktop:Omit<DesktopState,'projects'|'editingApp'|'screen'|'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'recycled'|'trashCount'|'reservation'|'terminal'|'shotHistory'|'stalled'|'stalledClosed'|'stallMs'|'stallSerial'|'idleMs'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'|'feedback'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
  view:{preferences:DesktopPreferences;desktop:Pick<DesktopState,'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'reservation'|'terminal'|'stalled'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'>;photo:PhotoEdit};
 }
-export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3|CaptureSceneV4|CaptureSceneV5|CaptureSceneV6;
+export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3|CaptureSceneV4|CaptureSceneV5|CaptureSceneV6|CaptureSceneV7;
 export function projectCaptureV2(state:GameState,language:string):CaptureSceneV2 {
  const d=state.run.desktop;
  // V1's document projection remains shared, while the V2 desktop has its own contract.
@@ -177,7 +179,7 @@ function isCaptureSceneV2(v:unknown):v is CaptureSceneV2 {
  const t=ex.terminal;
  return ['processes','performance'].includes(ex.managerTab as string)&&['home','shots','feedback','tessera','files','photo','terminal'].includes(ex.managerProcess as string)&&(ex.calendarMonth===null||num(ex.calendarMonth))&&record(t)&&[60000,3600000].includes(t.interval as number)&&typeof t.running==='boolean'&&num(t.elapsedMs)&&num(t.executions)&&Array.isArray(t.log)&&t.log.length<=20&&t.log.every(l=>record(l)&&num(l.at)&&typeof l.ok==='boolean')&&(ex.stalled===null||apps2.includes(ex.stalled as string))&&['skills','data','specs','general'].includes(ex.settingsPage as string);
 }
-export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value)||isCaptureSceneV4(value)||isCaptureSceneV5(value)||isCaptureSceneV6(value);}
+export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value)||isCaptureSceneV4(value)||isCaptureSceneV5(value)||isCaptureSceneV6(value)||isCaptureSceneV7(value);}
 
 // Format 3 records the selected visual stages. Older formats keep their own readers.
 export interface CaptureSceneV3 extends Omit<CaptureSceneV2,'version'> {version:3;appearance:Appearance}
@@ -215,7 +217,7 @@ function isCaptureSceneV5(v:unknown):v is CaptureSceneV5 {
 }
 
 export interface CaptureSceneV6 extends Omit<CaptureSceneV5,'version'> {version:6;appProjects:AppProjects;editingApp:BuiltApp|null}
-export function projectCapture(state:GameState,language:string):CaptureSceneV6 {
+function projectCaptureV6(state:GameState,language:string):CaptureSceneV6 {
  const d=state.run.desktop,base=projectCaptureV5(state,language);
  // Dense custom rows can show more files than the older fixed-height list. Keep the
  // scene bounded to 40 rows, including a selected file, as required by the old reader.
@@ -241,3 +243,7 @@ function isCaptureSceneV6(v:unknown):v is CaptureSceneV6 {
  if(!Object.entries(v.appProjects).every(([id,p])=>Object.hasOwn(appParts6,id)&&record(p)&&Array.isArray(p.crafted)&&p.crafted.every(part=>(appParts6[id as BuiltApp] as readonly string[]).includes(part))&&new Set(p.crafted).size===p.crafted.length&&layout6(p.draft,id as BuiltApp)&&(p.installed===null||layout6(p.installed,id as BuiltApp))&&Array.isArray(p.undo)&&p.undo.length===0&&Array.isArray(p.redo)&&p.redo.length===0))return false;
  return isCaptureSceneV5({...v,version:5,files:v.files.filter(f=>record(f)&&f.kind!=='app')})&&v.files.filter(f=>record(f)&&f.kind==='app').every(f=>record(f)&&text(f.id)&&text(f.name)&&Object.hasOwn(appParts6,String(f.appId))&&num(f.bytes)&&(f.at===null||num(f.at)));
 }
+
+export interface CaptureSceneV7 extends Omit<CaptureSceneV6,'version'>{version:7;page:PageDesign;legacyBonus?:{auto:number;drawing:number}}
+export function projectCapture(state:GameState,language:string):CaptureSceneV7{return {...projectCaptureV6(state,language),version:7,page:structuredClone(state.run.seed.page),...(state.run.kumiki.legacyBonus?{legacyBonus:{...state.run.kumiki.legacyBonus}}:{})};}
+function isCaptureSceneV7(v:unknown):v is CaptureSceneV7{return record(v)&&v.version===7&&isPageDesign(v.page)&&(v.legacyBonus===undefined||record(v.legacyBonus)&&num(v.legacyBonus.auto)&&v.legacyBonus.auto>=1&&v.legacyBonus.auto<=1.2&&num(v.legacyBonus.drawing)&&v.legacyBonus.drawing>=1&&v.legacyBonus.drawing<=2)&&isCaptureSceneV6({...v,version:6});}

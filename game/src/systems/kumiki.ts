@@ -22,7 +22,7 @@ export function enterKumiki(state: GameState): GameState {
   next = kGuide(kGuide(next, 'entered'), 'draw');
   return withK(next, { ...next.run.kumiki, guide: { ...next.run.kumiki.guide, current: next.run.version === 'v0.1' ? 'entered' : null } });
 }
-const UNLOCKS = [null, 'button', 'switch', 'slider', 'input', 'frame'] as const;
+const UNLOCKS = [null, 'button', 'extensions', 'input', 'frame', 'taskbar'] as const;
 export function availableIcons(state: GameState): string[] {
   const result: string[] = [];
   for (const [index, id] of ICON_IDS.entries()) {
@@ -30,7 +30,9 @@ export function availableIcons(state: GameState): string[] {
     result.push(id);
     if (!state.run.kumiki.drawings[id]?.exported) break;
   }
-  return state.run.kumiki.built.includes('frame') ? [...result, ...PRACTICE_IDS] : result;
+  const unlocked=state.run.kumiki.built.includes('frame')?[...result,...PRACTICE_IDS]:result;
+  // A template already being drawn remains available after the unlock order changes.
+  return [...ICON_IDS,...PRACTICE_IDS].filter(id=>unlocked.includes(id)||!!state.run.kumiki.drawings[id]);
 }
 export function drawingFor(state: GameState, id: string): Drawing | undefined {
   return id === 'free' ? state.persistent.artwork.sketchbook : state.run.kumiki.drawings[id];
@@ -80,8 +82,8 @@ export function paintDrawing(state: GameState, id: string, cells: readonly numbe
   }
   let result = storeDrawing(state, id, next);
   result = withK(result, { ...result.run.kumiki, lastActionAt: result.elapsedMs });
-  const focus = result.run.kumiki.placed.includes('switch') && result.run.kumiki.focus;
-  const pixels=earned * BALANCE.w2.dotValue * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * (focus ? BALANCE.w2.focusMultiplier : 1);
+  const drawingBonus=result.run.kumiki.legacyBonus?.drawing??1;
+  const pixels=earned * BALANCE.w2.dotValue * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * drawingBonus;
   result=storeDrawing(result,id,{...next,earnedPixels:(drawing.earnedPixels??drawing.rewarded.filter(Boolean).length*BALANCE.w2.dotValue)+pixels});
   result = creditPixels(result,pixels);
   return id === 'folder' && completeDrawing(result, id) ? kGuide(result, 'complete') : result;
@@ -132,7 +134,7 @@ export function buildKumiki(state: GameState, id: KumikiItem): GameState {
 }
 export function ownedParts(state: GameState): PartId[] {
   const built = state.run.kumiki.built;
-  return PART_IDS.filter(id => id === 'tabs' || id === 'table' ? hasKSkill(state, 'extraParts') : built.includes(id));
+  return PART_IDS.filter(id => !['switch','slider'].includes(id)).filter(id => id === 'tabs' || id === 'table' ? hasKSkill(state, 'extraParts') : built.includes(id));
 }
 export function placePart(state: GameState, part: PartId): GameState {
   if (!['kumiki','desktop'].includes(state.run.world) || !ownedParts(state).includes(part) || state.run.kumiki.placed.includes(part)) return state;
@@ -154,7 +156,7 @@ export function exportKumiki(state: GameState, now: number): GameState {
     persistent:{...state.persistent,artwork:{...state.persistent.artwork,icons:{...state.persistent.artwork.icons}}},
   };
   let tokens = 0;
-  const customName = next.run.kumiki.placed.includes('input') ? next.run.kumiki.exportName.trim().slice(0, BALANCE.w2.maxName) : '';
+  const customName = next.run.kumiki.exportName.trim().slice(0, BALANCE.w2.maxName);
   for (const id of ready.icons) {
     const drawing = next.run.kumiki.drawings[id]!;
     if (!drawing.exported && ICON_IDS.some(icon => icon === id)) tokens += BALANCE.spec.resolution[state.persistent.specs.resolution]!.tokens;
@@ -200,17 +202,16 @@ export function flushHomeBank(state: GameState): GameState {
   return withK(next, { ...next.run.kumiki, bank: 0, batchMs: 0 });
 }
 export function configureKumiki(state: GameState, change: Partial<Pick<KumikiState, 'focus' | 'interval' | 'exportName' | 'homeWindow' | 'workspace' | 'activeDocument'>>): GameState {
-  if (change.focus !== undefined && !state.run.kumiki.placed.includes('switch')
-    || change.interval !== undefined && (!state.run.kumiki.placed.includes('slider') || !Number.isInteger(change.interval) || change.interval < BALANCE.w2.intervalMin || change.interval > BALANCE.w2.intervalMax)) return state;
+  if(change.focus!==undefined||change.interval!==undefined)return state;
   if (change.workspace !== undefined && !['draw','compose','export'].includes(change.workspace) || change.activeDocument !== undefined && !['home','drawing'].includes(change.activeDocument)) return state;
-  const next = change.focus !== undefined || change.interval !== undefined ? flushHomeBank(state) : state;
-  return withK(next, { ...next.run.kumiki, ...change, exportName: (change.exportName ?? next.run.kumiki.exportName).slice(0, BALANCE.w2.maxName), lastActionAt: state.elapsedMs });
+  return withK(state, { ...state.run.kumiki, ...change, exportName: (change.exportName ?? state.run.kumiki.exportName).slice(0, BALANCE.w2.maxName), lastActionAt: state.elapsedMs });
 }
 export function changeDesign(state: GameState, part: string, design: Design): GameState {
   if (!state.run.kumiki.built.includes('select') || part !== 'primary' && !state.run.kumiki.placed.includes(part as PartId)
     || !(paletteFor(state.persistent.specs.color).includes(design.color) || (part === 'primary' || part === 'button') && design.color === homeButtonColor(state.persistent.specs.color)) || !Number.isFinite(design.radius) || design.radius < 0 || design.radius > 16
     || !['small', 'medium', 'large'].includes(design.textSize)) return state;
-  return withK(state, { ...state.run.kumiki, design: { ...state.run.kumiki.design, [part]: design } });
+  const next=withK(state, { ...state.run.kumiki, design: { ...state.run.kumiki.design, [part]: design } });
+  return part==='primary'?{...next,run:{...next.run,seed:{...next.run.seed,page:{...next.run.seed.page,button:design.color}}}}:next;
 }
 export function readKumikiGuide(state: GameState, id: KumikiGuide | 'close'): GameState {
   if (id !== 'close' && !state.run.kumiki.guide.seen.includes(id)) return state;
@@ -242,7 +243,7 @@ export function repairPart(state: GameState, part: PartId, dx: number, dy: numbe
 }
 export function prototypeConditions(state: GameState): boolean[] {
   const k = state.run.kumiki;
-  return [k.built.includes('button') && k.built.includes('switch'), k.exports.filter(e => e.kind === 'icon' && ICON_IDS.some(id => id === e.id)).length >= 2, k.placed.includes('button')];
+  return [k.built.includes('button') && k.built.includes('input'), k.exports.filter(e => e.kind === 'icon' && ICON_IDS.some(id => id === e.id)).length >= 2, k.placed.includes('button')];
 }
 
 export type KumikiAction =

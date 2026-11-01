@@ -9,6 +9,7 @@ export interface Drawing { size: number; frames: number[][]; rewarded: boolean[]
 export interface Design { color: string; radius: number; textSize: 'small' | 'medium' | 'large'; shadow: boolean }
 export interface ExportedWork { kind: 'icon' | 'part'; id: string; name: string | null; at: number; size: number; frames: number[][] }
 export interface KumikiState {
+  legacyBonus?:{auto:number;drawing:number};
   entered: boolean; enteredAt: number; built: KumikiItem[]; placed: PartId[];
   drawings: Record<string, Drawing>; underlays: Record<string, Drawing>; exports: ExportedWork[];
   activeDrawing: string;
@@ -64,9 +65,10 @@ export function isArtwork(x: unknown): x is Artwork {
     && ids(x.skills, BALANCE.w2.skills.map(s => s.id));
 }
 export function isKumikiState(x: unknown): x is KumikiState {
-  if (!obj(x) || !ids(x.built, BALANCE.w2.items.map(i => i.id)) || !ids(x.placed, PART_IDS)) return false;
+  if (!obj(x) || !ids(x.built, [...BALANCE.w2.items.map(i => i.id),'switch','slider']) || !ids(x.placed, PART_IDS)) return false;
   if (!obj(x.drawings) || !Object.entries(x.drawings).every(([id, drawing]) => KNOWN_ICONS.includes(id) && isDrawing(drawing))
     || !obj(x.underlays) || !Object.entries(x.underlays).every(([id, drawing]) => KNOWN_ICONS.includes(id) && isDrawing(drawing))) return false;
+  if(x.legacyBonus!==undefined&&(!obj(x.legacyBonus)||!amount(x.legacyBonus.auto)||x.legacyBonus.auto<1||x.legacyBonus.auto>1.2||!amount(x.legacyBonus.drawing)||x.legacyBonus.drawing<1||x.legacyBonus.drawing>2))return false;
   if (x.workspace !== undefined && !['draw','compose','export'].includes(x.workspace as string) || x.activeDocument !== undefined && !['home','drawing'].includes(x.activeDocument as string)) return false;
   if (typeof x.activeDrawing !== 'string' || x.entered && x.activeDrawing !== 'free' && !x.drawings[x.activeDrawing]) return false;
   if (!['enteredAt', 'bank', 'batchMs', 'driftTimerMs', 'lastActionAt'].every(key => amount(x[key]))) return false;

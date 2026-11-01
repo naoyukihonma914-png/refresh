@@ -8,7 +8,7 @@ import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
 import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, targetFor } from './kumiki';
 import { blankDrawing } from './kumikiState';
-import { advanceShipping, beginPrototypeRelease, buySpec, releaseEstimate, startNextVersion } from './release';
+import { advanceShipping, beginPrototypeRelease, buySpec, startNextVersion } from './release';
 
 function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
  let next=buyBlueprint(state,id);const app=isBuildable(id)?id:featureApp(id);
@@ -98,7 +98,8 @@ export function createFixture(name: string | null, now: number): GameState | nul
     next.resources.pixels = 51_872;
     next.run.seed.autoCursors = 41;
     next.run.totalPixelsGenerated = 1_000_000;
-    next.run.totalPixelsGenerated *= (303.5 / releaseEstimate(next)) ** (1 / BALANCE.release.exponent);
+    const elements=next.run.seed.built.length+next.run.kumiki.built.length+next.run.kumiki.exports.filter(e=>e.kind==='icon').length;
+    next.run.totalPixelsGenerated=BALANCE.release.pixelUnit*(303.5/(BALANCE.release.base*(1+BALANCE.release.perElement*elements)))**(1/BALANCE.release.exponent);
     if (name === 'release-ready') return next;
     next = beginPrototypeRelease(next, now);
     next = advanceShipping(next, name === 'release-counting' ? 2_400 : BALANCE.release.animationMs);
@@ -137,7 +138,7 @@ export function createFixture(name: string | null, now: number): GameState | nul
     if (name === 'kumiki-early') { next.resources.pixels = 0; return next; }
     for (const item of BALANCE.w2.items) {
       next = buildKumiki(next, item.id);
-      if (name === 'kumiki-mature' && item.id === 'switch') break;
+      if (name === 'kumiki-mature' && item.id === 'extensions') break;
     }
     for (const part of ownedParts(next)) if (name !== 'kumiki-mature' || part === 'button') next = placePart(next, part);
     for (const id of ['folder', 'bin']) {
@@ -154,7 +155,7 @@ export function createFixture(name: string | null, now: number): GameState | nul
     next.resources.pixels = name === 'kumiki-wall' ? BALANCE.w2.desktopCost : 31_240;
     next.run.kumiki.guide.current = name === 'kumiki-wall' ? 'wall' : 'export';
     if (next.run.version !== 'v0.1') { next.run.kumiki.guide.current = null; next.run.kumiki.guide.collapsed = true; }
-    if (name === 'kumiki-drift') next.run.kumiki.drift = { part: 'switch', dx: 10, dy: -6, angle: 3 };
+    if (name === 'kumiki-drift') next.run.kumiki.drift = { part: 'input', dx: 10, dy: -6, angle: 3 };
     return next;
   }
   if (name?.startsWith('seed-')) {

@@ -1,3 +1,4 @@
+import { createPageDesign, isPageDesign, type PageDesign } from './pageDesign';
 import { desktopScreen } from './desktopGeometry';
 import { createAppearance, unlockedEditorStage, unlockedDesktopStage, type Appearance } from './appearance';
 import { createDesktopPreferences, isDesktopPreferences, type DesktopPreferences, createDesktopState, isDesktopState, isScreenshot, type DesktopState, type Screenshot } from './desktopState';
@@ -5,11 +6,12 @@ import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/
 import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
 export interface SeedState {
+  page:PageDesign;
   built: SeedItem[];
   autoCursors: number;
   history: { item: SeedItem | 'cursor'; at: number }[];
@@ -68,7 +70,7 @@ export function createInitialState(now: number): GameState {
     run: {
       version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
       seed: {
-        built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
+        page:createPageDesign(),built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
       },
       kumiki: createKumikiState(), desktop: createDesktopState(),
@@ -132,6 +134,7 @@ export function isGameState(value: unknown): value is GameState {
   if (!run.seed.built.every(item => itemIds.includes(item))) return false;
   if (new Set(run.seed.built).size !== run.seed.built.length) return false;
   const seed = run.seed;
+  if(!isPageDesign(seed.page))return false;
   if (!isAmount(seed.lastActionAt) || !Array.isArray(seed.history)
     || !seed.history.every(entry => isRecord(entry) && (itemIds.includes(entry.item) || entry.item === 'cursor') && isAmount(entry.at))) return false;
   if (!isRecord(seed.guide) || !Array.isArray(seed.guide.seen)

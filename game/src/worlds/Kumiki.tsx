@@ -1,3 +1,4 @@
+import { pageColors } from '../systems/pageDesign';
 import { AppBuilder } from './AppBuilder';
 import { StatusBar } from '../components/StatusBar';
 import { PixelArt } from './desktop-icons';
@@ -26,7 +27,7 @@ const TOOL_PATHS = {
   fill: 'M4 12L12 4L20 12L12 20Z M3 13H21',
   eyedropper: 'M4 20L5 15L15 5L19 9L9 19Z M13 3L21 11',
 };
-export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = false, interactive = true, previewReady, previewDocuments, previewPalette,legacyAppearance=false }: { legacyAppearance?:boolean;previewPalette?:string[]; previewReady?: number; previewDocuments?: string[]; embedded?: boolean; preview?: boolean; interactive?: boolean; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
+export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = false, interactive = true, previewReady, previewDocuments, previewPalette,legacyAppearance=false,legacyHome=false }: { legacyAppearance?:boolean;legacyHome?:boolean;previewPalette?:string[]; previewReady?: number; previewDocuments?: string[]; embedded?: boolean; preview?: boolean; interactive?: boolean; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
   const { state } = snapshot;
   const k = state.run.kumiki,stage=editorStage(state),editingApp=state.run.desktop.editingApp;
   const act = preview ? () => {} : runtime.actKumiki;
@@ -76,7 +77,8 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const prototype = k.exitInspected && state.persistent.specs.color === 0;
   const releaseChecks = prototypeConditions(state);
   const defaultDesign: Design = { color: selected === 'primary' || selected === 'button' ? homeButtonColor(state.persistent.specs.color) : BASE_PALETTE[11]!, radius: 0, textSize: 'medium', shadow: false };
-  const design = selected ? k.design[selected] ?? defaultDesign : defaultDesign;
+  const storedDesign = selected ? k.design[selected] ?? defaultDesign : defaultDesign;
+  const design = selected==='primary'&&!legacyHome?{...storedDesign,color:pageColors(state.run.seed.page,state.persistent.specs.color).button}:storedDesign;
   useEffect(()=>{
     if(preview||!snapshot.tesseraIntent)return;
     setExtensions(false);setMenu(null);setExportsOpen(false);
@@ -147,13 +149,11 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const readGuide = (id: KumikiGuide | 'close') => { act({ type: 'guide', id }); };
   const change = (patch: Partial<Design>) => { if (selected) act({ type: 'design', id: selected, design: { ...design, ...patch } }); };
   const selectPart = (id: string) => {
-    if (tool === 'eyedropper') { const selectedColor = k.design[id]?.color ?? defaultDesign.color; setColor(Math.max(0, palette.indexOf(selectedColor))); }
+    if (tool === 'eyedropper') { const selectedColor = id==='primary'&&!legacyHome?pageColors(state.run.seed.page,state.persistent.specs.color).button:k.design[id]?.color ?? defaultDesign.color; setColor(Math.max(0, palette.indexOf(selectedColor))); }
     else {setSelected(id);if(stage===2)setColorPanel('properties');}
   };
   const layers = hasKSkill(state, 'layers') && <section className="layer-list"><h2>{i18n.t('k.layers')}</h2>{['primary', ...k.placed].map(id => <button key={id} className={selected === id ? 'active' : ''} onClick={() => { setTool('select'); selectPart(id); }}>{id === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${id as PartId}`)}</button>)}</section>;
-  const effect = next === 'button' ? i18n.t('effect.home', { value: BALANCE.w2.buttonMultiplier })
-    : next === 'switch' ? i18n.t('effect.focus', { value: BALANCE.w2.focusMultiplier })
-      : next === 'slider' ? i18n.t('effect.interval', { value: BALANCE.w2.sliderMultiplier }) : '';
+  const effect = next === 'button' ? i18n.t('effect.home', { value: BALANCE.w2.buttonMultiplier }) : '';
   const propertyPanel = k.built.includes('select') && (selected ? <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{selected === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${selected as PartId}`)}</p>
           <label>{i18n.t('k.fillColor')}<select aria-label={i18n.t('k.fillColor')} value={design.color} onChange={event => change({ color: event.target.value })}>{!palette.includes(design.color) && <option value={design.color}>{design.color}</option>}{palette.map(c => <option value={c} key={c}>{c}</option>)}</select></label>
           <label>{i18n.t('k.radius')}<input aria-label={i18n.t('k.radius')} type="range" min={0} max={16} value={design.radius} onChange={event => change({ radius: Number(event.target.value) })} /><output>{i18n.number(design.radius)}</output></label>
@@ -292,10 +292,10 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
           {editingApp&&<button className="active builder-document-tab" onClick={()=>runtime.actDesktop({type:'app-edit',app:editingApp})}>{i18n.t('builder.document',{app:i18n.t(`desktop.app.${editingApp}`)})}</button>}{extensions && <button className="active" onClick={() => setExtensions(false)}>{i18n.t('k.extensions')}</button>}
         </nav>
         {editingApp&&!extensions?<AppBuilder key={editingApp} app={editingApp} runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview}/>:extensions ? <Extensions runtime={runtime} snapshot={snapshot} i18n={i18n} /> : <div className="k-documents" data-home-state={k.homeWindow}><div className="workbench">
-          <HomeDocument runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview} interactive={interactive} selected={selected} onMeasure={setDimensions} onSelect={selectPart} selecting={tool === 'select' || tool === 'eyedropper'} dragPart={dragPart} onDrop={drop} />
+          <HomeDocument runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview} legacyHome={legacyHome} interactive={interactive} selected={selected} onMeasure={setDimensions} onSelect={selectPart} selecting={tool === 'select' || tool === 'eyedropper'} dragPart={dragPart} onDrop={drop} />
           {k.guide.seen.includes('entered') && <button className="home-comment-pin" onClick={() => readGuide('entered')}>{i18n.t('k.comment', { title: i18n.t('k.home') })}</button>}
         </div>{!legacyAppearance&&iconEditor}</div>}
-        {(exportsOpen||!legacyAppearance&&stage===2&&workspace==='export'&&!extensions)&&<section className="exports-list"><h2>{i18n.t('k.exports')}</h2>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
+        {(exportsOpen||!legacyAppearance&&stage===2&&workspace==='export'&&!extensions)&&<section className="exports-list"><h2>{i18n.t('k.exports')}</h2><label>{i18n.t('k.exportName')}<input aria-label={i18n.t('k.exportName')} value={k.exportName} maxLength={BALANCE.w2.maxName} onChange={e=>act({type:'configure',change:{exportName:e.target.value}})}/></label>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
           {k.exports.map(work => <button key={work.kind + work.id} onClick={() => { setExportsOpen(false);setWorkspace(work.kind==='icon'?'draw':'compose');setActiveDocument(work.kind==='icon'?'drawing':'home'); if (work.kind === 'icon') openDrawing(work.id); else if (k.placed.includes(work.id as PartId)) { setTool('select'); selectPart(work.id); } else { dragRef.current = work.id as PartId; setDragPart(work.id as PartId); } }}>{work.name || (work.kind === 'icon' ? i18n.t(`k.icon.${work.id as 'folder'}`) : i18n.t(`k.part.${work.id as PartId}`))}</button>)}
           {state.persistent.products.length > 0 && <><h2>{i18n.t('release.pastExports')}</h2><ul>{state.persistent.products.flatMap(product => product.exports.map(work => <li key={`${product.id}:${work.kind}:${work.id}`}>{i18n.t('release.guideRead', { version: productLabel(i18n,product.name,i18n.t('release.prototype')), title: work.name || i18n.t(work.kind === 'icon' ? `k.icon.${work.id as 'folder'}` : `k.part.${work.id as PartId}`) })}</li>))}</ul></>}
         </section>}
@@ -306,7 +306,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
     {appearanceMessage&&!preview&&<aside className="appearance-guide" role="status"><p>{i18n.t(backwards?'appearance.guide.previous':stage===2?'appearance.guide.editor2':'appearance.guide.editor1')}</p><small>{i18n.t('guide.signature')}</small><button onClick={()=>setAppearanceMessage(false)}>{i18n.t('guide.close')}</button></aside>}
     <StatusBar className="k-status" fields={[
       {id:'position',priority:0,text:i18n.t('k.position',{tool:i18n.t(`k.tool.${tool}`),...position})},
-      {id:'cursors',priority:2,text:i18n.t(k.focus&&k.placed.includes('switch')?'k.cursorPaused':'k.working',{count:state.run.seed.autoCursors})},
+      {id:'cursors',priority:2,text:i18n.t(legacyHome&&k.focus&&k.placed.includes('switch')?'k.cursorPaused':'k.working',{count:state.run.seed.autoCursors})},
       ...(state.lastSavedAt!==null?[{id:'saved',priority:3,text:i18n.t('save.saved',{time:i18n.time(state.lastSavedAt)})}]:[]),
       {id:'zoom',priority:1,text:i18n.t('k.zoomValue',{count:zoom*100})},
     ]}/>

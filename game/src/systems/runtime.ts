@@ -1,3 +1,4 @@
+import { actPageDesign, type PageAction } from './pageDesign';
 import { VIEWPORT } from './viewport';
 import { hasDesktopSkill } from './desktopJobs';
 import { actDesktop, observeTesseraAction, activeScreenshots, screenshotCapacity, takeScreenshot, type DesktopAction } from './desktop';
@@ -275,6 +276,11 @@ export class GameRuntime {
     if (!this.canOperate()) return;
     this.publish({ state: readGuide(this.snapshot.state, id) });
     this.persist();
+  };
+
+  actPage = (action:PageAction) => {
+    if(!this.canOperate()||this.snapshot.state.run.world==='release')return;
+    this.advanceForeground();const previous=this.snapshot.state;this.publish({state:observeTesseraAction(previous,actPageDesign(previous,action),action.type==='color'&&action.slot==='button'?'design':'page',this.platform.clock.wallNow())});this.persist();
   };
 
   applySeedSettings = (selected: readonly SeedSkill[], pattern: GameState['persistent']['seedAppearance']['pattern'], marquee: boolean) => {
