@@ -13,7 +13,7 @@ export function AppBuilder({app,...props}:DesktopProps&{app:BuiltApp}){
  const [selected,setSelected]=useState<AppPartId|null>(null),[invalid,setInvalid]=useState(false),[preview,setPreview]=useState<AppPart|null>(null);
  const [previewScale,setPreviewScale]=useState(1);
  const drag=useRef<{part:AppPart;x:number;y:number;scale:number;resize:boolean}|null>(null),canvas=useRef<HTMLDivElement>(null);
- const {metrics,ruler}=usePartMinimums({...project.draft,parts:allAppParts(app).map(id=>project.draft.parts.find(p=>p.id===id)??{id,x:0,y:0,width:112,height:32,color:'#ffffff',fontSize:12,rowHeight:24,striped:false})},i18n,'var(--app-font)');
+ const {metrics,ruler}=usePartMinimums({...project.draft,parts:allAppParts(app).map(id=>project.draft.parts.find(p=>p.id===id)??{id,x:0,y:0,width:112,height:32,color:'#ffffff',fontSize:12,rowHeight:24,striped:false})},i18n,'var(--app-font)',runtime.platform.clock.wallNow());
  const act=(action:AppBuildAction)=>{if(!props.preview)runtime.actDesktop(action);},draft=project.draft,part=draft.parts.find(p=>p.id===selected),next=nextDesktopApp(snapshot.state);
  const send=(patch:Partial<Rect & Pick<AppPart,'color'|'fontSize'|'rowHeight'|'striped'>>)=>{if(part)act({type:'app-change',app,part:part.id,patch,metrics});};
  const finish=()=>{const pointer=drag.current;if(!pointer)return;drag.current=null;if(preview&&validPlacement(draft,preview,metrics)){act({type:'app-change',app,part:preview.id,patch:preview,metrics});setInvalid(false);}else setInvalid(true);setPreview(null);};
