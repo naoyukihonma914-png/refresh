@@ -1,0 +1,5786 @@
+{
+  "checks": [
+    "3言語×段0〜2×2画面サイズ×8アプリの144画面で、配置の内側・重なりなし・最大化/復元/最小化/閉じる/再開を検査"
+  ],
+  "layouts": [
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 144,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 296,
+          "width": 144,
+          "height": 184
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 296,
+          "width": 640,
+          "height": 184
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 480,
+          "width": 784,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 136,
+          "width": 384,
+          "height": 408
+        },
+        {
+          "id": "body",
+          "x": 392,
+          "y": 136,
+          "width": 392,
+          "height": 408
+        },
+        {
+          "id": "folders",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 128
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "compare",
+          "x": 392,
+          "y": 144,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "wallpaper",
+          "x": 392,
+          "y": 72,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 328
+        },
+        {
+          "id": "brightness",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 72,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 144,
+          "width": 384,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "undo",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 152
+        },
+        {
+          "id": "timer",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 168
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 176,
+          "width": 784,
+          "height": 368
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "iconSize",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 784,
+          "height": 424
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 144,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 296,
+          "width": 144,
+          "height": 184
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 296,
+          "width": 640,
+          "height": 184
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 480,
+          "width": 784,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 136,
+          "width": 384,
+          "height": 408
+        },
+        {
+          "id": "body",
+          "x": 392,
+          "y": 136,
+          "width": 392,
+          "height": 408
+        },
+        {
+          "id": "folders",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 128
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "compare",
+          "x": 392,
+          "y": 144,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "wallpaper",
+          "x": 392,
+          "y": 72,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 328
+        },
+        {
+          "id": "brightness",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 72,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 144,
+          "width": 384,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "undo",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 152
+        },
+        {
+          "id": "timer",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 168
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 176,
+          "width": 784,
+          "height": 368
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "iconSize",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 784,
+          "height": 424
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 144,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 296,
+          "width": 144,
+          "height": 184
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 296,
+          "width": 640,
+          "height": 184
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 480,
+          "width": 784,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 136,
+          "width": 384,
+          "height": 408
+        },
+        {
+          "id": "body",
+          "x": 392,
+          "y": 136,
+          "width": 392,
+          "height": 408
+        },
+        {
+          "id": "folders",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 128
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "compare",
+          "x": 392,
+          "y": 144,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "wallpaper",
+          "x": 392,
+          "y": 72,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 328
+        },
+        {
+          "id": "brightness",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 72,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 144,
+          "width": 384,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "undo",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 152
+        },
+        {
+          "id": "timer",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 168
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 176,
+          "width": 784,
+          "height": 368
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "iconSize",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 784,
+          "height": 424
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 144,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 296,
+          "width": 144,
+          "height": 184
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 296,
+          "width": 640,
+          "height": 184
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 480,
+          "width": 784,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 136,
+          "width": 384,
+          "height": 408
+        },
+        {
+          "id": "body",
+          "x": 392,
+          "y": 136,
+          "width": 392,
+          "height": 408
+        },
+        {
+          "id": "folders",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 128
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "compare",
+          "x": 392,
+          "y": 144,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "wallpaper",
+          "x": 392,
+          "y": 72,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 328
+        },
+        {
+          "id": "brightness",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 72,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 144,
+          "width": 384,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "undo",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 152
+        },
+        {
+          "id": "timer",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 168
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 176,
+          "width": 784,
+          "height": 368
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "iconSize",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 784,
+          "height": 424
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 144,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 296,
+          "width": 144,
+          "height": 184
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 296,
+          "width": 640,
+          "height": 184
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 480,
+          "width": 784,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 136,
+          "width": 384,
+          "height": 408
+        },
+        {
+          "id": "body",
+          "x": 392,
+          "y": 136,
+          "width": 392,
+          "height": 408
+        },
+        {
+          "id": "folders",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 128
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "compare",
+          "x": 392,
+          "y": 144,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "wallpaper",
+          "x": 392,
+          "y": 72,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 328
+        },
+        {
+          "id": "brightness",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 72,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 144,
+          "width": 384,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "undo",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 152
+        },
+        {
+          "id": "timer",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 168
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 176,
+          "width": 784,
+          "height": 368
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "iconSize",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 784,
+          "height": 424
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 144,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 296,
+          "width": 144,
+          "height": 184
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 296,
+          "width": 640,
+          "height": 184
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 64
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 480,
+          "width": 784,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 136,
+          "width": 384,
+          "height": 408
+        },
+        {
+          "id": "body",
+          "x": 392,
+          "y": 136,
+          "width": 392,
+          "height": 408
+        },
+        {
+          "id": "folders",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 128
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "compare",
+          "x": 392,
+          "y": 144,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "wallpaper",
+          "x": 392,
+          "y": 72,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 216,
+          "width": 784,
+          "height": 328
+        },
+        {
+          "id": "brightness",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 72,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 144,
+          "width": 384,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "undo",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 152
+        },
+        {
+          "id": "timer",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 168
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 176,
+          "width": 784,
+          "height": 368
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "iconSize",
+          "x": 392,
+          "y": 0,
+          "width": 392,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 784,
+          "height": 424
+        }
+      ]
+    },
+    {
+      "stage": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 790,
+      "height": 544,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 384,
+          "height": 64
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 72,
+          "width": 784,
+          "height": 472
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 424
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 896,
+          "height": 424
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 656,
+          "width": 1016,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "body",
+          "x": 512,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "folders",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 512,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 512,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 536
+        },
+        {
+          "id": "brightness",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "undo",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1016,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 512,
+          "height": 192
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 200,
+          "width": 1016,
+          "height": 504
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 424
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 896,
+          "height": 424
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 656,
+          "width": 1016,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "body",
+          "x": 512,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "folders",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 512,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 512,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 536
+        },
+        {
+          "id": "brightness",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "undo",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1016,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 512,
+          "height": 192
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 200,
+          "width": 1016,
+          "height": 504
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 424
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 896,
+          "height": 424
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 656,
+          "width": 1016,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "body",
+          "x": 512,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "folders",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 512,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 512,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 536
+        },
+        {
+          "id": "brightness",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "undo",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1016,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 512,
+          "height": 192
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 200,
+          "width": 1016,
+          "height": 504
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 424
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 896,
+          "height": 424
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 656,
+          "width": 1016,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "body",
+          "x": 512,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "folders",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 512,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 512,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 536
+        },
+        {
+          "id": "brightness",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "undo",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1016,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 512,
+          "height": 192
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 200,
+          "width": 1016,
+          "height": 504
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 136,
+          "height": 424
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 224,
+          "width": 872,
+          "height": 424
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 656,
+          "width": 1016,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "body",
+          "x": 512,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "folders",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 512,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 512,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 536
+        },
+        {
+          "id": "brightness",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "undo",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1016,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 512,
+          "height": 192
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 200,
+          "width": 1016,
+          "height": 504
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 136,
+          "height": 424
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 224,
+          "width": 872,
+          "height": 424
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 656,
+          "width": 1016,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "body",
+          "x": 512,
+          "y": 104,
+          "width": 504,
+          "height": 600
+        },
+        {
+          "id": "folders",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 512,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 512,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1016,
+          "height": 536
+        },
+        {
+          "id": "brightness",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "undo",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1016,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 512,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 512,
+          "height": 192
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 200,
+          "width": 1016,
+          "height": 504
+        }
+      ]
+    },
+    {
+      "stage": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 1016,
+      "height": 707,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 504,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1016,
+          "height": 648
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 408
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 1232,
+          "height": 408
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 640,
+          "width": 1352,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "body",
+          "x": 680,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "folders",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 680,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 680,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 520
+        },
+        {
+          "id": "brightness",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "undo",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1352,
+          "height": 552
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 1352,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 408
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 1232,
+          "height": 408
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 640,
+          "width": 1352,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "body",
+          "x": 680,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "folders",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 680,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 680,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 520
+        },
+        {
+          "id": "brightness",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "undo",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1352,
+          "height": 552
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 1352,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 408
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 1232,
+          "height": 408
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 640,
+          "width": 1352,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "body",
+          "x": 680,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "folders",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 680,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 680,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 520
+        },
+        {
+          "id": "brightness",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "undo",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1352,
+          "height": 552
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 1352,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 112,
+          "height": 408
+        },
+        {
+          "id": "list",
+          "x": 120,
+          "y": 224,
+          "width": 1232,
+          "height": 408
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 640,
+          "width": 1352,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "body",
+          "x": 680,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "folders",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 680,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 680,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 520
+        },
+        {
+          "id": "brightness",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "undo",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1352,
+          "height": 552
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 1352,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 136,
+          "height": 408
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 224,
+          "width": 1208,
+          "height": 408
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 640,
+          "width": 1352,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "mail",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "body",
+          "x": 680,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "folders",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 680,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 680,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 520
+        },
+        {
+          "id": "brightness",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "bin",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "undo",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "clock",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1352,
+          "height": 552
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "theme",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "terminal",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 1352,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "app": "manager",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "navigation",
+          "x": 0,
+          "y": 0,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "search",
+          "x": 0,
+          "y": 112,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "large",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "places",
+          "x": 0,
+          "y": 224,
+          "width": 136,
+          "height": 408
+        },
+        {
+          "id": "list",
+          "x": 144,
+          "y": 224,
+          "width": 1208,
+          "height": 408
+        },
+        {
+          "id": "sort",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 48
+        },
+        {
+          "id": "status",
+          "x": 0,
+          "y": 640,
+          "width": 1352,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "mail",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "messages",
+          "x": 0,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "body",
+          "x": 680,
+          "y": 104,
+          "width": 672,
+          "height": 584
+        },
+        {
+          "id": "folders",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "draft",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 96
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "source",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "compare",
+          "x": 680,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "wallpaper",
+          "x": 680,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "image",
+          "x": 0,
+          "y": 168,
+          "width": 1352,
+          "height": 520
+        },
+        {
+          "id": "brightness",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "tone",
+          "x": 0,
+          "y": 56,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "crop",
+          "x": 0,
+          "y": 112,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "bin",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "empty",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "trash",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "undo",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "clock",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "time",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "timer",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 128
+        },
+        {
+          "id": "calendar",
+          "x": 0,
+          "y": 136,
+          "width": 1352,
+          "height": 552
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "theme",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "appearance",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        },
+        {
+          "id": "slideshow",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "iconSize",
+          "x": 680,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "terminal",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "commands",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 112
+        },
+        {
+          "id": "output",
+          "x": 0,
+          "y": 120,
+          "width": 1352,
+          "height": 568
+        }
+      ]
+    },
+    {
+      "stage": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "app": "manager",
+      "width": 1352,
+      "height": 689,
+      "parts": [
+        {
+          "id": "tabs",
+          "x": 0,
+          "y": 0,
+          "width": 672,
+          "height": 48
+        },
+        {
+          "id": "processes",
+          "x": 0,
+          "y": 56,
+          "width": 1352,
+          "height": 632
+        }
+      ]
+    }
+  ],
+  "pageErrors": []
+}

@@ -1,5 +1,8 @@
+import { actAppBuild } from './appBuild';
+import { featureApp, isBuildable } from './appLayout';
+import type { DesktopUpgrade } from '../config/balance';
 import { desktopScreen,resizeDesktop } from './desktopGeometry';
-import { enterDesktop, buyDesktopApp, focusWindow, advanceDesktopTime, takeScreenshot, nextDesktopApp } from './desktop';
+import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, advanceDesktopTime, takeScreenshot, nextDesktopApp } from './desktop';
 import { BALANCE } from '../config/balance';
 import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
@@ -7,8 +10,14 @@ import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, place
 import { blankDrawing } from './kumikiState';
 import { advanceShipping, beginPrototypeRelease, buySpec, releaseEstimate, startNextVersion } from './release';
 
+function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
+ let next=buyBlueprint(state,id);const app=isBuildable(id)?id:featureApp(id);
+ if(app){next=actAppBuild(next,{type:'app-recommend',app});next=actAppBuild(next,{type:'app-install',app});next=focusWindow(next,app);}
+ return next;
+}
+
 export const FIXTURE_NAMES = [
-  'intro', 'editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2',
+  'app-build-missing','app-build-empty','app-build-files','intro', 'editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2',
   'desktop-jobs','desktop-photo','desktop-ready','desktop-stalled',
   'desktop-early', 'desktop-wait', 'desktop-files', 'desktop-mail', 'desktop-modern', 'desktop-full',
   'foundation-start', 'foundation-saved', 'foundation-offline-capped',
@@ -23,6 +32,8 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
   if (name === 'intro') return state;
+  if(name==='app-build-missing'){const next=createFixture('desktop-stage2',now)!;next.run.desktop.projects.files!.draft.parts=next.run.desktop.projects.files!.draft.parts.filter(p=>p.id!=='sort');next.run.desktop.projects.files!.installed=structuredClone(next.run.desktop.projects.files!.draft);next.run.desktop.feedback=[{id:1,kind:'sort',sender:'hikari',target:'',baseline:[],baselineColor:'#000000',at:now,completedAt:null}];next.run.desktop.feedbackSerial=1;next.run.desktop.notice=1;next.run.desktop.success=null;return next;}
+  if(name==='app-build-empty'||name==='app-build-files'){let next=createFixture('desktop-early',now)!;next.resources.pixels=next.run.totalPixelsGenerated=1e9;next=buyBlueprint(next,'files');if(name==='app-build-files'){next=actAppBuild(next,{type:'app-recommend',app:'files'});next=buyBlueprint(next,'sort');}next.persistent.artwork.skills.push('update');next.persistent.appearance.editor=1;next.run.desktop.windows.tessera={...next.run.desktop.windows.tessera,x:0,y:0,width:800,height:572,maximized:true,restore:{x:40,y:40,width:600,height:400}};return next;}
   if(name?.startsWith('editor-stage')||name?.startsWith('desktop-stage')){
     const index=Number(name.at(-1)) as 0|1|2;
     let next=createFixture(name.startsWith('editor')?'kumiki-modern':'desktop-ready',now)!;

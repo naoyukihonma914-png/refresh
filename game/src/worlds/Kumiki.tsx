@@ -1,3 +1,4 @@
+import { AppBuilder } from './AppBuilder';
 import { StatusBar } from '../components/StatusBar';
 import { PixelArt } from './desktop-icons';
 import { editorStage,editorName } from '../systems/appearance';
@@ -27,11 +28,13 @@ const TOOL_PATHS = {
 };
 export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = false, interactive = true, previewReady, previewDocuments, previewPalette,legacyAppearance=false }: { legacyAppearance?:boolean;previewPalette?:string[]; previewReady?: number; previewDocuments?: string[]; embedded?: boolean; preview?: boolean; interactive?: boolean; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
   const { state } = snapshot;
-  const k = state.run.kumiki,stage=editorStage(state);
+  const k = state.run.kumiki,stage=editorStage(state),editingApp=state.run.desktop.editingApp;
   const act = preview ? () => {} : runtime.actKumiki;
   useEffect(() => { setDrawingId(k.activeDrawing); setFrame(0); }, [k.activeDrawing]);
-  const [workspace,setWorkspace]=useState<'draw'|'compose'|'export'>('draw');
-  const [activeDocument,setActiveDocument]=useState<'home'|'drawing'>('home');
+  const workspace=k.workspace??'draw';
+  const setWorkspace=(workspace:'draw'|'compose'|'export')=>act({type:'configure',change:{workspace}});
+  const activeDocument=k.activeDocument??'home';
+  const setActiveDocument=(selectedDocument:'home'|'drawing')=>act({type:'configure',change:{activeDocument:selectedDocument}});
   const [leftPanel,setLeftPanel]=useState<'parts'|'templates'>('templates');
   const [colorPanel,setColorPanel]=useState<'color'|'properties'>('color');
   const [detailPanel,setDetailPanel]=useState<'layers'|'history'>('history');
@@ -77,8 +80,8 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   useEffect(()=>{
     if(preview||!snapshot.tesseraIntent)return;
     setExtensions(false);setMenu(null);setExportsOpen(false);
-    if(snapshot.tesseraIntent.kind==='color'){setTool('select');setSelected('primary');}
-    else{setTool('pencil');setDrawingId(k.activeDrawing);setFrame(0);}
+    if(snapshot.tesseraIntent.kind==='color'){setWorkspace('compose');setActiveDocument('home');setTool('select');setSelected('primary');setColorPanel('properties');}
+    else{setWorkspace('draw');setActiveDocument('drawing');if(editingApp)runtime.actDesktop({type:'app-close',app:editingApp});setTool('pencil');setDrawingId(k.activeDrawing);setFrame(0);}
   },[snapshot.tesseraIntent?.serial,preview]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -192,7 +195,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         {archive && <section className="comment-archive"><h2>{i18n.t('k.comments')}</h2>{k.guide.seen.map(id => <button key={id} onClick={() => readGuide(id)}>{i18n.t(`k.guide.${id}.title`)}</button>)}<GuideHistory state={state} i18n={i18n} /></section>}
         {snapshot.offline && <section className="k-comment" role="status"><p>{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}</p></section>}
       </aside>;
-  return <main ref={host} className={['kumiki', embedded && 'k-embedded', preview && 'k-preview', mature && 'is-mature', legacyAppearance&&state.persistent.artwork.modern&&'is-modern',!legacyAppearance&&`editor-era-${stage}`, entered && 'is-entering', renewing && 'is-renewing'].filter(Boolean).join(' ')}
+  return <main ref={host} className={['kumiki', embedded && 'k-embedded', preview && 'k-preview', mature && 'is-mature', editingApp && 'app-building', legacyAppearance&&state.persistent.artwork.modern&&'is-modern',!legacyAppearance&&`editor-era-${stage}`, entered && 'is-entering', renewing && 'is-renewing'].filter(Boolean).join(' ')}
     data-workspace={stage===2&&!legacyAppearance?workspace:undefined} data-document={activeDocument}
     onPointerUp={event => {
       const id = dragRef.current;
@@ -219,14 +222,15 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         </div>}
       </div>
       {k.built.includes('extensions') && <button className={extensions ? 'active' : ''} onClick={() => { setExtensions(!extensions); act({ type: 'extensions' }); }}>{i18n.t('k.extensions')}</button>}
+      {Object.keys(state.run.desktop.projects).length>0&&<button onClick={()=>runtime.actDesktop({type:'app-edit',app:Object.keys(state.run.desktop.projects)[0] as import('../systems/desktopState').BuiltApp})}>{i18n.t('builder.documents')}</button>}
       <div className="k-menu-end">
         {!embedded && (tokensVisible || k.exitInspected) && <button onClick={() => setConditions(!conditions)}>{i18n.t('k.releaseProgress', { version: productLabel(i18n,state.persistent.productName,prototype ? 'v0.1' : 'v1.0'), done: prototype ? releaseChecks.filter(Boolean).length : 0, total: prototype ? releaseChecks.length : 5 })}</button>}
         {canReleasePrototype(state) && !snapshot.releaseConfirmation && <button className="prototype-release" onClick={runtime.requestPrototypeRelease}>{i18n.t('release.action')}</button>}
         <button aria-expanded={archive} onClick={() => setArchive(!archive)}>{i18n.t('k.comments')}</button>
       </div>
     </nav>
-    {!legacyAppearance&&stage===2&&<nav className="k-personas">{(['draw','compose','export'] as const).map(id=><button key={id} className={`persona-${id}`} aria-pressed={workspace===id&&!extensions} onClick={()=>{setWorkspace(id);setExtensions(false);if(id==='draw'){setTool('pencil');setLeftPanel('templates');setColorPanel('color');setDetailPanel('history');}if(id==='compose'){act({type:'configure',change:{homeWindow:'normal'}});setTool('select');setLeftPanel('parts');setColorPanel('properties');setDetailPanel('layers');}}}>{i18n.t(`k.workspace.${id}`)}</button>)}</nav>}
-    <header className="k-toolbar"><span>{i18n.t('k.home')}</span><b className="k-resource" data-pixels={state.resources.pixels}>{i18n.t('k.pixels', { pixels: i18n.pixels(state.resources.pixels) })}</b>
+    {!legacyAppearance&&stage===2&&<nav className="k-personas">{(['draw','compose','export'] as const).map(id=><button key={id} className={`persona-${id}`} aria-pressed={workspace===id&&!extensions} onClick={()=>{setWorkspace(id);setExtensions(false);if(id!=='compose'&&editingApp)runtime.actDesktop({type:'app-close',app:editingApp});if(id==='draw'){setTool('pencil');setLeftPanel('templates');setColorPanel('color');setDetailPanel('history');}if(id==='compose'){act({type:'configure',change:{homeWindow:'normal'}});setTool('select');setLeftPanel('parts');setColorPanel('properties');setDetailPanel('layers');}}}>{i18n.t(`k.workspace.${id}`)}</button>)}</nav>}
+    <header className="k-toolbar"><span>{editingApp?i18n.t('builder.document',{app:i18n.t(`desktop.app.${editingApp}`)}):i18n.t('k.home')}</span><b className="k-resource" data-pixels={state.resources.pixels}>{i18n.t('k.pixels', { pixels: i18n.pixels(state.resources.pixels) })}</b>
       <span className="k-resource">{i18n.t('k.rate', { pixels: i18n.rate(passivePixelsPerSecond(state)) })}</span>
       {tokensVisible && <span className="token-count k-resource">{i18n.t('k.tokens', { count: state.resources.tokens })}</span>}
       <span className="current-tool">{i18n.t(`k.tool.${tool}`)}</span>
@@ -283,11 +287,11 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         </section>}
       </aside>
       <section className="k-workspace">
-        <nav className="document-tabs"><button className={!extensions&&activeDocument==='home' ? 'active' : ''} onClick={() => { setExtensions(false);setActiveDocument('home');if(stage===2)setWorkspace('compose'); act({ type: 'configure', change: { homeWindow: 'normal' } }); }}>{i18n.t('k.home')}</button>
-          {!extensions&&!legacyAppearance&&<button className={activeDocument==='drawing'?'active':''} onClick={()=>{setActiveDocument('drawing');setTool('pencil');if(stage===2)setWorkspace('draw');host.current?.querySelector<HTMLElement>('canvas')?.focus();}}>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</button>}
-          {extensions && <button className="active" onClick={() => setExtensions(false)}>{i18n.t('k.extensions')}</button>}
+        <nav className="document-tabs"><button className={!editingApp&&!extensions&&activeDocument==='home' ? 'active' : ''} onClick={() => { setExtensions(false);setActiveDocument('home');if(editingApp)runtime.actDesktop({type:'app-close',app:editingApp});if(stage===2)setWorkspace('compose'); act({ type: 'configure', change: { homeWindow: 'normal' } }); }}>{i18n.t('k.home')}</button>
+          {!extensions&&!legacyAppearance&&<button className={!editingApp&&activeDocument==='drawing'?'active':''} onClick={()=>{setActiveDocument('drawing');if(editingApp)runtime.actDesktop({type:'app-close',app:editingApp});setTool('pencil');if(stage===2)setWorkspace('draw');host.current?.querySelector<HTMLElement>('canvas')?.focus();}}>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</button>}
+          {editingApp&&<button className="active builder-document-tab" onClick={()=>runtime.actDesktop({type:'app-edit',app:editingApp})}>{i18n.t('builder.document',{app:i18n.t(`desktop.app.${editingApp}`)})}</button>}{extensions && <button className="active" onClick={() => setExtensions(false)}>{i18n.t('k.extensions')}</button>}
         </nav>
-        {extensions ? <Extensions runtime={runtime} snapshot={snapshot} i18n={i18n} /> : <div className="k-documents" data-home-state={k.homeWindow}><div className="workbench">
+        {editingApp&&!extensions?<AppBuilder key={editingApp} app={editingApp} runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview}/>:extensions ? <Extensions runtime={runtime} snapshot={snapshot} i18n={i18n} /> : <div className="k-documents" data-home-state={k.homeWindow}><div className="workbench">
           <HomeDocument runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview} interactive={interactive} selected={selected} onMeasure={setDimensions} onSelect={selectPart} selecting={tool === 'select' || tool === 'eyedropper'} dragPart={dragPart} onDrop={drop} />
           {k.guide.seen.includes('entered') && <button className="home-comment-pin" onClick={() => readGuide('entered')}>{i18n.t('k.comment', { title: i18n.t('k.home') })}</button>}
         </div>{!legacyAppearance&&iconEditor}</div>}

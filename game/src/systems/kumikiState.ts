@@ -12,6 +12,7 @@ export interface KumikiState {
   entered: boolean; enteredAt: number; built: KumikiItem[]; placed: PartId[];
   drawings: Record<string, Drawing>; underlays: Record<string, Drawing>; exports: ExportedWork[];
   activeDrawing: string;
+  workspace?: 'draw' | 'compose' | 'export'; activeDocument?: 'home' | 'drawing';
   design: Record<string, Design>;
   focus: boolean; interval: number; exportName: string;
   bank: number; batchMs: number; driftTimerMs: number;
@@ -30,7 +31,7 @@ export function blankDrawing(size: number): Drawing {
 }
 export function createArtwork(): Artwork { return { icons: {}, sketchbook: blankDrawing(16), wallpaper: null, skills: [], modern: false }; }
 export function createKumikiState(): KumikiState {
-  return { entered: false, enteredAt: 0, built: [], placed: [], drawings: {}, underlays: {}, exports: [], activeDrawing: 'folder',
+  return { entered: false, enteredAt: 0, built: [], placed: [], drawings: {}, underlays: {}, exports: [], activeDrawing: 'folder', workspace:'draw', activeDocument:'home',
     design: {}, focus: false, interval: 1, exportName: '', bank: 0, batchMs: 0, driftTimerMs: 0, drift: null, generationLog: [],
     guide: { seen: [], read: [], current: null, collapsed: false }, lastActionAt: 0, exitInspected: false, tokenDiscovered: false, homeWindow: 'normal' };
 }
@@ -66,6 +67,7 @@ export function isKumikiState(x: unknown): x is KumikiState {
   if (!obj(x) || !ids(x.built, BALANCE.w2.items.map(i => i.id)) || !ids(x.placed, PART_IDS)) return false;
   if (!obj(x.drawings) || !Object.entries(x.drawings).every(([id, drawing]) => KNOWN_ICONS.includes(id) && isDrawing(drawing))
     || !obj(x.underlays) || !Object.entries(x.underlays).every(([id, drawing]) => KNOWN_ICONS.includes(id) && isDrawing(drawing))) return false;
+  if (x.workspace !== undefined && !['draw','compose','export'].includes(x.workspace as string) || x.activeDocument !== undefined && !['home','drawing'].includes(x.activeDocument as string)) return false;
   if (typeof x.activeDrawing !== 'string' || x.entered && x.activeDrawing !== 'free' && !x.drawings[x.activeDrawing]) return false;
   if (!['enteredAt', 'bank', 'batchMs', 'driftTimerMs', 'lastActionAt'].every(key => amount(x[key]))) return false;
   if (!Array.isArray(x.generationLog) || !x.generationLog.every(entry => obj(entry) && amount(entry.at) && amount(entry.pixels))) return false;

@@ -1,0 +1,61 @@
+{
+  "method": "Vite SSR / Node; 7 warm saves, median; UTF-16 storage cost includes keys, primary, backup and shared assets; quota 5 MiB",
+  "reports": [
+    {
+      "count": 0,
+      "schema": 11,
+      "primaryChars": 42233,
+      "backupChars": 42233,
+      "assetChars": 0,
+      "totalUtf16Bytes": 168994,
+      "keys": 2,
+      "initialSaveMs": 3.889079000000038,
+      "warmMedianMs": 1.0956959999999754,
+      "warmMaxMs": 1.2716729999999643,
+      "loadMs": 1.2508149999999887,
+      "quota5MiB": "saved"
+    },
+    {
+      "count": 50,
+      "schema": 11,
+      "primaryChars": 47691,
+      "backupChars": 47691,
+      "assetChars": 112333,
+      "totalUtf16Bytes": 415492,
+      "keys": 215,
+      "initialSaveMs": 47.385313999999994,
+      "warmMedianMs": 1.416633999999931,
+      "warmMaxMs": 6.607582999999977,
+      "loadMs": 41.260181999999986,
+      "quota5MiB": "saved"
+    },
+    {
+      "count": 200,
+      "schema": 11,
+      "primaryChars": 61580,
+      "backupChars": 61580,
+      "assetChars": 424895,
+      "totalUtf16Bytes": 1096172,
+      "keys": 815,
+      "initialSaveMs": 154.42632400000002,
+      "warmMedianMs": 1.378212000000076,
+      "warmMaxMs": 1.510319999999865,
+      "loadMs": 158.09454200000005,
+      "quota5MiB": "saved"
+    },
+    {
+      "count": 400,
+      "schema": 11,
+      "primaryChars": 80175,
+      "backupChars": 80175,
+      "assetChars": 841802,
+      "totalUtf16Bytes": 2004366,
+      "keys": 1615,
+      "initialSaveMs": 350.7744950000001,
+      "warmMedianMs": 1.6639059999997698,
+      "warmMaxMs": 2.128672999999708,
+      "loadMs": 307.7605599999997,
+      "quota5MiB": "saved"
+    }
+  ]
+}

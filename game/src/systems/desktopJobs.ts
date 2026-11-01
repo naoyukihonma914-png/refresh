@@ -1,7 +1,9 @@
+import { featureApp } from './appLayout';
+import { hasAppPart } from './appBuild';
 import { BALANCE, type DesktopSkill, type DesktopUpgrade } from '../config/balance';
 import { JOB_IDS, type AppId, type JobId } from './desktopState';
 import type { GameState } from './state';
-export const hasUpgrade=(s:GameState,id:DesktopUpgrade)=>s.run.desktop.upgrades?.includes(id);
+export const hasUpgrade=(s:GameState,id:DesktopUpgrade)=>s.run.desktop.upgrades?.includes(id)&&(!featureApp(id)||hasAppPart(s,featureApp(id)!,id)&&(!['sort','search','large'].includes(id)||hasAppPart(s,'files','list'))&&(!['crop','compare'].includes(id)||hasAppPart(s,'photo','image')));
 export const hasDesktopSkill=(s:GameState,id:DesktopSkill)=>s.persistent.desktopPrefs?.skills.includes(id)&&!s.persistent.desktopPrefs.disabled.includes(id);
 export const FEATURE_APPS={sort:'files',draft:'mail',search:'files',large:'files',crop:'photo',compare:'photo',undo:'bin',folders:'mail',timer:'clock',calendar:'clock',slideshow:'theme',iconSize:'theme'} as const;
 export const featureCount=(s:GameState,app:AppId)=>Object.entries(FEATURE_APPS).filter(([id,a])=>a===app&&hasUpgrade(s,id as DesktopUpgrade)).length;

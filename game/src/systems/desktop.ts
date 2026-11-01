@@ -1,3 +1,4 @@
+import { actAppBuild, ownAppBlueprint, ownFeaturePart, functionalApp, appLayoutBonus, hasAppPart, type AppBuildAction } from './appBuild';
 import { desktopScreen, fitWindow, fitIcon, workHeight } from './desktopGeometry';
 import { desktopStage } from './appearance';
 export {fitWindow} from './desktopGeometry';
@@ -39,16 +40,16 @@ export function buyDesktopApp(state:GameState,id:DesktopUpgrade,now=state.lastTi
  const item=nextDesktopApp(state);if(state.run.world!=='desktop'||item?.id!==id||state.resources.pixels<item.cost)return state;
  const feature=FEATURE_APPS[id as keyof typeof FEATURE_APPS];
  const isApp=APP_IDS.includes(id as AppId)&&!feature;
- let next=withDesktop({...state,resources:{...state.resources,pixels:state.resources.pixels-item.cost}},{...state.run.desktop,upgrades:[...state.run.desktop.upgrades,id],builtAt:{...state.run.desktop.builtAt,[id]:now},apps:isApp?[...state.run.desktop.apps,id as BuiltApp]:state.run.desktop.apps});
- if(isApp)return focusWindow(next,id as AppId);
- if(feature)return focusWindow(next,feature);
+ let next=withDesktop({...state,resources:{...state.resources,pixels:state.resources.pixels-item.cost}},{...state.run.desktop,upgrades:[...state.run.desktop.upgrades,id],builtAt:{...state.run.desktop.builtAt,[id]:now},apps:state.run.desktop.apps});
+ if(isApp)return focusWindow(ownAppBlueprint(next,id as BuiltApp),'tessera');
+ if(feature)return focusWindow(ownFeaturePart(next,id,feature),'tessera');
  return next;
 }
 export function desktopConditions(state:GameState):boolean[] {
- return [runningApps(state).filter(id=>!['note','settings'].includes(id)).length>=BALANCE.w3.requiredApps,
+ return [runningApps(state).filter(id=>!['note','settings'].includes(id)&&(id==='tessera'||functionalApp(state,id as BuiltApp))).length>=BALANCE.w3.requiredApps,
  state.run.desktop.feedback.filter(f=>f.completedAt!==null).length>=BALANCE.w3.requiredFeedback,
- ICON_IDS.every(id=>state.run.kumiki.exports.some(e=>e.kind==='icon'&&e.id===id)),state.persistent.desktopPrefs.wallpaper!==null,
- state.run.desktop.terminal.executions>0];
+ ICON_IDS.every(id=>state.run.kumiki.exports.some(e=>e.kind==='icon'&&e.id===id)),state.persistent.desktopPrefs.wallpaper!==null&&hasAppPart(state,'photo','image')&&hasAppPart(state,'photo','wallpaper'),
+ state.run.desktop.terminal.executions>0&&hasAppPart(state,'terminal','commands')];
 }
 export const pendingCapacity=(state:GameState)=>hasDesktopSkill(state,'sortMail')?BALANCE.w3.sortedMailCapacity:BALANCE.w3.maxPending;
 function newFeedback(state: GameState, at: number): Feedback | null {
@@ -119,7 +120,7 @@ export function screenshotParts(state: GameState): number {
 }
 export const screenshotCapacity = (state: GameState) => BALANCE.w3.baseShotCapacity * BALANCE.w3.storageCapacityMultiplier ** state.persistent.specs.storage;
 export const desktopAppShotGain = (state: GameState) => passivePixelsPerSecond(state) * (BALANCE.w3.partsPerWindow + 1) * BALANCE.w3.screenshotMultiplier * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution;
-export const screenshotReward = (state: GameState) => passivePixelsPerSecond(state) * screenshotParts(state) * BALANCE.w3.screenshotMultiplier * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution;
+export const screenshotReward = (state: GameState) => passivePixelsPerSecond(state) * screenshotParts(state) * BALANCE.w3.screenshotMultiplier * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution * appLayoutBonus(state);
 export function takeScreenshot(state: GameState, now: number, language: string, multiplier=1, automatic=false): GameState {
   if (state.run.world !== 'desktop' || state.run.desktop.cooldownMs > 0 || activeScreenshots(state).length >= screenshotCapacity(state)) return state;
   const frozen = projectCapture({...state,lastTickAt:now},language);
@@ -132,7 +133,7 @@ export function takeScreenshot(state: GameState, now: number, language: string, 
 export function restoreScreenshot(shot: Screenshot, catalog: Screenshot[]): GameState {
   return restoreScene(shot,catalog);
 }
-export type DesktopAction = ExtraAction
+export type DesktopAction = ExtraAction | AppBuildAction
   | { type: 'open' | 'taskbar' | 'minimize' | 'maximize' | 'close'; app: AppId }
   | { type: 'rect'; app: AppId; rect: Rect }
   | { type: 'icon'; app: AppId; x: number; y: number }
@@ -146,6 +147,7 @@ export type DesktopAction = ExtraAction
   | { type: 'note'; text: string };
 export function actDesktop(state: GameState, action: DesktopAction, now: number, language='ja'): GameState {
   if (state.run.world !== 'desktop') return state;
+  if(action.type.startsWith('app-'))return actAppBuild(state,action as AppBuildAction);
   state=actDesktopExtra(state,{type:'activity'},now);
   const d = state.run.desktop;
   switch(action.type) {
@@ -176,7 +178,10 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number,
       if(request.kind!=='screenshot'){
         const destinations:Partial<Record<Feedback['kind'],AppId>>={sort:'files',search:'files',bright:'photo',trash:'bin',timer:'clock',dark:'theme'};
         const app=destinations[request.kind]??'tessera';
-        let next=focusWindow(withDesktop(state,{...d,notice:null}),app);
+        const required:Partial<Record<Feedback['kind'],[BuiltApp,string[]]>>={sort:['files',['list','sort']],search:['files',['list','search']],bright:['photo',['image','brightness','wallpaper']],trash:['bin',['trash']],timer:['clock',['timer']],dark:['theme',['appearance']]};
+        const need=required[request.kind];
+        if(need&&state.run.desktop.projects[need[0]]&&need[1].some(part=>!hasAppPart(state,need[0],part)))return focusWindow(actAppBuild(state,{type:'app-edit',app:need[0]}),'tessera');
+        let next=focusWindow(withDesktop(state,{...d,notice:null,editingApp:app==='tessera'?null:d.editingApp}),app);
         if(hasDesktopSkill(state,'direct')&&['redraw','practice'].includes(request.kind)){next=prepareDrawing(next,request.target);next={...next,run:{...next.run,kumiki:{...next.run.kumiki,activeDrawing:request.target}}};}
         return next;
       }
@@ -188,7 +193,7 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number,
       if(next.run.desktop.windows.note.maximized)next=actDesktop(next,{type:'maximize',app:'note'},now);
       return focusWindow(actDesktop(next,{type:'rect',app:'note',rect:{x:d.screen.width*.55,y:workHeight(d.screen)*.2,width:d.screen.width*.42,height:workHeight(d.screen)*.72}},now),'note');
     }
-    default:return actDesktopExtra(state,action,now,language);
+    default:return actDesktopExtra(state,action as ExtraAction,now,language);
     case 'note': return action.text.length > BALANCE.w3.maxNote ? state : { ...state,persistent:{ ...state.persistent,productionNote:action.text,noteUpdatedAt:now } };
   }
 }
@@ -203,7 +208,7 @@ function advanceDesktopEvents(s:GameState,ms:number,now:number,offline:boolean,l
   next=withDesktop(next,{...next.run.desktop,cooldownMs:offline?0:next.run.desktop.cooldownMs,reservation:{...r,done:true,result:captures&&(offline||next.run.desktop.cooldownMs===0)&&activeScreenshots(next).length<screenshotCapacity(next)?'captured':'skipped'}});
   if(captures)next=takeScreenshot(next,Math.max(0,r.at),language,offline?BALANCE.w3.timerOfflineMultiplier:1);
  }
- if(captures&&!offline&&d.terminal.running){
+ if(captures&&!offline&&d.terminal.running&&hasAppPart(next,'terminal','commands')){
   const total=d.terminal.elapsedMs+ms,count=Math.floor(total/d.terminal.interval);
   next=withDesktop(next,{...next.run.desktop,terminal:{...d.terminal,elapsedMs:total%d.terminal.interval}});
   for(let i=0;i<Math.min(count,screenshotCapacity(next)+1);i++){

@@ -97,6 +97,7 @@ export const BALANCE = {
     baseShotCapacity: 50, storageCapacityMultiplier: 2, requiredApps: 6, requiredFeedback: 10,
     maxNote: 20_000, compactCursors: 8,
   },
+  appBuild:{width:640,height:416,grid:8,bodyMinWidth:112,bodyMinHeight:64,controlMinWidth:112,controlMinHeight:48,history:30,layoutBonus:.1},
   appearance:{transitionMs:2_000,gessoRequirement:2,screens:[{width:800,height:600},{width:1024,height:768},{width:1366,height:768}]},
   release: {
     maxProductName: 20,

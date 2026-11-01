@@ -1,3 +1,4 @@
+import { migrateAppProjects, repairAppProjects } from './appLayout';
 import { desktopScreen, resizeDesktop, LEGACY_DESKTOP } from './desktopGeometry';
 import { createAppearance } from './appearance';
 import { captureStore } from '../platform/captures';
@@ -91,6 +92,9 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     const desktopSkills=modern?[...new Set([...old.persistent.desktopPrefs.skills,'major1' as const,'major2' as const])]:old.persistent.desktopPrefs.skills;
     return {...old,schemaVersion:9,persistent:{...old.persistent,appearance:{editor:old.persistent.artwork.modern?2:0,desktop:modern?2:0},artwork:{...old.persistent.artwork,skills},desktopPrefs:{...old.persistent.desktopPrefs,skills:desktopSkills,radiusCustom:old.persistent.desktopPrefs.radius!==8}}};
   },
+  10(data) {
+    const old=data as GameState;return {...old,schemaVersion:11,run:{...old.run,desktop:{...old.run.desktop,editingApp:null,projects:migrateAppProjects(old.run.desktop.apps,old.run.desktop.upgrades,old.persistent.desktopPrefs.skills)}}};
+  },
   9(data) {
     const old=data as GameState;return {...old,schemaVersion:10,run:{...old.run,desktop:resizeDesktop({...old.run.desktop,screen:LEGACY_DESKTOP},desktopScreen(old.persistent.appearance.desktop),old.persistent.desktopPrefs.iconSize)}};
   },
@@ -123,6 +127,8 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
     if (next !== version + 1) throw new Error('保存データの変換に失敗しました');
     version = next;
   }
+  const candidate=data as GameState;
+  if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
   return migrated && data.run.seed.built.includes('kumiki') && !data.run.kumiki.entered ? enterKumiki(data) : data;
 }

@@ -1,10 +1,14 @@
+import { actAppBuild } from './appBuild';
+import { isBuildable, featureApp } from './appLayout';
+import type { DesktopUpgrade } from '../config/balance';
+import type { GameState } from './state';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe,expect,it } from 'vitest';
 import { BALANCE } from '../config/balance';
 import { createI18n } from '../content/i18n';
 import { createFixture } from './fixtures';
-import { actDesktop,advanceDesktopTime,activeScreenshots,buyDesktopApp,desktopConditions,focusWindow,nextDesktopApp,screenshotParts,screenshotReward,takeScreenshot,visibleApps } from './desktop';
+import { actDesktop,advanceDesktopTime,activeScreenshots,buyDesktopApp as buyBlueprint,desktopConditions,focusWindow,nextDesktopApp,screenshotParts,screenshotReward,takeScreenshot,visibleApps } from './desktop';
 import { hasDesktopSkill,jobCapacity,jobCursorCost,jobCursorRate,jobRate,jobsRate } from './desktopJobs';
 import { JOB_IDS, type Feedback } from './desktopState';
 import { desktopFiles } from './desktopFiles';
@@ -21,6 +25,7 @@ function request(s:ReturnType<typeof fixture>,kind:Feedback['kind']){
  const id=++s.run.desktop.feedbackSerial;
  s.run.desktop.feedback.push({id,kind,sender:'hikari',target:kind==='search'?'home':kind==='timer'?String(now+60000):'',at:now,completedAt:null,baseline:[],baselineColor:'#0067c0'});return s;
 }
+function buyDesktopApp(s:GameState,id:DesktopUpgrade){let next=buyBlueprint(s,id);const app=isBuildable(id)?id:featureApp(id);if(next!==s&&app){next=actAppBuild(next,{type:'app-recommend',app});next=actAppBuild(next,{type:'app-install',app});}return next;}
 describe('段階6：アプリとジョブ',()=>{
  it('21個のアプリ・機能を決めた順に支払い、作った操作だけを保存する',()=>{
   let s=fixture('desktop-early');s.resources.pixels=s.run.totalPixelsGenerated=1e12;const start=s.resources.pixels;
@@ -60,7 +65,7 @@ describe('段階6：アプリとジョブ',()=>{
   expect(decodeSave(encodeSave(s))).toEqual(s);
  });
  it('小さな機能はその窓が写るときだけパーツ数に加える',()=>{
-  let s=fixture('desktop-files');const before=screenshotParts(s);s=buyDesktopApp(s,'sort');expect(screenshotParts(s)).toBe(before+2);
+  let s=fixture('desktop-files');const before=screenshotParts(s);s=buyDesktopApp(s,'sort');s=focusWindow(s,'files');expect(screenshotParts(s)).toBe(before+2);
   s=action(s,{type:'minimize',app:'files'});expect(screenshotParts(s)).toBe(before-3);
  });
  it('予約は指定時刻に1度。不在中は半分、時計を戻しても二重に撮らない',()=>{
@@ -135,14 +140,14 @@ describe('段階6：アプリとジョブ',()=>{
  });
  it('第7版の実データと旧V1撮影を変更せず読み、第9版・V4撮影と混在して保存できる',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString();const old=JSON.parse(raw);let s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(10);expect(s.resources).toEqual(old.resources);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
+  expect(s.schemaVersion).toBe(11);expect(s.resources).toEqual(old.resources);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
   expect(readCapture(s.persistent.screenshots[0]!).version).toBe(1);expect(nextDesktopApp(s)?.id).toBe('sort');
-  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(4);
+  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(6);
   expect(decodeSave(encodeSave(s))).toEqual(s);expect(restoreScene(s.persistent.screenshots[0]!,s.persistent.screenshots).persistent.productionNote).toBe(readCapture(old.persistent.screenshots[0]).note);
  });
  it('V4の写真・テーマ・ジョブ・12機能も撮影時の状態を独立して保つ',()=>{
   let s=fixture();s=action(s,{type:'theme',mode:'dark'});s=action(s,{type:'manager-tab',tab:'performance'});s=action(s,{type:'calendar-month',at:1830297600000});s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);
-  expect(scene.version).toBe(4);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(6);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
   s=action(s,{type:'theme',mode:'light'});s=action(s,{type:'job-update',app:'files'});const restored=restoreScene(shot,s.persistent.screenshots);
   expect(restored.persistent.desktopPrefs.mode).toBe('dark');expect(restored.run.desktop.jobs.files.updates).toBe(1);expect(restored.run.desktop.upgrades).toHaveLength(21);expect(restored.run.desktop.managerTab).toBe('performance');expect(restored.run.desktop.calendarMonth).toBe(1830297600000);expect(scene.version!==1&&scene.display.managerShotRate).toBeGreaterThan(0);
  });

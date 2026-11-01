@@ -1,3 +1,4 @@
+import type { BuiltApp } from './desktopState';
 import { hasUpgrade } from './desktopJobs';
 import { productLabel } from '../content/products';
 import type { I18n } from '../content/i18n';
@@ -6,7 +7,7 @@ import type { Screenshot } from './desktopState';
 import type { GameState } from './state';
 import { encodeCapture } from './desktopState';
 export interface DesktopFile {
-  id: string; kind: 'folder' | 'icon' | 'part' | 'home' | 'sketch' | 'note' | 'shot'; name: string;
+  id: string; kind: 'folder' | 'icon' | 'part' | 'home' | 'sketch' | 'note' | 'shot' | 'app'; appId?:BuiltApp; name: string;
   at: number | null; bytes: number; work?: ExportedWork; drawing?: Drawing; shot?: Screenshot;
 }
 export const byteSize = (value: unknown): number => new TextEncoder().encode(typeof value === 'string' ? value : JSON.stringify(value)).length;
@@ -31,6 +32,7 @@ export function rawDesktopFiles(state: GameState, i18n: I18n, folder = state.run
   const exportDate=latest([...state.run.kumiki.exports,...state.persistent.products.flatMap(p=>p.exports)].map(w=>w.at));
   const screenshotDate=latest(state.persistent.screenshots.map(s=>s.at));
   return [
+    ...Object.keys(state.run.desktop.projects??{}).map(app=>({id:`app:${app}`,kind:'app' as const,appId:app as BuiltApp,name:i18n.t('builder.document',{app:i18n.t(`desktop.app.${app as BuiltApp}`)}),at:state.run.desktop.builtAt[app]??null,bytes:byteSize(state.run.desktop.projects[app as BuiltApp])})),
     {id:'exports',kind:'folder',name:i18n.t('files.exports'),at:exportDate,bytes:0},
     {id:'screenshots',kind:'folder',name:i18n.t('files.screenshots'),at:screenshotDate,bytes:0},
     {id:'home',kind:'home',name:i18n.t('files.home'),at:state.persistent.homeUpdatedAt,bytes:byteSize(encodeCapture({built:state.run.kumiki.built,placed:state.run.kumiki.placed,design:state.run.kumiki.design}))},

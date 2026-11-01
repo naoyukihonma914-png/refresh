@@ -38,7 +38,7 @@ export function drawingFor(state: GameState, id: string): Drawing | undefined {
 export function targetFor(state: GameState, id: string, size: number): number[] {
   if (id === 'free') return Array<number>(size * size).fill(-1);
   const previous = state.run.kumiki.underlays[id];
-  return previous ? scaleArt(previous.frames[0]!, previous.size, size) : iconTemplate(id, size);
+  return previous?.frames[0]?.some(color => color >= 0) ? scaleArt(previous.frames[0]!, previous.size, size) : iconTemplate(id, size);
 }
 export function completeDrawing(state: GameState, id: string): boolean {
   const drawing = drawingFor(state, id);
@@ -199,9 +199,10 @@ export function flushHomeBank(state: GameState): GameState {
   const next = creditPixels(state, state.run.kumiki.bank);
   return withK(next, { ...next.run.kumiki, bank: 0, batchMs: 0 });
 }
-export function configureKumiki(state: GameState, change: Partial<Pick<KumikiState, 'focus' | 'interval' | 'exportName' | 'homeWindow'>>): GameState {
+export function configureKumiki(state: GameState, change: Partial<Pick<KumikiState, 'focus' | 'interval' | 'exportName' | 'homeWindow' | 'workspace' | 'activeDocument'>>): GameState {
   if (change.focus !== undefined && !state.run.kumiki.placed.includes('switch')
     || change.interval !== undefined && (!state.run.kumiki.placed.includes('slider') || !Number.isInteger(change.interval) || change.interval < BALANCE.w2.intervalMin || change.interval > BALANCE.w2.intervalMax)) return state;
+  if (change.workspace !== undefined && !['draw','compose','export'].includes(change.workspace) || change.activeDocument !== undefined && !['home','drawing'].includes(change.activeDocument)) return state;
   const next = change.focus !== undefined || change.interval !== undefined ? flushHomeBank(state) : state;
   return withK(next, { ...next.run.kumiki, ...change, exportName: (change.exportName ?? next.run.kumiki.exportName).slice(0, BALANCE.w2.maxName), lastActionAt: state.elapsedMs });
 }
@@ -254,7 +255,7 @@ export type KumikiAction =
   | { type: 'place'; id: PartId }
   | { type: 'export' }
   | { type: 'skill'; id: KumikiSkill }
-  | { type: 'configure'; change: Partial<Pick<KumikiState, 'focus' | 'interval' | 'exportName' | 'homeWindow'>> }
+  | { type: 'configure'; change: Partial<Pick<KumikiState, 'focus' | 'interval' | 'exportName' | 'homeWindow' | 'workspace' | 'activeDocument'>> }
   | { type: 'design'; id: string; design: Design }
   | { type: 'guide'; id: KumikiGuide | 'close' }
   | { type: 'repair'; id: PartId; dx: number; dy: number }

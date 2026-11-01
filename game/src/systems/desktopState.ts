@@ -1,3 +1,4 @@
+import { repairAppProjects, type AppProjects } from './appLayout';
 import { desktopScreen, resizeDesktop, LEGACY_DESKTOP, MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT, workHeight } from './desktopGeometry';
 import type { LogicalSize } from './viewport';
 import { readCapture } from './captureScene';
@@ -21,6 +22,7 @@ export interface Feedback {
   at: number; completedAt: number | null; reward?:number;
 }
 export interface DesktopState {
+  projects:AppProjects; editingApp:BuiltApp|null;
   screen:LogicalSize; entered: boolean; enteredAt: number; apps: BuiltApp[]; upgrades:DesktopUpgrade[];
   builtAt:Record<string,number>; jobs:Record<JobId,Job>; workspace:0|1; workspaces:Record<AppId,0|1>;
   fileSort:'name'|'date'|'type'; fileDescending:boolean; fileSearch:string; largeIcons:boolean; mailFolder:'all'|'pending'|'completed';
@@ -37,7 +39,7 @@ export interface DesktopState {
 export interface Screenshot { id: number; at: number; language: string; data: string; deleted?:boolean }
 export function createDesktopState(screen:LogicalSize=desktopScreen(0)): DesktopState {
   const makeWindow = (x: number, y: number, width: number, height: number): WindowState => ({ x, y, width, height, open: false, minimized: false, maximized: false, z: 0, restore: null });
-  const desktop:DesktopState={ screen:LEGACY_DESKTOP, entered: false, enteredAt: 0, apps: [], upgrades:[],
+  const desktop:DesktopState={ projects:{},editingApp:null,screen:LEGACY_DESKTOP, entered: false, enteredAt: 0, apps: [], upgrades:[],
     builtAt:{},jobs:Object.fromEntries(JOB_IDS.map(id=>[id,{assigned:false,cursors:0,updates:0}])) as Record<JobId,Job>, workspace:0,
     workspaces:Object.fromEntries(APP_IDS.map(id=>[id,0])) as Record<AppId,0|1>,
     fileSort:'name',fileDescending:false,fileSearch:'',largeIcons:false,mailFolder:'all',photo:{source:'coast',brightness:1,tone:0,crop:0},compare:false,
@@ -56,6 +58,10 @@ const count = (x: unknown): x is number => amount(x) && Number.isSafeInteger(x);
 const rect = (x: unknown,screen:LogicalSize): x is Rect => obj(x) && ['x','y','width','height'].every(k => amount(x[k])) && (x.width as number) > 0 && (x.height as number) > 0 && (x.x as number) + (x.width as number) <= screen.width && (x.y as number) + (x.height as number) <= workHeight(screen);
 export function isDesktopState(x: unknown): x is DesktopState {
   if(!obj(x)||!obj(x.screen)||!BALANCE.appearance.screens.some(s=>s.width===(x.screen as LogicalSize).width&&s.height===(x.screen as LogicalSize).height))return false;
+  if(!Array.isArray(x.apps)||!Array.isArray(x.upgrades))return false;
+  if(!obj(x.projects)||!(x.editingApp===null||typeof x.editingApp==='string'&&Object.hasOwn(x.projects,x.editingApp)))return false;
+  const repaired=repairAppProjects(x.projects,x.apps as BuiltApp[],x.upgrades as DesktopUpgrade[]);
+  if(Object.keys(repaired).length!==Object.keys(x.projects).length||Object.entries(repaired).some(([id,p])=>p!==(x.projects as Record<string,unknown>)[id]))return false;
   const screen=x.screen as unknown as LogicalSize;
   if (!obj(x) || typeof x.entered !== 'boolean' || !amount(x.enteredAt) || !Array.isArray(x.apps) || new Set(x.apps).size!==x.apps.length || !x.apps.every(id=>APP_IDS.includes(id as AppId)&&!['tessera','note','settings'].includes(id as string))) return false;
   if (!obj(x.windows) || !obj(x.icons) || !APP_IDS.every(id => {
