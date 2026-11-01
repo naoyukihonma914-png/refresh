@@ -80,7 +80,9 @@ export function paintDrawing(state: GameState, id: string, cells: readonly numbe
   let result = storeDrawing(state, id, next);
   result = withK(result, { ...result.run.kumiki, lastActionAt: result.elapsedMs });
   const focus = result.run.kumiki.placed.includes('switch') && result.run.kumiki.focus;
-  result = creditPixels(result, earned * BALANCE.w2.dotValue * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * (focus ? BALANCE.w2.focusMultiplier : 1));
+  const pixels=earned * BALANCE.w2.dotValue * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * (focus ? BALANCE.w2.focusMultiplier : 1);
+  result=storeDrawing(result,id,{...next,earnedPixels:(drawing.earnedPixels??drawing.rewarded.filter(Boolean).length*BALANCE.w2.dotValue)+pixels});
+  result = creditPixels(result,pixels);
   return id === 'folder' && completeDrawing(result, id) ? kGuide(result, 'complete') : result;
 }
 export function fillDrawing(state: GameState, id: string, cell: number, color: number, frame = 0): GameState {

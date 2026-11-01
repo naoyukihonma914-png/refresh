@@ -31,10 +31,10 @@ describe('デスクトップ',()=>{
     expect(visibleApps(next)).toEqual(['tessera']);expect(next.run.desktop.apps).toEqual([]);expect(enterDesktop(next)).toBe(next);
     expect(enterDesktop(createInitialState(now)).run.world).toBe('seed');
   });
-  it('ファイル30万→メール47万の順で作り、段階6のアプリは追加しない',()=>{
+  it('ファイル・並べ替え・メールを順に作り、未購入のアプリを開かない',()=>{
     let s=desktop(); expect(buyDesktopApp(s,'mail')).toBe(s);
     const start=s.resources.pixels;s=buyDesktopApp(s,'files');expect(s.resources.pixels).toBe(start-300_000);expect(s.run.desktop.active).toBe('files');
-    expect(buyDesktopApp(s,'files')).toBe(s);s=buyDesktopApp(s,'mail');expect(s.resources.pixels).toBe(start-770_000);
+    expect(buyDesktopApp(s,'files')).toBe(s);expect(buyDesktopApp(s,'mail')).toBe(s);s=buyDesktopApp(s,'sort');s=buyDesktopApp(s,'mail');expect(s.resources.pixels).toBe(start-1_150_000);
     expect(s.run.desktop.apps).toEqual(['files','mail']);expect(desktopConditions(s)[0]).toBe(false);
   });
   it('窓の移動・大きさ・前後・最小化・最大化・復元・閉じる・開き直しとアイコン位置を保存する',()=>{
@@ -47,7 +47,7 @@ describe('デスクトップ',()=>{
     s=actDesktop(s,{type:'taskbar',app:'note'},now);expect(s.run.desktop.windows.note.minimized).toBe(false);
     s=actDesktop(s,{type:'close',app:'note'},now);s=decodeSave(encodeSave(s));expect(s.run.desktop.windows.note.open).toBe(false);
     s=focusWindow(s,'note');expect(s.run.desktop.windows.note.x).toBe(300);expect(s.run.desktop.icons.note).toEqual({x:150,y:700});
-    for(let i=0;i<100;i++)s=focusWindow(s,i%2?'note':'tessera');expect(Math.max(...Object.values(s.run.desktop.windows).map(w=>w.z))).toBeLessThanOrEqual(4);
+    for(let i=0;i<100;i++)s=focusWindow(s,i%2?'note':'tessera');expect(Math.max(...Object.values(s.run.desktop.windows).map(w=>w.z))).toBeLessThanOrEqual(11);
     s=actDesktop(s,{type:'rect',app:'note',rect:{x:-999,y:9999,width:1,height:9000}},now);expect(s.run.desktop.windows.note).toMatchObject({x:0,y:0,width:400,height:1032});
     expect(isGameState(s)).toBe(true);
   });
@@ -124,7 +124,7 @@ describe('デスクトップ',()=>{
   });
   it('第5版の製品・絵・性能・資源を保持してデスクトップの初期状態を補い、新形式を往復できる',()=>{
     const old=JSON.parse(encodeSave(createFixture('release-v1-tessera',now)!));old.schemaVersion=5;delete old.run.desktop;delete old.persistent.screenshots;delete old.persistent.productionNote;delete old.persistent.noteUpdatedAt;
-    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(7);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
+    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(8);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
     for(const fixture of ['desktop-early','desktop-files','desktop-mail','desktop-modern','desktop-full']){const s=createFixture(fixture,now)!;expect(isGameState(s),fixture).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);}
     expect(BALANCE.spec.storage[1].price).toBe(60);
   });

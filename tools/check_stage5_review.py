@@ -22,7 +22,7 @@ def main():
    path=OUT/f'exports/shots-{count}.json';assert path.exists(),path
    ctx,page=scene();import_file(page,path)
    assert not page.locator('.runtime-notice').count()
-   core=page.evaluate("JSON.parse(localStorage.getItem('refresh.save'))");assert len(core['persistent']['screenshots'])==count;assert 'data' not in core['persistent']['screenshots'][0];assert core['schemaVersion']==7
+   core=page.evaluate("JSON.parse(localStorage.getItem('refresh.save'))");assert len(core['persistent']['screenshots'])==count;assert 'data' not in core['persistent']['screenshots'][0];assert core['schemaVersion']==8
    session=ctx.new_cdp_session(page)
    frame=session.send('Page.getFrameTree')['frameTree']['frame']['id']
    world=session.send('Page.createIsolatedWorld',{'frameId':frame,'worldName':'native-save-timing'})['executionContextId']
@@ -49,8 +49,8 @@ def main():
    page.screenshot(path=str(OUT/f'shots-{count}-reloaded.png'));ctx.close();print(f'PASS: browser {count} captures, {report["warmMedianMs"]:.2f}ms, {report["totalUtf16Bytes"]} bytes',flush=True)
   checks.append('200枚・400枚を実際のlocalStorageへ取り込み、通常保存7回・再読み込み・最後の画像の表示を確認。通常保存の撮影データ書き込みは0件')
   legacy=gzip.decompress((ROOT/'game/src/systems/testdata/v6-two-shots.json.gz').read_bytes()).decode();ctx,page=scene();page.evaluate('(raw)=>localStorage.setItem("refresh.save",raw)',legacy);page.reload();page.locator('.desktop-live').wait_for()
-  core=page.evaluate('JSON.parse(localStorage.getItem("refresh.save"))');assert core['schemaVersion']==7 and len(core['persistent']['screenshots'])==2
-  page.locator('.desktop-live > .desktop-taskbar').get_by_role('button',name='ファイル',exact=True).click();page.locator('.desktop-live > [data-app="files"] .files-sidebar').get_by_role('button',name='スクリーンショット',exact=True).click();page.locator('[data-file="shot:1"]').dblclick();assert '保存の計測 0' in page.locator('.screenshot-preview textarea').input_value();ctx.close();checks.append('実際の第6版の撮影入りセーブを起動し、第7版へ移行して旧画像の本文を表示')
+  core=page.evaluate('JSON.parse(localStorage.getItem("refresh.save"))');assert core['schemaVersion']==8 and len(core['persistent']['screenshots'])==2
+  page.locator('.desktop-live > .desktop-taskbar').get_by_role('button',name='ファイル',exact=True).click();page.locator('.desktop-live > [data-app="files"] .files-sidebar').get_by_role('button',name='スクリーンショット',exact=True).click();page.locator('[data-file="shot:1"]').dblclick();assert '保存の計測 0' in page.locator('.screenshot-preview textarea').input_value();ctx.close();checks.append('実際の第6版の撮影入りセーブを起動し、第8版へ移行して旧画像の本文を表示')
   ctx,page=scene('desktop-mail');page.locator('.debug-panel').evaluate("e=>e.style.display='none'")
   page.get_by_role('button',name='窓を並べて撮る',exact=True).click();assert page.locator('.screenshot-toolbar.shot-hint').count()==1;assert page.locator('.capture-button').first.evaluate('e=>document.activeElement===e')
   a=page.locator('.desktop-live > [data-app="tessera"]').bounding_box();b=page.locator('.desktop-live > [data-app="note"]').bounding_box();assert a['x']+a['width']<=b['x'];page.screenshot(path=str(OUT/'capture-guidance.png'))

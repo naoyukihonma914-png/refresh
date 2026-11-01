@@ -1,6 +1,6 @@
 import { captureStore } from '../platform/captures';
 import { migrateCaptureV6 } from './captureMigration';
-import { createDesktopState } from './desktopState';
+import { createDesktopPreferences, createDesktopState } from './desktopState';
 import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameState } from './state';
 import type { SaveStorage } from '../platform/storage';
 import { createArtwork, createKumikiState } from './kumikiState';
@@ -36,7 +36,7 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     const next = { ...(data as GameState), schemaVersion: 4 };
     const projected = { ...next, schemaVersion: SCHEMA_VERSION,
       run: { ...next.run, shipping: null, restartMs: 0, desktop: createDesktopState() },
-      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
+      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
     };
     if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
     const palette = paletteFor(1);
@@ -77,6 +77,11 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     return {...old,schemaVersion:7,persistent:{...old.persistent,homeUpdatedAt:null,sketchUpdatedAt:null,screenshots:old.persistent.screenshots.map(migrateCaptureV6)},
       run:{...old.run,desktop:{...old.run.desktop,feedback:old.run.desktop.feedback.map(f=>({...f,sender:f.sender??'hikari'}))}}};
   },
+  7(data) {
+    const old=data as GameState, defaults=createDesktopState(), prefs=createDesktopPreferences();
+    prefs.lastShotId=Math.max(0,...old.persistent.screenshots.map(s=>s.id));
+    return {...old,schemaVersion:8,persistent:{...old.persistent,desktopPrefs:prefs},run:{...old.run,desktop:{...defaults,...old.run.desktop,upgrades:[...old.run.desktop.apps],windows:{...defaults.windows,...old.run.desktop.windows},icons:{...defaults.icons,...old.run.desktop.icons}}}};
+  },
 };
 
 export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameState {
@@ -87,7 +92,7 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
       if('data' in shot)return shot;
       const ref=(shot as unknown as {sceneRef?:unknown}).sceneRef;
       if(typeof ref!=='string'||!readScene)throw new Error('Screenshot assets are required');
-      const {id,at,language}=shot;return {id,at,language,data:readScene(ref)};
+      const {sceneRef:_ref,...metadata}=shot as unknown as Record<string,unknown>;return {...metadata,data:readScene(ref)} as unknown as GameState['persistent']['screenshots'][number];
     });
   }
   const versionOf = (value: unknown): number => {
@@ -153,23 +158,27 @@ export function saveGame(storage: SaveStorage, state: GameState, now: number, { 
   if (!canSave(state) && !(checkpoint && state.persistent.products.length > 0)) return { kind: 'locked', state };
   const saved = { ...state, lastSavedAt: now };
   let scenes:ReturnType<typeof captureStore>|undefined;
+  let previousBackup:string|null= null,backupChanged=false;
   try {
     if(!isGameState(saved))throw new Error('Invalid game state');
     scenes=captureStore(storage);scenes.begin();
-    const screenshots=saved.persistent.screenshots.map(({id,at,language,data})=>({id,at,language,sceneRef:scenes!.put(data)}));
+    const screenshots=saved.persistent.screenshots.map(({data,...metadata})=>({...metadata,sceneRef:scenes!.put(data)}));
     const raw=JSON.stringify({...saved,persistent:{...saved.persistent,screenshots}});
     const previous=storage.getItem(SAVE_KEYS.primary);
     if(previous!==null){
       let valid=verifiedPrimary.get(storage)===previous;
       if(!valid){try{decodeSave(previous,ref=>scenes!.get(ref));valid=true;}catch{/* Preserve the existing backup. */}}
-      if(valid)storage.setItem(SAVE_KEYS.backup,previous);
+      if(valid){previousBackup=storage.getItem(SAVE_KEYS.backup);storage.setItem(SAVE_KEYS.backup,previous);backupChanged=true;}
     }
     scenes.flush();
     storage.setItem(SAVE_KEYS.primary,raw);
     scenes.finish();verifiedPrimary.set(storage,raw);
+    try{scenes.collect(raw,storage.getItem(SAVE_KEYS.backup),previous);}catch{/* Collection is best effort after a successful commit. */}
     return {kind:'saved',state:saved};
   } catch {
-    scenes?.rollback();return {kind:'failed',state};
+    scenes?.rollback();
+    if(backupChanged){try{if(previousBackup===null)storage.removeItem(SAVE_KEYS.backup);else storage.setItem(SAVE_KEYS.backup,previousBackup);}catch{/* Primary remains intact if storage itself is unavailable. */}}
+    return {kind:'failed',state};
   }
 }
 

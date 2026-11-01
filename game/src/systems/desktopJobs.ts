@@ -1,0 +1,13 @@
+import { BALANCE, type DesktopSkill, type DesktopUpgrade } from '../config/balance';
+import { JOB_IDS, type AppId, type JobId } from './desktopState';
+import type { GameState } from './state';
+export const hasUpgrade=(s:GameState,id:DesktopUpgrade)=>s.run.desktop.upgrades?.includes(id);
+export const hasDesktopSkill=(s:GameState,id:DesktopSkill)=>s.persistent.desktopPrefs?.skills.includes(id)&&!s.persistent.desktopPrefs.disabled.includes(id);
+export const FEATURE_APPS={sort:'files',draft:'mail',search:'files',large:'files',crop:'photo',compare:'photo',undo:'bin',folders:'mail',timer:'clock',calendar:'clock',slideshow:'theme',iconSize:'theme'} as const;
+export const featureCount=(s:GameState,app:AppId)=>Object.entries(FEATURE_APPS).filter(([id,a])=>a===app&&hasUpgrade(s,id as DesktopUpgrade)).length;
+export const jobCapacity=(s:GameState)=>BALANCE.spec.memory[s.persistent.specs.memory]!.posts+(hasDesktopSkill(s,'posts')?BALANCE.w3.extraPosts:0);
+export const jobCursorCost=(s:GameState,id:JobId)=>Math.ceil(BALANCE.w3.jobs[id].cost*BALANCE.w3.cursorGrowth**s.run.desktop.jobs[id].cursors);
+export const jobUpdateCost=(s:GameState,id:JobId)=>Math.ceil(BALANCE.w3.jobs[id].cost*BALANCE.w3.updateBase*BALANCE.w3.updateGrowth**s.run.desktop.jobs[id].updates);
+export const jobCursorRate=(s:GameState,id:JobId)=>BALANCE.w3.jobs[id].rate*BALANCE.w3.updateMultiplier**s.run.desktop.jobs[id].updates*BALANCE.w3.featureMultiplier**featureCount(s,id)*BALANCE.spec.color[s.persistent.specs.color]!.multiplier*BALANCE.spec.refresh[s.persistent.specs.refresh]!.multiplier;
+export const jobRate=(s:GameState,id:JobId)=>s.run.world==='desktop'&&s.run.desktop.jobs?.[id]?.assigned?s.run.desktop.jobs[id].cursors*jobCursorRate(s,id):0;
+export const jobsRate=(s:GameState)=>JOB_IDS.reduce((n,id)=>n+jobRate(s,id),0);

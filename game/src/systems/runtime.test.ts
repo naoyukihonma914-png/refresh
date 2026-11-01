@@ -466,3 +466,21 @@ describe('段階5の保存と製品名',()=>{
     runtime.setNumberNotation('scientific');runtime.dispose();await start();expect(runtime.getSnapshot().state.persistent.numberNotation).toBe('scientific');
   });
 });
+
+describe('段階6の自動撮影と保存',()=>{
+ it('ターミナルの撮影も保存成功後に公開し、失敗時は通常生成を保って自動化を止める',async()=>{
+  const s=createFixture('desktop-ready',clock.wall)!;s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s.run.desktop.terminal.elapsedMs=59900;
+  storage.setItem(SAVE_KEYS.primary,encodeSave(s));await start();const before=runtime.getSnapshot().state.run.totalPixelsGenerated;
+  const write=storage.setItem;storage.setItem=(key,value)=>{if(key.startsWith('refresh.capture.'))throw new Error('Quota');write(key,value);};
+  step(100);expect(runtime.getSnapshot().state.persistent.screenshots).toHaveLength(0);expect(runtime.getSnapshot().state.run.desktop.terminal.running).toBe(false);expect(runtime.getSnapshot().state.run.totalPixelsGenerated).toBeGreaterThan(before);expect(runtime.getSnapshot().notice).toBe('save.failed');
+  storage.setItem=write;runtime.actDesktop({type:'terminal',running:true,interval:60000});step(60000);expect(runtime.getSnapshot().state.persistent.screenshots).toHaveLength(1);
+  runtime.dispose();await start();expect(runtime.getSnapshot().state.persistent.screenshots).toHaveLength(1);
+ });
+ it('不在の予約撮影も保存できるまで報酬を付けず、保存失敗でも通常の不在生成は失わない',async()=>{
+  const s=createFixture('desktop-ready',clock.wall)!;s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s.run.desktop.reservation={at:clock.wall+60000,done:false};
+  storage.setItem(SAVE_KEYS.primary,encodeSave(s));await start();const before=runtime.getSnapshot().state.run.totalPixelsGenerated;
+  clock.hidden=true;runtime.visibilityChanged();clock.wall+=120000;clock.mono+=120000;
+  const write=storage.setItem;storage.setItem=(key,value)=>{if(key.startsWith('refresh.capture.'))throw new Error('Quota');write(key,value);};
+  clock.hidden=false;runtime.visibilityChanged();expect(runtime.getSnapshot().state.persistent.screenshots).toHaveLength(0);expect(runtime.getSnapshot().state.run.totalPixelsGenerated).toBeGreaterThan(before);expect(runtime.getSnapshot().notice).toBe('save.failed');
+ });
+});

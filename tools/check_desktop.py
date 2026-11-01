@@ -46,12 +46,12 @@ def main():
    ctx,page=scene();assert page.locator('.desktop-shortcut').count()==2
    assert page.locator('.taskbar-apps button').count()==1
    assert page.locator('.taskbar-pixels small').inner_text()=='毎秒 276.8'
-   page.locator('.taskbar-pixels').click();assert '30万' in page.locator('.upgrade-current').inner_text();assert '47万' in page.locator('.upgrade-next').inner_text()
+   page.locator('.taskbar-pixels').click();assert '30万' in page.locator('.upgrade-current').inner_text();assert '38万' in page.locator('.upgrade-next').inner_text()
    page.locator('.upgrade-current button').click();assert page.locator('.desktop-shortcut').count()==3;assert win(page,'files').is_visible()
-   page.locator('.taskbar-pixels').click();page.locator('.upgrade-current button').click();assert page.locator('.desktop-shortcut').count()==4;assert win(page,'mail').is_visible()
+   page.locator('.taskbar-pixels').click();page.locator('.upgrade-current button').click();assert page.locator('.desktop-shortcut').count()==3;page.locator('.taskbar-pixels').click();page.locator('.upgrade-current button').click();assert page.locator('.desktop-shortcut').count()==4;assert win(page,'mail').is_visible()
    assert page.locator('.desktop-shortcut[data-shortcut="mail"] rect[fill="#8b8b8b"]').count()>0
-   page.locator('.taskbar-pixels').click();assert page.locator('.upgrade-current').count()==0
-   page.locator('.taskbar-pixels').click();layout(page);close(ctx);checks.append('初期アイコン2つ・タスクバーボタン1つ。ファイル30万→メール47万、未描画アイコンは灰色、段階6の操作は出さない')
+   page.locator('.taskbar-pixels').click();assert '59万' in page.locator('.upgrade-current').inner_text()
+   page.locator('.taskbar-pixels').click();layout(page);close(ctx);checks.append('初期アイコン2つ・タスクバーボタン1つ。ファイル30万→並べ替え38万→メール47万、未描画アイコンは灰色、次の機能だけを予告')
 
    ctx,page=scene('desktop-files');w=win(page,'files');r=w.bounding_box();page.mouse.move(r['x']+140,r['y']+16);page.mouse.down();page.mouse.move(r['x']-160,r['y']+96,steps=8);page.mouse.up();r2=w.bounding_box();assert abs(r2['x']-(r['x']-300))<2
    page.locator('[data-app="files"] .window-resize').focus();page.keyboard.press('ArrowRight');assert abs(w.bounding_box()['width']-776)<2
@@ -82,7 +82,7 @@ def main():
    page.get_by_role('button',name='あとで',exact=True).click();page.locator('.notification-button').click();assert page.locator('.notification-center button').count()==1;page.locator('.notification-center button').click();page.get_by_role('button',name='Tesseraで直す',exact=True).click();assert win(page,'tessera').evaluate("e=>e.classList.contains('is-active')")
    page.clock.fast_forward(480_000);assert len(json.loads(data(page))['run']['desktop']['feedback'])==3;close(ctx);checks.append('メールを作る前から4分ごとに通知、あとで閉じた依頼を再表示し、直す窓へ移動。3件で止まる')
 
-   ctx,page=scene('desktop-mail');task(page,'メール');w=win(page,'mail');w.locator('aside button').filter(has_text='生成ボタン').click();assert '塗りの色を変えて' in w.locator('article').inner_text();w.get_by_role('button',name='Tesseraで直す').click()
+   ctx,page=scene('desktop-mail');page.locator('.taskbar-pixels').click();page.locator('.upgrade-current button').click();w=win(page,'mail');w.locator('aside button').filter(has_text='生成ボタン').click();assert '塗りの色を変えて' in w.locator('article').inner_text();w.get_by_role('button',name='Tesseraで直す').click()
    tessera=win(page,'tessera');tessera.get_by_role('button',name='選択ツール',exact=True).click();tessera.locator('[data-part="primary"]').click();tokens=json.loads(data(page))['resources']['tokens']
    tessera.get_by_label('塗り',exact=True).select_option('#d0523a');assert 'ありがとうございました' in page.locator('.feedback-toast').inner_text();assert json.loads(data(page))['resources']['tokens']==tokens+2
    task(page,'メール');w=win(page,'mail');assert '対応済み' in w.locator('article').inner_text();raw=data(page);close(ctx);ctx,page=scene(None,raw=raw);task(page,'メール');assert '対応済み' in win(page,'mail').inner_text();close(ctx);checks.append('メールの一覧・本文・対応履歴。実際のボタン色変更だけで完了し、+2トークンを一度だけ保存')

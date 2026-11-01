@@ -1,3 +1,4 @@
+import { jobsRate } from './desktopJobs';
 import { BALANCE } from '../config/balance';
 import type { GameState } from './state';
 
@@ -25,11 +26,13 @@ export function cursorPixelsPerSecond(state: GameState): number {
   return manualClickValue(state) * cursorPressesPerSecond(state) * button * slider;
 }
 
-export const passivePixelsPerSecond = (state: GameState): number => state.run.seed.autoCursors * cursorPixelsPerSecond(state);
+export const homePixelsPerSecond = (state: GameState): number => state.run.seed.autoCursors * cursorPixelsPerSecond(state);
+export const passivePixelsPerSecond = (state: GameState): number => homePixelsPerSecond(state) + jobsRate(state);
 
 export function advanceHomeGeneration(state: GameState, ms: number): GameState {
+  state = creditPixels(state,jobsRate(state)*ms/BALANCE.time.millisecondsPerSecond);
   const k = state.run.kumiki;
-  const rate = passivePixelsPerSecond(state);
+  const rate = homePixelsPerSecond(state);
   if (!k.placed.includes('slider') || rate === 0) return creditPixels(state, rate * ms / BALANCE.time.millisecondsPerSecond);
   const period = k.interval * BALANCE.time.millisecondsPerSecond;
   const until = period - k.batchMs;

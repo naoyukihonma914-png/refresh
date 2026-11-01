@@ -45,6 +45,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
   const plural = new Intl.PluralRules(intl);
   const time = new Intl.DateTimeFormat(intl, { hour: '2-digit', minute: '2-digit' });
   const dateTime = new Intl.DateTimeFormat(intl, { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
+  const month = new Intl.DateTimeFormat(intl, {year:'numeric',month:'long'});
   const date = new Intl.DateTimeFormat(intl, { year: 'numeric', month: 'short', day: 'numeric' });
 
   function t(key: MessageKey, params: Record<string, string | number> = {}): string {
@@ -85,6 +86,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
     price: (value: number) => gameNumber(value,locale._meta.id === 'ja' ? 10_000 : 1_000,2),
     time: (timestamp: number) => time.format(timestamp),
     dateTime: (timestamp: number) => dateTime.format(timestamp),
+    month: (timestamp:number) => month.format(timestamp),
     date: (timestamp: number) => date.format(timestamp),
     spec: (key: SpecKey, level: number) => t(`spec.${key}.${level}` as MessageKey),
     languageName: (id: string) => id === TEST_LANGUAGE ? t('language.test')

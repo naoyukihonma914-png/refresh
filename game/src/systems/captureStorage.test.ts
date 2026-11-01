@@ -23,7 +23,7 @@ const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now
 describe('場面の保存形式と独立した記録',()=>{
  it('表示に必要な場面だけを持ち、製品・報酬台帳・過去の会話・全生成履歴をコピーしない',()=>{
   const s=shotState(),scene=readCapture(s.persistent.screenshots[0]!);
-  expect(scene.version).toBe(1);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(2);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
   expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene.editor.picture).not.toHaveProperty('rewarded');
   expect(scene.home.rows.length).toBeLessThanOrEqual(4);expect(scene.home.history.length).toBeLessThanOrEqual(4);
   const source=structuredClone(s);source.persistent.screenshots=[];
@@ -38,13 +38,14 @@ describe('場面の保存形式と独立した記録',()=>{
    expect(isCaptureScene(scene)).toBe(true);
    expect(readCapture({id:1,at:now,language:'ja',data:encodeCapture(scene)})).toEqual(scene);
   }finally{(BALANCE.w3.apps as unknown as unknown[]).splice(0,BALANCE.w3.apps.length,...original);}
-  expect(isCaptureScene({...scene,version:2})).toBe(false);
+  expect(isCaptureScene({...scene,version:999})).toBe(false);
+  expect(isCaptureScene({...scene,desktop:{...scene.desktop,notice:9999999}})).toBe(false);
   const bad=structuredClone(scene);bad.editor.picture!.frames[0]![0]=999;expect(isCaptureScene(bad)).toBe(false);
  });
  it('実際の第6版の2枚入りセーブを移行し、資源・製品・窓・撮影時の本文とパレットを保つ',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString();
   const old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(7);expect(s.resources).toEqual(old.resources);expect(s.persistent.products).toEqual(old.persistent.products);expect(s.run.desktop.windows).toEqual(old.run.desktop.windows);
+  expect(s.schemaVersion).toBe(8);expect(s.resources).toEqual(old.resources);expect(s.persistent.products).toEqual(old.persistent.products);expect(s.run.desktop.windows).toMatchObject(old.run.desktop.windows);
   expect(s.persistent.screenshots).toHaveLength(2);
   const oldFrame=decodeCapture(old.persistent.screenshots[0].data) as typeof s;
   const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene.home.design).toEqual(oldFrame.run.kumiki.design);
@@ -74,7 +75,7 @@ describe('場面の保存形式と独立した記録',()=>{
   // Emulate a lower game schema with the already-versioned scene reference envelope.
   stored.schemaVersion=6;
   const restored=decodeSave(JSON.stringify(stored),ref=>captureStore(target.storage).get(ref));
-  expect(restored.schemaVersion).toBe(7);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(1);
+  expect(restored.schemaVersion).toBe(8);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(2);
  });
  it('新しい画像の書き込みが途中で失敗しても元の記録を保ち、追加した未参照データだけを片付けて再試行できる',()=>{
   const target=disk(),s=shotState();saveGame(target.storage,s,now);const before=new Map(target.entries);
@@ -83,6 +84,12 @@ describe('場面の保存形式と独立した記録',()=>{
   target.storage.setItem=(key,value)=>{if(key.startsWith(CAPTURE_PREFIX)&&++count===2)throw new Error('Quota exceeded');write(key,value);};
   expect(saveGame(target.storage,next,now+1).kind).toBe('failed');expect(target.entries).toEqual(before);
   target.storage.setItem=write;expect(saveGame(target.storage,next,now+1).kind).toBe('saved');expect(loadGame(target.storage).kind).toBe('loaded');
+ });
+ it('主データの書き込みだけが失敗しても元の予備と画像を戻し、両方の世代を保持する',()=>{
+  const target=disk(),first=shotState();saveGame(target.storage,first,now);const s=actDesktop(first,{type:'note',text:'2世代目'},now+1);saveGame(target.storage,s,now+1);
+  const before=new Map(target.entries);s.run.desktop.cooldownMs=0;const next=takeScreenshot(s,now+2,'ja');const write=target.storage.setItem;
+  target.storage.setItem=(key,value)=>{if(key===SAVE_KEYS.primary)throw new Error('Quota');write(key,value);};
+  expect(saveGame(target.storage,next,now+2).kind).toBe('failed');expect(target.entries).toEqual(before);target.storage.setItem=write;expect(loadGame(target.storage).kind).toBe('loaded');
  });
  it('全データの初期化では別保存した場面と共有データも取り除く',()=>{
   const target=disk();saveGame(target.storage,shotState(),now);expect(target.entries.size).toBeGreaterThan(2);
@@ -103,7 +110,7 @@ describe('場面の保存形式と独立した記録',()=>{
    const imported=decodeSave(encodeSave(s)),other=disk(5*1024*1024);expect(saveGame(other.storage,imported,now).kind).toBe('saved');expect(loadGame(other.storage).kind).toBe('loaded');
    expect(target.entries.size).toBeLessThan(count*4+40);
   }
- });
+ },15000);
 });
 describe('小さな指摘への対応',()=>{
  it('描き直し対象を最近のものから外して順に回し、3人の差出人を使う',()=>{

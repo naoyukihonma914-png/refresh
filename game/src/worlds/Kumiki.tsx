@@ -66,6 +66,12 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const releaseChecks = prototypeConditions(state);
   const defaultDesign: Design = { color: selected === 'primary' || selected === 'button' ? homeButtonColor(state.persistent.specs.color) : BASE_PALETTE[11]!, radius: 0, textSize: 'medium', shadow: false };
   const design = selected ? k.design[selected] ?? defaultDesign : defaultDesign;
+  useEffect(()=>{
+    if(preview||!snapshot.tesseraIntent)return;
+    setExtensions(false);setMenu(null);setExportsOpen(false);
+    if(snapshot.tesseraIntent.kind==='color'){setTool('select');setSelected('primary');}
+    else{setTool('pencil');setDrawingId(k.activeDrawing);setFrame(0);}
+  },[snapshot.tesseraIntent?.serial,preview]);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useLayoutEffect(() => {
