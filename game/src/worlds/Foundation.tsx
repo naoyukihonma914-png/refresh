@@ -1,3 +1,4 @@
+import {BulkControl,ContractStatus} from '../components/LongPlaySettings';
 import { PageLayoutSurface,type PageLayoutHandle } from './PageLayoutSurface';
 import { pageColors,pageFonts,isRecommendedPage,type PageLayout } from '../systems/pageDesign';
 import { Estimate } from '../components/Estimate';
@@ -7,7 +8,7 @@ import { BALANCE, type SeedItem } from '../config/balance';
 import type { I18n } from '../content/i18n';
 import { canSave } from '../systems/state';
 import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
-import { canBuildSeed, cursorPrice, visibleSeedItems } from '../systems/seed';
+import { canBuildSeed,seedCursorQuote, visibleSeedItems } from '../systems/seed';
 import { cursorPixelsPerSecond, cursorPressesPerSecond, manualClickValue, passivePixelsPerSecond } from '../systems/economy';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { PageSettings } from './PageSettings';
@@ -119,20 +120,21 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
     state.persistent.specs.color > 0 && 'modern-colors', skills.includes('pattern') && `pattern-${appearance.pattern}`,
     skills.includes('marquee') && appearance.marquee && 'has-marquee'].filter(Boolean).join(' ');
   const purchase = (id: SeedItem | 'cursor') => {
-    const cost = id === 'cursor' ? cursorPrice(state) : BALANCE.w1.items.find(item => item.id === id)!.cost;
+    const cost = id === 'cursor' ? seedCursorQuote(state).cost : BALANCE.w1.items.find(item => item.id === id)!.cost;
     const label = i18n.t(`seed.buy.${id}`, { cost: i18n.integer(cost) });
+    const quantity=id==='cursor'?seedCursorQuote(state).count:1;
     const name = id === 'cursor' ? i18n.t('seed.cursor') : i18n.t(`item.${id}`);
     const effect = id === 'border' ? i18n.t('effect.clickAdd', { value: BALANCE.w1.border_bonus })
       : id === 'color' ? i18n.t('effect.cursorMult', { value: BALANCE.w1.color_cursor_mult })
         : id === 'font' ? i18n.t('effect.clickMult', { value: BALANCE.w1.font_mult })
           : id === 'motion' ? i18n.t('effect.momentum', { value: BALANCE.w1.momentum.max })
-            : id === 'cursor' ? i18n.t('effect.cursorRate', { value: i18n.rate(cursorPixelsPerSecond(state)) }) : '';
-    return <li key={id}>{has('layout') && <span>{name}{effect && <small className="purchase-effect">{effect}</small>}</span>}
+            : id === 'cursor' ? i18n.t('effect.cursorRate', { value: i18n.rate(cursorPixelsPerSecond(state)*quantity) }) : '';
+    return <li key={id}>{has('layout') && <span>{name}{id==='cursor'&&<BulkControl state={state} runtime={runtime} i18n={i18n}/>}<small className="bulk-count">{id==='cursor'&&quantity!==1?i18n.t('bulk.count',{count:quantity}):''}</small>{effect && <small className="purchase-effect">{effect}</small>}</span>}
       <button className="build-button" disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)} aria-label={label} aria-description={effect || undefined}>
         {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : <>{label}{effect && <small className="purchase-effect">{effect}</small>}</>}
-      </button><Estimate cost={cost} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} i18n={i18n} runtime={runtime} preview={preview}/></li>;
+      </button><Estimate cost={cost} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} i18n={i18n} runtime={runtime} preview={preview}/>{id==='cursor'&&!has('layout')&&<BulkControl state={state} runtime={runtime} i18n={i18n}/>}</li>;
   };
-  const headingNode=<>{!legacyHome&&page.heading&&<h1 className="home-heading">{page.heading}</h1>}      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{(state.run.version!=='v0.1'||state.persistent.products.length)?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName)}):i18n.t('foundation.goal')}
+  const headingNode=<><ContractStatus state={state} runtime={runtime} i18n={i18n}/>{!embedded&&state.run.play.achievement&&<p className="achievement-line" role="status">{i18n.t('achievement.notice',{name:i18n.t(`achievement.${state.run.play.achievement.id}`)})}</p>}{!legacyHome&&page.heading&&<h1 className="home-heading">{page.heading}</h1>}      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{(state.run.version!=='v0.1'||state.persistent.products.length)?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName)}):i18n.t('foundation.goal')}
         {!embedded && <button className="text-button goal-progress" onClick={() => setConditions(!conditions)} aria-expanded={conditions}>{i18n.t('seed.goalProgress', { done: 0, total: 5 })}</button>}
       </p>
       {conditions && <section className="release-conditions"><h2>{i18n.t('seed.conditions')}</h2><ul>
@@ -190,7 +192,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
   const upgradesNode=<>      <hr />
       {!has('kumiki') && <><p className="available-heading"><span>{i18n.t('seed.available')}</span></p><ul className="build-list">
         {canSave(state) && purchase('cursor')}{items.map(purchase)}</ul></>}
-      {has('kumiki') && <>{!embedded && <p className="seed-complete" role="status">{i18n.t('seed.complete')}</p>}<ul className="build-list">{purchase('cursor')}</ul></>}
+      {has('kumiki') && <>{!embedded && <p className="seed-complete" role="status">{i18n.t('seed.complete')}</p>}<ul className="build-list">{purchase('cursor')}{items.map(purchase)}</ul></>}
 </>;
   return <main data-page-motion={page.motion} style={!legacyHome?{...(has('color')?{'--seed-bg':colors.background,'--seed-surface':page.background??(state.persistent.specs.color===0?'#c0c0c0':'#ffffff'),'--seed-ink':colors.text,'--seed-button':colors.button,backgroundColor:colors.background,color:colors.text}:{}),...(has('font')?{fontFamily:pageFonts[page.bodyFont],'--page-heading-font':pageFonts[page.headingFont]}:{})} as CSSProperties:undefined} className={[className,customLayout&&'page-layout-active',!legacyHome&&(page.text||page.background)&&'page-custom-colors',state.run.restartMs>0&&'is-restarting',preview&&'is-preview'].filter(Boolean).join(' ')}>
     {settings?<PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={()=>setSettings(false)}/>:<div className={`seed-content ${customLayout?'page-layout-content':''}`}>
@@ -208,8 +210,9 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
 
       </div>
     </div>}
-    {!settings&&!preview&&!legacyHome&&(has('color')||layoutUnlocked)&&<div className="page-tools">
-      {state.run.version==='v0.1'&&has('color')&&<p><button className="text-button" onClick={()=>{setEditingLayout(null);setArranging(false);setSettings(true);}}>{i18n.t('seed.settings')}</button></p>}
+    {!embedded&&!settings&&!preview&&state.run.play.stray.lifeMs>0&&state.run.seed.built.includes('color')&&<button className="stray-pixel" aria-label={i18n.t('stray.collect')} title={i18n.t('stray.collect')} style={{left:`${state.run.play.stray.x*100}%`,top:`${state.run.play.stray.y*100}%`}} onClick={runtime.collectStray}/>}
+    {!settings&&!preview&&!legacyHome&&<div className="page-tools">
+      {state.run.version==='v0.1'&&<p><button className="text-button" onClick={()=>{setEditingLayout(null);setArranging(false);setSettings(true);}}>{i18n.t('seed.settings')}</button></p>}
       {layoutUnlocked&&<div className="page-layout-actions"><button onClick={arrange}>{i18n.t(arranging?'page.finish':'page.arrange')}</button><button onClick={()=>restorePage('recommended')}>{i18n.t('builder.recommended')}</button><button onClick={()=>restorePage('reset')}>{i18n.t('page.reset')}</button></div>}
     </div>}
   </main>;

@@ -1,3 +1,4 @@
+import {globalMultiplier} from './longPlay';
 import { jobsRate } from './desktopJobs';
 import { BALANCE } from '../config/balance';
 import type { GameState } from './state';
@@ -8,7 +9,7 @@ export function manualClickValue(state: GameState): number {
   const click = (w1.base_click + (built.includes('border') ? w1.border_bonus : 0))
     * (built.includes('font') ? w1.font_mult : 1);
   const color = BALANCE.spec.color[state.persistent.specs.color]!;
-  return click * color.multiplier;
+  return click * color.multiplier * globalMultiplier(state);
 }
 
 export function cursorPressesPerSecond(state: GameState): number {

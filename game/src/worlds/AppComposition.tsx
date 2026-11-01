@@ -22,7 +22,7 @@ export function AppSurface({app,children,...props}:DesktopProps&{app:BuiltApp;ch
   const node=ref.current;if(!node||!fitted||props.preview||w.maximized||node.clientWidth!==size.width||node.clientHeight!==size.height)return;
   const width=Math.min(snapshot.state.run.desktop.screen.width,w.width+Math.max(0,fitted.width-size.width));
   const height=Math.min(snapshot.state.run.desktop.screen.height-(snapshot.state.run.desktop.screen.width===800?28:snapshot.state.run.desktop.screen.width===1024?30:40),w.height+Math.max(0,fitted.height-size.height));
-  if(width>w.width||height>w.height)runtime.actDesktop({type:'rect',app,rect:{...w,width,height}});
+  if(width>w.width||height>w.height)runtime.actDesktop({type:'rect',app,rect:{...w,width,height}},{automatic:true});
  },[fitted?.width,fitted?.height,w.width,w.height,w.maximized,size]);
 
  if(!layout)return <Composition.Provider value={null}>{children}</Composition.Provider>;

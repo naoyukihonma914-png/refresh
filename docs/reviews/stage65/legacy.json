@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "Schema-12 live play gets the new settings; a genuine Scene-7 capture keeps its original controls without bulk, records/sound shortcuts or new terminal commands",
+    "A Scene-8 capture still displays its new sound controls after legacy-view gating"
+  ],
+  "scenes": [],
+  "pageErrors": []
+}

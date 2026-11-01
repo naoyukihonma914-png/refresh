@@ -1,10 +1,11 @@
+import {isProgress,type Progress} from './longPlay';
 import { isPageDesign, type PageDesign } from './pageDesign';
 import { BALANCE, type KumikiItem, type KumikiSkill, type PartId, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { isDesignMap, isExportedWork, PART_IDS, type Design, type ExportedWork } from './kumikiState';
 import type { SeedState } from './state';
 
 export interface ProductScreen {
-  page?:PageDesign;legacyBonus?:{auto:number;drawing:number};
+  progress?:Progress;page?:PageDesign;legacyBonus?:{auto:number;drawing:number};
   pixels: number; built: SeedItem[]; cursors: number; kumikiBuilt: KumikiItem[]; placed: PartId[];
   design: Record<string, Design>; focus: boolean; interval: number; exportName: string;
   specs: Record<SpecKey, number>; seedSkills: SeedSkill[];
@@ -34,6 +35,7 @@ export function isProductRecord(x: unknown): x is ProductRecord {
     || typeof s.exportName !== 'string' || !ids(s.seedSkills, BALANCE.w1.skills.map(i => i.id))
     || !['none', 'dots', 'grid', 'diagonal'].includes(s.pattern as string) || typeof s.marquee !== 'boolean'
     || !ids(s.kumikiSkills, BALANCE.w2.skills.map(i => i.id)) || typeof s.modern !== 'boolean') return false;
+  if(s.progress!==undefined&&!isProgress(s.progress))return false;
   if(s.page!==undefined&&!isPageDesign(s.page))return false;
   if(s.legacyBonus!==undefined&&(!obj(s.legacyBonus)||!amount(s.legacyBonus.auto)||s.legacyBonus.auto<1||s.legacyBonus.auto>1.2||!amount(s.legacyBonus.drawing)||s.legacyBonus.drawing<1||s.legacyBonus.drawing>2))return false;
   if (!obj(s.specs) || !(Object.keys(BALANCE.spec) as SpecKey[]).every(key => obj(s.specs) && count(s.specs[key]) && s.specs[key] < BALANCE.spec[key].length)) return false;

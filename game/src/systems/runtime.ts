@@ -1,3 +1,8 @@
+import {refreshDesktop} from './desktopExtras';
+import {reconcileProgress,actCommon,activeContract,type AchievementId,type CommonAction} from './longPlay';
+import {observeProgress} from './longPlayEvents';
+import {defaultNote} from './desktopFiles';
+import type {SoundKind} from '../platform/audio';
 import { actPageDesign, type PageAction } from './pageDesign';
 import { VIEWPORT } from './viewport';
 import { hasDesktopSkill } from './desktopJobs';
@@ -5,7 +10,7 @@ import { actDesktop, observeTesseraAction, activeScreenshots, screenshotCapacity
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { chooseLanguage, createI18n, LOCALES, TEST_LANGUAGE, type MessageKey } from '../content/i18n';
 import type { Platform, TabLease, Unsubscribe } from '../platform/types';
-import { creditPixels } from './economy';
+import { creditPixels,passivePixelsPerSecond } from './economy';
 import { createFixture } from './fixtures';
 import { clearGame, decodeSave, encodeSave, loadGame, saveGame } from './save';
 import { canSave, createInitialState, type GameState } from './state';
@@ -68,7 +73,23 @@ export class GameRuntime {
   };
   getSnapshot = () => this.snapshot;
 
-  private publish(update: Partial<RuntimeSnapshot>) {
+  private sound(kind:SoundKind,state=this.snapshot.state){
+    const sound=state.persistent.progress.sound;if(!sound.enabled||this.suspended||this.platform.visibility.isHidden())return;
+    try{this.platform.audio.play({kind,world:state.run.world==='release'?'kumiki':state.run.world,volume:sound.volume});}catch{}
+  }
+  private publish(update: Partial<RuntimeSnapshot>,bookkeeping=true) {
+    if(update.state&&bookkeeping){
+      const previous=this.snapshot.state;let state=reconcileProgress(observeProgress(previous,update.state),this.platform.clock.wallNow());
+      const additions=(Object.keys(state.persistent.progress.records) as AchievementId[]).filter(id=>previous.persistent.progress.records[id]===undefined);
+      if(additions.includes('secret-button')){const note=state.persistent.productionNote??defaultNote(createI18n(this.snapshot.language)),extra='\n\n'+createI18n(this.snapshot.language).t('secret.note');state={...state,persistent:{...state.persistent,productionNote:note.length+extra.length<=BALANCE.w3.maxNote?note+extra:note,progress:{...state.persistent.progress,noteOverflow:note.length+extra.length>BALANCE.w3.maxNote},noteUpdatedAt:this.platform.clock.wallNow()}};}
+      for(const id of additions)this.platform.unlockAchievement(id);
+      if(additions.length){state={...state,run:{...state.run,play:{...state.run.play,achievement:{id:additions.at(-1)!,until:this.platform.clock.wallNow()+BALANCE.longPlay.achievementNoticeMs}}}};this.sound('notification',state);}
+      if(state.run.desktop.notice!==null&&state.run.desktop.notice!==previous.run.desktop.notice)this.sound('notification',state);
+      if(state.persistent.screenshots.at(-1)?.id!==previous.persistent.screenshots.at(-1)?.id&&state.persistent.screenshots.length>previous.persistent.screenshots.length)this.sound('screenshot',state);
+      if(activeContract(previous)&&state.run.play.contract?.status==='complete')this.sound('build',state);
+      update.state=state;
+    }
+    if(update.state?.run.play.achievement&&this.platform.clock.wallNow()>=update.state.run.play.achievement.until)update.state={...update.state,run:{...update.state.run,play:{...update.state.run.play,achievement:null}}};
     const before=this.snapshot.state.run.world==='desktop'?this.snapshot.state.run.desktop.screen:VIEWPORT;
     this.snapshot = { ...this.snapshot, ...update };
     const after=this.snapshot.state.run.world==='desktop'?this.snapshot.state.run.desktop.screen:VIEWPORT;
@@ -99,7 +120,7 @@ export class GameRuntime {
         : loaded.kind === 'unavailable' ? 'save.storageUnavailable' : null,
       offline: loaded.kind !== 'empty' ? offlineNotice(result) : null,
       introVisible: this.platform.launch.fixture === 'intro' || !this.fixture && (loaded.kind === 'empty' || loaded.kind === 'unavailable'),
-    });
+    },false);
     this.lastActiveAt = this.platform.clock.monotonicNow();
     this.suspended = this.platform.visibility.isHidden();
     this.persist();
@@ -197,7 +218,7 @@ export class GameRuntime {
   dispose = () => {
     this.disposed = true;
     this.stopTimer?.();
-    this.lease?.release();
+    this.lease?.release();this.platform.audio.dispose();
   };
 
   changeLanguage = (language: string) => {
@@ -227,6 +248,7 @@ export class GameRuntime {
     const result = pressSeed(this.snapshot.state, this.momentum, now);
     if (result.state === this.snapshot.state) return;
     this.momentum = result.momentum;
+    this.sound('press',result.state);
     this.publish({ state: result.state, press: { serial: ++this.pressSerial, pixels: result.pixels, momentum: result.momentum.value, at: now, ...position, target: position.target ?? 'primary' } });
   };
 
@@ -238,7 +260,7 @@ export class GameRuntime {
     if (state === previous) return;
     this.publish({ state });
     this.persist();
-    if (id === 'kumiki') this.platform.unlockAchievement('kumiki-created');
+    this.sound('build',state);
   };
 
   actKumiki = (action: KumikiAction) => {
@@ -248,14 +270,18 @@ export class GameRuntime {
     const state = observeTesseraAction(previous, actKumiki(previous, action, this.platform.clock.wallNow()), action.type, this.platform.clock.wallNow());
     if (previous === state) return;
     this.publish({ state });
+    if(action.type==='build'||action.type==='place'||action.type==='skill')this.sound('build',state);if(action.type==='export')this.sound('export',state);if(action.type==='paint'||action.type==='fill')this.sound('press',state);
     if (action.type !== 'paint' && action.type !== 'fill') this.persist();
   };
 
-  actDesktop = (action: DesktopAction) => {
+  actDesktop = (action: DesktopAction, options?:{automatic?:boolean}) => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
-    const state = actDesktop(this.snapshot.state, action, this.platform.clock.wallNow(),this.snapshot.language);
+    const sourceBase=this.snapshot.state.run.play.clock.count&&action.type!=='activity'&&!options?.automatic?{...this.snapshot.state,run:{...this.snapshot.state.run,play:{...this.snapshot.state.run.play,clock:{...this.snapshot.state.run.play.clock,count:0}}}}:this.snapshot.state;
+    const source=(action.type==='open'||action.type==='close')&&action.app==='note'?{...sourceBase,run:{...sourceBase.run,play:{...sourceBase.run.play,letterOpen:false}}}:sourceBase;
+    const state = actDesktop(source, action, this.platform.clock.wallNow(),this.snapshot.language);
     if (state === this.snapshot.state) return;
+    if(['buy','job-buy','job-update','skill','app-craft','app-install'].includes(action.type))this.sound('build',state);
     const request=action.type==='fix'?state.run.desktop.feedback.find(f=>f.id===action.id):null;
     this.publish({state,...(request?.kind==='screenshot'?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}),...(request&&hasDesktopSkill(state,'direct')&&['color','redraw','practice'].includes(request.kind)?{tesseraIntent:{serial:(this.snapshot.tesseraIntent?.serial??0)+1,kind:request.kind==='color'?'color':'drawing'}}:{})});
     if (action.type !== 'rect' && action.type !== 'icon' && action.type !== 'note') this.persist();
@@ -270,6 +296,27 @@ export class GameRuntime {
       this.publish({ notice: 'desktop.storageFull' }); return false;
     }
     return this.commitReleaseChange(takeScreenshot(this.snapshot.state, this.platform.clock.wallNow(), this.snapshot.language));
+  };
+
+  common = (action:CommonAction) => {
+    if(!this.canOperate()||this.suspended||this.platform.visibility.isHidden())return;
+    this.advanceForeground();let state=actCommon(this.snapshot.state,action,this.platform.clock.wallNow());
+    if(state===this.snapshot.state)return;
+    if(action.type==='clock-click')state=actDesktop(state,{type:'open',app:'clock'},this.platform.clock.wallNow(),this.snapshot.language);
+    if(action.type==='letter-open')state=actDesktop(state,{type:'open',app:'note'},this.platform.clock.wallNow(),this.snapshot.language);
+    this.publish({state});if(action.type==='sound')this.sound('press');this.persist();
+  };
+  dismissAchievement=()=>{if(this.canOperate())this.publish({state:{...this.snapshot.state,run:{...this.snapshot.state.run,play:{...this.snapshot.state.run.play,achievement:null}}}});};
+  collectStray=()=>{
+    if(!this.canOperate()||this.suspended||this.platform.visibility.isHidden())return;this.advanceForeground();const s=this.snapshot.state;
+    if(s.run.world!=='seed'||!s.run.seed.built.includes('color')||s.run.play.stray.lifeMs<=0||activeContract(s)==='no-color')return;
+    const next=creditPixels(s,passivePixelsPerSecond(s)*BALANCE.longPlay.straySeconds);this.publish({state:{...next,run:{...next.run,play:{...next.run.play,stray:{...next.run.play.stray,lifeMs:0,waitMs:BALANCE.longPlay.strayMinMs}}}}});this.sound('press');this.persist();
+  };
+  terminalExport=()=>{this.actKumiki({type:'export'});};
+  refreshWindows=()=>{
+    if(!this.canOperate()||this.suspended||this.platform.visibility.isHidden())return;this.advanceForeground();let s=this.snapshot.state;const now=this.platform.clock.wallNow();
+    if(s.run.world!=='desktop'||s.persistent.progress.records['secret-clock']===undefined||!s.run.desktop.apps.includes('terminal')||now-s.run.play.refreshAt<BALANCE.longPlay.refreshCooldownMs)return;
+    const next=refreshDesktop(s,now);if(next===s)return;this.publish({state:next});this.sound('build');this.persist();
   };
 
   readSeedGuide = (id: GuideId | 'close' | 'listen') => {
@@ -344,7 +391,7 @@ export class GameRuntime {
       this.activeRemainderMs = 0;
       this.momentum = freshMomentum();
       this.lastActiveAt = this.platform.clock.monotonicNow();
-      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null, introVisible: false, releaseConfirmation: false });
+      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null, introVisible: false, releaseConfirmation: false },false);
       this.persist();
       return true;
     } catch {
@@ -413,7 +460,7 @@ export class GameRuntime {
     if (!this.commitReleaseChange(state)) return;
     this.momentum = freshMomentum();
     this.publish({ releaseConfirmation: false, press: null, offline: null });
-    this.platform.unlockAchievement('prototype-released');
+    this.sound('release',state);
   };
 
   purchaseSpec = (key: SpecKey) => {

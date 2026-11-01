@@ -1,3 +1,4 @@
+import {createAudio} from './audio';
 import { acquireTab } from './tab';
 import { createMemoryStorage, createSettingsStorage, type SaveStorage } from './storage';
 import type { Platform } from './types';
@@ -33,7 +34,7 @@ export function createBrowserPlatform(isolated = false): Platform {
   };
   const params = new URLSearchParams(window.location.search);
   return {
-    storage,
+    storage,audio:createAudio(),
     settings: createSettingsStorage(storage),
     launch: { debug: params.get('debug') === '1', fixture: params.get('state') },
     clock: { wallNow: () => Date.now(), monotonicNow: () => performance.now() },

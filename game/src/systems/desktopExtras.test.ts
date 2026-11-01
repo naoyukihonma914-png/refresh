@@ -140,14 +140,14 @@ describe('段階6：アプリとジョブ',()=>{
  });
  it('第7版の実データと旧V1撮影を変更せず読み、第9版・V4撮影と混在して保存できる',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString();const old=JSON.parse(raw);let s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(12);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
+  expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
   expect(readCapture(s.persistent.screenshots[0]!).version).toBe(1);expect(nextDesktopApp(s)?.id).toBe('sort');
-  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(7);
+  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(8);
   expect(decodeSave(encodeSave(s))).toEqual(s);expect(restoreScene(s.persistent.screenshots[0]!,s.persistent.screenshots).persistent.productionNote).toBe(readCapture(old.persistent.screenshots[0]).note);
  });
  it('V4の写真・テーマ・ジョブ・12機能も撮影時の状態を独立して保つ',()=>{
   let s=fixture();s=action(s,{type:'theme',mode:'dark'});s=action(s,{type:'manager-tab',tab:'performance'});s=action(s,{type:'calendar-month',at:1830297600000});s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);
-  expect(scene.version).toBe(7);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(8);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
   s=action(s,{type:'theme',mode:'light'});s=action(s,{type:'job-update',app:'files'});const restored=restoreScene(shot,s.persistent.screenshots);
   expect(restored.persistent.desktopPrefs.mode).toBe('dark');expect(restored.run.desktop.jobs.files.updates).toBe(1);expect(restored.run.desktop.upgrades).toHaveLength(21);expect(restored.run.desktop.managerTab).toBe('performance');expect(restored.run.desktop.calendarMonth).toBe(1830297600000);expect(scene.version!==1&&scene.display.managerShotRate).toBeGreaterThan(0);
  });

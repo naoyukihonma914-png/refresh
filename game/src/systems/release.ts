@@ -40,7 +40,7 @@ export function beginPrototypeRelease(original: GameState, now: number, reducedM
   const state = flushHomeBank(original);
   const k = state.run.kumiki, p = state.persistent;
   const screen: ProductScreen = structuredClone({
-    page:state.run.seed.page,...(k.legacyBonus?{legacyBonus:k.legacyBonus}:{}),pixels: state.resources.pixels, built: state.run.seed.built, cursors: state.run.seed.autoCursors,
+    progress:state.persistent.progress,page:state.run.seed.page,...(k.legacyBonus?{legacyBonus:k.legacyBonus}:{}),pixels: state.resources.pixels, built: state.run.seed.built, cursors: state.run.seed.autoCursors,
     kumikiBuilt: k.built, placed: k.placed, design: k.design, focus: k.focus, interval: k.interval, exportName: k.exportName,
     specs: p.specs, seedSkills: p.seedSkills, pattern: p.seedAppearance.pattern, marquee: p.seedAppearance.marquee,
     kumikiSkills: p.artwork.skills, modern: p.artwork.modern, log: k.generationLog, history: state.run.seed.history,
@@ -83,13 +83,14 @@ export function buySpec(state: GameState, key: SpecKey): GameState {
 export const canStartNextVersion = (state: GameState) => shippingComplete(state) && state.persistent.specs.color >= BALANCE.release.prototypeColorLevel;
 export function startNextVersion(state: GameState, now: number): GameState {
   if (!canStartNextVersion(state)) return state;
-  const next = createSeedVersion(state, 'v1', now);
+  const next = createSeedVersion(state,state.run.version==='v0.1'?'v1':'v2',now);
   next.run.restartMs = BALANCE.release.restartMs;
   next.run.seed.guide = { seen: ['return'], current: 'return', collapsed: false };
   return next;
 }
 export function productPreviewState(product: ProductRecord): GameState {
   const s = product.screen, next = createInitialState(product.releasedAt);
+  if(s.progress)next.persistent.progress=structuredClone(s.progress);else next.legacyGeneration=true;
   next.resources.pixels = s.pixels;
   next.run.totalPixelsGenerated = product.generatedPixels;
   next.run.version = product.version; next.run.world = 'kumiki';
