@@ -159,7 +159,7 @@ describe('素朴なページ設定と次のバージョンへの入口', () => {
     old.run.seed = { built: state.run.seed.built, autoCursors: state.run.seed.autoCursors };
     delete old.persistent.seedSkills; delete old.persistent.seedAppearance;
     const migrated = decodeSave(JSON.stringify(old));
-    expect(migrated.schemaVersion).toBe(10);
+    expect(migrated.schemaVersion).toBe(11);
     expect(migrated.resources).toEqual(state.resources);
     expect(migrated.persistent.specs).toEqual(state.persistent.specs);
     expect(migrated.run.seed.built).toEqual(state.run.seed.built);

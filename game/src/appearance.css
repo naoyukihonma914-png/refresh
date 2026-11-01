@@ -294,7 +294,7 @@
 .desktop[class*='desktop-era-'] .desktop-taskbar {gap:3px;}
 .desktop[class*='desktop-era-'] .taskbar-apps {overflow:hidden;}
 .desktop[class*='desktop-era-'] .taskbar-apps button {min-width:32px;flex:1 1 120px;}
-.desktop.desktop-era-0 .taskbar-product,.desktop.desktop-era-1 .taskbar-product {max-width:110px;}
+.desktop.desktop-era-0 .taskbar-product,.desktop.desktop-era-1 .taskbar-product {width:max-content;max-width:200px;}
 .desktop.desktop-era-0 .taskbar-job-source>span,.desktop.desktop-era-1 .taskbar-job-source>span {display:none;}
 .desktop.desktop-era-0 .taskbar-job-source,.desktop.desktop-era-1 .taskbar-job-source {width:24px;min-width:24px;justify-content:center;}
 .desktop.desktop-era-0 .taskbar-right,.desktop.desktop-era-1 .taskbar-right {padding:0 3px;gap:4px;}
@@ -382,3 +382,103 @@
 .desktop.desktop-era-2 .taskbar-balance small {display:block;font-size:11px;line-height:1.25;color:#e4edf3;}
 .desktop.desktop-era-2 .taskbar-balance .pixel-resource {width:12px;height:12px;}
 .app-files .working-cursors {bottom:60px;}
+
+/* App construction is an editor document. The installed app keeps its own layout. */
+.kumiki.app-building .k-body {grid-template-columns:1fr;grid-template-areas:'workspace';}
+.kumiki.app-building .k-tools,.kumiki.app-building .k-parts-panel,.kumiki.app-building .k-palette {display:none;}
+.kumiki.app-building .k-workspace {min-width:0;overflow:hidden;}
+.app-builder {display:flex;flex:1;min-height:0;flex-direction:column;overflow:hidden;background:var(--k-inset);color:var(--k-text);}
+.builder-toolbar {display:flex;flex-wrap:wrap;flex:none;gap:4px;padding:4px;border-bottom:1px solid var(--k-line);background:var(--k-panel);}
+.builder-toolbar select {max-width:180px;}
+.builder-toolbar button {padding:3px 6px;font-size:inherit;}
+.builder-body {display:flex;flex:1;min-height:0;min-width:0;}
+.builder-workspace {flex:1;min-width:0;overflow:auto;padding:24px 12px;background-color:var(--k-surface);background-image:radial-gradient(#7776 1px,transparent 1px);background-size:8px 8px;}
+.builder-preview-frame {max-width:660px;margin:0 auto;border:2px solid #888;background:#c0c0c0;color:#000;padding:3px;}
+.builder-preview-frame>h2 {margin:0 0 3px;padding:2px 5px;background:#000080;color:#fff;font-size:12px;}
+.builder-canvas {width:100%;position:relative;background:#c0c0c0;}
+.builder-part {position:absolute;box-sizing:border-box;border:1px solid #777;overflow:hidden;cursor:move;padding:3px;touch-action:none;outline:1px solid transparent;}
+.builder-part.builder-selected {outline:1px dashed #c48a2e;z-index:1;}
+.builder-part.invalid {outline:2px solid #e34c3d;opacity:.7;}
+.builder-part>b {display:block;font-size:inherit;}
+.builder-part ul {margin:3px 0;padding:0;list-style:none;}
+.builder-part li {min-height:var(--app-row-height);border-bottom:1px solid #8883;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.builder-resize {position:absolute;right:0;bottom:0;width:12px!important;height:12px!important;min-height:0!important;padding:0!important;background:linear-gradient(135deg,transparent 50%,#888 50%)!important;cursor:nwse-resize;}
+.builder-empty,.builder-error {padding:8px;font-size:12px;}.builder-error {color:#ff8f80;}
+.builder-sidebar {display:flex;flex-direction:column;flex:none;width:204px;overflow:auto;background:var(--k-panel);border-left:1px solid var(--k-line);font-size:12px;}
+.builder-sidebar h2 {margin:0;padding:5px;border-block:1px solid var(--k-line);font-size:12px;background:var(--k-inset);}
+.builder-parts {padding:4px;}.builder-parts>div {display:flex;gap:3px;margin:2px 0;}.builder-parts button:first-child {flex:1;min-width:0;text-align:left;white-space:normal;}.builder-parts button {padding:3px;}
+.builder-properties {display:flex;flex-direction:column;gap:4px;padding:6px;}.builder-properties label {display:flex;align-items:center;justify-content:space-between;gap:4px;}.builder-properties input[type=number] {width:62px;}.builder-properties select {max-width:100px;}
+.builder-sidebar>footer {padding:6px;margin-top:auto;}.builder-sidebar>footer p {font-size:11px;}.builder-install {width:100%;padding:6px;}
+.k-embedded .builder-sidebar {width:176px;}.k-embedded .builder-toolbar {font-size:11px;}.k-embedded .builder-workspace {padding:16px 8px;}
+.app-part-measure {position:absolute;visibility:hidden;pointer-events:none;inset:0 auto auto 0;width:max-content;display:flex;flex-direction:column;align-items:flex-start;white-space:nowrap;}
+.app-layout {position:relative;width:100%;height:100%;min-height:0;overflow:auto;padding:0;box-sizing:border-box;}
+.app-layout :is(.files-app,.files-body,.files-tools,.mail-app,.photo-app,.photo-adjustments,.bin-app,.clock-app,.theme-app,.terminal-app,.manager-app) {display:contents;}
+.app-layout-part {position:absolute;box-sizing:border-box;padding:4px;overflow:auto;border:1px solid #8886;min-width:0;min-height:0;}
+.app-layout-part> :is(.file-list,.file-preview,.files-sidebar,.photo-workbench,.terminal-output,article,aside) {width:100%;height:100%;box-sizing:border-box;min-width:0;overflow:auto;margin:0;}
+.app-layout-part label {display:flex;flex-wrap:wrap;align-items:center;gap:4px;max-width:100%;}
+.app-layout-part :is(input,select,button) {max-width:100%;min-width:0;box-sizing:border-box;font-size:inherit;}
+.app-layout-part :is(p,b,strong,h1,h2,span,label,td,th) {font-size:inherit;color:inherit;}
+.app-layout-part :is(table,.file-list,article,aside,.files-address,.app-toolbar,figure,.photo-adjustments) {color:inherit;background:transparent;}
+.app-layout-part :is(td,th) {height:var(--app-row-height);padding:3px 5px;}.app-layout-part table {width:100%;}
+.app-layout-part .photo-workbench {display:flex;}.app-layout-part .files-sidebar {display:flex;flex-direction:column;}
+.app-layout-empty {padding:16px;}.app-striped li:nth-child(even),.app-striped tr:nth-child(even) {background:#8882;}
+.app-rebuild {margin-left:auto;font:inherit;padding:0 5px;white-space:nowrap;}
+.kumiki.app-building .k-body {display:flex;}
+.kumiki.app-building .k-layer-strip {display:none;}
+.app-layout-part .files-address,.app-layout-part .app-toolbar {flex-wrap:wrap;height:auto;}
+.app-layout-part :is(button,input,select,textarea) {color:inherit;background-color:inherit;}
+.app-layout-part button:hover,.app-layout-part button:focus-visible {outline:1px solid currentColor;}
+.app-layout-part :is(.selected,.unread) {color:inherit;background-color:transparent;outline:1px solid currentColor;}
+.app-striped li:nth-child(even),.app-striped tr:nth-child(even) {background:var(--app-stripe,#8882);}
+.builder-parts>div {flex-wrap:wrap;align-items:center;}.builder-parts button:first-child {flex:1 1 90px;}.builder-parts button {max-width:100%;white-space:normal;}
+.app-layout-part {container-type:inline-size;}
+.app-layout-part table {height:auto!important;table-layout:fixed;}
+.app-layout-part .file-list td {max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.app-layout-part .file-list td:first-child>button {display:flex;width:100%;align-items:center;gap:4px;overflow:hidden;}
+.app-layout-part .file-list td:first-child>button>span {min-width:0;overflow:hidden;text-overflow:ellipsis;}
+.desktop[class*='desktop-era-'] .app-layout-part .files-sidebar button.selected {color:inherit;background:transparent;box-shadow:inset 0 0 0 1px currentColor;}
+@container (max-width:360px) {.app-layout-part .file-list :is(td,th):nth-child(2),.app-layout-part .file-list :is(td,th):nth-child(3) {display:none;}.app-layout-part .file-list :is(td,th):first-child {width:70%;}}
+.working-cursors[data-layout-job] {overflow:hidden;pointer-events:none;}
+.working-cursors[data-layout-job] .job-activity {display:none;}
+.app-layout .photo-app>.app-toolbar,.app-layout .bin-app>.app-toolbar {display:contents;}
+.desktop-live>.screenshot-toolbar {pointer-events:none;}
+.desktop-live>.screenshot-toolbar>.capture-button {pointer-events:auto;}
+.desktop-live:has(>.desktop-window.is-active.is-maximized)>.screenshot-toolbar {top:40px;}
+.builder-preview-content {position:absolute;inset:0 auto auto 0;transform-origin:0 0;font-size:12px;pointer-events:none;}
+.builder-part {border-color:transparent;}.builder-part:hover {border-color:currentColor;}
+.desktop-era-1 .builder-preview-frame {background:#ece9d8;border-color:#2863cb;border-radius:6px 6px 0 0;}.desktop-era-1 .builder-preview-frame>h2 {background:linear-gradient(#4b94e8,#0054c8);}
+.desktop-era-2 .builder-preview-frame {background:#c0d2dfbb;border-color:#b7d2e4;border-radius:6px;}.desktop-era-2 .builder-preview-frame>h2 {background:transparent;color:#111;}
+.desktop[class*='desktop-era-'] .app-layout .app-layout-part :is(tr.selected,button.selected,button.unread) {color:inherit;background:transparent;outline:1px solid currentColor;}
+.app-layout-part :is(select,option) {background-color:var(--app-background);color:var(--app-foreground);}
+.app-layout-part input::placeholder {color:inherit;opacity:1;}
+.app-layout .app-layout-part {margin:0;}
+
+/* AppPart adds a layout wrapper: keep the native app's content structure inside it. */
+.app-layout [data-app-part=messages]>aside {padding:0;}
+.app-layout [data-app-part=messages] h2 {padding:8px;margin:0;border-bottom:1px solid #8886;}
+.app-layout [data-app-part=messages] aside>button {display:flex;flex-direction:column;gap:5px;width:100%;text-align:left;padding:8px;border:0;border-bottom:1px solid #8886;white-space:normal;overflow-wrap:anywhere;}
+.app-layout [data-app-part=messages] aside>button b {font-weight:400;}
+.app-layout [data-app-part=messages] aside>button.unread b {font-weight:700;}
+.app-layout [data-app-part=body]>article {padding:12px;user-select:text;overflow-wrap:anywhere;}
+.app-layout [data-app-part=appearance]>label {justify-content:space-between;border-bottom:1px solid #8886;min-height:36px;}
+.app-layout [data-app-part=processes]>article {padding:8px;}
+.app-layout [data-app-part=time] .clock-time {font-size:3.333em;}
+/* Custom part colors include controls and selection; era styles still supply their bevels. */
+.desktop .app-layout .app-layout-part :is(p,b,strong,h1,h2,span,label,td,th,small,button,input,textarea,select,option,aside,article,table,.file-list,.files-address,.app-toolbar,.photo-adjustments,figcaption) {color:inherit;font-size:inherit;}
+.desktop .app-layout .app-layout-part :is(th,button,input,textarea,select,option,aside,article,.app-toolbar) {background-color:var(--app-background);}
+.desktop .app-layout .app-layout-part :is(tr.selected,button.selected,button.unread) {color:var(--app-foreground)!important;background:transparent!important;outline:1px solid currentColor;}
+.desktop .app-layout .app-layout-part :is(td,th) {height:var(--app-row-height);}
+.desktop .app-layout .app-layout-part :is(tr:hover td,tr:focus) {color:inherit;background:var(--app-stripe);}
+.builder-sidebar {overflow:hidden;}.builder-sidebar>h2,.builder-sidebar>footer {flex:none;}
+.builder-parts {max-height:40%;overflow:auto;flex:none;}.builder-properties {min-height:0;overflow:auto;flex:1;}
+.builder-sidebar>footer {border-top:1px solid var(--k-line);}
+.desktop .app-layout .app-layout-part .file-list td {padding-block:0;}
+.desktop .app-layout .app-layout-part .file-list td button {height:var(--app-row-height);min-height:var(--app-row-height);line-height:1.2;}
+.desktop {--app-font:'Refresh Pixel',monospace;}.desktop.desktop-era-1 {--app-font:Tahoma,'MS UI Gothic','Refresh Pixel',sans-serif;}.desktop.desktop-era-2 {--app-font:'Segoe UI','Meiryo UI','Refresh Glass','Refresh UI',sans-serif;}
+.builder-preview-content :is(.file-list button,.files-sidebar button,[data-app-part=messages] button) {box-shadow:none;border:0;}
+/* Previewed icons are app artwork, outside the editor toolbar's line-icon rules. */
+.builder-preview-content svg {stroke:none;stroke-width:0;fill:initial;}
+.builder-preview-content .file-list :is(.pixel-art,.app-icon) {inline-size:18px;block-size:18px;}
+.builder-preview-content .photo-transform>.pixel-art {inline-size:100%;block-size:100%;}
+.desktop .app-layout .app-layout-part .photo-workbench {background:var(--app-background);color:var(--app-foreground);}
+.app-layout .files-sidebar button {overflow-wrap:anywhere;}

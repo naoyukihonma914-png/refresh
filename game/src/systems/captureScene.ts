@@ -1,3 +1,5 @@
+import { type AppProjects } from './appLayout';
+import type { BuiltApp } from './desktopState';
 import { LEGACY_DESKTOP } from './desktopGeometry';
 import type { LogicalSize } from './viewport';
 import { editorStage,desktopStage,type Appearance } from './appearance';
@@ -122,7 +124,9 @@ export function restoreScene(shot:Screenshot,catalog:Screenshot[]):GameState {
   state.run.desktop={...createDesktopState(),...s.desktop,windows:{...createDesktopState().windows,...s.desktop.windows},icons:{...createDesktopState().icons,...s.desktop.icons},entered:true,feedbackSerial:Math.max(0,...s.desktop.feedback.map(f=>f.id)),feedback:s.desktop.feedback.map(f=>({...f,baseline:[],baselineColor:'#000000'}))};
   if(s.version!==1){state.persistent.desktopPrefs={...createDesktopPreferences(),...s.view.preferences};state.run.desktop={...state.run.desktop,...s.view.desktop};if(s.photoPicture)state.persistent.artwork.sketchbook=drawing(s.photoPicture);}
   if(s.version>=3)state.persistent.appearance={...(s as CaptureSceneV3).appearance};
-  state.run.desktop.screen=s.version===4?{...s.screen}:{...LEGACY_DESKTOP};
+  if(s.version>=5)state.run.kumiki={...state.run.kumiki,...(s as CaptureSceneV5).editorView};
+  state.run.desktop.screen='screen' in s?{...s.screen}:{...LEGACY_DESKTOP};
+  if(s.version>=6){const current=s as CaptureSceneV6;state.run.desktop.projects=structuredClone(current.appProjects);state.run.desktop.editingApp=current.editingApp;}
   state.persistent.screenshots=catalog.filter(s=>s.id<shot.id);
   return state;
 }
@@ -134,10 +138,10 @@ export interface CaptureSceneV2 extends Omit<CaptureSceneV1,'version'|'desktop'>
  version:2;
  display:CaptureSceneV1['display']&{wallTime:number;managerShotRate:number;managerTokenRate:number};
  photoPicture:Picture|null;
- desktop:Omit<DesktopState,'screen'|'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'recycled'|'trashCount'|'reservation'|'terminal'|'shotHistory'|'stalled'|'stalledClosed'|'stallMs'|'stallSerial'|'idleMs'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'|'feedback'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
+ desktop:Omit<DesktopState,'projects'|'editingApp'|'screen'|'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'recycled'|'trashCount'|'reservation'|'terminal'|'shotHistory'|'stalled'|'stalledClosed'|'stallMs'|'stallSerial'|'idleMs'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'|'feedback'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
  view:{preferences:DesktopPreferences;desktop:Pick<DesktopState,'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'reservation'|'terminal'|'stalled'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'>;photo:PhotoEdit};
 }
-export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3|CaptureSceneV4;
+export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3|CaptureSceneV4|CaptureSceneV5|CaptureSceneV6;
 export function projectCaptureV2(state:GameState,language:string):CaptureSceneV2 {
  const d=state.run.desktop;
  // V1's document projection remains shared, while the V2 desktop has its own contract.
@@ -173,7 +177,7 @@ function isCaptureSceneV2(v:unknown):v is CaptureSceneV2 {
  const t=ex.terminal;
  return ['processes','performance'].includes(ex.managerTab as string)&&['home','shots','feedback','tessera','files','photo','terminal'].includes(ex.managerProcess as string)&&(ex.calendarMonth===null||num(ex.calendarMonth))&&record(t)&&[60000,3600000].includes(t.interval as number)&&typeof t.running==='boolean'&&num(t.elapsedMs)&&num(t.executions)&&Array.isArray(t.log)&&t.log.length<=20&&t.log.every(l=>record(l)&&num(l.at)&&typeof l.ok==='boolean')&&(ex.stalled===null||apps2.includes(ex.stalled as string))&&['skills','data','specs','general'].includes(ex.settingsPage as string);
 }
-export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value)||isCaptureSceneV4(value);}
+export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value)||isCaptureSceneV4(value)||isCaptureSceneV5(value)||isCaptureSceneV6(value);}
 
 // Format 3 records the selected visual stages. Older formats keep their own readers.
 export interface CaptureSceneV3 extends Omit<CaptureSceneV2,'version'> {version:3;appearance:Appearance}
@@ -189,7 +193,7 @@ function isCaptureSceneV3(v:unknown):v is CaptureSceneV3 {
 
 // Format 4 keeps the logical size of the photographed desktop, including 4:3 scenes.
 export interface CaptureSceneV4 extends Omit<CaptureSceneV3,'version'> {version:4;screen:LogicalSize}
-export function projectCapture(state:GameState,language:string):CaptureSceneV4 {
+export function projectCaptureV4(state:GameState,language:string):CaptureSceneV4 {
  return {...projectCaptureV3(state,language),version:4,screen:{...state.run.desktop.screen}};
 }
 function isCaptureSceneV4(v:unknown):v is CaptureSceneV4 {
@@ -197,4 +201,43 @@ function isCaptureSceneV4(v:unknown):v is CaptureSceneV4 {
  if(!isCaptureSceneV3({...v,version:3})||!record(v.desktop)||!record(v.desktop.windows)||!record(v.desktop.icons))return false;
  const width=v.screen.width as number,height=v.screen.height as number,work=height-(width===800?28:width===1024?30:40);
  return Object.values(v.desktop.windows).every(b=>record(b)&&Number(b.x)+Number(b.width)<=width&&Number(b.y)+Number(b.height)<=work)&&Object.values(v.desktop.icons).every(p=>record(p)&&Number(p.x)<=width-80&&Number(p.y)<=work-76);
+}
+
+// Format 5 preserves the editor document and persona rather than recreating its initial view.
+export interface CaptureSceneV5 extends Omit<CaptureSceneV4,'version'> {
+ version:5; editorView:{workspace:'draw'|'compose'|'export';activeDocument:'home'|'drawing'};
+}
+export function projectCaptureV5(state:GameState,language:string):CaptureSceneV5 {
+ return {...projectCaptureV4(state,language),version:5,editorView:{workspace:state.run.kumiki.workspace??'draw',activeDocument:state.run.kumiki.activeDocument??'home'}};
+}
+function isCaptureSceneV5(v:unknown):v is CaptureSceneV5 {
+ return record(v)&&v.version===5&&record(v.editorView)&&['draw','compose','export'].includes(v.editorView.workspace as string)&&['home','drawing'].includes(v.editorView.activeDocument as string)&&isCaptureSceneV4({...v,version:4});
+}
+
+export interface CaptureSceneV6 extends Omit<CaptureSceneV5,'version'> {version:6;appProjects:AppProjects;editingApp:BuiltApp|null}
+export function projectCapture(state:GameState,language:string):CaptureSceneV6 {
+ const d=state.run.desktop,base=projectCaptureV5(state,language);
+ // Dense custom rows can show more files than the older fixed-height list. Keep the
+ // scene bounded to 40 rows, including a selected file, as required by the old reader.
+ const row=d.projects.files?.installed?.parts.find(p=>p.id==='list')?.rowHeight??32;
+ const count=Math.min(39,Math.ceil((d.windows.files.height-24)/Math.max(20,row))+1);
+ const files=d.windows.files.open&&!d.windows.files.minimized?desktopFiles(state,createI18n(language)).filter((f,i)=>i<count||f.id===d.fileSelection).map(file=>{
+  const {work,drawing,shot,...metadata}=file;
+  return {...metadata,...(work?.kind==='icon'?{picture:picture(work)}:drawing?{picture:picture(drawing)}:{}),...(work?.kind==='part'?{partId:work.id}:{}),...(shot&&file.id===d.fileSelection?{shotId:shot.id}:{})};
+ }):[];
+ return {...base,files,version:6,editingApp:d.editingApp,appProjects:structuredClone(Object.fromEntries(Object.entries(d.projects).filter(([id])=>d.editingApp===id||d.windows[id as BuiltApp].open&&!d.windows[id as BuiltApp].minimized).map(([id,p])=>[id,{...p,undo:[],redo:[]}])))};
+}
+// Format 6 owns its identifiers and geometry limits; later game balance must not invalidate an old image.
+const appParts6={files:['navigation','places','list','status','sort','search','large'],mail:['messages','body','draft','folders'],photo:['source','image','brightness','tone','wallpaper','crop','compare'],bin:['trash','empty','undo'],clock:['time','timer','calendar'],theme:['appearance','slideshow','iconSize'],terminal:['commands','output'],manager:['tabs','processes']} as const;
+function layout6(value:unknown,app:BuiltApp):boolean {
+ if(!record(value)||!num(value.width)||!num(value.height)||value.width<160||value.width>1920||value.height<100||value.height>1080||!Array.isArray(value.parts))return false;
+ const ids=appParts6[app] as readonly string[];
+ if(value.parts.length>ids.length||!value.parts.every(p=>record(p)&&ids.includes(p.id as string)&&['x','y','width','height'].every(k=>num(p[k])&&(p[k] as number)%8===0)&&Number(p.width)>0&&Number(p.height)>0&&Number(p.x)+Number(p.width)<=Number(value.width)&&Number(p.y)+Number(p.height)<=Number(value.height)&&text(p.color)&&/^#[0-9a-f]{6}$/i.test(p.color)&&[10,12,14,16].includes(p.fontSize as number)&&[20,24,28,32].includes(p.rowHeight as number)&&typeof p.striped==='boolean'))return false;
+ const parts=value.parts as Record<string,number>[];
+ return new Set(parts.map(p=>p.id)).size===parts.length&&parts.every((p,i)=>parts.every((q,j)=>i===j||!(p.x!<q.x!+q.width!&&p.x!+p.width!>q.x!&&p.y!<q.y!+q.height!&&p.y!+p.height!>q.y!)));
+}
+function isCaptureSceneV6(v:unknown):v is CaptureSceneV6 {
+ if(!record(v)||v.version!==6||!record(v.appProjects)||!(v.editingApp===null||Object.hasOwn(appParts6,String(v.editingApp)))||!Array.isArray(v.files))return false;
+ if(!Object.entries(v.appProjects).every(([id,p])=>Object.hasOwn(appParts6,id)&&record(p)&&Array.isArray(p.crafted)&&p.crafted.every(part=>(appParts6[id as BuiltApp] as readonly string[]).includes(part))&&new Set(p.crafted).size===p.crafted.length&&layout6(p.draft,id as BuiltApp)&&(p.installed===null||layout6(p.installed,id as BuiltApp))&&Array.isArray(p.undo)&&p.undo.length===0&&Array.isArray(p.redo)&&p.redo.length===0))return false;
+ return isCaptureSceneV5({...v,version:5,files:v.files.filter(f=>record(f)&&f.kind!=='app')})&&v.files.filter(f=>record(f)&&f.kind==='app').every(f=>record(f)&&text(f.id)&&text(f.name)&&Object.hasOwn(appParts6,String(f.appId))&&num(f.bytes)&&(f.at===null||num(f.at)));
 }

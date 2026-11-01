@@ -1,3 +1,4 @@
+import { hasAppPart, ownFeaturePart } from './appBuild';
 import { resizeDesktop } from './desktopGeometry';
 import { setDesktopStage, type VisualStage } from './appearance';
 import { BALANCE, type DesktopSkill } from '../config/balance';
@@ -60,22 +61,23 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   return next;
  }
  case 'large':return hasUpgrade(s,'large')?desktop(s,{largeIcons:!d.largeIcons}):s;
- case 'mail-folder':return hasUpgrade(s,'folders')||hasDesktopSkill(s,'sortMail')?desktop(s,{mailFolder:a.folder,mailSelection:null}):s;
+ case 'mail-folder':return hasAppPart(s,'mail','folders')&&(hasUpgrade(s,'folders')||hasDesktopSkill(s,'sortMail'))?desktop(s,{mailFolder:a.folder,mailSelection:null}):s;
  case 'photo':{
   if(!d.apps.includes('photo'))return s;
+  if(a.type==='photo'&&Object.keys(a.edit).some(key=>!hasAppPart(s,'photo',key==='brightness'?'brightness':key==='tone'?'tone':key==='crop'?'crop':'source')))return s;
   const edit={...d.photo,...a.edit};
   if(!['coast','night','sketch',...s.persistent.screenshots.filter(x=>!x.deleted).map(x=>`shot:${x.id}`)].includes(edit.source))return s;
-  if(!Number.isFinite(edit.brightness)||edit.brightness<.5||edit.brightness>1.5||!Number.isFinite(edit.tone)||edit.tone< -50||edit.tone>50||!Number.isFinite(edit.crop)||edit.crop<0||edit.crop>40||!hasUpgrade(s,'crop')&&edit.crop!==0)return s;
+  if(!Number.isFinite(edit.brightness)||edit.brightness<.5||edit.brightness>1.5||!Number.isFinite(edit.tone)||edit.tone< -50||edit.tone>50||!Number.isFinite(edit.crop)||edit.crop<0||edit.crop>40||!hasUpgrade(s,'crop')&&a.edit.crop!==undefined&&a.edit.crop!==0)return s;
   return desktop(s,{photo:edit});
  }
  case 'compare':return hasUpgrade(s,'compare')?desktop(s,{compare:!d.compare}):s;
  case 'wallpaper':{
-  if(!d.apps.includes('photo'))return s;
+  if(!hasAppPart(s,'photo','wallpaper')||!hasAppPart(s,'photo','image'))return s;
   const next={...s,persistent:{...s.persistent,desktopPrefs:{...p,wallpaper:{...d.photo}},artwork:{...s.persistent.artwork,wallpaper:d.photo.source==='sketch'?structuredClone(s.persistent.artwork.sketchbook):null}}};
   return d.photo.brightness>1?completeRequests(next,['bright'],now):next;
  }
  case 'trash':{
-  if(!d.apps.includes('bin')||d.trash.some(t=>t.id===a.id))return s;
+  if(!hasAppPart(s,'bin','trash')||d.trash.some(t=>t.id===a.id))return s;
   const file=[...desktopFiles(s,createI18n(language),'screenshots'),...desktopFiles(s,createI18n(language),'exports')].find(f=>f.id===a.id);
   if(!file||!(file.kind==='shot'||file.kind==='icon'&&file.id.startsWith('current:icon:')&&PRACTICE_IDS.includes(file.work!.id as 'document')))return s;
   const reward=recycleValue(s,a.id);
@@ -90,7 +92,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   return desktop({...s,resources:{...s.resources,pixels:s.resources.pixels-item.reward},run:{...s.run,totalPixelsGenerated:s.run.totalPixelsGenerated-item.reward}},{feedback:d.feedback.map(f=>f.kind==='trash'&&f.completedAt===null?{...f,baseline:f.baseline.filter(id=>`shot:${id}`!==a.id)}:f),trash:d.trash.filter(t=>t!==item),recycled:item.first?d.recycled.filter(id=>id!==a.id):d.recycled});
  }
  case 'empty-trash':{
-  if(!d.apps.includes('bin')||!d.trash.length)return s;
+  if(!hasAppPart(s,'bin','empty')||!d.trash.length)return s;
   const ids=new Set(d.trash.map(t=>t.id));
   const screenshots=s.persistent.screenshots.map(shot=>ids.has(`shot:${shot.id}`)?{...shot,deleted:true}:shot);
   let next=desktop({...s,persistent:{...s.persistent,screenshots},run:{...s.run,kumiki:{...s.run.kumiki,exports:s.run.kumiki.exports.filter(e=>!ids.has(`current:${e.kind}:${e.id}`))}}},{trash:[]});
@@ -109,9 +111,9 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   const next=desktop(s,{reservation:{at:a.at,done:false}});return matches?completeRequests(next,['timer'],now):next;
  }
  case 'cancel-reservation':return desktop(s,{reservation:null});
- case 'terminal':return d.apps.includes('terminal')&&(BALANCE.w3.terminalIntervals as readonly number[]).includes(a.interval)?desktop(s,{terminal:{...d.terminal,interval:a.interval,running:a.running,elapsedMs:0}}):s;
+ case 'terminal':return hasAppPart(s,'terminal','commands')&&(BALANCE.w3.terminalIntervals as readonly number[]).includes(a.interval)?desktop(s,{terminal:{...d.terminal,interval:a.interval,running:a.running,elapsedMs:0}}):s;
  case 'theme':{
-  if(!d.apps.includes('theme'))return s;
+  if((a.mode!==undefined||a.accent!==undefined||a.radius!==undefined||a.autoRadius!==undefined)&&!hasAppPart(s,'theme','appearance'))return s;
   const prefs={...p};
   if(a.mode==='light'||a.mode==='dark')prefs.mode=a.mode;
   if(a.accent&&/^#[0-9a-f]{6}$/i.test(a.accent))prefs.accent=a.accent;
@@ -127,7 +129,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   if(a.id==='major2'&&!p.skills.includes('major1'))return s;
   const skill=BALANCE.w3.skills.find(x=>x.id===a.id);if(!skill||p.skills.includes(a.id)||skill.band===2&&s.run.version==='v0.1'||s.resources.tokens<skill.cost)return s;
   const next:GameState={...s,resources:{...s.resources,tokens:s.resources.tokens-skill.cost},persistent:{...s.persistent,desktopPrefs:{...p,skills:[...p.skills,a.id]}},run:{...s.run,desktop:{...d,...(a.id==='burst'?{cooldownMs:d.cooldownMs*BALANCE.w3.burstMultiplier}:{}),...(a.id==='sortMail'?{mailFolder:'pending' as const}:{})}}};
-  return a.id==='major1'?setDesktopStage(next,1):a.id==='major2'?setDesktopStage(next,2):next;
+  return a.id==='major1'?setDesktopStage(next,1):a.id==='major2'?setDesktopStage(next,2):a.id==='sortMail'?ownFeaturePart(next,'folders','mail'):next;
  }
  case 'toggle-skill':{
   if(!p.skills.includes(a.id)||!BALANCE.w3.skills.find(x=>x.id===a.id)?.playful)return s;

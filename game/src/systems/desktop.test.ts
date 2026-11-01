@@ -1,3 +1,4 @@
+import { actAppBuild } from './appBuild';
 import { describe, expect, it } from 'vitest';
 import { BALANCE } from '../config/balance';
 import { createFixture } from './fixtures';
@@ -33,8 +34,8 @@ describe('デスクトップ',()=>{
   });
   it('ファイル・並べ替え・メールを順に作り、未購入のアプリを開かない',()=>{
     let s=desktop(); expect(buyDesktopApp(s,'mail')).toBe(s);
-    const start=s.resources.pixels;s=buyDesktopApp(s,'files');expect(s.resources.pixels).toBe(start-300_000);expect(s.run.desktop.active).toBe('files');
-    expect(buyDesktopApp(s,'files')).toBe(s);expect(buyDesktopApp(s,'mail')).toBe(s);s=buyDesktopApp(s,'sort');s=buyDesktopApp(s,'mail');expect(s.resources.pixels).toBe(start-1_150_000);
+    const start=s.resources.pixels;s=buyDesktopApp(s,'files');expect(s.resources.pixels).toBe(start-300_000);expect(s.run.desktop.active).toBe('tessera');s=actAppBuild(s,{type:'app-recommend',app:'files'});s=actAppBuild(s,{type:'app-install',app:'files'});
+    expect(buyDesktopApp(s,'files')).toBe(s);expect(buyDesktopApp(s,'mail')).toBe(s);s=buyDesktopApp(s,'sort');s=buyDesktopApp(s,'mail');s=actAppBuild(s,{type:'app-recommend',app:'mail'});s=actAppBuild(s,{type:'app-install',app:'mail'});expect(s.resources.pixels).toBe(start-1_150_000);
     expect(s.run.desktop.apps).toEqual(['files','mail']);expect(desktopConditions(s)[0]).toBe(false);
   });
   it('窓の移動・大きさ・前後・最小化・最大化・復元・閉じる・開き直しとアイコン位置を保存する',()=>{
@@ -124,7 +125,7 @@ describe('デスクトップ',()=>{
   });
   it('第5版の製品・絵・性能・資源を保持してデスクトップの初期状態を補い、新形式を往復できる',()=>{
     const old=JSON.parse(encodeSave(createFixture('release-v1-tessera',now)!));old.schemaVersion=5;delete old.run.desktop;delete old.persistent.screenshots;delete old.persistent.productionNote;delete old.persistent.noteUpdatedAt;
-    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(10);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
+    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(11);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
     for(const fixture of ['desktop-early','desktop-files','desktop-mail','desktop-modern','desktop-full']){const s=createFixture(fixture,now)!;expect(isGameState(s),fixture).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);}
     expect(BALANCE.spec.storage[1].price).toBe(60);
   });
