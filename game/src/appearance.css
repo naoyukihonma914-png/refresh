@@ -367,7 +367,6 @@
 }
 .desktop[class*='desktop-era-'] .screenshot-toolbar {width:max-content;}
 .kumiki.k-embedded .k-status {white-space:nowrap;overflow:hidden;flex-wrap:nowrap;}
-.kumiki.k-embedded .k-status>span {min-width:0;overflow:hidden;text-overflow:ellipsis;}
 .kumiki.editor-era-2[data-workspace=compose] .editor-navigator {display:none;}
 @container (max-width:850px) {
  .kumiki.editor-era-2[data-workspace=export] .k-documents {display:none!important;}
@@ -377,3 +376,9 @@
 .desktop-programs>button:hover,.desktop-programs>button:focus-visible {background:#000080;color:#fff;}
 .desktop-programs .app-icon,.desktop-programs .pixel-art {width:20px;height:20px;flex:none;}
 .desktop-programs>button>span {min-width:0;overflow-wrap:anywhere;}
+.desktop.desktop-era-2 .taskbar-balance {height:36px;min-height:36px;padding:2px 8px;gap:6px;border:1px solid transparent;border-radius:2px;color:#fff;white-space:nowrap;}
+.desktop.desktop-era-2 .taskbar-balance:hover,.desktop.desktop-era-2 .taskbar-balance[aria-expanded=true] {background:#ffffff24;border-color:#ffffff55;}
+.desktop.desktop-era-2 .taskbar-balance b {font-size:12px;line-height:1.25;font-weight:normal;}
+.desktop.desktop-era-2 .taskbar-balance small {display:block;font-size:11px;line-height:1.25;color:#e4edf3;}
+.desktop.desktop-era-2 .taskbar-balance .pixel-resource {width:12px;height:12px;}
+.app-files .working-cursors {bottom:60px;}

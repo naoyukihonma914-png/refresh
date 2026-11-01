@@ -1,3 +1,5 @@
+import { StatusBar } from '../components/StatusBar';
+import { feedbackBodyText,feedbackSubject } from '../content/feedback';
 import { workHeight,taskbarHeight,LEGACY_DESKTOP } from '../systems/desktopGeometry';
 import { appName,desktopStage,editorName } from '../systems/appearance';
 import { PhotoSurface } from './PhotoSurface';
@@ -12,7 +14,7 @@ import { Estimate } from '../components/Estimate';
 import { productLabel } from '../content/products';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { BALANCE } from '../config/balance';
-import { createI18n, type I18n } from '../content/i18n';
+import { createI18n } from '../content/i18n';
 import { paletteFor } from '../content/kumikiArt';
 import coast from '../assets/wallpaper/coast.webp';
 import { desktopAppShotGain, desktopConditions, installedApps, nextDesktopApp, restoreScreenshot, screenshotCapacity, screenshotParts, screenshotReward } from '../systems/desktop';
@@ -25,10 +27,8 @@ import { HomeDocument } from './kumiki/HomeDocument';
 import { LanguageSelect } from '../components/LanguageSelect';
 
 const noop = () => {};
-function feedbackName(f: Feedback, i18n: I18n): string { return ['redraw','practice'].includes(f.kind) ? i18n.t(`k.icon.${f.target as 'folder'}`) : f.kind==='search'?i18n.t('files.home'):''; }
-function feedbackSubject(f: Feedback, i18n: I18n) { return i18n.t(`feedback.subject.${f.kind}`,{name:feedbackName(f,i18n),time:i18n.time(Number(f.target)||0)}); }
-function FeedbackBody({ feedback: f, i18n }: { feedback: Feedback; i18n: I18n }) {
-  return <p className="feedback-body">{i18n.t(`feedback.body.${f.kind}`,{name:feedbackName(f,i18n),count:BALANCE.w3.redrawCells,time:i18n.time(Number(f.target)||0)})}</p>;
+function FeedbackBody({feedback:f,...props}:Props&{feedback:Feedback}) {
+ return <p className="feedback-body">{feedbackBodyText(props.snapshot.state,f,props.i18n,!!props.capture&&props.capture.version<3)}</p>;
 }
 function fixLabel(f:Feedback){return f.kind==='screenshot'?'desktop.fix.screenshot':f.kind==='sort'||f.kind==='search'?'desktop.fix.files':f.kind==='bright'?'desktop.fix.photo':f.kind==='trash'?'desktop.fix.bin':f.kind==='timer'?'desktop.fix.clock':f.kind==='dark'?'desktop.fix.theme':'desktop.fix.tessera';}
 function DesktopWindow({ app, children,jobMenu,onJobMenu, ...props }: Props & {app: AppId; children: ReactNode;jobMenu:JobId|null;onJobMenu:(app:JobId|null)=>void}) {
@@ -91,7 +91,7 @@ function NoteApp({snapshot,runtime,i18n,preview}: Props) {
   const text=snapshot.state.persistent.productionNote??defaultNote(i18n);
   return <div className="note-app"><textarea aria-label={i18n.t('note.text')} spellCheck={false} value={text} readOnly={preview} maxLength={BALANCE.w3.maxNote}
     onChange={e=>runtime.actDesktop({type:'note',text:e.target.value})} onBlur={runtime.persist}/>
-    <footer><span>{i18n.t('note.characters',{count:[...text].length})}</span><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} includeTest={runtime.platform.launch.debug}/></footer>
+    <StatusBar fields={[{id:'characters',priority:0,text:i18n.t('note.characters',{count:[...text].length})}]}><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} includeTest={runtime.platform.launch.debug}/></StatusBar>
   </div>;
 }
 function MailApp(props: Props) {
@@ -103,7 +103,7 @@ function MailApp(props: Props) {
     {folders&&<nav className="mail-folders">{(['all','pending','completed'] as const).map(folder=><button key={folder} className={d.mailFolder===folder?'selected':''} onClick={()=>runtime.actDesktop({type:'mail-folder',folder})}>{i18n.t(folder==='all'?'mail.all':folder==='pending'?'mail.pendingFolder':'mail.completedFolder')}</button>)}</nav>}{!messages.length&&<p>{i18n.t('mail.empty')}</p>}{messages.map(f=><button key={f.id} className={`${selected?.id===f.id?'selected':''} ${f.completedAt===null?'unread':''}`} onClick={()=>runtime.actDesktop({type:'mail',id:f.id})}>
       <b>{i18n.t(`feedback.sender.${f.sender}`)}</b><span>{feedbackSubject(f,i18n)}</span><small>{f.completedAt===null?i18n.t('mail.pending'):i18n.t('mail.completed',{date:i18n.dateTime(f.completedAt)})}</small>
     </button>)}</aside><article>{selected?<><h1>{feedbackSubject(selected,i18n)}</h1><p className="mail-sender">{i18n.t('mail.from',{name:i18n.t(`feedback.sender.${selected.sender}`)})}</p><p className="mail-date">{i18n.t('mail.received',{date:i18n.dateTime(selected.at)})}</p>
-      <FeedbackBody feedback={selected} i18n={i18n}/>{selected.completedAt===null&&hasUpgrade(snapshot.state,'draft')?<><div className="mail-draft"><b>{i18n.t('mail.draft')}</b><p>{i18n.t('mail.draftText')}</p></div><button className="win-button accent" onClick={()=>runtime.actDesktop({type:'fix',id:selected.id})}>{selected.kind==='redraw'||selected.kind==='practice'||selected.kind==='color'?i18n.t('desktop.fix.editor',{app:editorName(snapshot.state,i18n)}):i18n.t(fixLabel(selected))}</button></>:selected.completedAt!==null?<p className="mail-completed">{i18n.t('mail.completed',{date:i18n.dateTime(selected.completedAt)})}</p>:null}
+      <FeedbackBody {...props} feedback={selected}/>{selected.completedAt===null&&hasUpgrade(snapshot.state,'draft')?<><div className="mail-draft"><b>{i18n.t('mail.draft')}</b><p>{i18n.t('mail.draftText')}</p></div><button className="win-button accent" onClick={()=>runtime.actDesktop({type:'fix',id:selected.id})}>{selected.kind==='redraw'||selected.kind==='practice'||selected.kind==='color'?i18n.t('desktop.fix.editor',{app:editorName(snapshot.state,i18n)}):i18n.t(fixLabel(selected))}</button></>:selected.completedAt!==null?<p className="mail-completed">{i18n.t('mail.completed',{date:i18n.dateTime(selected.completedAt)})}</p>:null}
     </>:<p className="mail-placeholder">{i18n.t('mail.choose')}</p>}</article></div>;
 }
 export function ScreenshotPreview({shot,catalog, ...props}:Props & {shot:Screenshot;catalog:Screenshot[]}) {
@@ -125,9 +125,9 @@ function FilePreview({file, ...props}: Props & {file:DesktopFile}) {
     <div className="file-preview-content">
       {file.kind==='shot'&&file.shot&&<ScreenshotPreview {...props} shot={file.shot} catalog={catalog??snapshot.state.persistent.screenshots}/>}
       {(file.kind==='icon'||file.kind==='sketch')&&frames&&size&&<div className="art-preview">{frames.map((_,frame)=><PixelArt key={frame} frames={frames} size={size} frame={frame} palette={props.capture?.palette??paletteFor(snapshot.state.persistent.specs.color)}/>)}</div>}
-      {file.kind==='part'&&<div className="part-file-preview"><button className="win-button" onClick={()=>{runtime.actDesktop({type:'open',app:'tessera'});}}>{i18n.t('files.edit')}</button><p>{i18n.t(`k.part.${work!.id as 'button'}`)}</p></div>}
+      {file.kind==='part'&&<div className="part-file-preview"><button className="win-button" onClick={()=>{runtime.actDesktop({type:'open',app:'tessera'});}}>{i18n.t('files.edit',{app:editorName(snapshot.state,i18n,!!props.capture&&props.capture.version<3)})}</button><p>{i18n.t(`k.part.${work!.id as 'button'}`)}</p></div>}
       {file.kind==='home'&&<div className="file-home-preview" inert><HomeDocument {...props} selected={null} onSelect={noop} selecting={false} dragPart={null} onDrop={noop} preview interactive={false}/></div>}
-    </div><footer>{fileSize(file.bytes,i18n)}{file.at!==null&&<span>{i18n.dateTime(file.at)}</span>}</footer>
+    </div><StatusBar fields={[{id:'size',priority:1,text:fileSize(file.bytes,i18n)},...(file.at!==null?[{id:'modified',priority:0,text:i18n.dateTime(file.at)}]:[])]}/>
   </section>;
 }
 function FilesApp(props: Props) {
@@ -155,7 +155,10 @@ function FilesApp(props: Props) {
         <button onClick={()=>setSelectedRow(file.id)}>{file.kind==='icon'&&file.work?<PixelArt frames={file.work.frames} size={file.work.size} palette={props.capture?.palette??paletteFor(snapshot.state.persistent.specs.color)}/>:file.kind==='folder'?<AppIcon app="files" state={snapshot.state} palette={props.capture?.palette}/>:<AppIcon app="note" state={snapshot.state} palette={props.capture?.palette}/>}<span>{file.name}</span></button>
       </td><td title={file.at===null?undefined:i18n.dateTime(file.at)}>{file.at===null?i18n.t('files.unknownDate'):i18n.dateTime(file.at)}</td><td>{i18n.t(`files.type.${file.kind}`)}</td><td>{file.kind==='folder'?'':fileSize(file.bytes,i18n)}{canRecycle(file)&&<button className="file-recycle" aria-label={i18n.t('files.recycle')} title={i18n.t('files.recycle')} onClick={()=>runtime.actDesktop({type:'trash',id:file.id})}><LineIcon kind="close"/></button>}</td></tr>)}
     </tbody></table>{!files.length&&<p>{i18n.t('files.empty')}</p>}</div>}
-  </div><footer className="files-status"><span>{i18n.t('files.items',{count:props.capture?.display.fileCount??files.length})}</span><span>{i18n.t('files.storage',{used:props.capture?.display.shotCount??activeScreenshots(snapshot.state).length,capacity:screenshotCapacity(snapshot.state),size:fileSize(shotBytes,i18n)})}</span></footer></div>;
+  </div><StatusBar className="files-status" fields={[
+    {id:'items',priority:0,text:i18n.t('files.items',{count:props.capture?.display.fileCount??files.length})},
+    {id:'storage',priority:1,text:i18n.t('files.storage',{used:props.capture?.display.shotCount??activeScreenshots(snapshot.state).length,capacity:screenshotCapacity(snapshot.state),size:fileSize(shotBytes,i18n)})},
+  ]}/></div>;
 }
 function DesktopScene(props: Props): React.ReactElement {
   const {runtime,snapshot,i18n,preview=false}=props;
@@ -211,7 +214,7 @@ function DesktopScene(props: Props): React.ReactElement {
     </div>
     {(notification||success)&&<aside className={`feedback-toast ${success?'is-success':''}`} aria-live={preview?'off':'polite'}>
       <header><AppIcon app="mail" state={state} palette={props.capture?.palette}/><b>{i18n.t(success?'desktop.thanks':'desktop.notifications')}</b><button className="nav-button" aria-label={i18n.t('desktop.close')} onClick={()=>runtime.actDesktop(success?{type:'success-close'}:{type:'notice',id:null})}><LineIcon kind="close"/></button></header>
-      {success?<p>{i18n.t('desktop.tokenReward',{count:success.reward??BALANCE.w3.feedbackTokens})}</p>:notification&&<><b className="toast-sender">{i18n.t(`feedback.sender.${notification.sender}`)}</b><FeedbackBody feedback={notification} i18n={i18n}/><div className="toast-actions"><button className="win-button accent" onClick={()=>runtime.actDesktop({type:'fix',id:notification.id})}>{notification.kind==='redraw'||notification.kind==='practice'||notification.kind==='color'?i18n.t('desktop.fix.editor',{app:editorName(state,i18n)}):i18n.t(fixLabel(notification))}</button><button className="win-button" onClick={()=>runtime.actDesktop({type:'notice',id:null})}>{i18n.t('desktop.later')}</button></div></>}
+      {success?<p>{i18n.t('desktop.tokenReward',{count:success.reward??BALANCE.w3.feedbackTokens})}</p>:notification&&<><b className="toast-sender">{i18n.t(`feedback.sender.${notification.sender}`)}</b><FeedbackBody {...props} feedback={notification}/><div className="toast-actions"><button className="win-button accent" onClick={()=>runtime.actDesktop({type:'fix',id:notification.id})}>{notification.kind==='redraw'||notification.kind==='practice'||notification.kind==='color'?i18n.t('desktop.fix.editor',{app:editorName(state,i18n)}):i18n.t(fixLabel(notification))}</button><button className="win-button" onClick={()=>runtime.actDesktop({type:'notice',id:null})}>{i18n.t('desktop.later')}</button></div></>}
     </aside>}
     {notifications&&<section className="notification-center"><h2>{i18n.t('desktop.pending',{count:pending.length})}</h2>{pending.length?pending.map(f=><button key={f.id} className="win-button" onClick={()=>{runtime.actDesktop({type:'notice',id:f.id});setNotifications(false);}}>{feedbackSubject(f,i18n)}</button>):<p>{i18n.t('desktop.noPending')}</p>}</section>}
     {conditions&&<section className="desktop-conditions">{!legacy&&<nav className="desktop-programs">{apps.map(app=><button key={app} data-app-launcher={app} onClick={()=>{runtime.actDesktop({type:'open',app});setConditions(false);}}><AppIcon app={app} state={state}/><span>{appName(state,app,i18n)}</span></button>)}</nav>}<h2>{i18n.t('k.conditions')}</h2>{(['apps','requests','icons','wallpaper','automation'] as const).map((id,index)=><label key={id}><input type="checkbox" readOnly checked={checks[index]}/>{i18n.t(`seed.condition.${id}`)}</label>)}</section>}
@@ -229,6 +232,7 @@ function DesktopScene(props: Props): React.ReactElement {
     <footer ref={taskbar} className="desktop-taskbar">{!legacy&&<button className="taskbar-product" aria-label={i18n.t('appearance.productMenu')} title={productLabel(i18n,state.persistent.productName)} aria-expanded={conditions} onClick={()=>setConditions(!conditions)}><ProductGlyph/><span>{productLabel(i18n,state.persistent.productName)}</span></button>}{hasUpgrade(state,'jobs')&&<button ref={jobSource} className="taskbar-job-source" aria-label={i18n.t('jobs.drag')} aria-expanded={assignments} aria-haspopup="menu" draggable title={i18n.t('jobs.drag')} onDragStart={e=>{setAssignments(false);e.dataTransfer.setData('text/refresh-job','cursor');}} onKeyDown={event=>{if(event.key==='ArrowDown'){event.preventDefault();setAssignments(true);}}} onClick={()=>setAssignments(!assignments)}><CursorGlyph/><span>{i18n.t('jobs.cursor')}<small>{i18n.t('jobs.capacity',{used:JOB_IDS.filter(id=>d.jobs[id].assigned).length,capacity:jobCapacity(state)})}</small></span></button>}
       {hasDesktopSkill(state,'virtual')&&<nav className="taskbar-workspaces">{([0,1] as const).map(workspace=><button key={workspace} aria-label={i18n.t('desktop.workspace',{count:workspace+1})} aria-pressed={d.workspace===workspace} onClick={()=>runtime.actDesktop({type:'workspace',workspace})}>{i18n.integer(workspace+1)}</button>)}</nav>}<div className="taskbar-apps">{apps.filter(app=>legacy?!['note','settings'].includes(app)||d.windows[app].open:era===2?app!=='note'||d.windows[app].open:d.windows[app].open).map(app=><button key={app} aria-label={appName(snapshot.state,app,i18n)} title={appName(snapshot.state,app,i18n)} className={`${d.windows[app].open?'running':''} ${d.active===app&&!d.windows[app].minimized?'active':''}`} onClick={()=>runtime.actDesktop({type:'taskbar',app})}><AppIcon app={app} state={state} palette={props.capture?.palette} frame={frame}/><span className="taskbar-app-name">{appName(state,app,i18n,legacy)}</span></button>)}</div>
       <div className="taskbar-right">{(legacy||era!==2)&&resourceControls}
+        {!legacy&&era===2&&<button className="taskbar-pixels taskbar-balance" title={i18n.t('desktop.pixels',{pixels:i18n.pixels(state.resources.pixels)})} aria-expanded={upgrades} onClick={()=>{setUpgrades(!upgrades);setConditions(false);}}><i className="pixel-resource"/><span><b data-taskbar-pixels={state.resources.pixels}>{i18n.pixels(state.resources.pixels)}</b><small>{i18n.t('desktop.rateCompact',{pixels:i18n.rate(props.capture?.display.rate??passivePixelsPerSecond(state))})}</small></span></button>}
         {d.apps.includes('clock')&&<button className="taskbar-clock" onClick={()=>runtime.actDesktop({type:'open',app:'clock'})}><span>{i18n.time(wallTime)}</span><span>{i18n.date(wallTime)}</span></button>}
         {d.feedback.length>0&&<button className="notification-button" aria-label={i18n.t('desktop.notifications')} aria-expanded={notifications} onClick={()=>setNotifications(!notifications)}><LineIcon kind="bell"/>{pending.length>0&&<small>{i18n.integer(pending.length)}</small>}</button>}
       </div>

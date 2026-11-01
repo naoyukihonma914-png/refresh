@@ -1,3 +1,4 @@
+import { StatusBar } from '../components/StatusBar';
 import { PixelArt } from './desktop-icons';
 import { editorStage,editorName } from '../systems/appearance';
 import { ProductNameInput } from '../components/ProductSettings';
@@ -299,9 +300,11 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
     </div>
     {!legacyAppearance&&stage===1&&<section className="k-layer-strip"><b>{i18n.t('k.layers')}</b><span>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</span>{hasKSkill(state,'animation')&&drawing?.frames.map((_,index)=><button key={index} aria-pressed={frame===index} onClick={()=>setFrame(index)}>{i18n.t('k.frame',{count:index+1})}</button>)}</section>}
     {appearanceMessage&&!preview&&<aside className="appearance-guide" role="status"><p>{i18n.t(backwards?'appearance.guide.previous':stage===2?'appearance.guide.editor2':'appearance.guide.editor1')}</p><small>{i18n.t('guide.signature')}</small><button onClick={()=>setAppearanceMessage(false)}>{i18n.t('guide.close')}</button></aside>}
-    <footer className="k-status"><span>{i18n.t('k.position', { tool: i18n.t(`k.tool.${tool}`), ...position })}</span><span>{i18n.t(k.focus && k.placed.includes('switch') ? 'k.cursorPaused' : 'k.working', { count: state.run.seed.autoCursors })}</span>
-      {state.lastSavedAt !== null && <span>{i18n.t('save.saved', { time: i18n.time(state.lastSavedAt) })}</span>}
-      <span>{i18n.t('k.zoomValue', { count: zoom * 100 })}</span>
-    </footer>
+    <StatusBar className="k-status" fields={[
+      {id:'position',priority:0,text:i18n.t('k.position',{tool:i18n.t(`k.tool.${tool}`),...position})},
+      {id:'cursors',priority:2,text:i18n.t(k.focus&&k.placed.includes('switch')?'k.cursorPaused':'k.working',{count:state.run.seed.autoCursors})},
+      ...(state.lastSavedAt!==null?[{id:'saved',priority:3,text:i18n.t('save.saved',{time:i18n.time(state.lastSavedAt)})}]:[]),
+      {id:'zoom',priority:1,text:i18n.t('k.zoomValue',{count:zoom*100})},
+    ]}/>
   </main>;
 }
