@@ -1,3 +1,4 @@
+import { VIEWPORT } from './viewport';
 import { hasDesktopSkill } from './desktopJobs';
 import { actDesktop, observeTesseraAction, activeScreenshots, screenshotCapacity, takeScreenshot, type DesktopAction } from './desktop';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
@@ -67,7 +68,10 @@ export class GameRuntime {
   getSnapshot = () => this.snapshot;
 
   private publish(update: Partial<RuntimeSnapshot>) {
+    const before=this.snapshot.state.run.world==='desktop'?this.snapshot.state.run.desktop.screen:VIEWPORT;
     this.snapshot = { ...this.snapshot, ...update };
+    const after=this.snapshot.state.run.world==='desktop'?this.snapshot.state.run.desktop.screen:VIEWPORT;
+    if(before.width!==after.width||before.height!==after.height)this.platform.viewport.logicalSizeChanged({width:after.width,height:after.height});
     this.listeners.forEach(listener => listener());
   }
 
@@ -79,6 +83,8 @@ export class GameRuntime {
     });
     if (this.disposed) { this.lease.release(); return; }
     if (!this.lease.acquired) { this.publish({ status: 'blocked' }); return; }
+    const initialSize=this.snapshot.state.run.world==='desktop'?this.snapshot.state.run.desktop.screen:VIEWPORT;
+    this.platform.viewport.logicalSizeChanged({width:initialSize.width,height:initialSize.height});
     const loaded = this.fixture ? { kind: 'loaded' as const, state: this.snapshot.state }
       : loadGame(this.platform.storage);
     if (loaded.kind === 'corrupt') { this.publish({ status: 'corrupt' }); return; }

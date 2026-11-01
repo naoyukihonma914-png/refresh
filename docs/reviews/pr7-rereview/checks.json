@@ -1,0 +1,2159 @@
+{
+  "checks": [
+    "段0・1×Tessera①②/Gesso③×3言語×2ブラウザの36状態で、帯を縮小・最大化・復元。72画面を撮影し、全文の項目だけが残ることと省略の優先順位を確認",
+    "ファイルと制作ノートも3言語・段0/1で確認。文字数などを丸ごと省き、言語選択の操作を残す",
+    "段2で写真を最大化しても、時計の左のピクセル・毎秒が見えて押せる。3言語×2ブラウザでアップグレードの開閉を確認",
+    "通知とメールの本文は現在の名前に追従し、Gesso→Tesseraの切り戻し後も撮影したメールはGessoを保持。3言語で確認"
+  ],
+  "statusLayouts": [
+    {
+      "os": 0,
+      "editor": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 0,
+      "editor": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 0,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 0,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 0,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 0,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 0,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "[[Pencil~~~] · x ~~0 · y ~~0]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 0,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "[[Pencil~~~] · x ~~0 · y ~~0]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 1,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 1,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 1,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 1,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 1,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "[[Pencil~~~] · x ~~0 · y ~~0]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 1,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "[[Pencil~~~] · x ~~0 · y ~~0]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 2,
+      "language": "ja",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 2,
+      "language": "ja",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "鉛筆　x 0　y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "オートカーソル 41台がホーム画面で押しています",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "保存しました 09:01",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 2,
+      "language": "en",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 2,
+      "language": "en",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "Pencil · x 0 · y 0",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "41 auto cursors are pressing in the home screen",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "Saved at 09:01 AM",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "100%",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 2,
+      "language": "en-XA",
+      "browser": [
+        1920,
+        1080
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "[[Pencil~~~] · x ~~0 · y ~~0]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    },
+    {
+      "os": 1,
+      "editor": 2,
+      "language": "en-XA",
+      "browser": [
+        1366,
+        768
+      ],
+      "small": [
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ],
+      "wide": [
+        {
+          "id": "position",
+          "text": "[[Pencil~~~] · x ~~0 · y ~~0]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "cursors",
+          "text": "[41 auto cursors are pressing in the home screen~~~~~~~~~~~~~~~~~~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "saved",
+          "text": "[Saved at ~~~~09:01 AM]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        },
+        {
+          "id": "zoom",
+          "text": "[100%~]",
+          "complete": true,
+          "obscured": false,
+          "overflow": "clip"
+        }
+      ]
+    }
+  ],
+  "pageErrors": []
+}

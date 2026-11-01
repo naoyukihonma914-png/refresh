@@ -77,7 +77,7 @@ describe('段階6：アプリとジョブ',()=>{
  it('予約の記録はその時刻までの生成だけを含み、残りの不在生成を後で足す',()=>{
   let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s=action(s,{type:'reserve',at:now+60000});
   const before=s.resources.pixels,rate=passivePixelsPerSecond(s);s=advanceOfflineTime(s,now+120000).state;
-  const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.version===2&&scene.display.wallTime).toBe(now+60000);expect(scene.display.resources.pixels-before).toBeCloseTo(rate*60,1);
+  const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.version!==1&&scene.display.wallTime).toBe(now+60000);expect(scene.display.resources.pixels-before).toBeCloseTo(rate*60,1);
  });
  it('ターミナルは選んだ間隔で実行し、停止・満杯・最小化でも重複や無限生成をしない',()=>{
   let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s=action(s,{type:'terminal',interval:60000,running:true});
@@ -133,18 +133,18 @@ describe('段階6：アプリとジョブ',()=>{
   for(let i=0;i<10;i++){s=request(s,'sort');s=action(s,{type:'sort',by:'date'});}
   expect(desktopConditions(s)).toEqual([true,true,true,true,true]);expect(s.run.world).toBe('desktop');
  });
- it('第7版の実データと旧V1撮影を変更せず読み、第8版・V2撮影と混在して保存できる',()=>{
+ it('第7版の実データと旧V1撮影を変更せず読み、第9版・V4撮影と混在して保存できる',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString();const old=JSON.parse(raw);let s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(8);expect(s.resources).toEqual(old.resources);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
+  expect(s.schemaVersion).toBe(10);expect(s.resources).toEqual(old.resources);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
   expect(readCapture(s.persistent.screenshots[0]!).version).toBe(1);expect(nextDesktopApp(s)?.id).toBe('sort');
-  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(2);
+  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(4);
   expect(decodeSave(encodeSave(s))).toEqual(s);expect(restoreScene(s.persistent.screenshots[0]!,s.persistent.screenshots).persistent.productionNote).toBe(readCapture(old.persistent.screenshots[0]).note);
  });
- it('V2の写真・テーマ・ジョブ・12機能も撮影時の状態を独立して保つ',()=>{
+ it('V4の写真・テーマ・ジョブ・12機能も撮影時の状態を独立して保つ',()=>{
   let s=fixture();s=action(s,{type:'theme',mode:'dark'});s=action(s,{type:'manager-tab',tab:'performance'});s=action(s,{type:'calendar-month',at:1830297600000});s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);
-  expect(scene.version).toBe(2);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(4);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
   s=action(s,{type:'theme',mode:'light'});s=action(s,{type:'job-update',app:'files'});const restored=restoreScene(shot,s.persistent.screenshots);
-  expect(restored.persistent.desktopPrefs.mode).toBe('dark');expect(restored.run.desktop.jobs.files.updates).toBe(1);expect(restored.run.desktop.upgrades).toHaveLength(21);expect(restored.run.desktop.managerTab).toBe('performance');expect(restored.run.desktop.calendarMonth).toBe(1830297600000);expect(scene.version===2&&scene.display.managerShotRate).toBeGreaterThan(0);
+  expect(restored.persistent.desktopPrefs.mode).toBe('dark');expect(restored.run.desktop.jobs.files.updates).toBe(1);expect(restored.run.desktop.upgrades).toHaveLength(21);expect(restored.run.desktop.managerTab).toBe('performance');expect(restored.run.desktop.calendarMonth).toBe(1830297600000);expect(scene.version!==1&&scene.display.managerShotRate).toBeGreaterThan(0);
  });
  it.each(['desktop-jobs','desktop-photo','desktop-ready','desktop-stalled'])('%sの固定状態を往復できる',name=>{const s=fixture(name);expect(isGameState(s)).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);});
 });

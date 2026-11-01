@@ -1,0 +1,384 @@
+@font-face {font-family:'Refresh Glass';src:url('./assets/fonts/mplus1p-regular.woff2') format('woff2');font-weight:400;font-display:block;}
+/* Unversioned styling above remains available for recorded scenes from formats 1 and 2. */
+.k-documents {display:contents;}
+.desktop-resources {display:flex;align-items:center;gap:8px;}
+.taskbar-app-name,.era-progress {display:none;}
+.appearance-setting {display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0;}
+.appearance-requirement {color:#c67c41!important;}
+.appearance-guide {position:absolute;z-index:70;left:50%;bottom:70px;transform:translateX(-50%);max-width:560px;padding:12px 18px;color:#222;background:#fffde8;border:1px solid #8d8970;box-shadow:2px 3px 8px #0003;font:12px/1.6 'Refresh UI',sans-serif;}
+.appearance-guide p {margin:0 0 4px;}
+.appearance-guide small {display:block;text-align:right;}
+.desktop-updating {animation:visual-update 2s ease both;}
+@keyframes visual-update {0%,100%{filter:brightness(1)}35%{filter:brightness(.12)}65%{filter:brightness(.12)}85%{filter:brightness(1)}}
+/* Tessera 1: large, light, beveled controls. Tessera 2: compact, dark pixel controls. */
+.kumiki[class*='editor-era-'] {--k-panel:#d6cfc0;--k-surface:#5d6f7d;--k-inset:#b8b2a8;--k-line:#8f8574;--k-light:#f4efe4;--k-text:#1f1c18;--k-sub:#5e574c;--k-active:#b9a16d;color:var(--k-text);font:16px/1.35 'Refresh Pixel',monospace;background:var(--k-surface);}
+.kumiki[class*='editor-era-'] button,.kumiki[class*='editor-era-'] select {font:inherit;color:var(--k-text);background:var(--k-panel);border:1px solid #1f1c18;border-radius:0;box-shadow:inset 2px 2px var(--k-light),inset -2px -2px var(--k-line);}
+.kumiki[class*='editor-era-'] button:disabled {opacity:.5;}
+.kumiki[class*='editor-era-'] button:active,.kumiki[class*='editor-era-'] button.active {background:var(--k-active);box-shadow:inset 2px 2px var(--k-line),inset -2px -2px var(--k-light);}
+.kumiki[class*='editor-era-'] .k-menu {min-height:32px;background:var(--k-panel);border-bottom:2px solid var(--k-line);}
+.kumiki[class*='editor-era-'] .k-menu button {border:0;box-shadow:none;background:transparent;padding:3px 8px;}
+.kumiki[class*='editor-era-'] .k-toolbar {min-height:36px;padding:3px 10px;gap:8px 14px;background:var(--k-panel);border-bottom:2px solid var(--k-line);}
+.kumiki[class*='editor-era-'] .k-toolbar b {color:inherit;}
+.kumiki[class*='editor-era-'] .k-body {display:grid;grid-template-columns:70px minmax(0,1fr) 280px 46px;grid-template-areas:'palette workspace parts tools';gap:1px;}
+.kumiki[class*='editor-era-'] .k-tools {grid-area:tools;width:auto;inline-size:auto;padding:4px 1px;border-left:2px solid var(--k-line);gap:4px;}
+.kumiki.editor-era-0 .k-tools button {width:44px;height:44px;inline-size:44px;block-size:44px;}
+.kumiki.editor-era-0 .k-tools svg {width:32px;height:32px;stroke-width:2;}
+.kumiki[class*='editor-era-'] .k-palette {grid-area:palette;overflow:auto;min-height:0;background:var(--k-panel);border-right:2px solid var(--k-line);}
+.kumiki[class*='editor-era-'] .palette-label {display:none;}
+.kumiki[class*='editor-era-'] .palette-swatches {display:grid;grid-template-columns:repeat(2,26px);max-height:none;max-block-size:none;padding:4px;margin:3px 0;gap:2px;overflow:visible;}
+.kumiki.editor-era-0 .palette-swatches button {width:26px;height:26px;inline-size:26px;block-size:26px;min-block-size:26px;border:2px solid #534b40;box-shadow:inset 1px 1px #fff6;}
+.kumiki[class*='editor-era-'] .palette-swatches .chosen {outline:2px solid var(--k-text);outline-offset:-4px;}
+.kumiki[class*='editor-era-'] .mirror-option {display:flex;flex-direction:column;padding:3px;font-size:11px;}
+.kumiki[class*='editor-era-'] .k-parts-panel {grid-area:parts;inline-size:auto;width:auto;min-width:0;padding:0;background:var(--k-panel);border-left:2px solid var(--k-line);}
+.kumiki[class*='editor-era-'] .k-parts-panel > section,.kumiki[class*='editor-era-'] .part-list {flex:none;}
+.kumiki[class*='editor-era-'] .k-parts-panel h2 {font:inherit;font-weight:normal;background:var(--k-panel);color:var(--k-sub);padding:6px 10px;box-shadow:inset 0 -2px var(--k-line);margin:0;}
+.kumiki[class*='editor-era-'] .part-list {padding:4px;}
+.kumiki[class*='editor-era-'] .part-list button {min-height:38px;margin-bottom:4px;padding:6px;}
+.kumiki[class*='editor-era-'] .next-component {padding:2px 8px 10px;}
+.kumiki[class*='editor-era-'] .k-workspace {grid-area:workspace;min-width:0;min-height:0;overflow:hidden;}
+.kumiki[class*='editor-era-'] .document-tabs {min-height:32px;background:var(--k-panel);padding:3px 6px 0;border-bottom:2px solid var(--k-line);}
+.kumiki[class*='editor-era-'] .k-documents {display:grid;grid-template-columns:minmax(250px,1fr) minmax(280px,.9fr);min-height:0;flex:1;overflow:auto;gap:18px;padding:42px 24px;background:var(--k-surface);align-items:start;}
+.kumiki[class*='editor-era-'] .workbench {background:none;overflow:visible;min-width:0;}
+.kumiki[class*='editor-era-'] .home-document {width:100%;inline-size:100%;max-inline-size:100%;margin:0;border:2px solid #1f1c18;max-block-size:100%;}
+.kumiki[class*='editor-era-'] .icon-editor {width:100%;inline-size:100%;overflow:auto;max-height:100%;min-height:0;border:2px solid #1f1c18;background:var(--k-panel);box-shadow:inset 2px 2px var(--k-light),inset -2px -2px var(--k-line);}
+.kumiki[class*='editor-era-'] .editor-heading {flex-wrap:wrap;background:#1f3f7a;color:#fff;min-height:32px;padding:4px;gap:4px;font-size:13px;}
+.kumiki[class*='editor-era-'] .editor-heading h2 {display:none;}
+.kumiki[class*='editor-era-'] .editor-heading select {max-width:100%;min-width:0;flex:1;font-size:13px;}
+.kumiki[class*='editor-era-'] .drawing-scroll {inline-size:calc(100% - 20px);width:calc(100% - 20px);margin:10px;padding:0;max-block-size:none;block-size:auto;max-height:460px;overflow:auto;box-shadow:none;border:1px solid var(--k-line);}
+.kumiki[class*='editor-era-'] .drawing-scroll canvas {max-width:100%;height:auto!important;block-size:auto!important;aspect-ratio:1;}
+.kumiki[class*='editor-era-'] .k-status {min-height:26px;background:var(--k-panel);color:var(--k-text);font:12px 'Refresh Pixel',monospace;gap:18px;}
+.kumiki[class*='editor-era-'] .k-comment {font-size:12px;}
+.kumiki.editor-era-0:not(.is-mature) .k-body {grid-template-columns:70px minmax(0,1fr) 46px;grid-template-areas:'palette workspace tools';}
+.kumiki.editor-era-0:not(.is-mature) .k-parts-panel {display:none;}
+.kumiki[class*='editor-era-'].k-embedded .k-body {grid-template-columns:52px minmax(0,1fr) 170px 32px;}
+.kumiki[class*='editor-era-'].k-embedded .k-tools button {inline-size:28px;block-size:28px;width:28px;height:28px;}
+.kumiki[class*='editor-era-'].k-embedded .k-tools svg {width:22px;height:22px;}
+.kumiki[class*='editor-era-'].k-embedded .k-documents {grid-template-columns:minmax(180px,1fr) minmax(190px,1fr);padding:12px 8px;gap:8px;}
+.kumiki[class*='editor-era-'].k-embedded {font-size:12px;}
+.kumiki.editor-era-1 {--k-panel:#34343d;--k-surface:#232329;--k-inset:#1d1d22;--k-line:#1d1d22;--k-light:#4a4a55;--k-text:#e6e2d8;--k-sub:#b5b0a4;--k-active:#6b5530;font-size:12px;}
+.kumiki.editor-era-1 button,.kumiki.editor-era-1 select {box-shadow:inset 1px 1px var(--k-light),inset -1px -1px var(--k-line);border-color:#15151a;}
+.kumiki.editor-era-1 .k-menu {min-height:24px;border-width:1px;}
+.kumiki.editor-era-1 .k-toolbar {min-height:26px;border-width:1px;font-size:12px;}
+.kumiki.editor-era-1 .k-body {grid-template-columns:52px minmax(0,1fr) 180px 24px;}
+.kumiki.editor-era-1 .k-tools {padding:2px;gap:2px;border-width:1px;}
+.kumiki.editor-era-1 .k-tools button {inline-size:22px;block-size:22px;width:22px;height:22px;padding:2px;}
+.kumiki.editor-era-1 .k-tools svg {width:16px;height:16px;}
+.kumiki.editor-era-1 .palette-swatches {grid-template-columns:repeat(2,16px);padding:3px;gap:2px;margin:3px 4px;}
+.kumiki.editor-era-1 .palette-swatches button {width:16px;height:16px;inline-size:16px;block-size:16px;min-block-size:16px;border:1px solid #17171c;}
+.kumiki.editor-era-1 .part-list button {min-height:26px;margin-bottom:2px;padding:4px;}
+.kumiki.editor-era-1 .document-tabs {min-height:22px;border-width:1px;}
+.kumiki.editor-era-1 .home-document,.kumiki.editor-era-1 .icon-editor {border-width:1px;}
+.kumiki.editor-era-1 .editor-heading {min-height:24px;font-size:12px;}
+.k-layer-strip {display:flex;flex:none;align-items:center;gap:12px;padding:4px 10px;min-height:40px;border-top:1px solid var(--k-light);background:var(--k-inset);font-size:12px;}
+.k-layer-strip > button {min-height:26px;min-width:28px;}
+.kumiki.editor-era-1 .k-status {min-height:22px;}
+/* Gesso changes the panel arrangement and typography, not the document data. */
+.kumiki.editor-era-2 {--k-panel:#383838;--k-surface:#565656;--k-inset:#2f2f2f;--k-line:#1f1f1f;--k-light:#515151;--k-text:#e0e0e0;--k-sub:#b7b7b7;--k-active:#455362;font:13px/1.4 'Segoe UI','Refresh UI',sans-serif;}
+.kumiki.editor-era-2 button,.kumiki.editor-era-2 select {box-shadow:none;border:1px solid #202020;}
+.kumiki.editor-era-2 .k-menu {min-height:26px;background:#2b2b2b;border-width:1px;}
+.kumiki.editor-era-2 .k-personas {display:flex;flex:none;gap:6px;align-items:center;padding:6px 10px;min-height:46px;background:#383838;border-bottom:1px solid #1e1e1e;}
+.kumiki.editor-era-2 .k-personas button {min-width:96px;min-height:30px;border:1px solid #222;border-radius:2px;background:#4b4b4b;}
+.kumiki.editor-era-2 .k-personas button[aria-pressed=true] {background:#53667a;box-shadow:inset 0 0 0 1px #879aa9;}
+.kumiki.editor-era-2 .k-toolbar {min-height:32px;background:#323232;border-width:1px;}
+.kumiki.editor-era-2 .k-body {grid-template-columns:48px 240px minmax(0,1fr) 230px;grid-template-areas:'tools parts workspace palette';}
+.kumiki.editor-era-2 .k-tools {border-left:0;border-right:1px solid #222;}
+.kumiki.editor-era-2 .k-tools button {width:36px;height:34px;inline-size:36px;block-size:34px;background:#3c3c3c;}
+.kumiki.editor-era-2 .k-tools button:nth-child(1) svg {color:#d7ad68;}
+.kumiki.editor-era-2 .k-tools button:nth-child(2) svg {color:#d89999;}
+.kumiki.editor-era-2 .k-tools button:nth-child(3) svg {color:#cdd6e0;}
+.kumiki.editor-era-2 .k-tools button:nth-child(4) svg {color:#7ba4c5;}
+.kumiki.editor-era-2 .k-parts-panel {border-left:0;border-right:1px solid #222;background:#2f2f2f;}
+.kumiki.editor-era-2 .k-palette {border-left:1px solid #222;border-right:0;background:#2f2f2f;}
+.kumiki.editor-era-2 .palette-label {display:block;padding:8px;background:#3c3c3c;border-bottom:1px solid #222;color:#ddd;}
+.kumiki.editor-era-2 .palette-swatches {grid-template-columns:repeat(10,18px);gap:2px;padding:8px;margin:0;}
+.kumiki.editor-era-2 .palette-swatches button {width:18px;height:18px;inline-size:18px;block-size:18px;min-block-size:18px;}
+.kumiki.editor-era-2 .mirror-option {flex-direction:row;gap:6px;font-size:12px;padding:8px;}
+.kumiki.editor-era-2 .document-tabs {background:#333;min-height:26px;border-width:1px;}
+.kumiki.editor-era-2 .k-documents {background:#565656;grid-template-columns:minmax(260px,1fr) minmax(320px,1.15fr);padding:34px 18px;gap:18px;}
+.kumiki.editor-era-2 .k-documents[data-home-state=closed] {grid-template-columns:1fr;}
+.kumiki.editor-era-2 .k-documents[data-home-state=closed] .workbench {display:none;}
+.kumiki.editor-era-2 .icon-editor {background:#3c3c3c;border:1px solid #242424;box-shadow:0 2px 6px #0005;}
+.kumiki.editor-era-2 .editor-heading {background:#414141;color:#ddd;font:12px 'Refresh UI',sans-serif;}
+.kumiki.editor-era-2 .drawing-scroll {background:#383838;border-color:#252525;max-height:500px;}
+.kumiki.editor-era-2 .property-panel {padding:0 8px 8px;}
+.kumiki.editor-era-2 .property-panel > h2 {margin:0 -8px;}
+.kumiki.editor-era-2 .k-layer-strip {background:#303030;min-height:38px;}
+.kumiki.editor-era-2 .k-status {font-family:'Refresh UI',sans-serif;background:#2f2f2f;}
+.kumiki.editor-era-2.k-embedded .k-body {grid-template-columns:34px 140px minmax(0,1fr) 120px;}
+.kumiki.editor-era-2.k-embedded .palette-swatches {grid-template-columns:repeat(5,16px);}
+.kumiki.editor-era-2.k-embedded .k-documents {grid-template-columns:minmax(150px,1fr) minmax(170px,1fr);padding:12px 6px;gap:6px;}
+.kumiki.editor-era-2.k-embedded .k-personas {min-height:30px;padding:2px 6px;}
+.kumiki.editor-era-2.k-embedded .k-personas button {min-height:22px;min-width:70px;}
+.kumiki.editor-era-2.k-embedded .k-parts-panel h2 {font-size:11px;}
+/* The desktop keeps the same stored rectangles across three distinct window systems. */
+.desktop[class*='desktop-era-'] {background:#008080;color:#000;font:12px/1.3 'Refresh Pixel',monospace;}
+.desktop[class*='desktop-era-'] .desktop-window {background:#c0c0c0;border:2px solid #c0c0c0;border-radius:0!important;box-shadow:inset 1px 1px #fff,inset -1px -1px #000;}
+.desktop[class*='desktop-era-'] .window-title {height:18px;padding-left:2px;border:0;color:#c0c0c0;background:#808080;font-weight:bold;gap:2px;}
+.desktop[class*='desktop-era-'] .is-active>.window-title {background:#000080;color:#fff;}
+.desktop[class*='desktop-era-'] .window-title>.pixel-art,.desktop[class*='desktop-era-'] .window-title>.app-icon {width:16px;height:16px;margin-right:2px;}
+.desktop[class*='desktop-era-'] .window-controls {height:18px;gap:2px;padding:1px 1px 1px 0;}
+.desktop[class*='desktop-era-'] .window-controls button {width:16px;height:14px;min-height:14px;padding:0;background:#c0c0c0;color:#000;box-shadow:inset 1px 1px #fff,inset -1px -1px #000;border-radius:0;}
+.desktop[class*='desktop-era-'] .line-icon {stroke-width:1.3;shape-rendering:crispEdges;}
+.desktop[class*='desktop-era-'] .window-content {margin:2px;background:#fff;border:1px solid #808080;}
+.desktop[class*='desktop-era-'] .win-button,.desktop[class*='desktop-era-'] .nav-button {min-height:24px;border-radius:0;background:#c0c0c0;color:#000;border:0;box-shadow:inset 1px 1px #fff,inset -1px -1px #000,inset 2px 2px #dfdfdf,inset -2px -2px #808080;padding:3px 8px;}
+.desktop[class*='desktop-era-'] .win-button.accent {background:#c0c0c0;color:#000;}
+.desktop[class*='desktop-era-'] input,.desktop[class*='desktop-era-'] select,.desktop[class*='desktop-era-'] textarea {border-radius:0;background:#fff;color:#000;min-height:22px;border:0;box-shadow:inset 1px 1px #808080,inset -1px -1px #fff,inset 2px 2px #000;}
+.desktop[class*='desktop-era-'] input[type=checkbox],.desktop[class*='desktop-era-'] input[type=range] {box-shadow:none;}
+.desktop[class*='desktop-era-'] .app-toolbar,.desktop[class*='desktop-era-'] .files-address,.desktop[class*='desktop-era-'] .files-status,.desktop[class*='desktop-era-'] .note-app footer {min-height:26px;padding:3px 6px;background:#c0c0c0;border:0;border-bottom:1px solid #808080;}
+.desktop[class*='desktop-era-'] .files-sidebar,.desktop[class*='desktop-era-'] .mail-app aside,.desktop[class*='desktop-era-'] .settings-app>aside,.desktop[class*='desktop-era-'] .manager-app>nav {background:#c0c0c0;border-color:#808080;}
+.desktop[class*='desktop-era-'] .native-table th,.desktop[class*='desktop-era-'] .native-table td {height:24px;padding:3px 8px;border-color:#ddd;}
+.desktop[class*='desktop-era-'] .file-list th {background:#c0c0c0;box-shadow:inset 1px 1px #fff,inset -1px -1px #808080;}
+.desktop[class*='desktop-era-'] .file-list td {height:24px;}
+.desktop[class*='desktop-era-'] .selected {background:#000080!important;color:#fff!important;}
+.desktop[class*='desktop-era-'] .screenshot-toolbar {background:#c0c0c0;border:2px outset #eee;border-radius:0;box-shadow:2px 2px #0004;min-height:32px;padding:4px 8px;gap:12px;font-weight:normal;}
+.desktop[class*='desktop-era-'] .screenshot-toolbar > span {color:#222;}
+.desktop[class*='desktop-era-'] .screenshot-toolbar .win-button {min-height:24px;font-size:12px;}
+.desktop[class*='desktop-era-'] .desktop-shortcut {gap:3px;padding:2px;font-size:12px;min-height:60px;}
+.desktop[class*='desktop-era-'] .desktop-shortcut>.pixel-art,.desktop[class*='desktop-era-'] .desktop-shortcut>.app-icon {width:32px;height:32px;filter:drop-shadow(1px 1px #000);}
+.desktop[class*='desktop-era-'] .desktop-shortcut>span {text-shadow:1px 1px #000;}
+.desktop[class*='desktop-era-'] .desktop-taskbar {height:28px;gap:3px;padding:2px 3px 0;background:#c0c0c0;border:0;box-shadow:inset 0 1px #fff;backdrop-filter:none;}
+.desktop[class*='desktop-era-'] .taskbar-product {display:flex;flex:none;align-items:center;gap:4px;height:23px;max-width:190px;padding:1px 6px;border:0;box-shadow:inset 1px 1px #fff,inset -1px -1px #000,inset 2px 2px #dfdfdf,inset -2px -2px #808080;background:#c0c0c0;color:#000;font-weight:bold;white-space:nowrap;}
+.desktop[class*='desktop-era-'] .taskbar-product>.app-icon {width:18px;height:18px;}
+.desktop[class*='desktop-era-'] .taskbar-product>span {overflow:hidden;text-overflow:ellipsis;}
+.desktop[class*='desktop-era-'] .taskbar-apps {position:static;left:auto;transform:none;flex:1;min-width:0;height:23px;gap:3px;}
+.desktop[class*='desktop-era-'] .taskbar-apps button {display:flex;align-items:center;gap:4px;flex:1 1 156px;min-width:24px;max-width:156px;width:auto;height:23px;padding:1px 5px;border-radius:0;background:#c0c0c0;color:#000;box-shadow:inset 1px 1px #fff,inset -1px -1px #000,inset 2px 2px #dfdfdf,inset -2px -2px #808080;}
+.desktop[class*='desktop-era-'] .taskbar-apps button.active {box-shadow:inset 1px 1px #000,inset -1px -1px #fff;background:repeating-conic-gradient(#fff 0 25%,#c0c0c0 0 50%) 0/2px 2px;}
+.desktop[class*='desktop-era-'] .taskbar-apps button:after {display:none;}
+.desktop[class*='desktop-era-'] .taskbar-apps .app-icon,.desktop[class*='desktop-era-'] .taskbar-apps .pixel-art {width:16px;height:16px;}
+.desktop[class*='desktop-era-'] .taskbar-app-name {display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.desktop[class*='desktop-era-'] .taskbar-right {position:static;flex:none;min-width:0;margin-left:auto;padding:0 4px;height:23px;gap:5px;box-shadow:inset 1px 1px #808080,inset -1px -1px #fff;}
+.desktop[class*='desktop-era-'] .desktop-resources {gap:7px;}
+.desktop[class*='desktop-era-'] .taskbar-pixels {padding:0;min-height:20px;}
+.desktop[class*='desktop-era-'] .taskbar-pixels b {font-weight:normal;font-size:12px;}
+.desktop[class*='desktop-era-'] .taskbar-pixels small {display:none;}
+.desktop[class*='desktop-era-'] .taskbar-tokens {padding:0;font-size:12px;}
+.desktop[class*='desktop-era-'] .taskbar-progress {padding:0;max-width:70px;}
+.desktop[class*='desktop-era-'] .progress-caption {display:none;}
+.desktop[class*='desktop-era-'] .era-progress {display:flex;gap:1px;padding:1px;height:15px;border:1px inset #ddd;}
+.desktop[class*='desktop-era-'] .era-progress i {display:block;width:6px;}
+.desktop[class*='desktop-era-'] .era-progress i.done {background:#000080;}
+.desktop[class*='desktop-era-'] .taskbar-clock {height:23px;min-width:52px;padding:1px 4px;font-size:11px;}
+.desktop[class*='desktop-era-'] .taskbar-clock > span+span {display:none;}
+.desktop[class*='desktop-era-'] .notification-button {height:21px;width:24px;}
+.desktop[class*='desktop-era-'] .taskbar-job-source {height:23px;padding:0 4px;font-size:12px!important;gap:4px;margin:0 2px;}
+.desktop[class*='desktop-era-'] .taskbar-job-source small {display:none;}
+.desktop[class*='desktop-era-'] .feedback-toast {bottom:34px;border-radius:0;background:#c0c0c0;border:2px outset #eee;box-shadow:2px 2px #0005;color:#000;}
+.desktop[class*='desktop-era-'] .feedback-toast>header {height:20px;padding:1px 3px;background:#000080;color:#fff;}
+.desktop[class*='desktop-era-'] .feedback-toast header>.pixel-art {width:16px;height:16px;}
+.desktop[class*='desktop-era-'] .feedback-toast .nav-button {width:16px;min-height:16px;height:16px;padding:0;}
+.desktop[class*='desktop-era-'] .desktop-conditions {left:4px;right:auto;bottom:30px;border-radius:0;background:#c0c0c0;color:#000;border:2px outset #eee;box-shadow:2px 2px #0006;}
+.desktop[class*='desktop-era-'] .desktop-upgrades,.desktop[class*='desktop-era-'] .notification-center,.desktop[class*='desktop-era-'] .job-controls,.desktop[class*='desktop-era-'] .job-assignment-menu {border-radius:0;background:#c0c0c0;color:#000;border:2px outset #eee;box-shadow:2px 2px #0005;}
+.desktop[class*='desktop-era-'] .job-slot {width:22px!important;height:16px!important;font-size:10px;}
+.desktop[class*='desktop-era-'] .job-controls {top:20px;}
+.desktop[class*='desktop-era-'] .workspace-move {height:16px!important;}
+.desktop[class*='desktop-era-'] .window-title .restart-button {min-height:16px;height:16px;font-size:10px;padding:0 4px;}
+.desktop[class*='desktop-era-'] .job-assignment-menu {bottom:32px;}
+.desktop[class*='desktop-era-'] .note-app textarea {box-shadow:none;}
+/* The blue, glossy desktop. */
+.desktop.desktop-era-1 {background:#3a6ea5;font-family:Tahoma,'MS UI Gothic','Refresh Pixel',sans-serif;}
+.desktop.desktop-era-1 .desktop-window {padding:0 3px 3px;border:1px solid #1647a0;background:#245edb;border-radius:8px 8px 0 0!important;box-shadow:1px 2px 6px #0006;}
+.desktop.desktop-era-1 .window-title {height:26px;margin:0 -3px;padding-left:6px;background:linear-gradient(#7b9de6,#acc6ff 10%,#6e93df 25%,#7d9fe5 80%,#4a7bcc);color:#eaf1ff;border-radius:7px 7px 0 0;font-family:'Trebuchet MS','Refresh UI',sans-serif;font-size:13px;text-shadow:1px 1px #23457d;}
+.desktop.desktop-era-1 .is-active>.window-title {background:linear-gradient(#4d83ef,#7eb1ff 9%,#1963e9 22%,#0754d5 70%,#0145bd);color:#fff;}
+.desktop.desktop-era-1 .window-controls {height:26px;padding:2px;gap:2px;}
+.desktop.desktop-era-1 .window-controls button {width:21px;height:21px;background:linear-gradient(135deg,#75adfc,#2469e6);border:1px solid #fff;border-radius:3px;color:#fff;box-shadow:inset 1px 1px #b9d6ff;}
+.desktop.desktop-era-1 .window-controls .window-close {background:linear-gradient(135deg,#edac94,#d03b20);box-shadow:inset 1px 1px #f5c9b3;}
+.desktop.desktop-era-1 .window-content {margin:0;background:#ece9d8;border:0;}
+.desktop.desktop-era-1 .app-toolbar,.desktop.desktop-era-1 .files-address,.desktop.desktop-era-1 .files-status,.desktop.desktop-era-1 .note-app footer {background:#ece9d8;border-color:#d4d0c8;}
+.desktop.desktop-era-1 .files-sidebar {background:linear-gradient(#7da2e8,#688ad6);color:#fff;}
+.desktop.desktop-era-1 .files-sidebar button {color:#fff;}
+.desktop.desktop-era-1 .win-button,.desktop.desktop-era-1 .nav-button {border:1px solid #7895b4;border-radius:3px;background:linear-gradient(#fff,#ece9d8);box-shadow:inset 0 1px #fff;color:#000;}
+.desktop.desktop-era-1 .desktop-taskbar {height:30px;padding:2px 0 0;background:linear-gradient(#6c9df2,#2f75e7 12%,#205bcb 80%,#0e449e);box-shadow:inset 0 1px #aac9ff;}
+.desktop.desktop-era-1 .taskbar-product {height:28px;border-radius:0 11px 11px 0;background:linear-gradient(#8bb87e,#3e8f35 30%,#367c28 85%,#245b1a);color:#fff;box-shadow:inset 0 2px #a9d3a3,inset -2px 0 #173e15;font-style:italic;}
+.desktop.desktop-era-1 .taskbar-apps button {background:linear-gradient(#477ee4,#3b70d0);color:#fff;border-radius:2px;box-shadow:inset 1px 1px #80a6ee,inset -1px -1px #1d438d;height:24px;}
+.desktop.desktop-era-1 .taskbar-apps button.active {background:#1c4f9b;box-shadow:inset 1px 1px #123a7d;}
+.desktop.desktop-era-1 .taskbar-right {background:linear-gradient(#39b2f2,#078cdc);box-shadow:inset 1px 1px #1968a7;color:#fff;height:28px;}
+.desktop.desktop-era-1 .taskbar-pixels,.desktop.desktop-era-1 .taskbar-tokens,.desktop.desktop-era-1 .taskbar-clock,.desktop.desktop-era-1 .notification-button {color:#fff;}
+.desktop.desktop-era-1 .feedback-toast {bottom:42px;background:#fffbd3;border:1px solid #777;border-radius:7px;box-shadow:2px 3px 4px #0004;color:#222;}
+.desktop.desktop-era-1 .feedback-toast>header {background:transparent;color:#222;height:28px;}
+.desktop.desktop-era-1 .feedback-toast:after {content:'';position:absolute;right:18px;bottom:-8px;width:12px;height:12px;background:#fffbd3;transform:rotate(45deg);border-right:1px solid #777;border-bottom:1px solid #777;}
+.desktop.desktop-era-1 .desktop-shortcut>.pixel-art,.desktop.desktop-era-1 .desktop-shortcut>.app-icon {filter:drop-shadow(2px 3px 1px #0007);}
+/* The glass desktop: left application buttons and a resource gadget on the right. */
+.desktop.desktop-era-2 {background:#1d4a70;font-family:'Segoe UI','Meiryo UI','Refresh Glass','Refresh UI',sans-serif;}
+.desktop.desktop-era-2 .desktop-window {padding:0 5px 5px;border:1px solid #6e8b9b;background:linear-gradient(110deg,#d5ecf6b8,#c0dae685 45%,#9abacbd9);border-radius:7px!important;box-shadow:0 3px 10px #0007,inset 0 0 0 1px #f0faffcc;backdrop-filter:blur(10px);}
+.desktop.desktop-era-2 .window-title {height:30px;margin:0 -1px;padding-left:5px;background:transparent;color:#1a1a1a;font-weight:normal;text-shadow:0 0 4px #fff,0 0 6px #fff;}
+.desktop.desktop-era-2 .is-active>.window-title {background:transparent;color:#111;}
+.desktop.desktop-era-2 .window-controls {align-self:flex-start;height:20px;padding:0;gap:0;}
+.desktop.desktop-era-2 .window-controls button {height:19px;width:27px;background:linear-gradient(#f5fcffb0,#89a9bc99 48%,#4e809f99 51%,#a3c7d3b0);border:1px solid #7693a5;color:#182e3b;box-shadow:inset 0 0 0 1px #e3f3f8;}
+.desktop.desktop-era-2 .window-controls button:first-child {border-radius:0 0 0 4px;}
+.desktop.desktop-era-2 .window-controls .window-close {width:46px;border-radius:0 0 4px 0;background:linear-gradient(#f5bdb2,#d17161 48%,#b44935 52%,#dd8b71);color:#fff;}
+.desktop.desktop-era-2 .window-content {margin:0;border:1px solid #6f8b9e;background:#fff;}
+.desktop.desktop-era-2 .app-toolbar,.desktop.desktop-era-2 .files-address {background:linear-gradient(#fff,#eaf0f6);min-height:34px;}
+.desktop.desktop-era-2 .files-sidebar {background:#edf2f7;}
+.desktop.desktop-era-2 .files-address>.nav-button:first-child {border-radius:50%;width:28px;height:28px;min-height:28px;padding:3px;background:linear-gradient(#d8f1ff,#3885be);color:#fff;border:1px solid #638da9;box-shadow:inset 0 0 0 1px #fff;}
+.desktop.desktop-era-2 .win-button,.desktop.desktop-era-2 .nav-button {min-height:26px;border:1px solid #929ca5;border-radius:3px;background:linear-gradient(#fff,#e3e8eb);box-shadow:inset 0 1px #fff;color:#111;}
+.desktop.desktop-era-2 .desktop-taskbar {height:40px;padding:0 6px;background:linear-gradient(#c5e3f64d,#1c2f40b3 50%,#0a1726d9);box-shadow:inset 0 1px #f4ffff99;backdrop-filter:blur(10px);}
+.desktop.desktop-era-2 .taskbar-product {width:42px;height:42px;padding:5px;border-radius:50%;background:radial-gradient(at 35% 20%,#d6f3ff,#467b98 45%,#122e43 65%,#83bed3 90%);border:1px solid #091b29;box-shadow:inset 0 0 0 1px #b9deee,0 0 4px #bdddeb;}
+.desktop.desktop-era-2 .taskbar-product > .app-icon {width:30px;height:30px;}
+.desktop.desktop-era-2 .taskbar-product > span {display:none;}
+.desktop.desktop-era-2 .taskbar-apps {height:38px;flex:1;}
+.desktop.desktop-era-2 .taskbar-apps button {flex:none;width:48px;height:38px;min-width:48px;padding:4px 8px;background:transparent;border:1px solid transparent;box-shadow:none;border-radius:3px;}
+.desktop.desktop-era-2 .taskbar-apps button.running {border-color:#afc6d480;background:linear-gradient(#e2f1fa44,#58778a44);box-shadow:inset 0 0 0 1px #fff3;}
+.desktop.desktop-era-2 .taskbar-apps button.active {background:linear-gradient(#eefaff77,#7999ac77);box-shadow:inset 0 0 0 1px #fff4;}
+.desktop.desktop-era-2 .taskbar-apps .pixel-art,.desktop.desktop-era-2 .taskbar-apps .app-icon {width:28px;height:28px;}
+.desktop.desktop-era-2 .taskbar-app-name {display:none;}
+.desktop.desktop-era-2 .taskbar-right {background:none;box-shadow:none;height:38px;color:#fff;}
+.desktop.desktop-era-2 .taskbar-clock {height:36px;min-width:84px;color:#fff;}
+.desktop.desktop-era-2 .taskbar-clock>span+span {display:block;}
+.desktop.desktop-era-2 .desktop-resources {position:absolute;right:16px;bottom:700px;width:210px;min-height:200px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:stretch;background:linear-gradient(#283f58cf,#101f30ed);border:1px solid #c0dbe699;border-radius:7px;box-shadow:inset 0 1px #ffffff66,0 3px 10px #0008;color:#fff;}
+.desktop.desktop-era-2 .desktop-resources button {background:transparent;border:0;border-radius:0;box-shadow:none;color:#fff;max-width:none;white-space:normal;padding:4px;}
+.desktop.desktop-era-2 .taskbar-pixels {display:flex;align-items:flex-start;}
+.desktop.desktop-era-2 .taskbar-pixels b {font-family:inherit;font-size:22px;font-weight:normal;}
+.desktop.desktop-era-2 .taskbar-pixels small {display:block;font-size:11px;color:#b7dcec;}
+.desktop.desktop-era-2 .taskbar-tokens {font-size:13px;}
+.desktop.desktop-era-2 .taskbar-progress {order:3;}
+.desktop.desktop-era-2 .era-progress {display:none;}
+.desktop.desktop-era-2 .progress-caption {display:block;font-size:11px;text-align:left;}
+.desktop.desktop-era-2 .taskbar-job-source {color:#fff;}
+.desktop.desktop-era-2 .desktop-upgrades {top:150px;right:240px;bottom:auto;max-height:700px;overflow:auto;}
+.desktop.desktop-era-2 .desktop-conditions {bottom:44px;background:#f5f8fa;border:1px solid #9eb1be;border-radius:5px;box-shadow:2px 4px 8px #0005;}
+.desktop.desktop-era-2 .feedback-toast {bottom:54px;background:#fff;border:1px solid #8a9faa;border-radius:6px;box-shadow:1px 3px 8px #0005;}
+.desktop.desktop-era-2 .feedback-toast>header {height:28px;background:#fff;color:#222;}
+.desktop.desktop-era-2 .desktop-shortcut>.pixel-art,.desktop.desktop-era-2 .desktop-shortcut>.app-icon {width:40px;height:40px;filter:drop-shadow(1px 3px 2px #0008) drop-shadow(-1px -1px 1px #fff3);}
+@media(prefers-reduced-motion:reduce){.desktop-updating{animation:none;}}
+.desktop[class*='desktop-era-'] .desktop-window {border-radius:var(--window-radius)!important;}
+.desktop.desktop-era-1 .desktop-window {border-radius:var(--window-radius) var(--window-radius) 0 0!important;}
+.desktop.desktop-era-1 .window-title {border-radius:var(--window-radius) var(--window-radius) 0 0;}
+.desktop[class*='desktop-era-'].desktop-dark .window-content,.desktop[class*='desktop-era-'].desktop-dark .photo-adjustments {background:#272727;color:#eee;}
+.desktop[class*='desktop-era-'].desktop-dark .files-sidebar,.desktop[class*='desktop-era-'].desktop-dark .mail-app aside,.desktop[class*='desktop-era-'].desktop-dark .settings-app>aside,.desktop[class*='desktop-era-'].desktop-dark .manager-app>nav {background:#333;color:#eee;}
+@keyframes visual-update {0%,45%{filter:brightness(.08)}100%{filter:brightness(1)}}
+/* Zoom grows the canvas inside its scrollport; the native resolution never changes. */
+.kumiki[class*='editor-era-'] .drawing-scroll canvas {max-width:none;width:calc(min(100cqw,384px) * var(--drawing-zoom));inline-size:calc(min(100cqw,384px) * var(--drawing-zoom))!important;}
+.kumiki[class*='editor-era-'] .drawing-scroll {container-type:inline-size;}
+.kumiki.editor-era-2 .drawing-scroll canvas {width:calc(min(100cqw,384px) * var(--drawing-zoom));}
+.kumiki.editor-era-2 .panel-tabs {display:flex;gap:0;min-height:26px;background:#333;border-bottom:1px solid #232323;padding:2px 3px 0;}
+.kumiki.editor-era-2 .panel-tabs button {flex:1;min-width:0;padding:4px 5px;color:#aaa;background:#333;border-color:transparent;white-space:normal;}
+.kumiki.editor-era-2 .panel-tabs button[aria-pressed=true] {background:#4a4a4a;color:#fff;box-shadow:inset 0 2px #6f889e;}
+.kumiki.editor-era-2 .k-palette .layer-list {margin:0;border:0;}
+.kumiki.editor-era-2 .k-palette .layer-list h2 {display:none;}
+.kumiki.editor-era-2 .k-palette .layer-list button {margin:0;width:100%;min-height:30px;text-align:left;padding:5px 8px;}
+.kumiki.editor-era-2 .k-palette .property-panel {margin:0;border:0;}
+.kumiki.editor-era-2 .drawing-history {padding:8px;font-size:12px;}
+.kumiki.editor-era-2 .drawing-history button {padding:4px 8px;}
+.kumiki.editor-era-2 .template-list {display:flex;flex-direction:column;padding:4px;gap:2px;}
+.kumiki.editor-era-2 .template-list button {padding:5px 8px;text-align:left;}
+.kumiki.editor-era-2 .editor-navigator {border:1px solid #232323;background:#3c3c3c;margin:4px;padding:0 6px 8px;}
+.kumiki.editor-era-2 .navigator-preview {display:block;width:100%;height:110px;margin:6px 0;background:repeating-conic-gradient(#333 0 25%,#3c3c3c 0 50%) 0/12px 12px;}
+.kumiki.editor-era-2 .navigator-preview .pixel-art {width:100px;height:100px;}
+.kumiki.editor-era-2 .editor-navigator label {display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.kumiki.editor-era-2 .k-personas button:before {content:'';display:inline-block;width:16px;height:16px;margin-right:8px;vertical-align:middle;border:1px solid #222;box-shadow:inset 0 0 0 1px #fff4;background:linear-gradient(#65aed6,#287cb3);}
+.kumiki.editor-era-2 .k-personas .persona-pixels:before {background:linear-gradient(#b89bc2,#735283);}
+.kumiki.editor-era-2 .k-personas .persona-plugins:before {background:linear-gradient(#77b58b,#38714c);}
+.kumiki.editor-era-2.k-embedded .editor-navigator .navigator-preview {height:65px;}
+.kumiki.editor-era-2.k-embedded .navigator-preview .pixel-art {width:56px;height:56px;}
+.kumiki.editor-era-2.k-embedded .k-documents[data-home-state=closed] {grid-template-columns:1fr;}
+.desktop.desktop-era-0 .taskbar-pixels>span,.desktop.desktop-era-1 .taskbar-pixels>span {flex-direction:row;align-items:center;gap:6px;}
+.desktop.desktop-era-0 .taskbar-pixels small,.desktop.desktop-era-1 .taskbar-pixels small {display:inline;font-size:11px;color:inherit;}
+.desktop.desktop-era-0 .notification-button small,.desktop.desktop-era-1 .notification-button small {top:0;right:-2px;min-width:11px;height:11px;font-size:9px;border-radius:0;}
+.desktop.desktop-era-2 > .desktop-resources {z-index:5;}
+
+.kumiki.editor-era-2 .k-palette .palette-swatches {max-height:280px;overflow:auto;}
+.appearance-guide>button {display:block;margin:6px 0 0 auto;padding:3px 10px;background:#ebe6d4;color:#222;border:1px solid #999;font:inherit;}
+@media(prefers-reduced-motion:no-preference){.kumiki[class*='editor-era-'].is-renewing{animation:visual-update 2s ease both;}}
+/* The document retains the colors and links built in the first world. */
+.kumiki[class*='editor-era-'] .seed-page .text-button {background:transparent;border:0;box-shadow:none;color:#000080;}
+.kumiki[class*='editor-era-'] .seed-page .text-button:hover {color:#800080;}
+
+.desktop[class*='desktop-era-'] .desktop-shortcut>.pixel-art,.desktop[class*='desktop-era-'] .desktop-shortcut>.app-icon {width:var(--desktop-icon-size);height:var(--desktop-icon-size);}
+/* The browser scales the complete logical desktop and leaves black space outside it. */
+.viewport-shell {position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;}
+.viewport-shell.viewport-desktop {background:#000;}
+.desktop {width:var(--desktop-width,1920px);height:var(--desktop-height,1080px);}
+.desktop-window {container-type:inline-size;}
+.desktop[class*='desktop-era-'] .screenshot-toolbar {max-width:calc(100% - 32px);gap:6px 10px;white-space:normal;flex-wrap:wrap;justify-content:center;font-size:12px;}
+.desktop[class*='desktop-era-'] .desktop-shortcut>span {display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:16px;max-height:32px;overflow-wrap:anywhere;}
+.desktop[class*='desktop-era-'] .desktop-taskbar {gap:3px;}
+.desktop[class*='desktop-era-'] .taskbar-apps {overflow:hidden;}
+.desktop[class*='desktop-era-'] .taskbar-apps button {min-width:32px;flex:1 1 120px;}
+.desktop.desktop-era-0 .taskbar-product,.desktop.desktop-era-1 .taskbar-product {max-width:110px;}
+.desktop.desktop-era-0 .taskbar-job-source>span,.desktop.desktop-era-1 .taskbar-job-source>span {display:none;}
+.desktop.desktop-era-0 .taskbar-job-source,.desktop.desktop-era-1 .taskbar-job-source {width:24px;min-width:24px;justify-content:center;}
+.desktop.desktop-era-0 .taskbar-right,.desktop.desktop-era-1 .taskbar-right {padding:0 3px;gap:4px;}
+.desktop.desktop-era-0 .desktop-resources,.desktop.desktop-era-1 .desktop-resources {gap:5px;}
+.desktop.desktop-era-0 .taskbar-pixels,.desktop.desktop-era-1 .taskbar-pixels {gap:3px;white-space:nowrap;}
+.desktop.desktop-era-0 .taskbar-pixels .pixel-resource,.desktop.desktop-era-1 .taskbar-pixels .pixel-resource {width:12px;height:12px;}
+.desktop.desktop-era-0 .taskbar-tokens,.desktop.desktop-era-1 .taskbar-tokens {gap:4px;}
+.desktop.desktop-era-2 .desktop-resources {top:86px;bottom:auto;width:180px;min-height:160px;}
+.desktop.desktop-era-2 .desktop-upgrades {top:70px;right:204px;max-height:calc(100% - 120px);}
+.desktop .desktop-upgrades,.desktop .desktop-conditions,.desktop .notification-center {max-height:calc(100% - 70px);overflow:auto;}
+.desktop .appearance-guide {bottom:calc(var(--desktop-taskbar) + 12px);max-width:calc(100% - 50px);}
+@container (max-width:650px) {
+ .files-sidebar {width:112px;}
+ .files-sidebar button {padding-left:12px;overflow-wrap:anywhere;}
+ .files-address {padding:3px 5px;}
+ .files-breadcrumb {min-width:0;overflow:hidden;gap:3px;margin-left:2px;}
+ .files-breadcrumb button {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+ .file-list th:nth-child(2) {width:92px;}
+ .file-list th:nth-child(3) {width:80px;}
+ .file-list th:nth-child(4) {width:56px;}
+ .file-list th {padding:2px 4px;height:auto;min-height:24px;overflow-wrap:anywhere;}
+ .file-list td {padding:2px 4px;font-size:11px;}
+ .file-list td button {gap:4px;}
+ .files-tools {gap:5px;}
+ .files-tools input {min-width:0;flex:1;width:120px;}
+ .files-status {padding:3px 5px;gap:5px;flex-wrap:wrap;}
+ .mail-app>aside {width:38%;min-width:155px;}
+ .mail-app>aside h2,.mail-app>aside>button {padding:8px;}
+ .mail-app>article {padding:12px;}
+ .mail-app h1 {font-size:14px;}
+ .mail-folders {flex-wrap:wrap;}
+ .settings-app>aside {width:120px;}
+ .settings-app>article {padding:12px;}
+ .desktop-skill {gap:6px;grid-template-columns:minmax(0,1fr) auto;}
+ .desktop-skill>span {font-size:11px;}
+ .desktop-skill p {overflow-wrap:anywhere;}
+ .photo-adjustments {gap:5px;padding:6px;flex-wrap:wrap;}
+ .photo-adjustments label {min-width:100px;}
+ .app-toolbar {padding:4px 6px;gap:5px;}
+ .app-toolbar select {min-width:0;max-width:180px;}
+ .note-app textarea {padding:10px;font-size:12px;}
+ .note-app footer {padding:3px 6px;gap:8px;}
+ .note-app .language-select {display:flex;align-items:center;min-width:0;}
+ .note-app select {min-width:0;max-width:150px;}
+}
+/* Each Gesso workspace exposes the panels used by that task. */
+.kumiki.editor-era-2 .k-personas .persona-draw:before {background:linear-gradient(#65aed6,#287cb3);}
+.kumiki.editor-era-2 .k-personas .persona-compose:before {background:linear-gradient(#b89bc2,#735283);}
+.kumiki.editor-era-2 .k-personas .persona-export:before {background:linear-gradient(#77b58b,#38714c);}
+.kumiki.editor-era-2[data-workspace=draw] .workbench,.kumiki.editor-era-2[data-workspace=compose] .icon-editor {display:none;}
+.kumiki.editor-era-2[data-workspace=draw] .k-documents,.kumiki.editor-era-2[data-workspace=compose] .k-documents {grid-template-columns:1fr;}
+.kumiki.editor-era-2[data-workspace=draw] .icon-editor {max-width:800px;justify-self:center;}
+.kumiki.editor-era-2[data-workspace=compose] .workbench {max-width:800px;justify-self:center;}
+.kumiki.editor-era-2[data-workspace=export] .k-body {grid-template-columns:1fr;grid-template-areas:'workspace';}
+.kumiki.editor-era-2[data-workspace=export] .k-tools,.kumiki.editor-era-2[data-workspace=export] .k-palette,.kumiki.editor-era-2[data-workspace=export] .k-parts-panel,.kumiki.editor-era-2[data-workspace=export] .k-documents {display:none;}
+.kumiki.editor-era-2[data-workspace=export] .exports-list {position:static;flex:1;width:auto;max-width:none;max-height:none;overflow:auto;}
+@container (max-width:850px) {
+ .kumiki.k-embedded .k-workspace {min-width:0;}
+ .kumiki.k-embedded .k-documents {display:block!important;padding:8px!important;}
+ .kumiki.k-embedded .icon-editor {max-width:100%;}
+ .kumiki.k-embedded:not(.editor-era-2)[data-document=home] .k-documents>.icon-editor,.kumiki.k-embedded:not(.editor-era-2)[data-document=drawing] .k-documents>.workbench {display:none;}
+ .kumiki.k-embedded .k-toolbar {font-size:11px;gap:4px;height:auto;min-height:28px;}
+ .kumiki.k-embedded .k-tools {min-width:0;}
+ .kumiki.k-embedded .k-documents[data-home-state=closed] .workbench {display:none;}
+ .kumiki.editor-era-2.k-embedded .k-body {grid-template-columns:28px 116px minmax(0,1fr) 110px;}
+ .kumiki.editor-era-2.k-embedded .k-personas {flex-wrap:wrap;min-height:30px;gap:3px;}
+ .kumiki.editor-era-2.k-embedded .k-personas button {min-width:0;padding:3px 5px;}
+ .kumiki.editor-era-2.k-embedded .k-personas button:before {margin-right:3px;width:12px;height:12px;}
+ .kumiki.editor-era-2.k-embedded[data-workspace=export] .k-body {grid-template-columns:1fr;}
+}
+.desktop[class*='desktop-era-'] .screenshot-toolbar {width:max-content;}
+.kumiki.k-embedded .k-status {white-space:nowrap;overflow:hidden;flex-wrap:nowrap;}
+.kumiki.editor-era-2[data-workspace=compose] .editor-navigator {display:none;}
+@container (max-width:850px) {
+ .kumiki.editor-era-2[data-workspace=export] .k-documents {display:none!important;}
+}
+.desktop-programs {display:flex;flex-direction:column;gap:1px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid #888;}
+.desktop-programs>button {display:flex;align-items:center;gap:8px;min-height:28px;padding:3px 8px;background:transparent;color:inherit;border:0;text-align:left;font:inherit;}
+.desktop-programs>button:hover,.desktop-programs>button:focus-visible {background:#000080;color:#fff;}
+.desktop-programs .app-icon,.desktop-programs .pixel-art {width:20px;height:20px;flex:none;}
+.desktop-programs>button>span {min-width:0;overflow-wrap:anywhere;}
+.desktop.desktop-era-2 .taskbar-balance {height:36px;min-height:36px;padding:2px 8px;gap:6px;border:1px solid transparent;border-radius:2px;color:#fff;white-space:nowrap;}
+.desktop.desktop-era-2 .taskbar-balance:hover,.desktop.desktop-era-2 .taskbar-balance[aria-expanded=true] {background:#ffffff24;border-color:#ffffff55;}
+.desktop.desktop-era-2 .taskbar-balance b {font-size:12px;line-height:1.25;font-weight:normal;}
+.desktop.desktop-era-2 .taskbar-balance small {display:block;font-size:11px;line-height:1.25;color:#e4edf3;}
+.desktop.desktop-era-2 .taskbar-balance .pixel-resource {width:12px;height:12px;}
+.app-files .working-cursors {bottom:60px;}

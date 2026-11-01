@@ -1,0 +1,7 @@
+.status-bar {display:flex;align-items:center;flex-wrap:nowrap;gap:12px;min-width:0;}
+.status-bar>.status-content {position:relative;display:flex;align-items:center;justify-content:space-between;flex:1;min-width:0;gap:inherit;overflow:hidden;white-space:nowrap;}
+.status-bar .status-field {flex:none;white-space:nowrap;overflow:visible;text-overflow:clip;margin:0;}
+.status-bar .status-measure {position:absolute;inset:0 0 auto;height:0;overflow:hidden;visibility:hidden;pointer-events:none;gap:inherit;}
+.status-bar .status-probe {display:flex;width:max-content;gap:inherit;}
+.status-bar>.status-controls {flex:none;min-width:0;max-width:100%;margin-left:auto;}
+.k-status.status-bar {flex-wrap:nowrap;}

@@ -1,3 +1,6 @@
+import { StatusBar } from '../components/StatusBar';
+import { PixelArt } from './desktop-icons';
+import { editorStage,editorName } from '../systems/appearance';
 import { ProductNameInput } from '../components/ProductSettings';
 import { Estimate } from '../components/Estimate';
 import { productLabel } from '../content/products';
@@ -22,11 +25,16 @@ const TOOL_PATHS = {
   fill: 'M4 12L12 4L20 12L12 20Z M3 13H21',
   eyedropper: 'M4 20L5 15L15 5L19 9L9 19Z M13 3L21 11',
 };
-export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = false, interactive = true, previewReady, previewDocuments, previewPalette }: { previewPalette?:string[]; previewReady?: number; previewDocuments?: string[]; embedded?: boolean; preview?: boolean; interactive?: boolean; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
+export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = false, interactive = true, previewReady, previewDocuments, previewPalette,legacyAppearance=false }: { legacyAppearance?:boolean;previewPalette?:string[]; previewReady?: number; previewDocuments?: string[]; embedded?: boolean; preview?: boolean; interactive?: boolean; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
   const { state } = snapshot;
-  const k = state.run.kumiki;
+  const k = state.run.kumiki,stage=editorStage(state);
   const act = preview ? () => {} : runtime.actKumiki;
   useEffect(() => { setDrawingId(k.activeDrawing); setFrame(0); }, [k.activeDrawing]);
+  const [workspace,setWorkspace]=useState<'draw'|'compose'|'export'>('draw');
+  const [activeDocument,setActiveDocument]=useState<'home'|'drawing'>('home');
+  const [leftPanel,setLeftPanel]=useState<'parts'|'templates'>('templates');
+  const [colorPanel,setColorPanel]=useState<'color'|'properties'>('color');
+  const [detailPanel,setDetailPanel]=useState<'layers'|'history'>('history');
   const [tool, setTool] = useState<DrawingTool>('pencil');
   const [color, setColor] = useState(0);
   const [drawingId, setDrawingId] = useState(k.activeDrawing);
@@ -42,12 +50,12 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [name, setName] = useState(state.persistent.playerName ?? '');
   const [playing, setPlaying] = useState(false);
-  const [renewing, setRenewing] = useState(false);
+  const [renewing, setRenewing] = useState(false),[backwards,setBackwards]=useState(false),[appearanceMessage,setAppearanceMessage]=useState(false);
   const [wallpaperNotice, setWallpaperNotice] = useState(false);
   const [dragPart, setDragPart] = useState<PartId | null>(null);
   const dragRef = useRef<PartId | null>(null);
   const host = useRef<HTMLElement>(null);
-  const previousModern = useRef(state.persistent.artwork.modern);
+  const previousStage = useRef(stage);
   const undo = useRef<{ id: string; frames: number[][] }[]>([]);
   const redo = useRef<{ id: string; frames: number[][] }[]>([]);
   const [historyVersion, setHistoryVersion] = useState(0);
@@ -89,20 +97,18 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
     }
     const node = selected ? root.querySelector<HTMLElement>(`[data-part="${selected}"]`) : null;
     if (node) {
-      const rect = node.getBoundingClientRect(), scale = origin.width / root.offsetWidth;
-      setDimensions({ width: Math.round(rect.width / scale), height: Math.round(rect.height / scale) });
+      setDimensions({width:node.offsetWidth,height:node.offsetHeight});
     }
     if (home) home.style.animation = previousAnimation ?? '';
-  }, [selected, design.radius, design.textSize, k.placed.length, mature]);
-  useEffect(() => {
-    if (previousModern.current !== state.persistent.artwork.modern && state.persistent.artwork.modern) setRenewing(true);
-    previousModern.current = state.persistent.artwork.modern;
-  }, [state.persistent.artwork.modern]);
+  }, [selected, design.radius, design.textSize, k.placed.length, mature, workspace, stage, state.run.desktop.screen.width, state.run.desktop.screen.height, state.run.desktop.windows.tessera.width, state.run.desktop.windows.tessera.height]);
+  useLayoutEffect(() => {
+    if(!preview&&previousStage.current!==stage){setBackwards(stage<previousStage.current);setRenewing(true);setAppearanceMessage(true);}previousStage.current=stage;
+  },[stage,preview]);
   useEffect(() => {
     if (!renewing) return;
-    const stop = runtime.platform.every(BALANCE.w2.upgradeMs, () => { setRenewing(false); stop(); });
+    const stop = runtime.platform.every(BALANCE.appearance.transitionMs, () => { setRenewing(false); stop(); });
     return stop;
-  }, [renewing, runtime]);
+  }, [renewing, stage, runtime]);
   useEffect(() => {
     if (!playing || !drawing || drawing.frames.length < 2) return;
     return runtime.platform.every(BALANCE.w2.animationFrameMs, () => setFrame(previous => (previous + 1) % 2));
@@ -139,13 +145,55 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const change = (patch: Partial<Design>) => { if (selected) act({ type: 'design', id: selected, design: { ...design, ...patch } }); };
   const selectPart = (id: string) => {
     if (tool === 'eyedropper') { const selectedColor = k.design[id]?.color ?? defaultDesign.color; setColor(Math.max(0, palette.indexOf(selectedColor))); }
-    else setSelected(id);
+    else {setSelected(id);if(stage===2)setColorPanel('properties');}
   };
   const layers = hasKSkill(state, 'layers') && <section className="layer-list"><h2>{i18n.t('k.layers')}</h2>{['primary', ...k.placed].map(id => <button key={id} className={selected === id ? 'active' : ''} onClick={() => { setTool('select'); selectPart(id); }}>{id === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${id as PartId}`)}</button>)}</section>;
   const effect = next === 'button' ? i18n.t('effect.home', { value: BALANCE.w2.buttonMultiplier })
     : next === 'switch' ? i18n.t('effect.focus', { value: BALANCE.w2.focusMultiplier })
       : next === 'slider' ? i18n.t('effect.interval', { value: BALANCE.w2.sliderMultiplier }) : '';
-  return <main ref={host} className={['kumiki', embedded && 'k-embedded', preview && 'k-preview', mature && 'is-mature', state.persistent.artwork.modern && 'is-modern', entered && 'is-entering', renewing && 'is-renewing'].filter(Boolean).join(' ')}
+  const propertyPanel = k.built.includes('select') && (selected ? <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{selected === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${selected as PartId}`)}</p>
+          <label>{i18n.t('k.fillColor')}<select aria-label={i18n.t('k.fillColor')} value={design.color} onChange={event => change({ color: event.target.value })}>{!palette.includes(design.color) && <option value={design.color}>{design.color}</option>}{palette.map(c => <option value={c} key={c}>{c}</option>)}</select></label>
+          <label>{i18n.t('k.radius')}<input aria-label={i18n.t('k.radius')} type="range" min={0} max={16} value={design.radius} onChange={event => change({ radius: Number(event.target.value) })} /><output>{i18n.number(design.radius)}</output></label>
+          <label>{i18n.t('k.textSize')}<select aria-label={i18n.t('k.textSize')} value={design.textSize} onChange={event => change({ textSize: event.target.value as Design['textSize'] })}>{(['small','medium','large'] as const).map(id => <option key={id} value={id}>{i18n.t(`k.${id}`)}</option>)}</select></label>
+          <label className="shadow-setting"><input type="checkbox" checked={design.shadow} onChange={event => change({ shadow: event.target.checked })} />{i18n.t('k.shadow')}</label>
+          {hasKSkill(state, 'snap') && <p>{i18n.t('k.dimensions', dimensions)}</p>}
+        </section> : state.persistent.artwork.modern && <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{i18n.t('k.choosePart')}</p></section>);
+  const palettePanel = <><label className="palette-label">{i18n.t('k.color')}</label>
+        <div className="palette-swatches">{palette.map((c, index) => <button key={c} style={{ backgroundColor: c }} title={c} aria-label={i18n.t('k.color') + ' ' + c} aria-pressed={color === index}
+          className={color === index ? 'chosen' : ''} onClick={() => setColor(index)} />)}</div>
+        {hasKSkill(state, 'mirror') && <label className="mirror-option"><input type="checkbox" checked={mirror} onChange={event => setMirror(event.target.checked)} />{i18n.t('k.mirror')}</label>}</>;
+  const iconEditor = <aside className="icon-editor">
+        <section className="icon-panel">
+        <div className="editor-heading"><h2>{i18n.t(drawingId === 'free' ? 'k.file.free' : 'k.document')}</h2>
+          <select aria-label={i18n.t('k.document')} value={drawingId} onChange={event => openDrawing(event.target.value)}>
+            {(previewDocuments ?? availableIcons(state)).map(id => <option key={id} value={id}>{i18n.t(`k.icon.${id as 'folder'}`)}</option>)}
+            <option value="free">{i18n.t('k.file.free')}</option>
+          </select>
+          {drawing && <span>{i18n.t('k.grid', { size: drawing.size })}</span>}
+        </div>
+        {drawing && <><DrawingCanvas compact={embedded} drawing={drawing} target={target} palette={palette} frame={frame} zoom={zoom} tool={tool} i18n={i18n} modern={legacyAppearance?state.persistent.artwork.modern:stage>0} onBegin={begin} onEnd={runtime.persist} onStroke={stroke} onPosition={(x, y) => setPosition({ x, y })} />
+          <p className="drawing-progress">{i18n.t('k.progress', { total: target.filter(c => c >= 0).length, done: target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length })}</p>
+          <progress max={Math.max(1, target.filter(c => c >= 0).length)} value={target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length} aria-label={i18n.t('k.progress', { total: target.filter(c => c >= 0).length, done: target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length })} />
+          <div className="editor-options"><label>{i18n.t('k.zoom')}<select value={zoom} onChange={event => setZoom(Number(event.target.value))}>{[1,2,3,4].map(value => <option key={value} value={value}>{i18n.t('k.zoomValue', { count: value * 100 })}</option>)}</select></label>
+            {hasKSkill(state, 'animation') && <><button disabled={drawing.frames.length === 2} onClick={() => act({ type: 'frame', id: drawingId })}>{i18n.t('k.addFrame')}</button>
+              {drawing.frames.map((_, index) => <button key={index} aria-pressed={frame === index} onClick={() => setFrame(index)}>{i18n.t('k.frame', { count: index + 1 })}</button>)}
+              {drawing.frames.length === 2 && <button onClick={() => setPlaying(!playing)}>{i18n.t(playing ? 'k.stopAnimation' : 'k.playAnimation')}</button>}
+            </>}
+            {drawingId === 'free' && hasKSkill(state, 'wallpaper') && <button onClick={() => { act({ type: 'wallpaper' }); setWallpaperNotice(true); }}>{i18n.t('k.wallpaper')}</button>}
+          </div>{wallpaperNotice && <p role="status">{i18n.t('k.wallpaperSaved')}</p>}
+        </>}
+        </section>
+        {legacyAppearance&&propertyPanel}
+        {legacyAppearance&&state.persistent.artwork.modern&&layers}
+        {k.guide.current && !k.guide.collapsed && <section className="k-comment"><h3>{i18n.t(`k.guide.${k.guide.current}.title`)}</h3><p>{i18n.t(`k.guide.${k.guide.current}`)}</p><p>{i18n.t('guide.signature')}</p>
+          {k.guide.current === 'name' && <form onSubmit={event => { event.preventDefault(); act({ type: 'name', name }); readGuide('close'); }}><label>{i18n.t('k.playerName')}<input value={name} maxLength={BALANCE.w2.maxName} onChange={event => setName(event.target.value)} /></label><button type="submit">{i18n.t('k.answer')}</button></form>}
+          <button onClick={() => readGuide('close')}>{i18n.t('guide.close')}</button>
+        </section>}
+        {archive && <section className="comment-archive"><h2>{i18n.t('k.comments')}</h2>{k.guide.seen.map(id => <button key={id} onClick={() => readGuide(id)}>{i18n.t(`k.guide.${id}.title`)}</button>)}<GuideHistory state={state} i18n={i18n} /></section>}
+        {snapshot.offline && <section className="k-comment" role="status"><p>{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}</p></section>}
+      </aside>;
+  return <main ref={host} className={['kumiki', embedded && 'k-embedded', preview && 'k-preview', mature && 'is-mature', legacyAppearance&&state.persistent.artwork.modern&&'is-modern',!legacyAppearance&&`editor-era-${stage}`, entered && 'is-entering', renewing && 'is-renewing'].filter(Boolean).join(' ')}
+    data-workspace={stage===2&&!legacyAppearance?workspace:undefined} data-document={activeDocument}
     onPointerUp={event => {
       const id = dragRef.current;
       if (!id) return;
@@ -157,7 +205,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
       dragRef.current = null; setDragPart(null);
     }}>
     <nav className="k-menu">
-      <b className="app-name">{i18n.t('k.app')}</b>
+      <b className="app-name">{editorName(state,i18n,legacyAppearance)}</b>
       <div className="menu-anchor"><button aria-expanded={menu === 'file'} onClick={() => setMenu(menu === 'file' ? null : 'file')}>{i18n.t('k.file')}</button>
         {menu === 'file' && <div className="k-dropdown">
           <button onClick={runtime.downloadData}>{i18n.t('data.export')}</button><button onClick={() => { void runtime.requestImport(); }}>{i18n.t('data.import')}</button>
@@ -177,6 +225,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         <button aria-expanded={archive} onClick={() => setArchive(!archive)}>{i18n.t('k.comments')}</button>
       </div>
     </nav>
+    {!legacyAppearance&&stage===2&&<nav className="k-personas">{(['draw','compose','export'] as const).map(id=><button key={id} className={`persona-${id}`} aria-pressed={workspace===id&&!extensions} onClick={()=>{setWorkspace(id);setExtensions(false);if(id==='draw'){setTool('pencil');setLeftPanel('templates');setColorPanel('color');setDetailPanel('history');}if(id==='compose'){act({type:'configure',change:{homeWindow:'normal'}});setTool('select');setLeftPanel('parts');setColorPanel('properties');setDetailPanel('layers');}}}>{i18n.t(`k.workspace.${id}`)}</button>)}</nav>}
     <header className="k-toolbar"><span>{i18n.t('k.home')}</span><b className="k-resource" data-pixels={state.resources.pixels}>{i18n.t('k.pixels', { pixels: i18n.pixels(state.resources.pixels) })}</b>
       <span className="k-resource">{i18n.t('k.rate', { pixels: i18n.rate(passivePixelsPerSecond(state)) })}</span>
       {tokensVisible && <span className="token-count k-resource">{i18n.t('k.tokens', { count: state.resources.tokens })}</span>}
@@ -203,13 +252,18 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         {!mature && <button className="next-tool" disabled={state.resources.pixels < nextCost} title={i18n.t('k.build', { name: i18n.t('k.part.select'), cost: i18n.integer(nextCost) })} aria-label={i18n.t('k.build', { name: i18n.t('k.part.select'), cost: i18n.integer(nextCost) })} onClick={() => act({ type: 'build', id: 'select' })}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d={TOOL_PATHS.select} /></svg></button>}
       </aside>
+      {!legacyAppearance&&<aside className="k-palette">{stage===2?<>
+        <nav className="panel-tabs">{(workspace==='draw'?['color'] as const:['properties','color'] as const).map(id=><button key={id} aria-pressed={colorPanel===id} onClick={()=>setColorPanel(id)}>{i18n.t(id==='color'?'k.color':'k.properties')}</button>)}</nav>
+        {colorPanel==='color'?palettePanel:propertyPanel||<p>{i18n.t('k.choosePart')}</p>}
+        <nav className="panel-tabs">{(['layers','history'] as const).filter(id=>id==='history'||workspace==='compose'&&hasKSkill(state,'layers')).map(id=><button key={id} aria-pressed={detailPanel===id} onClick={()=>setDetailPanel(id)}>{i18n.t(id==='layers'?'k.layers':'k.history')}</button>)}</nav>
+        {detailPanel==='layers'?layers:<section className="drawing-history"><p>{i18n.t('k.historyCount',{undo:undo.current.length,redo:redo.current.length})}</p><button disabled={!undo.current.length} onClick={()=>restore('undo')}>{i18n.t('k.undo')}</button><button disabled={!redo.current.length} onClick={()=>restore('redo')}>{i18n.t('k.redo')}</button></section>}
+      </>:palettePanel}</aside>}
       <aside className="k-parts-panel">
-        <h2>{i18n.t('k.palette')}</h2>
-        <label className="palette-label">{i18n.t('k.color')}</label>
-        <div className="palette-swatches">{palette.map((c, index) => <button key={c} style={{ backgroundColor: c }} title={c} aria-label={i18n.t('k.color') + ' ' + c} aria-pressed={color === index}
-          className={color === index ? 'chosen' : ''} onClick={() => setColor(index)} />)}</div>
-        {hasKSkill(state, 'mirror') && <label className="mirror-option"><input type="checkbox" checked={mirror} onChange={event => setMirror(event.target.checked)} />{i18n.t('k.mirror')}</label>}
-        {parts.length > 0 && <><h2>{i18n.t('k.parts')}</h2><div className="part-list">{parts.map(id => <button key={id} className={dragPart === id ? 'active' : ''} draggable={!k.placed.includes(id)}
+        {legacyAppearance&&<h2>{i18n.t('k.palette')}</h2>}
+        {legacyAppearance&&palettePanel}
+        {!legacyAppearance&&stage===2&&<nav className="panel-tabs">{(workspace==='draw'?['templates'] as const:['parts','templates'] as const).map(id=><button key={id} aria-pressed={leftPanel===id} onClick={()=>setLeftPanel(id)}>{i18n.t(id==='parts'?'k.parts':'k.templates')}</button>)}</nav>}
+        {!legacyAppearance&&stage===2&&(leftPanel==='templates'||workspace==='draw')&&<div className="template-list">{availableIcons(state).map(id=><button key={id} onClick={()=>openDrawing(id)} aria-pressed={drawingId===id}>{i18n.t(`k.icon.${id as 'folder'}`)}</button>)}<button onClick={()=>openDrawing('free')}>{i18n.t('k.file.free')}</button></div>}
+        {(legacyAppearance||stage!==2||workspace!=='draw'&&leftPanel==='parts')&&parts.length > 0 && <><h2>{i18n.t('k.parts')}</h2><div className="part-list">{parts.map(id => <button key={id} className={dragPart === id ? 'active' : ''} draggable={!k.placed.includes(id)}
           onPointerDown={() => { if (!k.placed.includes(id)) { dragRef.current = id; setDragPart(id); } }}
           onDragStart={event => { event.dataTransfer.setData('text/plain', id); dragRef.current = id; setDragPart(id); }}
           onDragEnd={() => { dragRef.current = null; setDragPart(null); }} onClick={() => k.placed.includes(id) ? selectPart(id) : (dragRef.current = id, setDragPart(id))}>
@@ -217,7 +271,9 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         </button>)}</div></>}
         {mature && next && <section className="next-component"><h2>{i18n.t('k.next')}</h2><p>{i18n.t(`k.part.${next}`)}{effect && <small className="purchase-effect">{effect}</small>}</p><button disabled={state.resources.pixels < nextCost}
           onClick={() => act({ type: 'build', id: next })}>{i18n.t('seed.buildPrice', { cost: i18n.integer(nextCost) })}</button><Estimate cost={nextCost} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} i18n={i18n} runtime={runtime} preview={preview}/></section>}
-        {!state.persistent.artwork.modern && layers}
+        {legacyAppearance&&!state.persistent.artwork.modern&&layers}
+        {!legacyAppearance&&stage!==2&&propertyPanel}{!legacyAppearance&&stage!==2&&layers}
+        {!legacyAppearance&&stage===2&&drawing&&<section className="editor-navigator"><h2>{i18n.t('k.navigator')}</h2><button className="navigator-preview" aria-label={i18n.t('k.goDrawing')} onClick={()=>{setExtensions(false);host.current?.querySelector('canvas')?.focus();host.current?.querySelector('canvas')?.scrollIntoView({block:'nearest'});}}><PixelArt frames={drawing.frames} size={drawing.size} palette={palette} frame={frame}/></button><label>{i18n.t('k.zoom')}<select value={zoom} onChange={e=>setZoom(Number(e.target.value))}>{[1,2,3,4].map(value=><option key={value} value={value}>{i18n.t('k.zoomValue',{count:value*100})}</option>)}</select></label></section>}
         {!embedded && parts.length > 0 && <section className="desktop-exit"><button disabled={!k.built.includes('taskbar') || state.persistent.specs.color === 0 || state.resources.pixels < BALANCE.w2.desktopCost}
           onClick={() => { act({ type: 'exit' }); setConditions(true); }}>{i18n.t('k.desktop')}</button>
           <p>{i18n.t('k.desktopPrice', { pixels: i18n.integer(BALANCE.w2.desktopCost) })}</p>
@@ -227,58 +283,28 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         </section>}
       </aside>
       <section className="k-workspace">
-        <nav className="document-tabs"><button className={!extensions ? 'active' : ''} onClick={() => { setExtensions(false); act({ type: 'configure', change: { homeWindow: 'normal' } }); }}>{i18n.t('k.home')}</button>
+        <nav className="document-tabs"><button className={!extensions&&activeDocument==='home' ? 'active' : ''} onClick={() => { setExtensions(false);setActiveDocument('home');if(stage===2)setWorkspace('compose'); act({ type: 'configure', change: { homeWindow: 'normal' } }); }}>{i18n.t('k.home')}</button>
+          {!extensions&&!legacyAppearance&&<button className={activeDocument==='drawing'?'active':''} onClick={()=>{setActiveDocument('drawing');setTool('pencil');if(stage===2)setWorkspace('draw');host.current?.querySelector<HTMLElement>('canvas')?.focus();}}>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</button>}
           {extensions && <button className="active" onClick={() => setExtensions(false)}>{i18n.t('k.extensions')}</button>}
         </nav>
-        {extensions ? <Extensions runtime={runtime} snapshot={snapshot} i18n={i18n} /> : <div className="workbench">
-          <HomeDocument runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview} interactive={interactive} selected={selected} onSelect={selectPart} selecting={tool === 'select' || tool === 'eyedropper'} dragPart={dragPart} onDrop={drop} />
+        {extensions ? <Extensions runtime={runtime} snapshot={snapshot} i18n={i18n} /> : <div className="k-documents" data-home-state={k.homeWindow}><div className="workbench">
+          <HomeDocument runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview} interactive={interactive} selected={selected} onMeasure={setDimensions} onSelect={selectPart} selecting={tool === 'select' || tool === 'eyedropper'} dragPart={dragPart} onDrop={drop} />
           {k.guide.seen.includes('entered') && <button className="home-comment-pin" onClick={() => readGuide('entered')}>{i18n.t('k.comment', { title: i18n.t('k.home') })}</button>}
-        </div>}
-        {exportsOpen && <section className="exports-list"><h2>{i18n.t('k.exports')}</h2>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
-          {k.exports.map(work => <button key={work.kind + work.id} onClick={() => { setExportsOpen(false); if (work.kind === 'icon') openDrawing(work.id); else if (k.placed.includes(work.id as PartId)) { setTool('select'); selectPart(work.id); } else { dragRef.current = work.id as PartId; setDragPart(work.id as PartId); } }}>{work.name || (work.kind === 'icon' ? i18n.t(`k.icon.${work.id as 'folder'}`) : i18n.t(`k.part.${work.id as PartId}`))}</button>)}
+        </div>{!legacyAppearance&&iconEditor}</div>}
+        {(exportsOpen||!legacyAppearance&&stage===2&&workspace==='export'&&!extensions)&&<section className="exports-list"><h2>{i18n.t('k.exports')}</h2>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
+          {k.exports.map(work => <button key={work.kind + work.id} onClick={() => { setExportsOpen(false);setWorkspace(work.kind==='icon'?'draw':'compose');setActiveDocument(work.kind==='icon'?'drawing':'home'); if (work.kind === 'icon') openDrawing(work.id); else if (k.placed.includes(work.id as PartId)) { setTool('select'); selectPart(work.id); } else { dragRef.current = work.id as PartId; setDragPart(work.id as PartId); } }}>{work.name || (work.kind === 'icon' ? i18n.t(`k.icon.${work.id as 'folder'}`) : i18n.t(`k.part.${work.id as PartId}`))}</button>)}
           {state.persistent.products.length > 0 && <><h2>{i18n.t('release.pastExports')}</h2><ul>{state.persistent.products.flatMap(product => product.exports.map(work => <li key={`${product.id}:${work.kind}:${work.id}`}>{i18n.t('release.guideRead', { version: productLabel(i18n,product.name,i18n.t('release.prototype')), title: work.name || i18n.t(work.kind === 'icon' ? `k.icon.${work.id as 'folder'}` : `k.part.${work.id as PartId}`) })}</li>))}</ul></>}
         </section>}
       </section>
-      <aside className="icon-editor">
-        <section className="icon-panel">
-        <div className="editor-heading"><h2>{i18n.t(drawingId === 'free' ? 'k.file.free' : 'k.document')}</h2>
-          <select aria-label={i18n.t('k.document')} value={drawingId} onChange={event => openDrawing(event.target.value)}>
-            {(previewDocuments ?? availableIcons(state)).map(id => <option key={id} value={id}>{i18n.t(`k.icon.${id as 'folder'}`)}</option>)}
-            <option value="free">{i18n.t('k.file.free')}</option>
-          </select>
-          {drawing && <span>{i18n.t('k.grid', { size: drawing.size })}</span>}
-        </div>
-        {drawing && <><DrawingCanvas compact={embedded} drawing={drawing} target={target} palette={palette} frame={frame} zoom={zoom} tool={tool} i18n={i18n} modern={state.persistent.artwork.modern} onBegin={begin} onEnd={runtime.persist} onStroke={stroke} onPosition={(x, y) => setPosition({ x, y })} />
-          <p className="drawing-progress">{i18n.t('k.progress', { total: target.filter(c => c >= 0).length, done: target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length })}</p>
-          <progress max={Math.max(1, target.filter(c => c >= 0).length)} value={target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length} aria-label={i18n.t('k.progress', { total: target.filter(c => c >= 0).length, done: target.filter((c, i) => c >= 0 && drawing.frames[0]![i] === c).length })} />
-          <div className="editor-options"><label>{i18n.t('k.zoom')}<select value={zoom} onChange={event => setZoom(Number(event.target.value))}>{[1,2,3,4].map(value => <option key={value} value={value}>{i18n.t('k.zoomValue', { count: value * 100 })}</option>)}</select></label>
-            {hasKSkill(state, 'animation') && <><button disabled={drawing.frames.length === 2} onClick={() => act({ type: 'frame', id: drawingId })}>{i18n.t('k.addFrame')}</button>
-              {drawing.frames.map((_, index) => <button key={index} aria-pressed={frame === index} onClick={() => setFrame(index)}>{i18n.t('k.frame', { count: index + 1 })}</button>)}
-              {drawing.frames.length === 2 && <button onClick={() => setPlaying(!playing)}>{i18n.t(playing ? 'k.stopAnimation' : 'k.playAnimation')}</button>}
-            </>}
-            {drawingId === 'free' && hasKSkill(state, 'wallpaper') && <button onClick={() => { act({ type: 'wallpaper' }); setWallpaperNotice(true); }}>{i18n.t('k.wallpaper')}</button>}
-          </div>{wallpaperNotice && <p role="status">{i18n.t('k.wallpaperSaved')}</p>}
-        </>}
-        </section>
-        {k.built.includes('select') && (selected ? <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{selected === 'primary' ? i18n.t('k.primary') : i18n.t(`k.part.${selected as PartId}`)}</p>
-          <label>{i18n.t('k.fillColor')}<select aria-label={i18n.t('k.fillColor')} value={design.color} onChange={event => change({ color: event.target.value })}>{!palette.includes(design.color) && <option value={design.color}>{design.color}</option>}{palette.map(c => <option value={c} key={c}>{c}</option>)}</select></label>
-          <label>{i18n.t('k.radius')}<input aria-label={i18n.t('k.radius')} type="range" min={0} max={16} value={design.radius} onChange={event => change({ radius: Number(event.target.value) })} /><output>{i18n.number(design.radius)}</output></label>
-          <label>{i18n.t('k.textSize')}<select aria-label={i18n.t('k.textSize')} value={design.textSize} onChange={event => change({ textSize: event.target.value as Design['textSize'] })}>{(['small','medium','large'] as const).map(id => <option key={id} value={id}>{i18n.t(`k.${id}`)}</option>)}</select></label>
-          <label className="shadow-setting"><input type="checkbox" checked={design.shadow} onChange={event => change({ shadow: event.target.checked })} />{i18n.t('k.shadow')}</label>
-          {hasKSkill(state, 'snap') && <p>{i18n.t('k.dimensions', dimensions)}</p>}
-        </section> : state.persistent.artwork.modern && <section className="property-panel"><h2>{i18n.t('k.properties')}</h2><p>{i18n.t('k.choosePart')}</p></section>)}
-        {state.persistent.artwork.modern && layers}
-        {k.guide.current && !k.guide.collapsed && <section className="k-comment"><h3>{i18n.t(`k.guide.${k.guide.current}.title`)}</h3><p>{i18n.t(`k.guide.${k.guide.current}`)}</p><p>{i18n.t('guide.signature')}</p>
-          {k.guide.current === 'name' && <form onSubmit={event => { event.preventDefault(); act({ type: 'name', name }); readGuide('close'); }}><label>{i18n.t('k.playerName')}<input value={name} maxLength={BALANCE.w2.maxName} onChange={event => setName(event.target.value)} /></label><button type="submit">{i18n.t('k.answer')}</button></form>}
-          <button onClick={() => readGuide('close')}>{i18n.t('guide.close')}</button>
-        </section>}
-        {archive && <section className="comment-archive"><h2>{i18n.t('k.comments')}</h2>{k.guide.seen.map(id => <button key={id} onClick={() => readGuide(id)}>{i18n.t(`k.guide.${id}.title`)}</button>)}<GuideHistory state={state} i18n={i18n} /></section>}
-        {snapshot.offline && <section className="k-comment" role="status"><p>{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}</p></section>}
-      </aside>
+      {legacyAppearance&&iconEditor}
     </div>
-    <footer className="k-status"><span>{i18n.t('k.position', { tool: i18n.t(`k.tool.${tool}`), ...position })}</span><span>{i18n.t(k.focus && k.placed.includes('switch') ? 'k.cursorPaused' : 'k.working', { count: state.run.seed.autoCursors })}</span>
-      {state.lastSavedAt !== null && <span>{i18n.t('save.saved', { time: i18n.time(state.lastSavedAt) })}</span>}
-      <span>{i18n.t('k.zoomValue', { count: zoom * 100 })}</span>
-    </footer>
+    {!legacyAppearance&&stage===1&&<section className="k-layer-strip"><b>{i18n.t('k.layers')}</b><span>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</span>{hasKSkill(state,'animation')&&drawing?.frames.map((_,index)=><button key={index} aria-pressed={frame===index} onClick={()=>setFrame(index)}>{i18n.t('k.frame',{count:index+1})}</button>)}</section>}
+    {appearanceMessage&&!preview&&<aside className="appearance-guide" role="status"><p>{i18n.t(backwards?'appearance.guide.previous':stage===2?'appearance.guide.editor2':'appearance.guide.editor1')}</p><small>{i18n.t('guide.signature')}</small><button onClick={()=>setAppearanceMessage(false)}>{i18n.t('guide.close')}</button></aside>}
+    <StatusBar className="k-status" fields={[
+      {id:'position',priority:0,text:i18n.t('k.position',{tool:i18n.t(`k.tool.${tool}`),...position})},
+      {id:'cursors',priority:2,text:i18n.t(k.focus&&k.placed.includes('switch')?'k.cursorPaused':'k.working',{count:state.run.seed.autoCursors})},
+      ...(state.lastSavedAt!==null?[{id:'saved',priority:3,text:i18n.t('save.saved',{time:i18n.time(state.lastSavedAt)})}]:[]),
+      {id:'zoom',priority:1,text:i18n.t('k.zoomValue',{count:zoom*100})},
+    ]}/>
   </main>;
 }

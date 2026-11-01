@@ -20,7 +20,7 @@ function makePlatform(target = storage): Platform {
     clock: { wallNow: () => clock.wall, monotonicNow: () => clock.mono },
     tabs: { acquire: vi.fn(async () => ({ acquired: clock.owned, isOwner: () => clock.owned, release() {} })) },
     visibility: { isHidden: () => clock.hidden, subscribe: () => () => {} },
-    viewport: { size: () => ({ width: 1920, height: 1080 }), subscribe: () => () => {} },
+    viewport: { logicalSizeChanged:vi.fn(),size: () => ({ width: 1920, height: 1080 }), subscribe: () => () => {} },
     lifecycle: { onLeave: () => () => {}, onRestore: () => () => {} },
     files: { write: vi.fn(), read: vi.fn(async () => null) },
     animation: { subscribe: () => () => {}, reducedMotion: () => false },
@@ -482,5 +482,15 @@ describe('段階6の自動撮影と保存',()=>{
   clock.hidden=true;runtime.visibilityChanged();clock.wall+=120000;clock.mono+=120000;
   const write=storage.setItem;storage.setItem=(key,value)=>{if(key.startsWith('refresh.capture.'))throw new Error('Quota');write(key,value);};
   clock.hidden=false;runtime.visibilityChanged();expect(runtime.getSnapshot().state.persistent.screenshots).toHaveLength(0);expect(runtime.getSnapshot().state.run.totalPixelsGenerated).toBeGreaterThan(before);expect(runtime.getSnapshot().notice).toBe('save.failed');
+ });
+});
+
+describe('論理画面の大きさをプラットフォームへ通知',()=>{
+ it('デスクトップの読み込み・切替・取り込みを通知し、通常のtickでは重複しない',async()=>{
+  storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('desktop-stage0',clock.wall)!));await start();expect(platform.viewport.logicalSizeChanged).toHaveBeenLastCalledWith({width:800,height:600});
+  vi.mocked(platform.viewport.logicalSizeChanged).mockClear();step(1000);expect(platform.viewport.logicalSizeChanged).not.toHaveBeenCalled();
+  runtime.actDesktop({type:'desktop-stage',stage:1});expect(platform.viewport.logicalSizeChanged).toHaveBeenLastCalledWith({width:1024,height:768});
+  runtime.actDesktop({type:'desktop-stage',stage:2});expect(platform.viewport.logicalSizeChanged).toHaveBeenLastCalledWith({width:1366,height:768});
+  runtime.importData(encodeSave(createFixture('kumiki-wall',clock.wall)!));expect(platform.viewport.logicalSizeChanged).toHaveBeenLastCalledWith({width:1920,height:1080});
  });
 });

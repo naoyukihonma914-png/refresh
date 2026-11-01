@@ -1,3 +1,4 @@
+import { editorStage } from '../systems/appearance';
 import type { CSSProperties } from 'react';
 import { iconTemplate, paletteFor } from '../content/kumikiArt';
 import type { GameState } from '../systems/state';
@@ -13,6 +14,7 @@ export function AppIcon({ app, state, frame = 0, palette }: { palette?:string[];
     const work = state.run.kumiki.exports.find(e => e.kind === 'icon' && e.id === id);
     return <PixelArt frames={work?.frames ?? [iconTemplate(id,16)]} size={work?.size ?? 16} palette={palette??paletteFor(state.persistent.specs.color)} frame={frame} grey={!work} />;
   }
+  if(app==='tessera'&&editorStage(state)===2)return <svg viewBox="0 0 48 48" className="app-icon gesso-icon" aria-hidden="true"><path d="M6 8h36v34H6z" fill="#526a7e" stroke="#263744"/><path d="M8 10h32v13H8z" fill="#7895ad"/><path d="m14 33 3-8 14-14 5 5-14 14z" fill="#e9e2cf" stroke="#263744"/><path d="m14 33 8-3-5-5z" fill="#d8ab63"/></svg>;
   if(app==='terminal')return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true"><rect x="4" y="8" width="40" height="32" rx="3" fill="#26323a" stroke="#8c9ba5"/><path d="m12 17 6 6-6 6m11 1h10" stroke="#e4ecef" strokeWidth="2" fill="none"/></svg>;
   if(app==='manager')return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true"><rect x="6" y="5" width="36" height="38" fill="#e4eaed" stroke="#536b7e"/><path d="M10 35h28M14 32V22m10 10V12m10 20V17" stroke="#537e9a" strokeWidth="4"/></svg>;
   if(app==='theme')return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true"><path d="M7 6h34v36H7z" fill="#cedae0" stroke="#6c808b"/><path d="M9 8h15v32H9z" fill="#556d7e"/><path d="M27 12h10v10H27z" fill="#bba16e"/></svg>;
@@ -26,3 +28,5 @@ export function LineIcon({ kind }: { kind: 'minimize'|'maximize'|'restore'|'clos
 }
 
 export function CursorGlyph(){return <svg className="cursor-glyph" viewBox="0 0 16 20" aria-hidden="true"><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="currentColor" stroke="#8b969d"/></svg>;}
+
+export function ProductGlyph(){return <svg viewBox="0 0 32 32" className="app-icon product-glyph" aria-hidden="true"><path d="M4 5h20v5H9v8H4z" fill="#e7d5a5"/><path d="M12 13h16v5H17v9h-5z" fill="#c8e1e3"/><path d="M4 22h5v5H4z" fill="#b3c6db"/></svg>;}

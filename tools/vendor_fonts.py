@@ -28,10 +28,11 @@ FONTS = [
     ('biz-udpgothic-regular', 'bizudpgothic', 'BIZUDPGothic-Regular.ttf'),
     ('biz-udpgothic-bold', 'bizudpgothic', 'BIZUDPGothic-Bold.ttf'),
     ('biz-udgothic-regular', 'bizudgothic', 'BIZUDGothic-Regular.ttf'),
+    ('mplus1p-regular', 'mplus1p', 'MPLUS1p-Regular.ttf'),
     ('dotgothic16', 'dotgothic16', 'DotGothic16-Regular.ttf'),
 ]
 # DotGothic16には𥝱がない。CSSで次に指定した同梱BIZ UDPGothicへ任せる。
-FALLBACKS = {'dotgothic16': {'𥝱': 'biz-udpgothic-regular.woff2'}}
+FALLBACKS = {'mplus1p-regular': {'𥝱':'biz-udpgothic-regular.woff2'}, 'dotgothic16': {'𥝱': 'biz-udpgothic-regular.woff2'}}
 # 全漢字の範囲は含めない。かな・通常の句読点・記号とラテン文字を明示する。
 RANGES = [
     (0x0020, 0x007E), (0x00A0, 0x017F),  # ASCII、Latin-1、Latin Extended-A

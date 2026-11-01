@@ -13,7 +13,7 @@ class Checks(list):
 JA=json.loads((ROOT/'game/src/content/locales/ja.json').read_text())['messages']
 
 def main():
- parser=argparse.ArgumentParser();parser.add_argument('--base-url',default='http://127.0.0.1:4173');parser.add_argument('--visual-only',action='store_true');args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--base-url',default='http://127.0.0.1:4173');parser.add_argument('--visual-only',action='store_true');parser.add_argument('--functional-only',action='store_true');args=parser.parse_args()
  OUT.mkdir(parents=True,exist_ok=True);checks=Checks();errors=[];layouts=[]
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox'])
@@ -29,7 +29,11 @@ def main():
    return json.loads(Path(event.value.path()).read_text())
   def win(page,app):return page.locator(f'.desktop-live > [data-app="{app}"]')
   def open_app(page,app):
-   page.locator('.desktop-live > .desktop-taskbar .taskbar-apps').get_by_role('button',name=JA['desktop.app.'+app],exact=True).click()
+   w=win(page,app)
+   if not w.count():
+    page.locator('.desktop-live>.desktop-taskbar .taskbar-product').click();page.locator(f'.desktop-programs [data-app-launcher="{app}"]').click()
+   elif not w.is_visible() or 'is-active' not in w.get_attribute('class'):
+    page.locator('.desktop-live>.desktop-taskbar .taskbar-apps').get_by_role('button',name=w.get_attribute('aria-label'),exact=True).click()
    win(page,app).wait_for(state='visible');return win(page,app)
   def maximize(page,app):
    w=win(page,app)
@@ -40,7 +44,7 @@ def main():
    for _ in range(n):locator.press('ArrowRight')
   if not args.visual_only:
    ctx,page=scene('desktop-early');assert not page.locator('.taskbar-clock').count();assert not page.locator('.job-slot').count()
-   page.locator('.desktop-live > .desktop-taskbar .taskbar-tokens').click();assert win(page,'settings').is_visible();assert win(page,'settings').locator('.desktop-skill').count()==9;ctx.close();checks.append('初期状態には未解放の操作を出さず、トークンから設定を開ける')
+   page.locator('.desktop-live > .desktop-taskbar .taskbar-tokens').click();assert win(page,'settings').is_visible();assert win(page,'settings').locator('.desktop-skill').count()==10;ctx.close();checks.append('初期状態には未解放の操作を出さず、トークンから設定を開ける')
    ctx,page=scene();w=open_app(page,'tessera');slot=w.locator('.job-slot');slot.click();w.get_by_role('button',name='ジョブを外す',exact=True).click();assert not state(page)['run']['desktop']['jobs']['tessera']['assigned']
    page.locator('.desktop-live > .desktop-taskbar .taskbar-job-source').drag_to(w.locator('.window-title'));slot.click();assert state(page)['run']['desktop']['jobs']['tessera']['assigned']
    before=state(page);w.locator('.job-controls button').nth(0).click();after=state(page);assert after['run']['desktop']['jobs']['tessera']['cursors']==9
@@ -53,6 +57,7 @@ def main():
    w.get_by_role('button',name='大きいアイコン',exact=True).click();assert w.locator('.large-file-icons').count();w.get_by_role('button',name='一覧',exact=True).click()
    w.locator('.window-controls').get_by_role('button',name='元に戻す',exact=True).click()
    w.locator('.files-sidebar').get_by_role('button',name='スクリーンショット',exact=True).click();row=w.locator('[data-file]').first;shotid=row.get_attribute('data-file')
+   tw=open_app(page,'tessera');tw.locator('.window-controls').get_by_role('button',name='最小化',exact=True).click()
    row.drag_to(page.locator('.desktop-live > [data-shortcut="bin"]'));assert state(page)['run']['desktop']['trash'][0]['id']==shotid
    binwin=open_app(page,'bin');binwin.get_by_role('button',name='元に戻す',exact=True).click();assert len(state(page)['run']['desktop']['trash'])==0
    ctx.close();checks.append('ファイルの並べ替え・検索・大きいアイコン・ドラッグでごみ箱・元に戻す')
@@ -75,7 +80,7 @@ def main():
    w.locator('.window-controls').get_by_role('button',name='閉じる',exact=True).click()
    page.locator('.taskbar-workspaces button').nth(1).click();assert page.locator('.desktop-live > [data-app]:visible').count()==0
    page.locator('.taskbar-workspaces button').nth(0).click();w=open_app(page,'tessera');rect=w.locator('.window-title').bounding_box();page.mouse.move(rect['x']+80,rect['y']+16);page.mouse.down();page.mouse.move(20,rect['y']+16,steps=12);page.mouse.up()
-   s=state(page);assert s['run']['desktop']['windows']['tessera']['x']==0;assert s['run']['desktop']['windows']['tessera']['width']==960
+   s=state(page);assert s['run']['desktop']['windows']['tessera']['x']==0;assert s['run']['desktop']['windows']['tessera']['width']==520
    w.locator('.workspace-move').click();assert state(page)['run']['desktop']['workspaces']['tessera']==1
    for _ in range(31):page.clock.fast_forward(4000)
    assert page.locator('.desktop-live > .desktop-screensaver').count();page.mouse.move(1400,900);assert not page.locator('.desktop-live > .desktop-screensaver').count()
@@ -85,9 +90,11 @@ def main():
    legacy=OUT/'v7-import.json';legacy.write_bytes(gzip.decompress((ROOT/'game/src/systems/testdata/v7-two-shots.json.gz').read_bytes()))
    ctx,page=scene(None)
    with page.expect_file_chooser() as chooser:page.locator('.debug-panel button').nth(-2).evaluate('e=>e.click()')
-   chooser.value.set_files(str(legacy));page.locator('.desktop-live').wait_for();s=state(page);assert s['schemaVersion']==8;assert len(s['persistent']['screenshots'])==2;assert json.loads(s['persistent']['screenshots'][0]['data'])['version']==1
-   ctx.close();checks.append('ブラウザでも旧第7版とV1撮影を取り込み、第8版へ移行')
+   chooser.value.set_files(str(legacy));page.locator('.desktop-live').wait_for();s=state(page);assert s['schemaVersion']==10;assert len(s['persistent']['screenshots'])==2;assert json.loads(s['persistent']['screenshots'][0]['data'])['version']==1
+   ctx.close();checks.append('ブラウザでも旧第7版とV1撮影を取り込み、第10版へ移行')
   (OUT/'functional-checks.json').write_text(json.dumps({'checks':checks,'pageErrors':errors},ensure_ascii=False,indent=2)+'\n')
+  if args.functional_only:
+   assert not errors,errors;print(json.dumps({'checks':len(checks),'pageErrors':errors},ensure_ascii=False));browser.close();return
   # Native controls and translated text at the reference and smaller viewport sizes.
   for language in ['ja','en','en-XA']:
    for viewport in [(1920,1080),(1280,720)]:
@@ -97,11 +104,11 @@ def main():
      if app!='photo':
       label=JA['desktop.app.'+app] if language=='ja' else json.loads((ROOT/'game/src/content/locales/en.json').read_text())['messages']['desktop.app.'+app]
       if app=='settings':page.locator('.desktop-live > .desktop-taskbar .taskbar-tokens').click()
-      else:page.locator('.desktop-live > .desktop-taskbar .taskbar-apps').get_by_role('button',name=re.compile(re.escape(label))).click()
+      else:open_app(page,app)
      win(page,app).wait_for(state='visible')
      page.clock.run_for(50)
      bar=page.locator('.desktop-live > .desktop-taskbar');icons=bar.locator('.taskbar-apps').bounding_box();resources=bar.locator('.taskbar-right').bounding_box();assert icons['x']+icons['width']<=resources['x']+1,(language,viewport,app,icons,resources)
-     title=win(page,app).locator('.window-title').bounding_box();expected=32*viewport[0]/1920;assert abs(title['height']-expected)<2
+     title=win(page,app).locator('.window-title').bounding_box();expected=18*min(viewport[0]/800,viewport[1]/600);assert abs(title['height']-expected)<2
      overflows=win(page,app).locator('.win-button,select').evaluate_all("nodes=>nodes.filter(n=>n.clientWidth&&n.scrollWidth>n.clientWidth+3).map(n=>n.textContent)")
      layouts.append({'language':language,'viewport':viewport,'app':app,'overflows':overflows})
      page.screenshot(path=str(OUT/f'{app}-{language}-{viewport[0]}.png'))

@@ -14,7 +14,7 @@ export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }
   const i18n = useMemo(() => createI18n(snapshot.language, {numberNotation:snapshot.state.persistent.numberNotation}), [snapshot.language,snapshot.state.persistent.numberNotation]);
   return (
     <>
-      <Stage platform={runtime.platform} i18n={i18n}>
+      <Stage platform={runtime.platform} i18n={i18n} desktop={snapshot.state.run.world==='desktop'} logical={snapshot.state.run.world==='desktop'?snapshot.state.run.desktop.screen:undefined}>
         {snapshot.status === 'starting' && <p className="system-message">{i18n.t('system.loading')}</p>}
         {snapshot.status === 'blocked' && <div className="system-message" role="alert">
           <p>{i18n.t('system.otherTab')}</p>

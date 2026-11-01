@@ -1,3 +1,4 @@
+import { canSwitchEditor, setEditorStage, type VisualStage } from './appearance';
 import { enterDesktop } from './desktop';
 import { BALANCE, type KumikiItem, type KumikiSkill, type PartId } from '../config/balance';
 import { ICON_IDS, PRACTICE_IDS, homeButtonColor, iconTemplate, paletteFor, scaleArt } from '../content/kumikiArt';
@@ -176,6 +177,7 @@ export function exportKumiki(state: GameState, now: number): GameState {
 export function buyKumikiSkill(state: GameState, id: KumikiSkill): GameState {
   const skill = BALANCE.w2.skills.find(skill => skill.id === id);
   if (!state.run.kumiki.built.includes('extensions') || !skill || hasKSkill(state, id) || skill.band === 2 && state.run.version === 'v0.1' || state.resources.tokens < skill.cost) return state;
+  if(id==='modern'&&!canSwitchEditor(state))return state;
   const artwork = { ...state.persistent.artwork, skills: [...state.persistent.artwork.skills, id] };
   if (id === 'expand') {
     const old = artwork.sketchbook;
@@ -190,7 +192,8 @@ export function buyKumikiSkill(state: GameState, id: KumikiSkill): GameState {
     }
   }
   if (id === 'modern') artwork.modern = true;
-  return { ...state, resources: { ...state.resources, tokens: state.resources.tokens - skill.cost }, persistent: { ...state.persistent, artwork } };
+  const next={ ...state, resources: { ...state.resources, tokens: state.resources.tokens - skill.cost }, persistent: { ...state.persistent, artwork } };
+  return id==='update'?setEditorStage(next,1):id==='modern'?setEditorStage(next,2):next;
 }
 export function flushHomeBank(state: GameState): GameState {
   const next = creditPixels(state, state.run.kumiki.bank);
@@ -257,6 +260,7 @@ export type KumikiAction =
   | { type: 'repair'; id: PartId; dx: number; dy: number }
   | { type: 'name'; name: string }
   | { type: 'modern'; enabled: boolean }
+  | { type: 'editor-stage';stage:VisualStage }
   | { type: 'wallpaper' }
   | { type: 'extensions' }
   | { type: 'exit' };
@@ -282,7 +286,8 @@ function reduceKumiki(state: GameState, action: KumikiAction, now: number): Game
     case 'guide': return readKumikiGuide(state, action.id);
     case 'repair': return repairPart(state, action.id, action.dx, action.dy);
     case 'name': return !state.run.kumiki.built.includes('input') ? state : { ...state, persistent: { ...state.persistent, playerName: action.name.trim().slice(0, BALANCE.w2.maxName) || null } };
-    case 'modern': return !hasKSkill(state, 'modern') ? state : { ...state, persistent: { ...state.persistent, artwork: { ...state.persistent.artwork, modern: action.enabled } } };
+    case 'modern': return !hasKSkill(state,'modern')?state:setEditorStage(state,action.enabled?2:0);
+    case 'editor-stage': return setEditorStage(state,action.stage);
     case 'wallpaper': return !hasKSkill(state, 'wallpaper') ? state : { ...state, persistent: { ...state.persistent, artwork: { ...state.persistent.artwork, wallpaper: structuredClone(state.persistent.artwork.sketchbook) } } };
     case 'extensions': return !state.run.kumiki.built.includes('extensions') ? state : kGuide(state, 'extensions');
     case 'exit': return state.run.world === 'desktop' ? state : state.persistent.specs.color > 0 ? enterDesktop(state) : !state.run.kumiki.built.includes('taskbar') ? state : kGuide(withK(state, { ...state.run.kumiki, exitInspected: true }), 'wall');
