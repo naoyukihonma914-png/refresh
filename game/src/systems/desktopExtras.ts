@@ -121,7 +121,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   if(typeof a.autoRadius==='boolean')prefs.radiusCustom=!a.autoRadius;
   if(a.iconSize!==undefined&&[32,48,64].includes(a.iconSize)&&hasUpgrade(s,'iconSize'))prefs.iconSize=a.iconSize;
   if(typeof a.slideshow==='boolean'&&hasUpgrade(s,'slideshow'))prefs.slideshow=a.slideshow;
-  let next:GameState={...s,persistent:{...s.persistent,desktopPrefs:prefs},run:{...s.run,kumiki:{...s.run.kumiki,design:{...s.run.kumiki.design,primary:{...(s.run.kumiki.design.primary??{radius:0,textSize:'medium' as const,shadow:false}),color:prefs.accent}}}}};
+  let next:GameState={...s,persistent:{...s.persistent,desktopPrefs:prefs},run:{...s.run,seed:{...s.run.seed,page:{...s.run.seed.page,button:prefs.accent}},kumiki:{...s.run.kumiki,design:{...s.run.kumiki.design,primary:{...(s.run.kumiki.design.primary??{radius:0,textSize:'medium' as const,shadow:false}),color:prefs.accent}}}}};
   if(a.iconSize!==undefined)next={...next,run:{...next.run,desktop:resizeDesktop(next.run.desktop,next.run.desktop.screen,prefs.iconSize)}};
   if(prefs.mode==='dark')next=completeRequests(next,['dark'],now);return next;
  }

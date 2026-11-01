@@ -1,3 +1,4 @@
+import { recommendedPage } from './pageDesign';
 import { BALANCE, type SeedItem, type SeedSkill } from '../config/balance';
 import { creditPixels, manualClickValue } from './economy';
 import { createInitialState, type GameState, type GuideId } from './state';
@@ -48,6 +49,7 @@ export function buildSeed(state: GameState, id: SeedItem | 'cursor', now: number
   const next = updateSeedGuide({ ...state,
     resources: { ...state.resources, pixels: Math.max(0, state.resources.pixels - cost) },
     run: { ...state.run, seed: { ...seed,
+      page:id==='layout'?{...seed.page,layout:seed.page.layout??recommendedPage()}:seed.page,
       built: id === 'cursor' ? seed.built : [...seed.built, id],
       autoCursors: seed.autoCursors + (id === 'cursor' ? 1 : 0),
       history: [...seed.history, { item: id, at: now }], lastActionAt: state.elapsedMs,
@@ -111,6 +113,7 @@ export function createSeedVersion(previous: GameState, version: 'v1' | 'v2', now
   next.resources.tokens = previous.resources.tokens;
   next.resources.dollars = previous.resources.dollars;
   if (previous.persistent.seedSkills.includes('inherit')) {
+    next.run.seed.page=structuredClone(previous.run.seed.page);
     const items = BALANCE.w1.items.filter(item => item.id !== 'kumiki' && previous.run.seed.built.includes(item.id)).map(item => item.id);
     if (items.length) next.run.seed.installer = { items, elapsedMs: 0 };
   }

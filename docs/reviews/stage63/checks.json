@@ -1,0 +1,220 @@
+{
+  "checks": [
+    "3言語×2サイズでカラー→フォント→レイアウト→アニメーションを実購入。配色・文字のガード・書体・動き・ドラッグ・拡大縮小・窓外/重なり/最小寸法の拒否・生成・おすすめ・標準へ戻すを実操作",
+    "3時代×3言語×2サイズでホームの見出し入力・作者名/作品名の独立・設定共有・取り外した部品の不在・配置の収まり、写真のスライダー操作と時代ごとの見た目を確認",
+    "本物の第11版セーブをブラウザで移行。返金・未受け取り・倍率・ノート・アプリ・旧撮影の保持、自動生成の再開、見出し編集と保存再読み込み、場面形式7の撮影を後の変更から独立して表示することを確認"
+  ],
+  "screens": [
+    {
+      "screen": "seed",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "seed",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "seed",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "seed",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "seed",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "seed",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "screen": "home/photo",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": []
+}

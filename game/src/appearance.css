@@ -500,3 +500,14 @@
 .desktop-frozen .builder-resize {display:none;}
 /* Focus may scroll hidden overflow by a rounded pixel at fractional desktop scales. */
 .desktop {overflow:clip;}
+/* Native range controls must keep the materials of their desktop era. */
+.desktop[class*='desktop-era-'] input[type=range] {appearance:none;-webkit-appearance:none;height:20px;min-height:20px;background:transparent;box-shadow:none;border:0;accent-color:auto;}
+.desktop[class*='desktop-era-'] input[type=range]::-webkit-slider-runnable-track {height:4px;background:#c0c0c0;border:1px solid #808080;box-shadow:inset 1px 1px #000,inset -1px -1px #fff;}
+.desktop[class*='desktop-era-'] input[type=range]::-webkit-slider-thumb {appearance:none;-webkit-appearance:none;width:11px;height:20px;margin-top:-9px;background:#c0c0c0;border:1px solid #808080;border-radius:0;box-shadow:inset 1px 1px #fff,inset -1px -1px #000;}
+.desktop[class*='desktop-era-'] input[type=range]::-moz-range-track {height:4px;background:#c0c0c0;border:1px solid #808080;}
+.desktop[class*='desktop-era-'] input[type=range]::-moz-range-thumb {width:10px;height:18px;background:#c0c0c0;border:1px solid #808080;border-radius:0;box-shadow:inset 1px 1px #fff,inset -1px -1px #000;}
+.desktop.desktop-era-1 input[type=range]::-webkit-slider-thumb {background:linear-gradient(90deg,#fff,#ddd9ca);border-color:#8a8d7d;box-shadow:inset 0 3px #57b74d;}
+.desktop.desktop-era-1 input[type=range]::-moz-range-thumb {background:#ece9d8;border-color:#8a8d7d;box-shadow:inset 0 3px #57b74d;}
+.desktop.desktop-era-2 input[type=range]::-webkit-slider-runnable-track {height:5px;background:linear-gradient(#8c999e,#edf3f5);border-color:#8b989e;box-shadow:none;}
+.desktop.desktop-era-2 input[type=range]::-webkit-slider-thumb {width:12px;height:20px;background:linear-gradient(90deg,#f2fcff,#aacbdc);border-color:#6b8b9e;border-radius:2px;box-shadow:inset 1px 1px #fff;}
+.desktop.desktop-era-2 input[type=range]::-moz-range-thumb {width:11px;height:18px;background:linear-gradient(90deg,#f2fcff,#aacbdc);border-color:#6b8b9e;border-radius:2px;}

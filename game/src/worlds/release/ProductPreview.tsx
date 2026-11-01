@@ -23,7 +23,7 @@ export function ProductPreview({ product, runtime, snapshot, i18n }: { product: 
   }, [product, i18n.language]);
   return <div className={`product-preview kumiki ${product.screen.modern ? 'is-modern' : ''}`} role="img" aria-label={i18n.t('release.preview')}>
     <div ref={mount} className="product-preview-mount" inert aria-hidden="true" style={{ transform: `translate(${fit.left}px, ${fit.top}px) scale(${fit.scale})` }}>
-      <HomeDocument runtime={runtime} snapshot={{ ...snapshot, state, press: null, offline: null }} i18n={i18n} selected={null} onSelect={() => {}} selecting={false} dragPart={null} onDrop={() => {}} preview />
+      <HomeDocument runtime={runtime} snapshot={{ ...snapshot, state, press: null, offline: null }} i18n={i18n} selected={null} onSelect={() => {}} selecting={false} dragPart={null} onDrop={() => {}} preview legacyHome={!product.screen.page} />
     </div>
   </div>;
 }

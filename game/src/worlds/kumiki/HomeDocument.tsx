@@ -1,3 +1,4 @@
+import { PART_IDS } from '../../systems/kumikiState';
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { BALANCE, type PartId } from '../../config/balance';
 import type { I18n } from '../../content/i18n';
@@ -6,10 +7,10 @@ import { ownedParts, hasKSkill } from '../../systems/kumiki';
 import { Foundation, useAnimationClock } from '../Foundation';
 import { manualClickValue } from '../../systems/economy';
 import { designStyle } from './design';
-export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop, preview = false, interactive = true, onMeasure }: {
+export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop, preview = false, interactive = true, legacyHome=false, onMeasure }: {
   runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n; selected: string | null; onSelect(id: string): void;
   selecting: boolean; dragPart: PartId | null; onDrop(id: PartId): void;
-  preview?: boolean; interactive?: boolean;onMeasure?(size:{width:number;height:number}):void;
+  preview?: boolean; interactive?: boolean;legacyHome?:boolean;onMeasure?(size:{width:number;height:number}):void;
 }) {
   const { state } = snapshot;
   const k = state.run.kumiki;
@@ -19,6 +20,7 @@ export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, sele
   const repairStart = useRef<{ id: PartId; x: number; y: number; scale: number } | null>(null);
   const [repairOffset, setRepairOffset] = useState({ dx: 0, dy: 0 });
   const act = runtime.actKumiki;
+  const parts=legacyHome?PART_IDS.filter(id=>id==='tabs'||id==='table'?hasKSkill(state,'extraParts'):k.built.includes(id)):ownedParts(state);
   useLayoutEffect(() => {
     const root = sheet.current;
     const node = root && selected ? root.querySelector<HTMLElement>(`[data-part="${selected}"]`) : null;
@@ -74,7 +76,7 @@ export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, sele
     switch: <label><input type="checkbox" checked={k.focus} onChange={event => act({ type: 'configure', change: { focus: event.target.checked } })} />{i18n.t('k.focus')}</label>,
     slider: <label>{i18n.t('k.interval')}<input aria-label={i18n.t('k.interval')} type="range" min={BALANCE.w2.intervalMin} max={BALANCE.w2.intervalMax} value={k.interval}
       onChange={event => act({ type: 'configure', change: { interval: Number(event.target.value) } })} /><output>{i18n.t('k.seconds', { count: k.interval })}</output></label>,
-    input: <label>{i18n.t('k.exportName')}<input value={k.exportName} maxLength={BALANCE.w2.maxName} onChange={event => act({ type: 'configure', change: { exportName: event.target.value } })} /></label>,
+    input: <label>{i18n.t(legacyHome?'k.exportName':'page.homeHeading')}<input aria-label={i18n.t(legacyHome?'k.exportName':'page.homeHeading')} value={legacyHome?k.exportName:state.run.seed.page.heading} maxLength={BALANCE.w2.maxName} onChange={event=>legacyHome?act({type:'configure',change:{exportName:event.target.value}}):runtime.actPage({type:'heading',heading:event.target.value})}/></label>,
     frame: <span>{i18n.t('k.home')}</span>, taskbar: <button onClick={() => act({ type: 'configure', change: { homeWindow: k.homeWindow === 'minimized' ? 'normal' : 'minimized' } })}>{i18n.t('k.home')}</button>,
     tabs: <div className="home-tabs"><button aria-pressed={!recordTab} onClick={() => setRecordTab(false)}>{i18n.t('k.tab.home')}</button><button aria-pressed={recordTab} onClick={() => setRecordTab(true)}>{i18n.t('k.tab.record')}</button></div>,
     table: <table><thead><tr><th>{i18n.t('k.table.time')}</th><th>{i18n.t('k.table.pixels')}</th></tr></thead><tbody>{k.generationLog.slice(-4).map((entry, index) => <tr key={index}><td>{i18n.time(entry.at)}</td><td>{i18n.integer(entry.pixels)}</td></tr>)}</tbody></table>,
@@ -90,14 +92,14 @@ export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, sele
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d={['M3 12H13','M3 3H13V13H3Z','M3 3L13 13M13 3L3 13'][index]} /></svg>
       </button>)}</div></header>}
     <div className="home-body" hidden={k.homeWindow === 'minimized' || k.homeWindow === 'closed'}>
-      <Foundation snapshot={snapshot} runtime={runtime} i18n={i18n} embedded preview={preview} interactive={interactive}>
+      <Foundation snapshot={snapshot} runtime={runtime} i18n={i18n} embedded preview={preview} legacyHome={legacyHome} interactive={interactive}>
         <div className="home-part-list">
-          {ownedParts(state).filter(id => id !== 'frame' && id !== 'taskbar' && (id !== 'table' || !k.placed.includes('tabs') || recordTab)).map(id => slot(id, items[id]))}
-          {ownedParts(state).includes('frame') && !k.placed.includes('frame') && slot('frame', items.frame)}
+          {parts.filter(id => id !== 'frame' && id !== 'taskbar' && (id !== 'table' || !k.placed.includes('tabs') || recordTab)).map(id => slot(id, items[id]))}
+          {parts.includes('frame') && !k.placed.includes('frame') && slot('frame', items.frame)}
         </div>
       </Foundation>
     </div>
-    {ownedParts(state).includes('taskbar') && slot('taskbar', items.taskbar)}
+    {parts.includes('taskbar') && slot('taskbar', items.taskbar)}
     {measure && <div className="selection-measure" style={{ insetInlineStart: measure.x, insetBlockStart: measure.y, inlineSize: measure.width, blockSize: measure.height }}>
       <span>{i18n.t('k.dimensions', { width: Math.round(measure.width), height: Math.round(measure.height) })}</span>
     </div>}

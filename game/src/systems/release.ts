@@ -40,7 +40,7 @@ export function beginPrototypeRelease(original: GameState, now: number, reducedM
   const state = flushHomeBank(original);
   const k = state.run.kumiki, p = state.persistent;
   const screen: ProductScreen = structuredClone({
-    pixels: state.resources.pixels, built: state.run.seed.built, cursors: state.run.seed.autoCursors,
+    page:state.run.seed.page,...(k.legacyBonus?{legacyBonus:k.legacyBonus}:{}),pixels: state.resources.pixels, built: state.run.seed.built, cursors: state.run.seed.autoCursors,
     kumikiBuilt: k.built, placed: k.placed, design: k.design, focus: k.focus, interval: k.interval, exportName: k.exportName,
     specs: p.specs, seedSkills: p.seedSkills, pattern: p.seedAppearance.pattern, marquee: p.seedAppearance.marquee,
     kumikiSkills: p.artwork.skills, modern: p.artwork.modern, log: k.generationLog, history: state.run.seed.history,
@@ -95,8 +95,9 @@ export function productPreviewState(product: ProductRecord): GameState {
   next.run.version = product.version; next.run.world = 'kumiki';
   next.run.seed.built = [...s.built]; next.run.seed.autoCursors = s.cursors;
   next.run.seed.history = s.history;
+  if(s.page)next.run.seed.page=structuredClone(s.page);
   next.run.kumiki = { ...createKumikiState(), entered: true, activeDrawing: 'free', built: s.kumikiBuilt, placed: s.placed,
-    design: s.design, focus: s.focus, interval: s.interval, exportName: s.exportName, generationLog: s.log };
+    design: s.design,legacyBonus:s.legacyBonus, focus: s.focus, interval: s.interval, exportName: s.exportName, generationLog: s.log };
   next.persistent.specs = s.specs; next.persistent.seedSkills = s.seedSkills;
   next.persistent.seedAppearance = { pattern: s.pattern, marquee: s.marquee };
   next.persistent.artwork.skills = s.kumikiSkills; next.persistent.artwork.modern = s.modern;

@@ -1,8 +1,10 @@
+import { isPageDesign, type PageDesign } from './pageDesign';
 import { BALANCE, type KumikiItem, type KumikiSkill, type PartId, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { isDesignMap, isExportedWork, PART_IDS, type Design, type ExportedWork } from './kumikiState';
 import type { SeedState } from './state';
 
 export interface ProductScreen {
+  page?:PageDesign;legacyBonus?:{auto:number;drawing:number};
   pixels: number; built: SeedItem[]; cursors: number; kumikiBuilt: KumikiItem[]; placed: PartId[];
   design: Record<string, Design>; focus: boolean; interval: number; exportName: string;
   specs: Record<SpecKey, number>; seedSkills: SeedSkill[];
@@ -27,11 +29,13 @@ export function isProductRecord(x: unknown): x is ProductRecord {
     || x.author !== null && typeof x.author !== 'string' || !amount(x.generatedPixels) || !count(x.builtCount) || !count(x.revenue)) return false;
   const s = x.screen;
   if (!obj(s) || !amount(s.pixels) || !count(s.cursors) || !ids(s.built, BALANCE.w1.items.map(i => i.id))
-    || !ids(s.kumikiBuilt, BALANCE.w2.items.map(i => i.id)) || !ids(s.placed, PART_IDS) || !isDesignMap(s.design)
+    || !ids(s.kumikiBuilt, [...BALANCE.w2.items.map(i => i.id),'switch','slider']) || !ids(s.placed, PART_IDS) || !isDesignMap(s.design)
     || typeof s.focus !== 'boolean' || !count(s.interval) || s.interval < BALANCE.w2.intervalMin || s.interval > BALANCE.w2.intervalMax
     || typeof s.exportName !== 'string' || !ids(s.seedSkills, BALANCE.w1.skills.map(i => i.id))
     || !['none', 'dots', 'grid', 'diagonal'].includes(s.pattern as string) || typeof s.marquee !== 'boolean'
     || !ids(s.kumikiSkills, BALANCE.w2.skills.map(i => i.id)) || typeof s.modern !== 'boolean') return false;
+  if(s.page!==undefined&&!isPageDesign(s.page))return false;
+  if(s.legacyBonus!==undefined&&(!obj(s.legacyBonus)||!amount(s.legacyBonus.auto)||s.legacyBonus.auto<1||s.legacyBonus.auto>1.2||!amount(s.legacyBonus.drawing)||s.legacyBonus.drawing<1||s.legacyBonus.drawing>2))return false;
   if (!obj(s.specs) || !(Object.keys(BALANCE.spec) as SpecKey[]).every(key => obj(s.specs) && count(s.specs[key]) && s.specs[key] < BALANCE.spec[key].length)) return false;
   if (!Array.isArray(s.log) || !s.log.every(e => obj(e) && amount(e.at) && amount(e.pixels))) return false;
   if (!Array.isArray(s.history) || !s.history.every(e => obj(e) && ['cursor', ...BALANCE.w1.items.map(i => i.id)].includes(e.item as SeedItem | 'cursor') && amount(e.at))) return false;

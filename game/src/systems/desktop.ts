@@ -1,3 +1,4 @@
+import { pageColors } from './pageDesign';
 import { actAppBuild, ownAppBlueprint, ownFeaturePart, functionalApp, appLayoutBonus, hasAppPart, type AppBuildAction } from './appBuild';
 import { desktopScreen, fitWindow, fitIcon, workHeight } from './desktopGeometry';
 import { desktopStage } from './appearance';
@@ -7,7 +8,7 @@ import { FEATURE_APPS, featureCount, hasDesktopSkill, hasUpgrade } from './deskt
 import type { DesktopUpgrade } from '../config/balance';
 import { encodeScene, projectCapture, restoreScene } from './captureScene';
 import { BALANCE } from '../config/balance';
-import { ICON_IDS, PRACTICE_IDS, homeButtonColor } from '../content/kumikiArt';
+import { ICON_IDS, PRACTICE_IDS } from '../content/kumikiArt';
 import { availableIcons, drawingFor, prepareDrawing } from './kumiki';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import { APP_IDS, createDesktopState, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
@@ -56,7 +57,7 @@ function newFeedback(state: GameState, at: number): Feedback | null {
   const d = state.run.desktop;
   const pending = d.feedback.filter(f => f.completedAt === null);
   if (pending.length >= pendingCapacity(state)) return null;
-  const primaryColor = state.run.kumiki.design.primary?.color ?? homeButtonColor(state.persistent.specs.color);
+  const primaryColor = pageColors(state.run.seed.page,state.persistent.specs.color).button;
   const candidates: { kind: Feedback['kind']; target: string }[] = [];
   const redraw = [...ICON_IDS].sort((a,b) => {
     const last=(id:string)=>d.feedback.filter(f=>f.kind==='redraw'&&f.target===id).at(-1)?.id??0;
@@ -106,7 +107,7 @@ export function observeTesseraAction(before: GameState, after: GameState, type: 
   if (after.run.world !== 'desktop' || before === after) return after;
   const done = after.run.desktop.feedback.filter(f => {
     if (f.completedAt !== null) return false;
-    if (type === 'design' && f.kind === 'color') return (after.run.kumiki.design.primary?.color ?? homeButtonColor(after.persistent.specs.color)) !== f.baselineColor;
+    if (type === 'design' && f.kind === 'color') return pageColors(after.run.seed.page,after.persistent.specs.color).button !== f.baselineColor;
     if (type !== 'export' || !['redraw','practice'].includes(f.kind)) return false;
     const old = drawingFor(before, f.target), work = after.run.kumiki.exports.find(e => e.kind === 'icon' && e.id === f.target);
     if (!old?.dirty || !work) return false;

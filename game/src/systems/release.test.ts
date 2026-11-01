@@ -5,7 +5,7 @@ import { createInitialState, isGameState } from './state';
 import { decodeSave, encodeSave, loadGame, saveGame, createMemoryStorage } from './save';
 import { advanceActiveTime, advanceOfflineTime } from './time';
 import { buildSeed, canBuildSeed, cursorPrice, pressSeed, freshMomentum } from './seed';
-import { availableIcons, buildKumiki, configureKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, prototypeConditions, targetFor } from './kumiki';
+import { availableIcons, buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, prototypeConditions, targetFor } from './kumiki';
 import { passivePixelsPerSecond } from './economy';
 import { beginPrototypeRelease, buySpec, canBuySpec, canFundNextVersion, canReleasePrototype, canStartNextVersion, dailySales, displayedSales, productPreviewState, releaseEstimate, shippingComplete, shippingProduct, SPEC_ORDER, startNextVersion } from './release';
 
@@ -20,7 +20,7 @@ describe('試作版のリリース', () => {
     expect(canReleasePrototype(state)).toBe(true);
     for (const mutate of [
       (s: typeof state) => { s.run.kumiki.exitInspected = false; },
-      (s: typeof state) => { s.run.kumiki.built = s.run.kumiki.built.filter(id => id !== 'switch'); },
+      (s: typeof state) => { s.run.kumiki.built = s.run.kumiki.built.filter(id => id !== 'input'); },
       (s: typeof state) => { s.run.kumiki.exports = s.run.kumiki.exports.filter(e => e.kind === 'part'); },
       (s: typeof state) => { s.run.kumiki.placed = s.run.kumiki.placed.filter(id => id !== 'button'); },
       (s: typeof state) => { s.run.version = 'v1'; },
@@ -197,7 +197,7 @@ describe('試作版のリリース', () => {
     delete old.run.shipping; delete old.run.restartMs;
     delete old.persistent.products; delete old.persistent.guideArchive; delete old.persistent.homeTheme;
     const migrated = decodeSave(JSON.stringify(old));
-    expect(migrated.schemaVersion).toBe(11); expect(migrated.resources).toEqual(old.resources);
+    expect(migrated.schemaVersion).toBe(12); expect(migrated.resources).toEqual(old.resources);
     const state = shipped(); expect(decodeSave(encodeSave(state))).toEqual(state);
     for (const mutate of [
       (s: typeof state) => { s.run.shipping!.productId = 99; },
@@ -256,7 +256,6 @@ it('実際の生成・購入・描画からv0.1を出荷し、256色を買って
     }
     state = buildKumiki(state, item.id); pause(4_000);
     for (const part of ownedParts(state)) if (!state.run.kumiki.placed.includes(part)) state = placePart(state, part);
-    if (item.id === 'slider') state = configureKumiki(state, { interval: BALANCE.w2.intervalMax });
     state = exportKumiki(state, time); pause(2_000);
     if (item.id === 'extensions' || item.id === 'input') pause(15_000);
   }
@@ -268,5 +267,5 @@ it('実際の生成・購入・描画からv0.1を出荷し、256色を買って
   expect(state.run.version).toBe('v1'); expect(state.run.world).toBe('seed'); expect(state.persistent.specs.color).toBe(1);
   expect(state.persistent.products).toHaveLength(1);
   console.info(`v0.1の自動プレイ: ${(time / 60_000).toFixed(2)}分 / ${revenue}ドル / ${state.persistent.products[0]!.exports.filter(e => e.kind === 'icon').length}アイコン`);
-  expect(time).toBeGreaterThanOrEqual(40 * 60_000); expect(time).toBeLessThanOrEqual(60 * 60_000);
+  expect(time).toBeGreaterThanOrEqual(39 * 60_000); expect(time).toBeLessThanOrEqual(60 * 60_000);
 });

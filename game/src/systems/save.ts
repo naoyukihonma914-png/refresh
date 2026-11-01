@@ -1,3 +1,6 @@
+import { ICON_IDS } from '../content/kumikiArt';
+import { BALANCE } from '../config/balance';
+import { createPageDesign, isPageDesign } from './pageDesign';
 import { migrateAppProjects, repairAppProjects } from './appLayout';
 import { desktopScreen, resizeDesktop, LEGACY_DESKTOP } from './desktopGeometry';
 import { createAppearance } from './appearance';
@@ -38,7 +41,7 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   3(data) {
     const next = { ...(data as GameState), schemaVersion: 4 };
     const projected = { ...next, schemaVersion: SCHEMA_VERSION,
-      run: { ...next.run, shipping: null, restartMs: 0, desktop: createDesktopState() },
+      run: { ...next.run, seed:{...next.run.seed,page:createPageDesign()},shipping: null, restartMs: 0, desktop: createDesktopState() },
       persistent: { ...next.persistent, appearance:createAppearance(), products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
     };
     if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
@@ -92,6 +95,14 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     const desktopSkills=modern?[...new Set([...old.persistent.desktopPrefs.skills,'major1' as const,'major2' as const])]:old.persistent.desktopPrefs.skills;
     return {...old,schemaVersion:9,persistent:{...old.persistent,appearance:{editor:old.persistent.artwork.modern?2:0,desktop:modern?2:0},artwork:{...old.persistent.artwork,skills},desktopPrefs:{...old.persistent.desktopPrefs,skills:desktopSkills,radiusCustom:old.persistent.desktopPrefs.radius!==8}}};
   },
+  11(data) {
+    const old=data as GameState,k=old.run.kumiki,sw=k.built.includes('switch'),slider=k.built.includes('slider'),refund=(sw?BALANCE.legacyHome.switchRefund:0)+(slider?BALANCE.legacyHome.sliderRefund:0),bank=k.bank;
+    const pixels=old.resources.pixels+refund+bank;
+    const built=k.built.filter(id=>!['switch','slider'].includes(id));
+    // Keep an already completed prototype requirement completed after replacing it.
+    if(sw&&k.built.includes('button')&&k.placed.includes('button')&&k.exports.filter(e=>e.kind==='icon'&&ICON_IDS.includes(e.id as typeof ICON_IDS[number])).length>=2&&!built.includes('input'))built.push('input');
+    return {...old,schemaVersion:12,resources:{...old.resources,pixels},run:{...old.run,totalPixelsGenerated:Math.max(old.run.totalPixelsGenerated+bank,pixels),seed:{...old.run.seed,page:{...createPageDesign(),button:k.design.primary?.color??null}},kumiki:{...k,built,placed:k.placed.filter(id=>!['switch','slider'].includes(id)),focus:false,interval:1,bank:0,batchMs:0,legacyBonus:{auto:slider?BALANCE.w2.sliderMultiplier:1,drawing:sw?BALANCE.w2.focusMultiplier:1},drift:k.drift&&['switch','slider'].includes(k.drift.part)?null:k.drift}}};
+  },
   10(data) {
     const old=data as GameState;return {...old,schemaVersion:11,run:{...old.run,desktop:{...old.run.desktop,editingApp:null,projects:migrateAppProjects(old.run.desktop.apps,old.run.desktop.upgrades,old.persistent.desktopPrefs.skills)}}};
   },
@@ -129,6 +140,7 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   }
   const candidate=data as GameState;
   if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
+  if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
   return migrated && data.run.seed.built.includes('kumiki') && !data.run.kumiki.entered ? enterKumiki(data) : data;
 }

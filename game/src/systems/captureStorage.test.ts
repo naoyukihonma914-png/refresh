@@ -23,7 +23,7 @@ const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now
 describe('場面の保存形式と独立した記録',()=>{
  it('表示に必要な場面だけを持ち、製品・報酬台帳・過去の会話・全生成履歴をコピーしない',()=>{
   const s=shotState(),scene=readCapture(s.persistent.screenshots[0]!);
-  expect(scene.version).toBe(6);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(7);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
   expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene.editor.picture).not.toHaveProperty('rewarded');
   expect(scene.home.rows.length).toBeLessThanOrEqual(4);expect(scene.home.history.length).toBeLessThanOrEqual(4);
   const source=structuredClone(s);source.persistent.screenshots=[];
@@ -45,7 +45,7 @@ describe('場面の保存形式と独立した記録',()=>{
  it('実際の第6版の2枚入りセーブを移行し、資源・製品・窓・撮影時の本文とパレットを保つ',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString();
   const old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(11);expect(s.resources).toEqual(old.resources);expect(s.persistent.products).toEqual(old.persistent.products);expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
+  expect(s.schemaVersion).toBe(12);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products).toEqual(old.persistent.products);expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
   expect(s.persistent.screenshots).toHaveLength(2);
   const oldFrame=decodeCapture(old.persistent.screenshots[0].data) as typeof s;
   const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene.home.design).toEqual(oldFrame.run.kumiki.design);
@@ -75,7 +75,7 @@ describe('場面の保存形式と独立した記録',()=>{
   // Emulate a lower game schema with the already-versioned scene reference envelope.
   stored.schemaVersion=6;
   const restored=decodeSave(JSON.stringify(stored),ref=>captureStore(target.storage).get(ref));
-  expect(restored.schemaVersion).toBe(11);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(6);
+  expect(restored.schemaVersion).toBe(12);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(7);
  });
  it('新しい画像の書き込みが途中で失敗しても元の記録を保ち、追加した未参照データだけを片付けて再試行できる',()=>{
   const target=disk(),s=shotState();saveGame(target.storage,s,now);const before=new Map(target.entries);

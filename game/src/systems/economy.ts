@@ -20,10 +20,8 @@ export function cursorPressesPerSecond(state: GameState): number {
 export function cursorPixelsPerSecond(state: GameState): number {
   if (state.run.world === 'release') return 0;
   const k = state.run.kumiki;
-  if (['kumiki','desktop'].includes(state.run.world) && k.placed.includes('switch') && k.focus) return 0;
   const button = k.placed.includes('button') ? BALANCE.w2.buttonMultiplier : 1;
-  const slider = k.placed.includes('slider') ? 1 + (k.interval - BALANCE.w2.intervalMin) / (BALANCE.w2.intervalMax - BALANCE.w2.intervalMin) * (BALANCE.w2.sliderMultiplier - 1) : 1;
-  return manualClickValue(state) * cursorPressesPerSecond(state) * button * slider;
+  return manualClickValue(state) * cursorPressesPerSecond(state) * button * (k.legacyBonus?.auto??1);
 }
 
 export const homePixelsPerSecond = (state: GameState): number => state.run.seed.autoCursors * cursorPixelsPerSecond(state);
@@ -31,16 +29,7 @@ export const passivePixelsPerSecond = (state: GameState): number => homePixelsPe
 
 export function advanceHomeGeneration(state: GameState, ms: number): GameState {
   state = creditPixels(state,jobsRate(state)*ms/BALANCE.time.millisecondsPerSecond);
-  const k = state.run.kumiki;
-  const rate = homePixelsPerSecond(state);
-  if (!k.placed.includes('slider') || rate === 0) return creditPixels(state, rate * ms / BALANCE.time.millisecondsPerSecond);
-  const period = k.interval * BALANCE.time.millisecondsPerSecond;
-  const until = period - k.batchMs;
-  const remainder = ms < until ? k.batchMs + ms : (ms - until) % period;
-  const pixels = ms < until ? 0 : k.bank + rate * (ms - remainder) / BALANCE.time.millisecondsPerSecond;
-  const bank = ms < until ? k.bank + rate * ms / BALANCE.time.millisecondsPerSecond : rate * remainder / BALANCE.time.millisecondsPerSecond;
-  const next = creditPixels(state, pixels);
-  return { ...next, run: { ...next.run, kumiki: { ...next.run.kumiki, bank, batchMs: remainder } } };
+  return creditPixels(state,homePixelsPerSecond(state)*ms/BALANCE.time.millisecondsPerSecond);
 }
 
 export function creditPixels(state: GameState, pixels: number): GameState {

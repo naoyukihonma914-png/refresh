@@ -80,7 +80,7 @@ describe('段階6.2：アプリの組み立てと詰みの防止',()=>{
  });
  it('実際の第10版を追加料金なく移行し、購入済みアプリ・12機能・撮影を失わない',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v10-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(11);expect(s.resources).toEqual(old.resources);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(s.run.desktop.apps).toEqual(old.run.desktop.apps);
+  expect(s.schemaVersion).toBe(12);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(s.run.desktop.apps).toEqual(old.run.desktop.apps);
   for(const app of BUILDABLE_APPS){expect(functionalApp(s,app)).toBe(true);expect(validLayout(s.run.desktop.projects[app]!.installed,app)).toBe(true);}
   for(const id of ['sort','search','large'])expect(hasAppPart(s,'files',id)).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);
  });
@@ -102,7 +102,7 @@ describe('段階6.2：アプリの組み立てと詰みの防止',()=>{
   let s=ready();s=actAppBuild(s,{type:'app-remove',app:'theme',part:'appearance'});s=actAppBuild(s,{type:'app-install',app:'theme'});s=actDesktop(s,{type:'theme',iconSize:64},now);expect(s.persistent.desktopPrefs.iconSize).toBe(64);expect(actDesktop(s,{type:'theme',mode:'dark'},now)).toBe(s);
  });
  it('購入済みの自動仕分けで使っていたメールのフォルダーも旧データから引き継ぐ',()=>{
-  const raw=JSON.parse(gunzipSync(readFileSync(new URL('./testdata/v10-two-shots.json.gz',import.meta.url))).toString());raw.run.desktop.upgrades=raw.run.desktop.upgrades.filter((id:string)=>id!=='folders');raw.persistent.desktopPrefs.skills.push('sortMail');const s=decodeSave(JSON.stringify(raw));expect(s.run.desktop.projects.mail!.installed!.parts.some(p=>p.id==='folders')).toBe(true);expect(s.resources).toEqual(raw.resources);
+  const raw=JSON.parse(gunzipSync(readFileSync(new URL('./testdata/v10-two-shots.json.gz',import.meta.url))).toString());raw.run.desktop.upgrades=raw.run.desktop.upgrades.filter((id:string)=>id!=='folders');raw.persistent.desktopPrefs.skills.push('sortMail');const s=decodeSave(JSON.stringify(raw));expect(s.run.desktop.projects.mail!.installed!.parts.some(p=>p.id==='folders')).toBe(true);expect(s.resources.tokens).toBe(raw.resources.tokens);expect(s.resources.dollars).toBe(raw.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(raw.resources.pixels);
  });
  it('行の高さを小さくした一覧では、増えた表示行も撮影に残し、40行の上限を保つ',()=>{
   const s=createFixture('desktop-stage2',now)!;s.run.desktop.windows.files={...s.run.desktop.windows.files,x:0,y:0,open:true,minimized:false,height:728};s.run.desktop.fileFolder='screenshots';s.run.desktop.projects.files!.installed!.parts.find(p=>p.id==='list')!.rowHeight=20;const shot=s.persistent.screenshots[0]!;s.persistent.screenshots=Array.from({length:50},(_,i)=>({...shot,id:i+1}));s.run.desktop.fileSelection='shot:50';const scene=projectCapture(s,'ja');expect(scene.files.length).toBeGreaterThan(25);expect(scene.files.length).toBeLessThanOrEqual(40);expect(scene.files.some(f=>f.id==='shot:50')).toBe(true);expect(isCaptureScene(scene)).toBe(true);
@@ -113,7 +113,7 @@ describe('段階6.2：アプリの組み立てと詰みの防止',()=>{
  });
  it('撮影した場面・アプリの配置・稼働中の色を、後の編集と外観変更から独立して保つ',()=>{
   let s=ready();s.run.kumiki.workspace='compose';s=focusWindow(s,'files');s=actAppBuild(s,{type:'app-edit',app:'files'});s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot),frozen=shot.data;s=actAppBuild(s,{type:'app-remove',app:'files',part:'list'});s=actAppBuild(s,{type:'app-install',app:'files'});
-  expect(scene.version).toBe(6);const restored=restoreScene(shot,s.persistent.screenshots);expect(restored.run.kumiki.workspace).toBe('compose');expect(restored.run.desktop.projects.files!.installed!.parts.some(p=>p.id==='list')).toBe(true);expect(shot.data).toBe(frozen);expect(projectCapture(restored,'ja').editingApp).toBe('files');
+  expect(scene.version).toBe(7);const restored=restoreScene(shot,s.persistent.screenshots);expect(restored.run.kumiki.workspace).toBe('compose');expect(restored.run.desktop.projects.files!.installed!.parts.some(p=>p.id==='list')).toBe(true);expect(shot.data).toBe(frozen);expect(projectCapture(restored,'ja').editingApp).toBe('files');
  });
  it('配置ボーナスは色の好みで変わらず、端にそろっていない配置には付けない',()=>{
   const s=ready(),before=appLayoutBonus(s);for(const p of Object.values(s.run.desktop.projects))for(const part of p!.installed!.parts)part.color='#008080';expect(appLayoutBonus(s)).toBe(before);

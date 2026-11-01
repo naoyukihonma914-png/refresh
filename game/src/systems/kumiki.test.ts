@@ -87,7 +87,7 @@ describe('組木の描画と書き出し', () => {
   });
 
   it('購入と前の書き出しに応じて下絵が1つずつ届く。練習用はトークンなし', () => {
-    let state = through('frame');
+    let state = through('taskbar');
     expect(availableIcons(state).filter(id => ICON_IDS.some(icon => icon === id))).toEqual(['folder']);
     for (const id of ICON_IDS) { state = finish(state, id); state = exportKumiki(state, now); }
     expect(availableIcons(state)).toEqual([...ICON_IDS, ...PRACTICE_IDS]);
@@ -125,44 +125,12 @@ describe('部品・拡張機能と生成', () => {
     expect(placePart(state, 'button')).toBe(state);
   });
 
-  it('集中モードは置いてから使え、ホーム画面を止めてドットを2倍にする', () => {
-    let state = through('switch');
-    expect(configureKumiki(state, { focus: true })).toBe(state);
-    state = placePart(state, 'switch'); state = configureKumiki(state, { focus: true });
-    expect(passivePixelsPerSecond(state)).toBe(0);
-    const before = state.resources.pixels, target = targetFor(state, 'folder', 16), cell = target.findIndex(c => c >= 0);
-    state = paintDrawing(state, 'folder', [cell], target[cell]!);
-    expect(state.resources.pixels - before).toBe(20);
-    expect(advanceOfflineTime(state, now + 3_600_000).pixels).toBe(0);
+  it('廃止した集中・間隔は新規に購入・配置できず、自動生成を止めない',()=>{
+    const state=through('input');expect(buildKumiki(state,'switch')).toBe(state);expect(buildKumiki(state,'slider')).toBe(state);expect(placePart(state,'switch')).toBe(state);expect(placePart(state,'slider')).toBe(state);expect(configureKumiki(state,{focus:true})).toBe(state);expect(configureKumiki(state,{interval:10})).toBe(state);expect(passivePixelsPerSecond(state)).toBeGreaterThan(0);
   });
-
-  it('間隔10秒は最大1.2倍でまとめて入り、保存と不在も端数を重複しない', () => {
-    let state = through('slider'); state = placePart(placePart(state, 'button'), 'slider');
-    state.persistent.artwork.skills.push('extraParts'); state = placePart(state, 'table');
-    state = configureKumiki(state, { interval: 10 });
-    const before = state.resources.pixels, rate = passivePixelsPerSecond(state);
-    state = advanceActiveTime(state, 9_000).state;
-    expect(state.resources.pixels).toBe(before);
-    state = decodeSave(encodeSave(state)); state = advanceActiveTime(state, 1_000).state;
-    expect(state.resources.pixels - before).toBeCloseTo(rate * 10);
-    expect(state.run.kumiki.generationLog.at(-1)?.pixels).toBeCloseTo(rate * 10);
-    const offline = advanceOfflineTime(state, now + 3 * 3_600_000);
-    expect(offline.creditedMs).toBe(2 * 3_600_000);
-    expect(offline.pixels).toBeCloseTo(rate * 7200);
-    expect(advanceOfflineTime(offline.state, now + 3 * 3_600_000).pixels).toBe(0);
+  it('自動生成を連続して受け取り、保存・不在を通して二重に加算しない',()=>{
+    let state=placePart(through('input'),'button');const before=state.resources.pixels,rate=passivePixelsPerSecond(state);state=advanceActiveTime(state,9000).state;expect(state.resources.pixels-before).toBeCloseTo(rate*9);state=decodeSave(encodeSave(state));state=advanceActiveTime(state,1000).state;expect(state.resources.pixels-before).toBeCloseTo(rate*10);const off=advanceOfflineTime(state,now+3*3600000);expect(off.pixels).toBeCloseTo(rate*7200);expect(advanceOfflineTime(off.state,now+3*3600000).pixels).toBe(0);
   });
-
-  it('間隔変更・集中モードへの切替で待機中の生成を失わない', () => {
-    let state = through('slider'); state = placePart(placePart(state, 'slider'), 'switch');
-    state = configureKumiki(state, { interval: 10 });
-    state = advanceActiveTime(state, 1_000).state;
-    const pending = state.run.kumiki.bank, before = state.resources.pixels;
-    state = configureKumiki(state, { focus: true });
-    expect(state.resources.pixels - before).toBeCloseTo(pending);
-    expect(state.run.kumiki.bank).toBe(0);
-    expect(state.run.kumiki.batchMs).toBe(0);
-  });
-
   it('トークン不足・次の帯の先取り・二重課金を拒む', () => {
     let state = through('extensions');
     expect(buyKumikiSkill(state, 'fill')).toBe(state);

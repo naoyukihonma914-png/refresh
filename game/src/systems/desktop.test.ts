@@ -59,7 +59,7 @@ describe('デスクトップ',()=>{
     s=actDesktop(s,{type:'minimize',app:'note'},now);expect(screenshotParts(s)).toBe(16);
     expect(screenshotReward(s)).toBe(passivePixelsPerSecond(s)*16*.5);
     s.persistent.specs.resolution=1;expect(screenshotReward(s)).toBe(passivePixelsPerSecond(s)*16*.5*1.25);
-    s.run.kumiki.focus=true;expect(screenshotReward(s)).toBe(0);
+    s.run.kumiki.focus=true;expect(screenshotReward(s)).toBeGreaterThan(0);
   });
   it('撮影時の状態は後の編集・窓操作で変わらず、前の画像データを再帰的に含めない',()=>{
     let s=focusWindow(desktop(),'note');s=actDesktop(s,{type:'note',text:'制作途中の記録'},now);
@@ -125,7 +125,7 @@ describe('デスクトップ',()=>{
   });
   it('第5版の製品・絵・性能・資源を保持してデスクトップの初期状態を補い、新形式を往復できる',()=>{
     const old=JSON.parse(encodeSave(createFixture('release-v1-tessera',now)!));old.schemaVersion=5;delete old.run.desktop;delete old.persistent.screenshots;delete old.persistent.productionNote;delete old.persistent.noteUpdatedAt;
-    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(11);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
+    const next=decodeSave(JSON.stringify(old));expect(next.schemaVersion).toBe(12);expect(next.persistent.products).toEqual(old.persistent.products);expect(next.resources).toEqual(old.resources);expect(next.run.desktop.entered).toBe(false);
     for(const fixture of ['desktop-early','desktop-files','desktop-mail','desktop-modern','desktop-full']){const s=createFixture(fixture,now)!;expect(isGameState(s),fixture).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);}
     expect(BALANCE.spec.storage[1].price).toBe(60);
   });
