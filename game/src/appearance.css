@@ -413,7 +413,7 @@
 .app-part-measure {position:absolute;visibility:hidden;pointer-events:none;inset:0 auto auto 0;width:max-content;display:flex;flex-direction:column;align-items:flex-start;white-space:nowrap;}
 .app-layout {position:relative;width:100%;height:100%;min-height:0;overflow:auto;padding:0;box-sizing:border-box;}
 .app-layout :is(.files-app,.files-body,.files-tools,.mail-app,.photo-app,.photo-adjustments,.bin-app,.clock-app,.theme-app,.terminal-app,.manager-app) {display:contents;}
-.app-layout-part {position:absolute;box-sizing:border-box;padding:4px;overflow:auto;border:1px solid #8886;min-width:0;min-height:0;}
+.app-layout-part {position:absolute;box-sizing:border-box;padding:4px;overflow:auto;border:0;min-width:0;min-height:0;}
 .app-layout-part> :is(.file-list,.file-preview,.files-sidebar,.photo-workbench,.terminal-output,article,aside) {width:100%;height:100%;box-sizing:border-box;min-width:0;overflow:auto;margin:0;}
 .app-layout-part label {display:flex;flex-wrap:wrap;align-items:center;gap:4px;max-width:100%;}
 .app-layout-part :is(input,select,button) {max-width:100%;min-width:0;box-sizing:border-box;font-size:inherit;}
@@ -437,21 +437,18 @@
 .app-layout-part .file-list td:first-child>button {display:flex;width:100%;align-items:center;gap:4px;overflow:hidden;}
 .app-layout-part .file-list td:first-child>button>span {min-width:0;overflow:hidden;text-overflow:ellipsis;}
 .desktop[class*='desktop-era-'] .app-layout-part .files-sidebar button.selected {color:inherit;background:transparent;box-shadow:inset 0 0 0 1px currentColor;}
-@container (max-width:360px) {.app-layout-part .file-list :is(td,th):nth-child(2),.app-layout-part .file-list :is(td,th):nth-child(3) {display:none;}.app-layout-part .file-list :is(td,th):first-child {width:70%;}}
+
 .working-cursors[data-layout-job] {overflow:hidden;pointer-events:none;}
 .working-cursors[data-layout-job] .job-activity {display:none;}
 .app-layout .photo-app>.app-toolbar,.app-layout .bin-app>.app-toolbar {display:contents;}
-.desktop-live>.screenshot-toolbar {pointer-events:none;}
-.desktop-live>.screenshot-toolbar>.capture-button {pointer-events:auto;}
-.desktop-live:has(>.desktop-window.is-active.is-maximized)>.screenshot-toolbar {top:40px;}
 .builder-preview-content {position:absolute;inset:0 auto auto 0;transform-origin:0 0;font-size:12px;pointer-events:none;}
-.builder-part {border-color:transparent;}.builder-part:hover {border-color:currentColor;}
+.builder-part {border:1px dashed #888;}.builder-part:hover {border-color:currentColor;}
 .desktop-era-1 .builder-preview-frame {background:#ece9d8;border-color:#2863cb;border-radius:6px 6px 0 0;}.desktop-era-1 .builder-preview-frame>h2 {background:linear-gradient(#4b94e8,#0054c8);}
 .desktop-era-2 .builder-preview-frame {background:#c0d2dfbb;border-color:#b7d2e4;border-radius:6px;}.desktop-era-2 .builder-preview-frame>h2 {background:transparent;color:#111;}
 .desktop[class*='desktop-era-'] .app-layout .app-layout-part :is(tr.selected,button.selected,button.unread) {color:inherit;background:transparent;outline:1px solid currentColor;}
 .app-layout-part :is(select,option) {background-color:var(--app-background);color:var(--app-foreground);}
 .app-layout-part input::placeholder {color:inherit;opacity:1;}
-.app-layout .app-layout-part {margin:0;}
+.app-layout .app-layout-part {margin:0;border:0;}
 
 /* AppPart adds a layout wrapper: keep the native app's content structure inside it. */
 .app-layout [data-app-part=messages]>aside {padding:0;}
@@ -482,3 +479,24 @@
 .builder-preview-content .photo-transform>.pixel-art {inline-size:100%;block-size:100%;}
 .desktop .app-layout .app-layout-part .photo-workbench {background:var(--app-background);color:var(--app-foreground);}
 .app-layout .files-sidebar button {overflow-wrap:anywhere;}
+
+/* The capture drawer leaves only its small grip at the upper screen edge. */
+.desktop .screenshot-toolbar,.desktop[class*='desktop-era-'] .screenshot-toolbar {top:8px;max-width:calc(100% - 24px);box-sizing:border-box;}
+.desktop .screenshot-toolbar[hidden] {display:none;}
+.screenshot-toggle {position:absolute;z-index:31;top:0;left:50%;transform:translateX(-50%);width:40px;height:8px;min-height:0;padding:0;border:1px solid #888;border-top:0;border-radius:0;background:#c0c0c0;box-shadow:inset 1px 1px #fff,inset -1px -1px #666;cursor:pointer;}
+.screenshot-toggle:after {content:'';position:absolute;left:12px;right:12px;top:2px;height:2px;border-top:1px solid #666;border-bottom:1px solid #fff;}
+.screenshot-toggle:focus-visible,.screenshot-toggle.shot-hint {outline:2px solid #0067c0;outline-offset:1px;}
+.desktop-era-1 .screenshot-toggle {background:linear-gradient(#acc6ff,#6e93df);border-color:#285cc8;box-shadow:inset 1px 0 #d8e4ff;}
+.desktop-era-2 .screenshot-toggle {background:linear-gradient(#dcebf1cc,#adc8d6cc);border-color:#6f8b9e;box-shadow:inset 1px 0 #ffffffe0;backdrop-filter:blur(8px);}
+/* Keep the title's center free for the grip; the edit action belongs beside window controls. */
+.desktop-window:has(.app-rebuild)>.window-title>.window-controls {margin-left:0;}
+.part-measure-line {display:block;}
+.app-layout .file-list table {table-layout:auto;min-width:100%;}
+.app-layout .file-list th:not(:first-child) {width:1%;white-space:nowrap;}
+.app-layout .file-list td:first-child {max-width:220px;}
+.app-layout .file-list td:not(:first-child) {overflow:visible;text-overflow:clip;}
+.app-layout .files-sidebar button {white-space:nowrap;overflow-wrap:normal;padding-left:12px;}
+.desktop-frozen .builder-part {border:0;outline:0;}
+.desktop-frozen .builder-resize {display:none;}
+/* Focus may scroll hidden overflow by a rounded pixel at fractional desktop scales. */
+.desktop {overflow:clip;}

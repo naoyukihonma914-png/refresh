@@ -7,8 +7,8 @@ export const partLabel=(id:AppPartId,i18n:I18n)=>i18n.t(`builder.part.${id}` as 
 export function usePartMinimums(layout:AppLayout,i18n:I18n,fontFamily?:string){
  const ref=useRef<HTMLDivElement>(null),[metrics,setMetrics]=useState<PartMinimums>({});
  const key=layout.parts.map(p=>p.id+':'+p.fontSize).join(',');
- useLayoutEffect(()=>{const root=ref.current;if(!root)return;const measure=()=>{const next:PartMinimums={};for(const node of root.querySelectorAll<HTMLElement>('[data-measure-part]'))next[node.dataset.measurePart as AppPartId]={width:Math.ceil((node.scrollWidth+24)/8)*8,height:32};setMetrics(old=>JSON.stringify(old)===JSON.stringify(next)?old:next);};measure();const observer=new ResizeObserver(measure);observer.observe(root);return()=>observer.disconnect();},[key,i18n.language]);
- const ruler=<div ref={ref} className="app-part-measure" style={{fontFamily}} aria-hidden="true">{layout.parts.map(p=><span key={p.id} data-measure-part={p.id} style={{fontSize:p.fontSize}}>{partLabel(p.id,i18n)}</span>)}</div>;
+ useLayoutEffect(()=>{const root=ref.current;if(!root)return;const measure=()=>{const next:PartMinimums={};for(const node of root.querySelectorAll<HTMLElement>('[data-measure-part]'))next[node.dataset.measurePart as AppPartId]={width:Math.ceil((node.scrollWidth+(node.dataset.measurePart==='places'?48:24))/8)*8,height:32};setMetrics(old=>JSON.stringify(old)===JSON.stringify(next)?old:next);};measure();const observer=new ResizeObserver(measure);observer.observe(root);return()=>observer.disconnect();},[key,i18n.language]);
+ const ruler=<div ref={ref} className="app-part-measure" style={{fontFamily}} aria-hidden="true">{layout.parts.map(p=><span key={p.id} data-measure-part={p.id} style={{fontSize:p.fontSize}}>{partLabel(p.id,i18n)}{p.id==='places'&&(['root','exports','screenshots'] as const).map(id=><span className="part-measure-line" key={id}>{i18n.t(`files.${id}`)}</span>)}</span>)}</div>;
  return {metrics,ruler};
 }
 const Composition=createContext<AppLayout|null>(null);
@@ -31,6 +31,6 @@ export function AppSurface({app,children,...props}:DesktopProps&{app:BuiltApp;ch
 export function AppPart({id,children}: {id:AppPartId;children:ReactNode}){
  const layout=useContext(Composition);if(!layout)return <>{children}</>;
  const part=layout.parts.find(p=>p.id===id);if(!part)return null;
- const style={left:part.x,top:part.y,width:part.width,height:part.height,backgroundColor:part.color,color:readableText(part.color),fontSize:part.fontSize,'--app-background':part.color,'--app-foreground':readableText(part.color),'--app-stripe':readableText(part.color)==='#000000'?'#ffffff22':'#00000022',borderColor:readableText(part.color),'--app-row-height':`${Math.max(part.rowHeight,part.fontSize+8)}px`} as CSSProperties;
+ const style={left:part.x,top:part.y,width:part.width,height:part.height,backgroundColor:part.color,color:readableText(part.color),fontSize:part.fontSize,'--app-background':part.color,'--app-foreground':readableText(part.color),'--app-stripe':readableText(part.color)==='#000000'?'#ffffff22':'#00000022','--app-row-height':`${Math.max(part.rowHeight,part.fontSize+8)}px`} as CSSProperties;
  return <section className={`app-layout-part ${part.striped?'app-striped':''}`} data-app-part={id} style={style}>{children}</section>;
 }

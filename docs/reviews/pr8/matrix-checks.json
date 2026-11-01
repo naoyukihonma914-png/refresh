@@ -1,0 +1,818 @@
+{
+  "checks": [
+    "3時代×3言語×2画面サイズ×最大化3アプリの54通りで帯を閉じた上部の重なりなし。開閉・外側クリック・Escape・撮影で閉じる・文字幅・編集時だけの枠・撮影・日付と種類・場所名を確認"
+  ],
+  "screens": [
+    {
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 924,
+        "y": 0,
+        "width": 72,
+        "height": 14.399999618530273
+      }
+    },
+    {
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 657.4000244140625,
+        "y": 0,
+        "width": 51.199951171875,
+        "height": 10.239999771118164
+      }
+    },
+    {
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 931.875,
+        "y": 0,
+        "width": 56.25,
+        "height": 11.25
+      }
+    },
+    {
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "files",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 931.8887329101562,
+        "y": 0.265625,
+        "width": 56.2225341796875,
+        "height": 11.24450969696045
+      }
+    },
+    {
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "tessera",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "files",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    },
+    {
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "app": "photo",
+      "grip": {
+        "x": 663,
+        "y": 0,
+        "width": 40,
+        "height": 8
+      }
+    }
+  ],
+  "pageErrors": []
+}
