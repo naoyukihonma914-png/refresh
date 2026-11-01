@@ -1,3 +1,4 @@
+import { desktopScreen, resizeDesktop, LEGACY_DESKTOP } from './desktopGeometry';
 import { createAppearance } from './appearance';
 import { captureStore } from '../platform/captures';
 import { migrateCaptureV6 } from './captureMigration';
@@ -89,6 +90,9 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     const skills=modern?[...new Set([...old.persistent.artwork.skills,'update' as const])]:old.persistent.artwork.skills;
     const desktopSkills=modern?[...new Set([...old.persistent.desktopPrefs.skills,'major1' as const,'major2' as const])]:old.persistent.desktopPrefs.skills;
     return {...old,schemaVersion:9,persistent:{...old.persistent,appearance:{editor:old.persistent.artwork.modern?2:0,desktop:modern?2:0},artwork:{...old.persistent.artwork,skills},desktopPrefs:{...old.persistent.desktopPrefs,skills:desktopSkills,radiusCustom:old.persistent.desktopPrefs.radius!==8}}};
+  },
+  9(data) {
+    const old=data as GameState;return {...old,schemaVersion:10,run:{...old.run,desktop:resizeDesktop({...old.run.desktop,screen:LEGACY_DESKTOP},desktopScreen(old.persistent.appearance.desktop),old.persistent.desktopPrefs.iconSize)}};
   },
 };
 

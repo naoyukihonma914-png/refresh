@@ -1,0 +1,412 @@
+{
+  "date": "2026-11-01",
+  "unitTests": 249,
+  "build": "TypeScript + single HTML, about 5.68 MB",
+  "screens": {
+    "checks": [
+      "段0〜2×3言語×2ブラウザの18画面と、ファイル・メール36画面。4:3の黒い余白、段2の全面表示、タスクバー・文字を確認",
+      "0→1→2→0で通常・最大化・復元位置・全アイコンが範囲内。実保存してページを読み直しても座標が一致",
+      "Gessoの「描く・組む・書き出す」と英語・試験用言語を確認。場面に応じてキャンバス・ホームとプロパティ・エクスポート一覧が切り替わる",
+      "新しい撮影は800×600を記録し、ファイルのプレビューも4:3",
+      "実際の旧第9版を読み込み、V3撮影は従来の1920×1080・16:9を保つ"
+    ],
+    "layouts": [
+      {
+        "era": 0,
+        "language": "ja",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 0,
+        "language": "ja",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 0,
+        "language": "ja",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 0,
+        "language": "ja",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 0,
+        "language": "en",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 0,
+        "language": "en",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 0,
+        "language": "en",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 0,
+        "language": "en",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 0,
+        "language": "en-XA",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 0,
+        "language": "en-XA",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 0,
+        "language": "en-XA",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 0,
+        "language": "en-XA",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 1,
+        "language": "ja",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 1,
+        "language": "ja",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 1,
+        "language": "ja",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 1,
+        "language": "ja",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 1,
+        "language": "en",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 1,
+        "language": "en",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 1,
+        "language": "en",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 1,
+        "language": "en",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 1,
+        "language": "en-XA",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 1,
+        "language": "en-XA",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 1,
+        "language": "en-XA",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 1,
+        "language": "en-XA",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 2,
+        "language": "ja",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 2,
+        "language": "ja",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 2,
+        "language": "ja",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 2,
+        "language": "ja",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 2,
+        "language": "en",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 2,
+        "language": "en",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 2,
+        "language": "en",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 2,
+        "language": "en",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 2,
+        "language": "en-XA",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "files"
+      },
+      {
+        "era": 2,
+        "language": "en-XA",
+        "viewport": [
+          1920,
+          1080
+        ],
+        "app": "mail"
+      },
+      {
+        "era": 2,
+        "language": "en-XA",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "files"
+      },
+      {
+        "era": 2,
+        "language": "en-XA",
+        "viewport": [
+          1366,
+          768
+        ],
+        "app": "mail"
+      }
+    ],
+    "pageErrors": []
+  },
+  "finalInteractions": {
+    "checks": [
+      "0→1→2→0で通常・最大化・復元位置・全アイコンが範囲内。実保存してページを読み直しても座標が一致",
+      "Gessoの「描く・組む・書き出す」と英語・試験用言語を確認。場面に応じてキャンバス・ホームとプロパティ・エクスポート一覧が切り替わる",
+      "新しい撮影は800×600を記録し、ファイルのプレビューも4:3",
+      "実際の旧第9版を読み込み、V3撮影は従来の1920×1080・16:9を保つ"
+    ],
+    "layouts": [],
+    "pageErrors": []
+  },
+  "saveMeasurement": {
+    "method": "Vite SSR / Node; 7 warm saves, median; UTF-16 storage cost includes keys, primary, backup and shared assets; quota 5 MiB",
+    "reports": [
+      {
+        "count": 0,
+        "schema": 10,
+        "primaryChars": 41005,
+        "backupChars": 41005,
+        "assetChars": 0,
+        "totalUtf16Bytes": 164082,
+        "keys": 2,
+        "initialSaveMs": 4.304603999999927,
+        "warmMedianMs": 0.7157450000001973,
+        "warmMaxMs": 1.1200200000000677,
+        "loadMs": 1.1834249999999429,
+        "quota5MiB": "saved"
+      },
+      {
+        "count": 50,
+        "schema": 10,
+        "primaryChars": 46419,
+        "backupChars": 46419,
+        "assetChars": 98033,
+        "totalUtf16Bytes": 381804,
+        "keys": 213,
+        "initialSaveMs": 78.22621299999992,
+        "warmMedianMs": 1.323174999999992,
+        "warmMaxMs": 5.297995000000128,
+        "loadMs": 29.556500000000142,
+        "quota5MiB": "saved"
+      },
+      {
+        "count": 200,
+        "schema": 10,
+        "primaryChars": 60319,
+        "backupChars": 60319,
+        "assetChars": 371299,
+        "totalUtf16Bytes": 983936,
+        "keys": 813,
+        "initialSaveMs": 148.03622599999994,
+        "warmMedianMs": 1.177440999999817,
+        "warmMaxMs": 1.7280820000000858,
+        "loadMs": 110.43872199999987,
+        "quota5MiB": "saved"
+      },
+      {
+        "count": 400,
+        "schema": 10,
+        "primaryChars": 78898,
+        "backupChars": 78898,
+        "assetChars": 735776,
+        "totalUtf16Bytes": 1787206,
+        "keys": 1613,
+        "initialSaveMs": 751.6247210000001,
+        "warmMedianMs": 2.2811900000006062,
+        "warmMaxMs": 3.9630880000004254,
+        "loadMs": 472.31035299999985,
+        "quota5MiB": "saved"
+      }
+    ]
+  }
+}

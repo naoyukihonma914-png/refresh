@@ -1,10 +1,11 @@
+import { desktopScreen } from './desktopGeometry';
 import { createAppearance, unlockedEditorStage, unlockedDesktopStage, type Appearance } from './appearance';
 import { createDesktopPreferences, isDesktopPreferences, type DesktopPreferences, createDesktopState, isDesktopState, isScreenshot, type DesktopState, type Screenshot } from './desktopState';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -117,6 +118,8 @@ export function isGameState(value: unknown): value is GameState {
     || !isAmount(run.shipping.elapsedMs) || run.shipping.elapsedMs > BALANCE.release.animationMs : run.shipping !== null) return false;
   if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;
+  const screen=desktopScreen((persistent.appearance as unknown as Appearance).desktop);
+  if(run.desktop.screen.width!==screen.width||run.desktop.screen.height!==screen.height)return false;
   if (!Array.isArray(persistent.screenshots) || !persistent.screenshots.every(s => isScreenshot(s))
     || persistent.screenshots.some((s, i, shots) => i > 0 && s.id <= shots[i-1]!.id)
     || !(persistent.productionNote === null || typeof persistent.productionNote === 'string' && persistent.productionNote.length <= BALANCE.w3.maxNote)

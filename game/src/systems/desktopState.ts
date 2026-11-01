@@ -1,10 +1,11 @@
+import { desktopScreen, resizeDesktop, LEGACY_DESKTOP, MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT, workHeight } from './desktopGeometry';
+import type { LogicalSize } from './viewport';
 import { readCapture } from './captureScene';
 import { ICON_IDS, PRACTICE_IDS } from '../content/kumikiArt';
 import { BALANCE, type DesktopUpgrade, type DesktopSkill } from '../config/balance';
 export const APP_IDS = ['tessera', 'note', 'files', 'mail', 'manager', 'photo', 'bin', 'clock', 'theme', 'terminal', 'settings'] as const;
 export type AppId = typeof APP_IDS[number];
-export const MIN_WINDOW_WIDTH = {tessera:760,note:400,files:640,mail:700,manager:700,photo:640,bin:520,clock:360,theme:580,terminal:580,settings:700} as const;
-export const MIN_WINDOW_HEIGHT = 320;
+export {MIN_WINDOW_WIDTH,MIN_WINDOW_HEIGHT} from './desktopGeometry';
 export type BuiltApp = Exclude<AppId,'tessera'|'note'|'settings'>;
 export const JOB_IDS = ['tessera','files','photo','terminal'] as const;
 export type JobId = typeof JOB_IDS[number];
@@ -20,7 +21,7 @@ export interface Feedback {
   at: number; completedAt: number | null; reward?:number;
 }
 export interface DesktopState {
-  entered: boolean; enteredAt: number; apps: BuiltApp[]; upgrades:DesktopUpgrade[];
+  screen:LogicalSize; entered: boolean; enteredAt: number; apps: BuiltApp[]; upgrades:DesktopUpgrade[];
   builtAt:Record<string,number>; jobs:Record<JobId,Job>; workspace:0|1; workspaces:Record<AppId,0|1>;
   fileSort:'name'|'date'|'type'; fileDescending:boolean; fileSearch:string; largeIcons:boolean; mailFolder:'all'|'pending'|'completed';
   photo:PhotoEdit; compare:boolean; trash:{id:string;at:number;reward:number;first:boolean}[]; recycled:string[]; trashCount:number;
@@ -34,9 +35,9 @@ export interface DesktopState {
   cooldownMs: number; fileFolder: 'root' | 'exports' | 'screenshots'; fileSelection: string | null; mailSelection: number | null;
 }
 export interface Screenshot { id: number; at: number; language: string; data: string; deleted?:boolean }
-export function createDesktopState(): DesktopState {
+export function createDesktopState(screen:LogicalSize=desktopScreen(0)): DesktopState {
   const makeWindow = (x: number, y: number, width: number, height: number): WindowState => ({ x, y, width, height, open: false, minimized: false, maximized: false, z: 0, restore: null });
-  return { entered: false, enteredAt: 0, apps: [], upgrades:[],
+  const desktop:DesktopState={ screen:LEGACY_DESKTOP, entered: false, enteredAt: 0, apps: [], upgrades:[],
     builtAt:{},jobs:Object.fromEntries(JOB_IDS.map(id=>[id,{assigned:false,cursors:0,updates:0}])) as Record<JobId,Job>, workspace:0,
     workspaces:Object.fromEntries(APP_IDS.map(id=>[id,0])) as Record<AppId,0|1>,
     fileSort:'name',fileDescending:false,fileSearch:'',largeIcons:false,mailFolder:'all',photo:{source:'coast',brightness:1,tone:0,crop:0},compare:false,
@@ -45,17 +46,22 @@ export function createDesktopState(): DesktopState {
     windows: { tessera: makeWindow(150, 64, 900, 580), note: makeWindow(430, 150, 630, 650), files: makeWindow(1076, 236, 760, 470), mail: makeWindow(920, 110, 880, 610),manager:makeWindow(600,180,850,580),photo:makeWindow(760,130,840,600),bin:makeWindow(300,200,650,440),clock:makeWindow(1350,420,480,580),theme:makeWindow(800,120,720,610),terminal:makeWindow(500,260,800,480),settings:makeWindow(700,140,880,680) }, active: null,
     icons: { tessera: { x: 8, y: 8 }, note: { x: 8, y: 96 }, files: { x: 8, y: 184 }, mail: { x: 8, y: 272 },manager:{x:8,y:360},photo:{x:8,y:448},bin:{x:8,y:536},clock:{x:8,y:624},theme:{x:8,y:712},terminal:{x:8,y:800},settings:{x:8,y:888} },
     feedbackMs: 0, feedbackSerial: 0, feedback: [], notice: null, success: null, cooldownMs: 0, fileFolder: 'root', fileSelection: null, mailSelection: null };
+  const fitted=resizeDesktop(desktop,screen);
+  for(const w of Object.values(fitted.windows))w.y=Math.min(workHeight(screen)-w.height,Math.max(64,w.y));
+  return fitted;
 }
 const obj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
 const amount = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x >= 0;
 const count = (x: unknown): x is number => amount(x) && Number.isSafeInteger(x);
-const rect = (x: unknown): x is Rect => obj(x) && ['x','y','width','height'].every(k => amount(x[k])) && (x.width as number) > 0 && (x.height as number) > 0 && (x.x as number) + (x.width as number) <= 1920 && (x.y as number) + (x.height as number) <= 1032;
+const rect = (x: unknown,screen:LogicalSize): x is Rect => obj(x) && ['x','y','width','height'].every(k => amount(x[k])) && (x.width as number) > 0 && (x.height as number) > 0 && (x.x as number) + (x.width as number) <= screen.width && (x.y as number) + (x.height as number) <= workHeight(screen);
 export function isDesktopState(x: unknown): x is DesktopState {
+  if(!obj(x)||!obj(x.screen)||!BALANCE.appearance.screens.some(s=>s.width===(x.screen as LogicalSize).width&&s.height===(x.screen as LogicalSize).height))return false;
+  const screen=x.screen as unknown as LogicalSize;
   if (!obj(x) || typeof x.entered !== 'boolean' || !amount(x.enteredAt) || !Array.isArray(x.apps) || new Set(x.apps).size!==x.apps.length || !x.apps.every(id=>APP_IDS.includes(id as AppId)&&!['tessera','note','settings'].includes(id as string))) return false;
   if (!obj(x.windows) || !obj(x.icons) || !APP_IDS.every(id => {
     const w = (x.windows as Record<string, unknown>)[id], p = (x.icons as Record<string, unknown>)[id];
-    return rect(w) && w.width >= MIN_WINDOW_WIDTH[id] && w.height >= MIN_WINDOW_HEIGHT && obj(w) && ['open','minimized','maximized'].every(k => typeof w[k] === 'boolean') && count(w.z) && (w.maximized ? rect(w.restore) : w.restore === null)
-      && obj(p) && amount(p.x) && amount(p.y) && p.x <= 1840 && p.y <= 944;
+    return rect(w,screen) && w.width >= MIN_WINDOW_WIDTH[id] && w.height >= MIN_WINDOW_HEIGHT && obj(w) && ['open','minimized','maximized'].every(k => typeof w[k] === 'boolean') && count(w.z) && (w.maximized ? rect(w.restore,screen) : w.restore === null)
+      && obj(p) && amount(p.x) && amount(p.y) && p.x <= screen.width-80 && p.y <= workHeight(screen)-76;
   })) return false;
   if (x.active !== null && !APP_IDS.includes(x.active as AppId)) return false;
   if (!amount(x.feedbackMs) || !count(x.feedbackSerial) || !amount(x.cooldownMs) || !Array.isArray(x.feedback)) return false;

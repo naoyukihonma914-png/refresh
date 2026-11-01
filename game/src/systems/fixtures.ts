@@ -1,3 +1,4 @@
+import { desktopScreen,resizeDesktop } from './desktopGeometry';
 import { enterDesktop, buyDesktopApp, focusWindow, advanceDesktopTime, takeScreenshot, nextDesktopApp } from './desktop';
 import { BALANCE } from '../config/balance';
 import { createInitialState, type GameState } from './state';
@@ -24,9 +25,11 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if (name === 'intro') return state;
   if(name?.startsWith('editor-stage')||name?.startsWith('desktop-stage')){
     const index=Number(name.at(-1)) as 0|1|2;
-    const next=createFixture(name.startsWith('editor')?'kumiki-modern':'desktop-ready',now)!;
+    let next=createFixture(name.startsWith('editor')?'kumiki-modern':'desktop-ready',now)!;
     next.persistent.artwork.skills=['fill','mirror','layers','eyedropper','expand','snap','outline','animation','extraParts','wallpaper','update','modern'];
     next.persistent.desktopPrefs.skills=['major1','major2'];next.persistent.appearance={editor:index,desktop:index};next.persistent.artwork.modern=index===2;
+    next.run.desktop=resizeDesktop(next.run.desktop,desktopScreen(index));
+    if(name.startsWith('desktop'))next=advanceDesktopTime(next,720_000,now,true);
     next.run.kumiki.guide.collapsed=true;next.resources.tokens=200;return next;
   }
   if (name?.startsWith('desktop-')) {
@@ -39,7 +42,7 @@ export function createFixture(name: string | null, now: number): GameState | nul
     if (name === 'desktop-files') return next;
     next=buyDesktopApp(next,'sort');next = buyDesktopApp(next,'mail'); next = focusWindow(next,'tessera');
     if (name === 'desktop-modern') {
-      next.persistent.artwork.skills.push('update','modern','fill','layers'); next.persistent.artwork.modern=true;next.persistent.appearance={editor:2,desktop:2};next.persistent.desktopPrefs.skills.push('major1','major2');
+      next.persistent.artwork.skills.push('update','modern','fill','layers'); next.persistent.artwork.modern=true;next.persistent.appearance={editor:2,desktop:2};next.persistent.desktopPrefs.skills.push('major1','major2');next.run.desktop=resizeDesktop(next.run.desktop,desktopScreen(2));
     }
     next = advanceDesktopTime(next,720_000,now);next.run.desktop.idleMs=0;next.run.desktop.stalled=null;next.run.desktop.stalledClosed=false;next.run.desktop.stallMs=BALANCE.w3.stallMinMs;
     if(['desktop-jobs','desktop-photo','desktop-ready','desktop-stalled'].includes(name!)){
@@ -116,7 +119,7 @@ export function createFixture(name: string | null, now: number): GameState | nul
     if (name === 'kumiki-modern') {
       state.run.version = 'v2'; state.persistent.specs.color = 1; state.persistent.specs.resolution = 1;
       state.persistent.artwork.skills = BALANCE.w2.skills.map(skill => skill.id);
-      state.persistent.artwork.modern = true;state.persistent.appearance={editor:2,desktop:2};state.persistent.desktopPrefs.skills=['major1','major2'];
+      state.persistent.artwork.modern = true;state.persistent.appearance={editor:2,desktop:2};state.persistent.desktopPrefs.skills=['major1','major2'];state.run.desktop=resizeDesktop(state.run.desktop,desktopScreen(2));
       state.persistent.artwork.sketchbook = blankDrawing(32);
     }
     let next = enterKumiki(state);

@@ -51,6 +51,8 @@ export function createBrowserPlatform(isolated = false): Platform {
       },
     },
     viewport: {
+      // Electron can resize its native window here; browsers keep their current viewport.
+      logicalSizeChanged() {},
       size: () => ({ width: window.innerWidth, height: window.innerHeight }),
       subscribe: listener => {
         window.addEventListener('resize', listener);

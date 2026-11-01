@@ -702,8 +702,6 @@
     "desktop.skill.major2": "大型アップデート（2回目）",
     "desktop.skill.major2.description": "ガラスの窓と小さな資源の部品。Gessoの動作環境にも対応します。",
     "desktop.skill.major2.requirement": "先に大型アップデートが必要です",
-    "k.workspace.home": "画面",
-    "k.workspace.pixels": "ピクセル",
     "desktop.fix.editor": "{app}で直す",
     "appearance.productMenu": "製品の進み具合",
     "appearance.guide.previous": "前の姿に戻しました。作ったものは引き継いでいます。",
@@ -712,6 +710,10 @@
     "k.history": "履歴",
     "k.historyCount": "元に戻せる操作 {undo}件・やり直せる操作 {redo}件",
     "k.navigator": "ナビゲーター",
-    "k.goDrawing": "描いている絵へ移動"
+    "k.goDrawing": "描いている絵へ移動",
+    "k.workspace.draw": "描く",
+    "k.workspace.compose": "組む",
+    "k.workspace.export": "書き出す",
+    "desktop.rateCompact": "{pixels}/秒"
   }
 }

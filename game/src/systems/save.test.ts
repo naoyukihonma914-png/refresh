@@ -24,7 +24,7 @@ describe('保存と読み込み', () => {
     old.run.kumiki.exports[0].frames[0][0] = 11;
     old.run.kumiki.design.primary = { color: '#000080', radius: 4, textSize: 'medium', shadow: false };
     const next = decodeSave(JSON.stringify(old));
-    expect(next.schemaVersion).toBe(9);
+    expect(next.schemaVersion).toBe(10);
     for (const art of [next.run.kumiki.drawings.folder, next.run.kumiki.underlays.folder, next.persistent.artwork.sketchbook, next.persistent.artwork.wallpaper, next.persistent.artwork.icons.folder]) {
       expect(art!.frames[0]![0]).toBe(LEGACY_COLOR_MAP[11]);
       expect(art!.rewarded[0]).toBe(true);
@@ -95,7 +95,7 @@ describe('保存と読み込み', () => {
   });
 
   it('今後の版・未対応の旧版を推測で読み込まない', () => {
-    expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 10 }))).toThrow('新しい版');
+    expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 11 }))).toThrow('新しい版');
     expect(() => decodeSave(JSON.stringify({ ...savedState(), schemaVersion: 0 }))).toThrow('対応していません');
     expect(() => decodeSave('{}')).toThrow();
   });

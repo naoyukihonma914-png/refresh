@@ -742,8 +742,6 @@
     "desktop.skill.major2": "Second major update",
     "desktop.skill.major2.description": "Glass windows and a resource gadget. Meets the requirements for Gesso.",
     "desktop.skill.major2.requirement": "Requires the first major update",
-    "k.workspace.home": "Design",
-    "k.workspace.pixels": "Pixels",
     "desktop.fix.editor": "Open {app}",
     "appearance.productMenu": "Product progress",
     "appearance.guide.previous": "Returned to an earlier appearance. Your work has been kept.",
@@ -752,6 +750,10 @@
     "k.history": "History",
     "k.historyCount": "{undo} undo steps · {redo} redo steps",
     "k.navigator": "Navigator",
-    "k.goDrawing": "Go to the current drawing"
+    "k.goDrawing": "Go to the current drawing",
+    "k.workspace.draw": "Draw",
+    "k.workspace.compose": "Compose",
+    "k.workspace.export": "Export",
+    "desktop.rateCompact": "{pixels}/s"
   }
 }

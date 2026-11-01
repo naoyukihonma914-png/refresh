@@ -1,3 +1,5 @@
+import { LEGACY_DESKTOP } from './desktopGeometry';
+import type { LogicalSize } from './viewport';
 import { editorStage,desktopStage,type Appearance } from './appearance';
 import type { DesktopPreferences, PhotoEdit } from './desktopState';
 import { activeScreenshots } from './desktop';
@@ -119,7 +121,8 @@ export function restoreScene(shot:Screenshot,catalog:Screenshot[]):GameState {
   state.persistent.productionNote=s.note;
   state.run.desktop={...createDesktopState(),...s.desktop,windows:{...createDesktopState().windows,...s.desktop.windows},icons:{...createDesktopState().icons,...s.desktop.icons},entered:true,feedbackSerial:Math.max(0,...s.desktop.feedback.map(f=>f.id)),feedback:s.desktop.feedback.map(f=>({...f,baseline:[],baselineColor:'#000000'}))};
   if(s.version!==1){state.persistent.desktopPrefs={...createDesktopPreferences(),...s.view.preferences};state.run.desktop={...state.run.desktop,...s.view.desktop};if(s.photoPicture)state.persistent.artwork.sketchbook=drawing(s.photoPicture);}
-  if(s.version===3)state.persistent.appearance={...s.appearance};
+  if(s.version>=3)state.persistent.appearance={...(s as CaptureSceneV3).appearance};
+  state.run.desktop.screen=s.version===4?{...s.screen}:{...LEGACY_DESKTOP};
   state.persistent.screenshots=catalog.filter(s=>s.id<shot.id);
   return state;
 }
@@ -131,10 +134,10 @@ export interface CaptureSceneV2 extends Omit<CaptureSceneV1,'version'|'desktop'>
  version:2;
  display:CaptureSceneV1['display']&{wallTime:number;managerShotRate:number;managerTokenRate:number};
  photoPicture:Picture|null;
- desktop:Omit<DesktopState,'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'recycled'|'trashCount'|'reservation'|'terminal'|'shotHistory'|'stalled'|'stalledClosed'|'stallMs'|'stallSerial'|'idleMs'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'|'feedback'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
+ desktop:Omit<DesktopState,'screen'|'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'recycled'|'trashCount'|'reservation'|'terminal'|'shotHistory'|'stalled'|'stalledClosed'|'stallMs'|'stallSerial'|'idleMs'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'|'feedback'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
  view:{preferences:DesktopPreferences;desktop:Pick<DesktopState,'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'reservation'|'terminal'|'stalled'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'>;photo:PhotoEdit};
 }
-export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3;
+export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3|CaptureSceneV4;
 export function projectCaptureV2(state:GameState,language:string):CaptureSceneV2 {
  const d=state.run.desktop;
  // V1's document projection remains shared, while the V2 desktop has its own contract.
@@ -170,11 +173,11 @@ function isCaptureSceneV2(v:unknown):v is CaptureSceneV2 {
  const t=ex.terminal;
  return ['processes','performance'].includes(ex.managerTab as string)&&['home','shots','feedback','tessera','files','photo','terminal'].includes(ex.managerProcess as string)&&(ex.calendarMonth===null||num(ex.calendarMonth))&&record(t)&&[60000,3600000].includes(t.interval as number)&&typeof t.running==='boolean'&&num(t.elapsedMs)&&num(t.executions)&&Array.isArray(t.log)&&t.log.length<=20&&t.log.every(l=>record(l)&&num(l.at)&&typeof l.ok==='boolean')&&(ex.stalled===null||apps2.includes(ex.stalled as string))&&['skills','data','specs','general'].includes(ex.settingsPage as string);
 }
-export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value);}
+export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value)||isCaptureSceneV4(value);}
 
 // Format 3 records the selected visual stages. Older formats keep their own readers.
 export interface CaptureSceneV3 extends Omit<CaptureSceneV2,'version'> {version:3;appearance:Appearance}
-export function projectCapture(state:GameState,language:string):CaptureSceneV3 {
+function projectCaptureV3(state:GameState,language:string):CaptureSceneV3 {
  return {...projectCaptureV2(state,language),version:3,appearance:{editor:editorStage(state),desktop:desktopStage(state)}};
 }
 function isCaptureSceneV3(v:unknown):v is CaptureSceneV3 {
@@ -182,4 +185,16 @@ function isCaptureSceneV3(v:unknown):v is CaptureSceneV3 {
  const e=v.editor,p=v.view.preferences;
  if(typeof p.radiusCustom!=='boolean'||!stringIds(e.skills,[...editorSkills,'update'])||!stringIds(p.skills,[...skills2,'major1','major2'])||!stringIds(p.disabled,skills2))return false;
  return isCaptureSceneV2({...v,version:2,editor:{...e,skills:(e.skills as string[]).filter(id=>id!=='update')},view:{...v.view,preferences:{...p,skills:(p.skills as string[]).filter(id=>!['major1','major2'].includes(id))}}});
+}
+
+// Format 4 keeps the logical size of the photographed desktop, including 4:3 scenes.
+export interface CaptureSceneV4 extends Omit<CaptureSceneV3,'version'> {version:4;screen:LogicalSize}
+export function projectCapture(state:GameState,language:string):CaptureSceneV4 {
+ return {...projectCaptureV3(state,language),version:4,screen:{...state.run.desktop.screen}};
+}
+function isCaptureSceneV4(v:unknown):v is CaptureSceneV4 {
+ if(!record(v)||v.version!==4||!record(v.screen)||![[800,600],[1024,768],[1366,768]].some(([w,h])=>v.screen&&record(v.screen)&&v.screen.width===w&&v.screen.height===h))return false;
+ if(!isCaptureSceneV3({...v,version:3})||!record(v.desktop)||!record(v.desktop.windows)||!record(v.desktop.icons))return false;
+ const width=v.screen.width as number,height=v.screen.height as number,work=height-(width===800?28:width===1024?30:40);
+ return Object.values(v.desktop.windows).every(b=>record(b)&&Number(b.x)+Number(b.width)<=width&&Number(b.y)+Number(b.height)<=work)&&Object.values(v.desktop.icons).every(p=>record(p)&&Number(p.x)<=width-80&&Number(p.y)<=work-76);
 }

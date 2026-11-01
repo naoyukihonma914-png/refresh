@@ -1,3 +1,6 @@
+import { desktopScreen, fitWindow, fitIcon, workHeight } from './desktopGeometry';
+import { desktopStage } from './appearance';
+export {fitWindow} from './desktopGeometry';
 import { actDesktopExtra, completeRequests, type ExtraAction } from './desktopExtras';
 import { FEATURE_APPS, featureCount, hasDesktopSkill, hasUpgrade } from './desktopJobs';
 import type { DesktopUpgrade } from '../config/balance';
@@ -6,7 +9,7 @@ import { BALANCE } from '../config/balance';
 import { ICON_IDS, PRACTICE_IDS, homeButtonColor } from '../content/kumikiArt';
 import { availableIcons, drawingFor, prepareDrawing } from './kumiki';
 import { creditPixels, passivePixelsPerSecond } from './economy';
-import { MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH, APP_IDS, createDesktopState, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
+import { APP_IDS, createDesktopState, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
 import type { GameState } from './state';
 export const withDesktop = (state: GameState, desktop: DesktopState): GameState => ({ ...state, run: { ...state.run, desktop } });
 export const installedApps = (state: GameState): AppId[] => ['tessera', 'note', ...state.run.desktop.apps, 'settings'];
@@ -14,7 +17,7 @@ export const runningApps = (state: GameState): AppId[] => installedApps(state).f
 export const visibleApps = (state: GameState): AppId[] => runningApps(state).filter(id => !state.run.desktop.windows[id].minimized && (!hasDesktopSkill(state,'virtual')||state.run.desktop.workspaces[id]===state.run.desktop.workspace));
 export function enterDesktop(state: GameState): GameState {
   if (state.run.world !== 'kumiki' || state.run.desktop.entered || state.persistent.specs.color < 1 || !state.run.kumiki.built.includes('taskbar') || state.resources.pixels < BALANCE.w2.desktopCost) return state;
-  const d = createDesktopState(); d.entered = true; d.enteredAt = state.elapsedMs;d.builtAt.desktop=state.lastTickAt; d.active = 'tessera'; d.windows.tessera.open = true; d.windows.tessera.z = 1;
+  const d = createDesktopState(desktopScreen(desktopStage(state))); d.entered = true; d.enteredAt = state.elapsedMs;d.builtAt.desktop=state.lastTickAt; d.active = 'tessera'; d.windows.tessera.open = true; d.windows.tessera.z = 1;
   return { ...state, resources: { ...state.resources, pixels: state.resources.pixels - BALANCE.w2.desktopCost }, run: { ...state.run, world: 'desktop', desktop: d } };
 }
 export function focusWindow(state: GameState, app: AppId): GameState {
@@ -29,11 +32,6 @@ export function focusWindow(state: GameState, app: AppId): GameState {
 }
 function nextActive(state: GameState, app: AppId): AppId | null {
   return visibleApps(state).filter(id => id !== app).sort((a,b) => state.run.desktop.windows[b].z - state.run.desktop.windows[a].z)[0] ?? null;
-}
-export function fitWindow(app: AppId, rect: Rect): Rect {
-  const minWidth = MIN_WINDOW_WIDTH[app];
-  const width = Math.max(minWidth, Math.min(1920, rect.width)), height = Math.max(MIN_WINDOW_HEIGHT, Math.min(1032, rect.height));
-  return { x: Math.max(0, Math.min(1920 - width, rect.x)), y: Math.max(0, Math.min(1032 - height, rect.y)), width, height };
 }
 export const nextDesktopApp = (state:GameState) => BALANCE.w3.apps.find(item=>!state.run.desktop.upgrades.includes(item.id))??null;
 export const followingDesktopApp = (state:GameState) => BALANCE.w3.apps.filter(item=>!state.run.desktop.upgrades.includes(item.id))[1]??null;
@@ -161,13 +159,13 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number,
     case 'maximize': {
       if (!installedApps(state).includes(action.app)) return state;
       const w = d.windows[action.app];
-      return focusWindow(withDesktop(state,{ ...d, windows: { ...d.windows,[action.app]: { ...w, ...(w.maximized ? w.restore! : { x:0,y:0,width:1920,height:1032 }), maximized: !w.maximized, restore: w.maximized ? null : { x:w.x,y:w.y,width:w.width,height:w.height } } } }),action.app);
+      return focusWindow(withDesktop(state,{ ...d, windows: { ...d.windows,[action.app]: { ...w, ...(w.maximized ? w.restore! : { x:0,y:0,width:d.screen.width,height:workHeight(d.screen) }), maximized: !w.maximized, restore: w.maximized ? null : { x:w.x,y:w.y,width:w.width,height:w.height } } } }),action.app);
     }
     case 'rect': {
       if (!installedApps(state).includes(action.app) || d.windows[action.app].maximized || !(['x','y','width','height'] as const).every(key => Number.isFinite(action.rect[key]))) return state;
-      return withDesktop(state,{ ...d,windows:{ ...d.windows,[action.app]:{ ...d.windows[action.app], ...fitWindow(action.app,action.rect) } } });
+      return withDesktop(state,{ ...d,windows:{ ...d.windows,[action.app]:{ ...d.windows[action.app], ...fitWindow(action.app,action.rect,d.screen) } } });
     }
-    case 'icon': return !installedApps(state).includes(action.app) || !Number.isFinite(action.x) || !Number.isFinite(action.y) ? state : withDesktop(state,{ ...d,icons:{ ...d.icons,[action.app]: { x:Math.max(0,Math.min(1840,action.x)),y:Math.max(0,Math.min(944,action.y)) } } });
+    case 'icon': return !installedApps(state).includes(action.app) || !Number.isFinite(action.x) || !Number.isFinite(action.y) ? state : withDesktop(state,{ ...d,icons:{ ...d.icons,[action.app]: fitIcon({x:action.x,y:action.y},d.screen,Math.max(76,state.persistent.desktopPrefs.iconSize+36)) } });
     case 'folder': return !['root','exports','screenshots'].includes(action.folder) ? state : withDesktop(state,{ ...d,fileFolder:action.folder,fileSelection:null });
     case 'file': return withDesktop(state,{ ...d,fileSelection:action.id });
     case 'mail': return !d.feedback.some(f => f.id === action.id) ? state : withDesktop(state,{ ...d,mailSelection:action.id });
@@ -185,10 +183,10 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number,
       // Keep two real windows visible and give the capture toolbar a clear destination.
       let next=focusWindow(withDesktop(state,{...d,notice:null}),'tessera');
       if(next.run.desktop.windows.tessera.maximized)next=actDesktop(next,{type:'maximize',app:'tessera'},now);
-      next=actDesktop(next,{type:'rect',app:'tessera',rect:{x:150,y:64,width:900,height:580}},now);
+      next=actDesktop(next,{type:'rect',app:'tessera',rect:{x:16,y:64,width:d.screen.width*.65,height:workHeight(d.screen)*.65}},now);
       next=focusWindow(next,'note');
       if(next.run.desktop.windows.note.maximized)next=actDesktop(next,{type:'maximize',app:'note'},now);
-      return focusWindow(actDesktop(next,{type:'rect',app:'note',rect:{x:1100,y:140,width:630,height:650}},now),'note');
+      return focusWindow(actDesktop(next,{type:'rect',app:'note',rect:{x:d.screen.width*.55,y:workHeight(d.screen)*.2,width:d.screen.width*.42,height:workHeight(d.screen)*.72}},now),'note');
     }
     default:return actDesktopExtra(state,action,now,language);
     case 'note': return action.text.length > BALANCE.w3.maxNote ? state : { ...state,persistent:{ ...state.persistent,productionNote:action.text,noteUpdatedAt:now } };

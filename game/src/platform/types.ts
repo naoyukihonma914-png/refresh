@@ -16,6 +16,7 @@ export interface Platform {
   readonly viewport: {
     size(): { width: number; height: number };
     subscribe(listener: () => void): Unsubscribe;
+    logicalSizeChanged(size:{width:number;height:number}):void;
   };
   readonly lifecycle: {
     onLeave(listener: () => void): Unsubscribe;

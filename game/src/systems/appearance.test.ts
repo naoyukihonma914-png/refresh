@@ -40,7 +40,7 @@ describe('段階6.1：見た目の進化と互換性',()=>{
   s=createFixture('desktop-stage2',now)!;s=paintDrawing(s,'free',[0],3);s=actDesktop(s,{type:'theme',radius:3},now);
   const k=s.run.kumiki,art=s.persistent.artwork,prefs=s.persistent.desktopPrefs,d=s.run.desktop,resources=s.resources;
   s=actKumiki(s,{type:'editor-stage',stage:0},now);s=actDesktop(s,{type:'desktop-stage',stage:0},now);
-  expect(s.run.kumiki).toBe(k);expect(s.run.desktop).toBe(d);expect(s.resources).toBe(resources);expect(s.persistent.artwork.skills).toBe(art.skills);expect(s.persistent.artwork.sketchbook).toBe(art.sketchbook);expect(s.persistent.desktopPrefs).toBe(prefs);
+  expect(s.run.kumiki).toBe(k);expect(s.run.desktop.jobs).toBe(d.jobs);expect(s.run.desktop.apps).toBe(d.apps);expect(s.resources).toBe(resources);expect(s.persistent.artwork.skills).toBe(art.skills);expect(s.persistent.artwork.sketchbook).toBe(art.sketchbook);expect(s.persistent.desktopPrefs).toBe(prefs);
   expect(setEditorStage(s,3 as never)).toBe(s);expect(setDesktopStage(s,-1 as never)).toBe(s);expect(decodeSave(encodeSave(s))).toEqual(s);
  });
  it('選んだ段と取得した動作環境を周回後も引き継ぐ',()=>{
@@ -50,16 +50,16 @@ describe('段階6.1：見た目の進化と互換性',()=>{
  });
  it('実際の第8版とV2撮影は書き換えず、旧modern購入者には新しい動作環境を付ける',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v8-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(9);expect(s.resources).toEqual(old.resources);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(readCapture(s.persistent.screenshots[0]!).version).toBe(2);
+  expect(s.schemaVersion).toBe(10);expect(s.resources).toEqual(old.resources);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(readCapture(s.persistent.screenshots[0]!).version).toBe(2);
   expect(s.persistent.appearance).toEqual({editor:0,desktop:0});expect(s.persistent.desktopPrefs.radiusCustom).toBe(false);
   old.persistent.artwork.skills.push('modern');old.persistent.artwork.modern=true;old.persistent.desktopPrefs.radius=3;
   const modern=decodeSave(JSON.stringify(old));expect(modern.persistent.appearance).toEqual({editor:2,desktop:2});expect(modern.persistent.artwork.skills).toContain('update');expect(canSwitchEditor(modern)).toBe(true);expect(modern.persistent.desktopPrefs.radiusCustom).toBe(true);expect(modern.resources).toEqual(s.resources);
  });
- it('V3撮影は撮影時の段・角の設定を持ち、後の変更を受けない。過去のV1・V2も混在できる',()=>{
+ it('V4撮影は撮影時の段・角の設定を持ち、後の変更を受けない。過去のV1・V2も混在できる',()=>{
   let s=createFixture('desktop-stage2',now)!;s=actDesktop(s,{type:'theme',radius:3},now);s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!;const scene=readCapture(shot);
-  expect(scene.version).toBe(3);expect(isCaptureScene(scene)).toBe(true);s=setDesktopStage(setEditorStage(s,0),0);s=actDesktop(s,{type:'theme',autoRadius:true},now);
+  expect(scene.version).toBe(4);expect(isCaptureScene(scene)).toBe(true);s=setDesktopStage(setEditorStage(s,0),0);s=actDesktop(s,{type:'theme',autoRadius:true},now);
   const frozen=restoreScene(shot,s.persistent.screenshots);expect(frozen.persistent.appearance).toEqual({editor:2,desktop:2});expect(frozen.persistent.desktopPrefs).toMatchObject({radius:3,radiusCustom:true});
-  const invalid=structuredClone(scene);if(invalid.version===3){invalid.appearance.desktop=9 as never;expect(isCaptureScene(invalid)).toBe(false);}
+  const invalid=structuredClone(scene);if(invalid.version===4){invalid.appearance.desktop=9 as never;expect(isCaptureScene(invalid)).toBe(false);}
   const mixed=decodeSave(gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString());mixed.persistent.screenshots.push({...shot,id:10});mixed.persistent.desktopPrefs.lastShotId=10;expect(decodeSave(encodeSave(mixed))).toEqual(mixed);
  });
  it.each(['editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2'])('%sの状態を往復できる',name=>{const s=createFixture(name,now)!;expect(isGameState(s)).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);});

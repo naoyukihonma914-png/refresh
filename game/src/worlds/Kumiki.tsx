@@ -29,9 +29,11 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const k = state.run.kumiki,stage=editorStage(state);
   const act = preview ? () => {} : runtime.actKumiki;
   useEffect(() => { setDrawingId(k.activeDrawing); setFrame(0); }, [k.activeDrawing]);
-  const [leftPanel,setLeftPanel]=useState<'parts'|'templates'>('parts');
+  const [workspace,setWorkspace]=useState<'draw'|'compose'|'export'>('draw');
+  const [activeDocument,setActiveDocument]=useState<'home'|'drawing'>('home');
+  const [leftPanel,setLeftPanel]=useState<'parts'|'templates'>('templates');
   const [colorPanel,setColorPanel]=useState<'color'|'properties'>('color');
-  const [detailPanel,setDetailPanel]=useState<'layers'|'history'>('layers');
+  const [detailPanel,setDetailPanel]=useState<'layers'|'history'>('history');
   const [tool, setTool] = useState<DrawingTool>('pencil');
   const [color, setColor] = useState(0);
   const [drawingId, setDrawingId] = useState(k.activeDrawing);
@@ -94,11 +96,10 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
     }
     const node = selected ? root.querySelector<HTMLElement>(`[data-part="${selected}"]`) : null;
     if (node) {
-      const rect = node.getBoundingClientRect(), scale = origin.width / root.offsetWidth;
-      setDimensions({ width: Math.round(rect.width / scale), height: Math.round(rect.height / scale) });
+      setDimensions({width:node.offsetWidth,height:node.offsetHeight});
     }
     if (home) home.style.animation = previousAnimation ?? '';
-  }, [selected, design.radius, design.textSize, k.placed.length, mature]);
+  }, [selected, design.radius, design.textSize, k.placed.length, mature, workspace, stage, state.run.desktop.screen.width, state.run.desktop.screen.height, state.run.desktop.windows.tessera.width, state.run.desktop.windows.tessera.height]);
   useLayoutEffect(() => {
     if(!preview&&previousStage.current!==stage){setBackwards(stage<previousStage.current);setRenewing(true);setAppearanceMessage(true);}previousStage.current=stage;
   },[stage,preview]);
@@ -191,6 +192,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         {snapshot.offline && <section className="k-comment" role="status"><p>{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}</p></section>}
       </aside>;
   return <main ref={host} className={['kumiki', embedded && 'k-embedded', preview && 'k-preview', mature && 'is-mature', legacyAppearance&&state.persistent.artwork.modern&&'is-modern',!legacyAppearance&&`editor-era-${stage}`, entered && 'is-entering', renewing && 'is-renewing'].filter(Boolean).join(' ')}
+    data-workspace={stage===2&&!legacyAppearance?workspace:undefined} data-document={activeDocument}
     onPointerUp={event => {
       const id = dragRef.current;
       if (!id) return;
@@ -222,7 +224,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         <button aria-expanded={archive} onClick={() => setArchive(!archive)}>{i18n.t('k.comments')}</button>
       </div>
     </nav>
-    {!legacyAppearance&&stage===2&&<nav className="k-personas"><button className="persona-home" aria-pressed={k.homeWindow!=='closed'&&!extensions} onClick={()=>{setExtensions(false);act({type:'configure',change:{homeWindow:'normal'}});}}>{i18n.t('k.workspace.home')}</button><button className="persona-pixels" aria-pressed={k.homeWindow==='closed'&&!extensions} onClick={()=>{setExtensions(false);act({type:'configure',change:{homeWindow:'closed'}});}}>{i18n.t('k.workspace.pixels')}</button>{k.built.includes('extensions')&&<button className="persona-plugins" aria-pressed={extensions} onClick={()=>setExtensions(!extensions)}>{i18n.t('k.extensions')}</button>}</nav>}
+    {!legacyAppearance&&stage===2&&<nav className="k-personas">{(['draw','compose','export'] as const).map(id=><button key={id} className={`persona-${id}`} aria-pressed={workspace===id&&!extensions} onClick={()=>{setWorkspace(id);setExtensions(false);if(id==='draw'){setTool('pencil');setLeftPanel('templates');setColorPanel('color');setDetailPanel('history');}if(id==='compose'){act({type:'configure',change:{homeWindow:'normal'}});setTool('select');setLeftPanel('parts');setColorPanel('properties');setDetailPanel('layers');}}}>{i18n.t(`k.workspace.${id}`)}</button>)}</nav>}
     <header className="k-toolbar"><span>{i18n.t('k.home')}</span><b className="k-resource" data-pixels={state.resources.pixels}>{i18n.t('k.pixels', { pixels: i18n.pixels(state.resources.pixels) })}</b>
       <span className="k-resource">{i18n.t('k.rate', { pixels: i18n.rate(passivePixelsPerSecond(state)) })}</span>
       {tokensVisible && <span className="token-count k-resource">{i18n.t('k.tokens', { count: state.resources.tokens })}</span>}
@@ -250,17 +252,17 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d={TOOL_PATHS.select} /></svg></button>}
       </aside>
       {!legacyAppearance&&<aside className="k-palette">{stage===2?<>
-        <nav className="panel-tabs">{(['color','properties'] as const).map(id=><button key={id} aria-pressed={colorPanel===id} onClick={()=>setColorPanel(id)}>{i18n.t(id==='color'?'k.color':'k.properties')}</button>)}</nav>
+        <nav className="panel-tabs">{(workspace==='draw'?['color'] as const:['properties','color'] as const).map(id=><button key={id} aria-pressed={colorPanel===id} onClick={()=>setColorPanel(id)}>{i18n.t(id==='color'?'k.color':'k.properties')}</button>)}</nav>
         {colorPanel==='color'?palettePanel:propertyPanel||<p>{i18n.t('k.choosePart')}</p>}
-        <nav className="panel-tabs">{(['layers','history'] as const).filter(id=>id==='history'||hasKSkill(state,'layers')).map(id=><button key={id} aria-pressed={detailPanel===id} onClick={()=>setDetailPanel(id)}>{i18n.t(id==='layers'?'k.layers':'k.history')}</button>)}</nav>
+        <nav className="panel-tabs">{(['layers','history'] as const).filter(id=>id==='history'||workspace==='compose'&&hasKSkill(state,'layers')).map(id=><button key={id} aria-pressed={detailPanel===id} onClick={()=>setDetailPanel(id)}>{i18n.t(id==='layers'?'k.layers':'k.history')}</button>)}</nav>
         {detailPanel==='layers'?layers:<section className="drawing-history"><p>{i18n.t('k.historyCount',{undo:undo.current.length,redo:redo.current.length})}</p><button disabled={!undo.current.length} onClick={()=>restore('undo')}>{i18n.t('k.undo')}</button><button disabled={!redo.current.length} onClick={()=>restore('redo')}>{i18n.t('k.redo')}</button></section>}
       </>:palettePanel}</aside>}
       <aside className="k-parts-panel">
         {legacyAppearance&&<h2>{i18n.t('k.palette')}</h2>}
         {legacyAppearance&&palettePanel}
-        {!legacyAppearance&&stage===2&&<nav className="panel-tabs">{(['parts','templates'] as const).map(id=><button key={id} aria-pressed={leftPanel===id} onClick={()=>setLeftPanel(id)}>{i18n.t(id==='parts'?'k.parts':'k.templates')}</button>)}</nav>}
-        {!legacyAppearance&&stage===2&&leftPanel==='templates'&&<div className="template-list">{availableIcons(state).map(id=><button key={id} onClick={()=>openDrawing(id)} aria-pressed={drawingId===id}>{i18n.t(`k.icon.${id as 'folder'}`)}</button>)}<button onClick={()=>openDrawing('free')}>{i18n.t('k.file.free')}</button></div>}
-        {(legacyAppearance||stage!==2||leftPanel==='parts')&&parts.length > 0 && <><h2>{i18n.t('k.parts')}</h2><div className="part-list">{parts.map(id => <button key={id} className={dragPart === id ? 'active' : ''} draggable={!k.placed.includes(id)}
+        {!legacyAppearance&&stage===2&&<nav className="panel-tabs">{(workspace==='draw'?['templates'] as const:['parts','templates'] as const).map(id=><button key={id} aria-pressed={leftPanel===id} onClick={()=>setLeftPanel(id)}>{i18n.t(id==='parts'?'k.parts':'k.templates')}</button>)}</nav>}
+        {!legacyAppearance&&stage===2&&(leftPanel==='templates'||workspace==='draw')&&<div className="template-list">{availableIcons(state).map(id=><button key={id} onClick={()=>openDrawing(id)} aria-pressed={drawingId===id}>{i18n.t(`k.icon.${id as 'folder'}`)}</button>)}<button onClick={()=>openDrawing('free')}>{i18n.t('k.file.free')}</button></div>}
+        {(legacyAppearance||stage!==2||workspace!=='draw'&&leftPanel==='parts')&&parts.length > 0 && <><h2>{i18n.t('k.parts')}</h2><div className="part-list">{parts.map(id => <button key={id} className={dragPart === id ? 'active' : ''} draggable={!k.placed.includes(id)}
           onPointerDown={() => { if (!k.placed.includes(id)) { dragRef.current = id; setDragPart(id); } }}
           onDragStart={event => { event.dataTransfer.setData('text/plain', id); dragRef.current = id; setDragPart(id); }}
           onDragEnd={() => { dragRef.current = null; setDragPart(null); }} onClick={() => k.placed.includes(id) ? selectPart(id) : (dragRef.current = id, setDragPart(id))}>
@@ -280,16 +282,16 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         </section>}
       </aside>
       <section className="k-workspace">
-        <nav className="document-tabs"><button className={!extensions ? 'active' : ''} onClick={() => { setExtensions(false); act({ type: 'configure', change: { homeWindow: 'normal' } }); }}>{i18n.t('k.home')}</button>
-          {!extensions&&!legacyAppearance&&<button onClick={()=>{setTool('pencil');if(stage===2)act({type:'configure',change:{homeWindow:'closed'}});host.current?.querySelector<HTMLElement>('canvas')?.focus();}}>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</button>}
+        <nav className="document-tabs"><button className={!extensions&&activeDocument==='home' ? 'active' : ''} onClick={() => { setExtensions(false);setActiveDocument('home');if(stage===2)setWorkspace('compose'); act({ type: 'configure', change: { homeWindow: 'normal' } }); }}>{i18n.t('k.home')}</button>
+          {!extensions&&!legacyAppearance&&<button className={activeDocument==='drawing'?'active':''} onClick={()=>{setActiveDocument('drawing');setTool('pencil');if(stage===2)setWorkspace('draw');host.current?.querySelector<HTMLElement>('canvas')?.focus();}}>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</button>}
           {extensions && <button className="active" onClick={() => setExtensions(false)}>{i18n.t('k.extensions')}</button>}
         </nav>
         {extensions ? <Extensions runtime={runtime} snapshot={snapshot} i18n={i18n} /> : <div className="k-documents" data-home-state={k.homeWindow}><div className="workbench">
-          <HomeDocument runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview} interactive={interactive} selected={selected} onSelect={selectPart} selecting={tool === 'select' || tool === 'eyedropper'} dragPart={dragPart} onDrop={drop} />
+          <HomeDocument runtime={runtime} snapshot={snapshot} i18n={i18n} preview={preview} interactive={interactive} selected={selected} onMeasure={setDimensions} onSelect={selectPart} selecting={tool === 'select' || tool === 'eyedropper'} dragPart={dragPart} onDrop={drop} />
           {k.guide.seen.includes('entered') && <button className="home-comment-pin" onClick={() => readGuide('entered')}>{i18n.t('k.comment', { title: i18n.t('k.home') })}</button>}
         </div>{!legacyAppearance&&iconEditor}</div>}
-        {exportsOpen && <section className="exports-list"><h2>{i18n.t('k.exports')}</h2>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
-          {k.exports.map(work => <button key={work.kind + work.id} onClick={() => { setExportsOpen(false); if (work.kind === 'icon') openDrawing(work.id); else if (k.placed.includes(work.id as PartId)) { setTool('select'); selectPart(work.id); } else { dragRef.current = work.id as PartId; setDragPart(work.id as PartId); } }}>{work.name || (work.kind === 'icon' ? i18n.t(`k.icon.${work.id as 'folder'}`) : i18n.t(`k.part.${work.id as PartId}`))}</button>)}
+        {(exportsOpen||!legacyAppearance&&stage===2&&workspace==='export'&&!extensions)&&<section className="exports-list"><h2>{i18n.t('k.exports')}</h2>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
+          {k.exports.map(work => <button key={work.kind + work.id} onClick={() => { setExportsOpen(false);setWorkspace(work.kind==='icon'?'draw':'compose');setActiveDocument(work.kind==='icon'?'drawing':'home'); if (work.kind === 'icon') openDrawing(work.id); else if (k.placed.includes(work.id as PartId)) { setTool('select'); selectPart(work.id); } else { dragRef.current = work.id as PartId; setDragPart(work.id as PartId); } }}>{work.name || (work.kind === 'icon' ? i18n.t(`k.icon.${work.id as 'folder'}`) : i18n.t(`k.part.${work.id as PartId}`))}</button>)}
           {state.persistent.products.length > 0 && <><h2>{i18n.t('release.pastExports')}</h2><ul>{state.persistent.products.flatMap(product => product.exports.map(work => <li key={`${product.id}:${work.kind}:${work.id}`}>{i18n.t('release.guideRead', { version: productLabel(i18n,product.name,i18n.t('release.prototype')), title: work.name || i18n.t(work.kind === 'icon' ? `k.icon.${work.id as 'folder'}` : `k.part.${work.id as PartId}`) })}</li>))}</ul></>}
         </section>}
       </section>

@@ -6,10 +6,10 @@ import { ownedParts, hasKSkill } from '../../systems/kumiki';
 import { Foundation, useAnimationClock } from '../Foundation';
 import { manualClickValue } from '../../systems/economy';
 import { designStyle } from './design';
-export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop, preview = false, interactive = true }: {
+export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, selecting, dragPart, onDrop, preview = false, interactive = true, onMeasure }: {
   runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n; selected: string | null; onSelect(id: string): void;
   selecting: boolean; dragPart: PartId | null; onDrop(id: PartId): void;
-  preview?: boolean; interactive?: boolean;
+  preview?: boolean; interactive?: boolean;onMeasure?(size:{width:number;height:number}):void;
 }) {
   const { state } = snapshot;
   const k = state.run.kumiki;
@@ -23,10 +23,15 @@ export function HomeDocument({ runtime, snapshot, i18n, selected, onSelect, sele
     const root = sheet.current;
     const node = root && selected ? root.querySelector<HTMLElement>(`[data-part="${selected}"]`) : null;
     if (!root || !node || !hasKSkill(state, 'snap')) { setMeasure(null); return; }
+    const measureSelection=()=>{
     const a = root.getBoundingClientRect(), b = node.getBoundingClientRect(), scale = a.width / root.offsetWidth;
+    if(b.width)onMeasure?.({width:node.offsetWidth,height:node.offsetHeight});
     setMeasure(b.width ? { x: (b.left - a.left) / scale + root.scrollLeft, y: (b.top - a.top) / scale + root.scrollTop,
       width: b.width / scale, height: b.height / scale } : null);
-  }, [selected, k.placed.length, k.design, k.homeWindow, state.persistent.artwork.skills]);
+    };
+    measureSelection();
+    const observer=new ResizeObserver(measureSelection);observer.observe(root);observer.observe(node);return()=>observer.disconnect();
+  }, [selected, k.placed.length, k.design, k.homeWindow, state.persistent.artwork.skills,onMeasure]);
   const clock = useAnimationClock(runtime, !preview && state.run.seed.built.includes('motion'), state.persistent.specs.refresh);
   const [floating, setFloating] = useState<NonNullable<RuntimeSnapshot['press']>[]>([]);
   useEffect(() => {

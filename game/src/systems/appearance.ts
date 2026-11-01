@@ -1,3 +1,4 @@
+import { desktopScreen, resizeDesktop } from './desktopGeometry';
 import { BALANCE } from '../config/balance';
 import type { I18n } from '../content/i18n';
 import type { GameState } from './state';
@@ -18,5 +19,5 @@ export function setEditorStage(s:GameState,stage:VisualStage):GameState {
 }
 export function setDesktopStage(s:GameState,stage:VisualStage):GameState {
  if(![0,1,2].includes(stage)||stage>unlockedDesktopStage(s))return s;
- return {...s,persistent:{...s.persistent,appearance:{...s.persistent.appearance,desktop:stage}}};
+ return {...s,persistent:{...s.persistent,appearance:{...s.persistent.appearance,desktop:stage}},run:{...s.run,desktop:resizeDesktop(s.run.desktop,desktopScreen(stage),s.persistent.desktopPrefs.iconSize)}};
 }
