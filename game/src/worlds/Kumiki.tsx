@@ -223,6 +223,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
       </div>
       {k.built.includes('extensions') && <button className={extensions ? 'active' : ''} onClick={() => { setExtensions(!extensions); act({ type: 'extensions' }); }}>{i18n.t('k.extensions')}</button>}
       {Object.keys(state.run.desktop.projects).length>0&&<button onClick={()=>runtime.actDesktop({type:'app-edit',app:Object.keys(state.run.desktop.projects)[0] as import('../systems/desktopState').BuiltApp})}>{i18n.t('builder.documents')}</button>}
+      {!state.legacyGeneration&&<button className="common-settings-button" onClick={()=>setExtensions(!extensions)}>{i18n.t('settings.open')}</button>}
       <div className="k-menu-end">
         {!embedded && (tokensVisible || k.exitInspected) && <button onClick={() => setConditions(!conditions)}>{i18n.t('k.releaseProgress', { version: productLabel(i18n,state.persistent.productName,prototype ? 'v0.1' : 'v1.0'), done: prototype ? releaseChecks.filter(Boolean).length : 0, total: prototype ? releaseChecks.length : 5 })}</button>}
         {canReleasePrototype(state) && !snapshot.releaseConfirmation && <button className="prototype-release" onClick={runtime.requestPrototypeRelease}>{i18n.t('release.action')}</button>}
@@ -305,6 +306,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
     {!legacyAppearance&&stage===1&&<section className="k-layer-strip"><b>{i18n.t('k.layers')}</b><span>{i18n.t(drawingId==='free'?'k.file.free':`k.icon.${drawingId as 'folder'}`)}</span>{hasKSkill(state,'animation')&&drawing?.frames.map((_,index)=><button key={index} aria-pressed={frame===index} onClick={()=>setFrame(index)}>{i18n.t('k.frame',{count:index+1})}</button>)}</section>}
     {appearanceMessage&&!preview&&<aside className="appearance-guide" role="status"><p>{i18n.t(backwards?'appearance.guide.previous':stage===2?'appearance.guide.editor2':'appearance.guide.editor1')}</p><small>{i18n.t('guide.signature')}</small><button onClick={()=>setAppearanceMessage(false)}>{i18n.t('guide.close')}</button></aside>}
     <StatusBar className="k-status" fields={[
+      ...(state.run.play.achievement?[{id:'achievement',priority:0,text:i18n.t('achievement.notice',{name:i18n.t(`achievement.${state.run.play.achievement.id}`)})}]:[]),
       {id:'position',priority:0,text:i18n.t('k.position',{tool:i18n.t(`k.tool.${tool}`),...position})},
       {id:'cursors',priority:2,text:i18n.t(legacyHome&&k.focus&&k.placed.includes('switch')?'k.cursorPaused':'k.working',{count:state.run.seed.autoCursors})},
       ...(state.lastSavedAt!==null?[{id:'saved',priority:3,text:i18n.t('save.saved',{time:i18n.time(state.lastSavedAt)})}]:[]),

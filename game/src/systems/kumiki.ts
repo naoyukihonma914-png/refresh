@@ -1,3 +1,4 @@
+import {globalMultiplier} from './longPlay';
 import { canSwitchEditor, setEditorStage, type VisualStage } from './appearance';
 import { enterDesktop } from './desktop';
 import { BALANCE, type KumikiItem, type KumikiSkill, type PartId } from '../config/balance';
@@ -83,7 +84,7 @@ export function paintDrawing(state: GameState, id: string, cells: readonly numbe
   let result = storeDrawing(state, id, next);
   result = withK(result, { ...result.run.kumiki, lastActionAt: result.elapsedMs });
   const drawingBonus=result.run.kumiki.legacyBonus?.drawing??1;
-  const pixels=earned * BALANCE.w2.dotValue * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * drawingBonus;
+  const pixels=earned * BALANCE.w2.dotValue * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * drawingBonus * globalMultiplier(result);
   result=storeDrawing(result,id,{...next,earnedPixels:(drawing.earnedPixels??drawing.rewarded.filter(Boolean).length*BALANCE.w2.dotValue)+pixels});
   result = creditPixels(result,pixels);
   return id === 'folder' && completeDrawing(result, id) ? kGuide(result, 'complete') : result;

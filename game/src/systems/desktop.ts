@@ -3,13 +3,13 @@ import { actAppBuild, ownAppBlueprint, ownFeaturePart, functionalApp, appLayoutB
 import { desktopScreen, fitWindow, fitIcon, workHeight } from './desktopGeometry';
 import { desktopStage } from './appearance';
 export {fitWindow} from './desktopGeometry';
-import { actDesktopExtra, completeRequests, type ExtraAction } from './desktopExtras';
+import { actDesktopExtra, completeRequests,refreshDesktop, type ExtraAction } from './desktopExtras';
 import { FEATURE_APPS, featureCount, hasDesktopSkill, hasUpgrade } from './desktopJobs';
 import type { DesktopUpgrade } from '../config/balance';
 import { encodeScene, projectCapture, restoreScene } from './captureScene';
 import { BALANCE } from '../config/balance';
 import { ICON_IDS, PRACTICE_IDS } from '../content/kumikiArt';
-import { availableIcons, drawingFor, prepareDrawing } from './kumiki';
+import { availableIcons, drawingFor, prepareDrawing,exportKumiki } from './kumiki';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import { APP_IDS, createDesktopState, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
 import type { GameState } from './state';
@@ -214,10 +214,10 @@ function advanceDesktopEvents(s:GameState,ms:number,now:number,offline:boolean,l
   next=withDesktop(next,{...next.run.desktop,terminal:{...d.terminal,elapsedMs:total%d.terminal.interval}});
   for(let i=0;i<Math.min(count,screenshotCapacity(next)+1);i++){
    const at=Math.max(0,now-total%d.terminal.interval-(count-1-i)*d.terminal.interval);
-   const before=next.persistent.screenshots.length;
+   const before=next;
    if(i>0)next=withDesktop(next,{...next.run.desktop,cooldownMs:Math.max(0,next.run.desktop.cooldownMs-d.terminal.interval)});
-   next=takeScreenshot(next,at,language,1,hasDesktopSkill(next,'autoFeedback'));
-   const ok=before!==next.persistent.screenshots.length;
+   next=next.run.play.terminalCommand==='export'?exportKumiki(next,at):next.run.play.terminalCommand==='refresh'?refreshDesktop(next,at):takeScreenshot(next,at,language,1,hasDesktopSkill(next,'autoFeedback'));
+   const ok=next.run.play.terminalCommand==='capture'?before.persistent.screenshots.length!==next.persistent.screenshots.length:before!==next;
    next=withDesktop(next,{...next.run.desktop,terminal:{...next.run.desktop.terminal,executions:next.run.desktop.terminal.executions+(ok?1:0),log:[...next.run.desktop.terminal.log,{at,ok}].slice(-BALANCE.w3.maxNoteLog)}});
    if(!ok&&activeScreenshots(next).length>=screenshotCapacity(next))break;
   }

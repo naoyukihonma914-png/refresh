@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "Both contracts completed via real purchases; no-color skips Color in the seed list and neither challenge can block progress",
+    "Contract cancellation and selection at the future v1 release boundary carry into v2 without building Color",
+    "Stray pixel collected once, reappears at the interval and disappears after 30 seconds",
+    "100 pre-border manual clicks append the note once; sound starts only after user interaction and mute persists in state",
+    "16 extra drawing cells exported through the real editor unlock a picture icon; its letter leaves the production note intact",
+    "Ten consecutive taskbar-clock clicks unlock refresh; real terminal command arranges windows and cooldown prevents repeated rewards",
+    "Genuine schema-12 save migrates in browser, retains money, notes, app projects and captures, resumes production and reloads with stable records"
+  ],
+  "scenes": [],
+  "pageErrors": []
+}

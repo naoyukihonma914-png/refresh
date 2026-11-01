@@ -30,7 +30,7 @@ export interface DesktopState {
   reservation:{at:number;done:boolean;result?:'captured'|'skipped'|'expired'}|null; terminal:{interval:number;running:boolean;elapsedMs:number;executions:number;log:{at:number;ok:boolean}[]};
   shotHistory:{at:number;pixels:number}[]; stalled:AppId|null; stalledClosed:boolean; stallMs:number; stallSerial:number;
   managerTab:'processes'|'performance';managerProcess:string;calendarMonth:number|null;
-  idleMs:number; settingsPage:'skills'|'data'|'specs'|'general';
+  idleMs:number; settingsPage:'skills'|'data'|'specs'|'general'|'records'|'sound';
   windows: Record<AppId, WindowState>; active: AppId | null;
   icons: Record<AppId, { x: number; y: number }>;
   feedbackMs: number; feedbackSerial: number; feedback: Feedback[]; notice: number | null; success: number | null;
@@ -121,5 +121,5 @@ function isDesktopExtras(x:Record<string,unknown>):boolean {
  if(x.reservation!==null&&(!obj(x.reservation)||!amount(x.reservation.at)||typeof x.reservation.done!=='boolean'||x.reservation.result!==undefined&&!['captured','skipped','expired'].includes(x.reservation.result as string)))return false;
  const t=x.terminal;
  if(!obj(t)||!(BALANCE.w3.terminalIntervals as readonly unknown[]).includes(t.interval)||typeof t.running!=='boolean'||!amount(t.elapsedMs)||!count(t.executions)||!Array.isArray(t.log)||t.log.length>BALANCE.w3.maxNoteLog||!t.log.every(v=>obj(v)&&amount(v.at)&&typeof v.ok==='boolean'))return false;
- return ['processes','performance'].includes(x.managerTab as string)&&['home','shots','feedback',...JOB_IDS].includes(x.managerProcess as string)&&(x.calendarMonth===null||amount(x.calendarMonth))&&Array.isArray(x.shotHistory)&&x.shotHistory.length<=BALANCE.w3.maxShotHistory&&x.shotHistory.every(v=>obj(v)&&amount(v.at)&&amount(v.pixels))&&(x.stalled===null||APP_IDS.includes(x.stalled as AppId))&&typeof x.stalledClosed==='boolean'&&amount(x.stallMs)&&count(x.stallSerial)&&amount(x.idleMs)&&['skills','data','specs','general'].includes(x.settingsPage as string);
+ return ['processes','performance'].includes(x.managerTab as string)&&['home','shots','feedback',...JOB_IDS].includes(x.managerProcess as string)&&(x.calendarMonth===null||amount(x.calendarMonth))&&Array.isArray(x.shotHistory)&&x.shotHistory.length<=BALANCE.w3.maxShotHistory&&x.shotHistory.every(v=>obj(v)&&amount(v.at)&&amount(v.pixels))&&(x.stalled===null||APP_IDS.includes(x.stalled as AppId))&&typeof x.stalledClosed==='boolean'&&amount(x.stallMs)&&count(x.stallSerial)&&amount(x.idleMs)&&['skills','data','specs','general','records','sound'].includes(x.settingsPage as string);
 }
