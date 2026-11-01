@@ -4,7 +4,7 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 import { readFileSync } from 'node:fs';
 
 const fontLicenses = Object.fromEntries(
-  ['notoserifjp', 'notosansjp', 'bizudpgothic', 'bizudgothic', 'dotgothic16'].map(name => [name,
+  ['notoserifjp', 'notosansjp', 'bizudpgothic', 'bizudgothic', 'dotgothic16','mplus1p'].map(name => [name,
     readFileSync(new URL(`./src/assets/fonts/${name}-OFL.txt`, import.meta.url), 'utf8'),
   ]),
 );

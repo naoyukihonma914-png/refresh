@@ -1,3 +1,4 @@
+import { setDesktopStage, type VisualStage } from './appearance';
 import { BALANCE, type DesktopSkill } from '../config/balance';
 import { createI18n } from '../content/i18n';
 import { PRACTICE_IDS } from '../content/kumikiArt';
@@ -15,10 +16,11 @@ export type ExtraAction =
  | {type:'trash';id:string} | {type:'undo-trash';id:string} | {type:'empty-trash'}
  | {type:'reserve';at:number} | {type:'cancel-reservation'}
  | {type:'terminal';interval:number;running:boolean}
- | {type:'theme';mode?:'light'|'dark';accent?:string;radius?:number;iconSize?:number;slideshow?:boolean}
+ | {type:'theme';mode?:'light'|'dark';accent?:string;radius?:number;autoRadius?:boolean;iconSize?:number;slideshow?:boolean}
  | {type:'skill';id:DesktopSkill} | {type:'toggle-skill';id:DesktopSkill}
  | {type:'workspace';workspace:0|1} | {type:'move-workspace';app:AppId}
  | {type:'manager-tab';tab:DesktopState['managerTab']} | {type:'manager-process';process:string} | {type:'calendar-month';at:number}
+ | {type:'desktop-stage';stage:VisualStage}
  | {type:'settings-page';page:DesktopState['settingsPage']} | {type:'restart';app:AppId} | {type:'activity'};
 const desktop=(s:GameState,patch:Partial<DesktopState>):GameState=>({...s,run:{...s.run,desktop:{...s.run.desktop,...patch}}});
 export function completeRequests(s:GameState,kinds:string[],now:number,automatic=false):GameState {
@@ -94,7 +96,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   // Referenced historical previews remain readable; collect only unreachable images.
   const retained=new Set(screenshots.filter(shot=>!shot.deleted).map(shot=>shot.id));
   const rootSources=[p.wallpaper?.source,d.photo.source];for(const source of rootSources)if(source?.startsWith('shot:'))retained.add(Number(source.slice(5)));
-  const visit=(id:number)=>{const shot=screenshots.find(x=>x.id===id);if(!shot)return;const scene=readCapture(shot);const refs=scene.files.flatMap(f=>f.shotId?[f.shotId]:[]);if(scene.version===2)for(const source of [scene.view.photo.source,scene.view.preferences.wallpaper?.source])if(source?.startsWith('shot:'))refs.push(Number(source.slice(5)));for(const ref of refs)if(!retained.has(ref)){retained.add(ref);visit(ref);}};
+  const visit=(id:number)=>{const shot=screenshots.find(x=>x.id===id);if(!shot)return;const scene=readCapture(shot);const refs=scene.files.flatMap(f=>f.shotId?[f.shotId]:[]);if(scene.version!==1)for(const source of [scene.view.photo.source,scene.view.preferences.wallpaper?.source])if(source?.startsWith('shot:'))refs.push(Number(source.slice(5)));for(const ref of refs)if(!retained.has(ref)){retained.add(ref);visit(ref);}};
   for(const id of [...retained])visit(id);
   next={...next,persistent:{...next.persistent,screenshots:screenshots.filter(shot=>retained.has(shot.id))}};
   return next;
@@ -112,15 +114,18 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   const prefs={...p};
   if(a.mode==='light'||a.mode==='dark')prefs.mode=a.mode;
   if(a.accent&&/^#[0-9a-f]{6}$/i.test(a.accent))prefs.accent=a.accent;
-  if(a.radius!==undefined&&Number.isFinite(a.radius))prefs.radius=Math.max(0,Math.min(8,a.radius));
+  if(a.radius!==undefined&&Number.isFinite(a.radius)){prefs.radius=Math.max(0,Math.min(8,a.radius));prefs.radiusCustom=true;}
+  if(typeof a.autoRadius==='boolean')prefs.radiusCustom=!a.autoRadius;
   if(a.iconSize!==undefined&&[32,48,64].includes(a.iconSize)&&hasUpgrade(s,'iconSize'))prefs.iconSize=a.iconSize;
   if(typeof a.slideshow==='boolean'&&hasUpgrade(s,'slideshow'))prefs.slideshow=a.slideshow;
   let next:GameState={...s,persistent:{...s.persistent,desktopPrefs:prefs},run:{...s.run,kumiki:{...s.run.kumiki,design:{...s.run.kumiki.design,primary:{...(s.run.kumiki.design.primary??{radius:0,textSize:'medium' as const,shadow:false}),color:prefs.accent}}}}};
   if(prefs.mode==='dark')next=completeRequests(next,['dark'],now);return next;
  }
  case 'skill':{
+  if(a.id==='major2'&&!p.skills.includes('major1'))return s;
   const skill=BALANCE.w3.skills.find(x=>x.id===a.id);if(!skill||p.skills.includes(a.id)||skill.band===2&&s.run.version==='v0.1'||s.resources.tokens<skill.cost)return s;
-  return {...s,resources:{...s.resources,tokens:s.resources.tokens-skill.cost},persistent:{...s.persistent,desktopPrefs:{...p,skills:[...p.skills,a.id]}},run:{...s.run,desktop:{...d,...(a.id==='burst'?{cooldownMs:d.cooldownMs*BALANCE.w3.burstMultiplier}:{}),...(a.id==='sortMail'?{mailFolder:'pending' as const}:{})}}};
+  const next:GameState={...s,resources:{...s.resources,tokens:s.resources.tokens-skill.cost},persistent:{...s.persistent,desktopPrefs:{...p,skills:[...p.skills,a.id]}},run:{...s.run,desktop:{...d,...(a.id==='burst'?{cooldownMs:d.cooldownMs*BALANCE.w3.burstMultiplier}:{}),...(a.id==='sortMail'?{mailFolder:'pending' as const}:{})}}};
+  return a.id==='major1'?setDesktopStage(next,1):a.id==='major2'?setDesktopStage(next,2):next;
  }
  case 'toggle-skill':{
   if(!p.skills.includes(a.id)||!BALANCE.w3.skills.find(x=>x.id===a.id)?.playful)return s;
@@ -131,6 +136,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
  case 'manager-tab':return ['processes','performance'].includes(a.tab)?desktop(s,{managerTab:a.tab}):s;
  case 'manager-process':return ['home','shots','feedback',...JOB_IDS].includes(a.process)?desktop(s,{managerProcess:a.process}):s;
  case 'calendar-month':return Number.isFinite(a.at)&&a.at>=0?desktop(s,{calendarMonth:a.at}):s;
+ case 'desktop-stage':return setDesktopStage(s,a.stage);
  case 'settings-page':return desktop(s,{settingsPage:a.page});
  case 'restart':return d.stalled===a.app?desktop(creditPixels(s,passivePixelsPerSecond(s)*BALANCE.w3.restartSeconds),{stalled:null,stalledClosed:false,stallMs:BALANCE.w3.stallMinMs+(d.stallSerial*7919)%(BALANCE.w3.stallMaxMs-BALANCE.w3.stallMinMs)}):s;
  }

@@ -1,3 +1,4 @@
+import { createAppearance } from './appearance';
 import { captureStore } from '../platform/captures';
 import { migrateCaptureV6 } from './captureMigration';
 import { createDesktopPreferences, createDesktopState } from './desktopState';
@@ -36,7 +37,7 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     const next = { ...(data as GameState), schemaVersion: 4 };
     const projected = { ...next, schemaVersion: SCHEMA_VERSION,
       run: { ...next.run, shipping: null, restartMs: 0, desktop: createDesktopState() },
-      persistent: { ...next.persistent, products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
+      persistent: { ...next.persistent, appearance:createAppearance(), products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
     };
     if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
     const palette = paletteFor(1);
@@ -81,6 +82,13 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
     const old=data as GameState, defaults=createDesktopState(), prefs=createDesktopPreferences();
     prefs.lastShotId=Math.max(0,...old.persistent.screenshots.map(s=>s.id));
     return {...old,schemaVersion:8,persistent:{...old.persistent,desktopPrefs:prefs},run:{...old.run,desktop:{...defaults,...old.run.desktop,upgrades:[...old.run.desktop.apps],windows:{...defaults.windows,...old.run.desktop.windows},icons:{...defaults.icons,...old.run.desktop.icons}}}};
+  },
+  8(data) {
+    const old=data as GameState,modern=old.persistent.artwork.skills.includes('modern');
+    // The old paid modern tool ran in a modern desktop. Preserve both the paid tool and its runtime.
+    const skills=modern?[...new Set([...old.persistent.artwork.skills,'update' as const])]:old.persistent.artwork.skills;
+    const desktopSkills=modern?[...new Set([...old.persistent.desktopPrefs.skills,'major1' as const,'major2' as const])]:old.persistent.desktopPrefs.skills;
+    return {...old,schemaVersion:9,persistent:{...old.persistent,appearance:{editor:old.persistent.artwork.modern?2:0,desktop:modern?2:0},artwork:{...old.persistent.artwork,skills},desktopPrefs:{...old.persistent.desktopPrefs,skills:desktopSkills,radiusCustom:old.persistent.desktopPrefs.radius!==8}}};
   },
 };
 

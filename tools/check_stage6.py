@@ -13,7 +13,7 @@ class Checks(list):
 JA=json.loads((ROOT/'game/src/content/locales/ja.json').read_text())['messages']
 
 def main():
- parser=argparse.ArgumentParser();parser.add_argument('--base-url',default='http://127.0.0.1:4173');parser.add_argument('--visual-only',action='store_true');args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--base-url',default='http://127.0.0.1:4173');parser.add_argument('--visual-only',action='store_true');parser.add_argument('--functional-only',action='store_true');args=parser.parse_args()
  OUT.mkdir(parents=True,exist_ok=True);checks=Checks();errors=[];layouts=[]
  with sync_playwright() as p:
   browser=p.chromium.launch(executable_path=shutil.which('chromium'),args=['--no-sandbox'])
@@ -40,7 +40,7 @@ def main():
    for _ in range(n):locator.press('ArrowRight')
   if not args.visual_only:
    ctx,page=scene('desktop-early');assert not page.locator('.taskbar-clock').count();assert not page.locator('.job-slot').count()
-   page.locator('.desktop-live > .desktop-taskbar .taskbar-tokens').click();assert win(page,'settings').is_visible();assert win(page,'settings').locator('.desktop-skill').count()==9;ctx.close();checks.append('初期状態には未解放の操作を出さず、トークンから設定を開ける')
+   page.locator('.desktop-live > .desktop-taskbar .taskbar-tokens').click();assert win(page,'settings').is_visible();assert win(page,'settings').locator('.desktop-skill').count()==10;ctx.close();checks.append('初期状態には未解放の操作を出さず、トークンから設定を開ける')
    ctx,page=scene();w=open_app(page,'tessera');slot=w.locator('.job-slot');slot.click();w.get_by_role('button',name='ジョブを外す',exact=True).click();assert not state(page)['run']['desktop']['jobs']['tessera']['assigned']
    page.locator('.desktop-live > .desktop-taskbar .taskbar-job-source').drag_to(w.locator('.window-title'));slot.click();assert state(page)['run']['desktop']['jobs']['tessera']['assigned']
    before=state(page);w.locator('.job-controls button').nth(0).click();after=state(page);assert after['run']['desktop']['jobs']['tessera']['cursors']==9
@@ -85,9 +85,11 @@ def main():
    legacy=OUT/'v7-import.json';legacy.write_bytes(gzip.decompress((ROOT/'game/src/systems/testdata/v7-two-shots.json.gz').read_bytes()))
    ctx,page=scene(None)
    with page.expect_file_chooser() as chooser:page.locator('.debug-panel button').nth(-2).evaluate('e=>e.click()')
-   chooser.value.set_files(str(legacy));page.locator('.desktop-live').wait_for();s=state(page);assert s['schemaVersion']==8;assert len(s['persistent']['screenshots'])==2;assert json.loads(s['persistent']['screenshots'][0]['data'])['version']==1
-   ctx.close();checks.append('ブラウザでも旧第7版とV1撮影を取り込み、第8版へ移行')
+   chooser.value.set_files(str(legacy));page.locator('.desktop-live').wait_for();s=state(page);assert s['schemaVersion']==9;assert len(s['persistent']['screenshots'])==2;assert json.loads(s['persistent']['screenshots'][0]['data'])['version']==1
+   ctx.close();checks.append('ブラウザでも旧第7版とV1撮影を取り込み、第9版へ移行')
   (OUT/'functional-checks.json').write_text(json.dumps({'checks':checks,'pageErrors':errors},ensure_ascii=False,indent=2)+'\n')
+  if args.functional_only:
+   assert not errors,errors;print(json.dumps({'checks':len(checks),'pageErrors':errors},ensure_ascii=False));browser.close();return
   # Native controls and translated text at the reference and smaller viewport sizes.
   for language in ['ja','en','en-XA']:
    for viewport in [(1920,1080),(1280,720)]:
@@ -101,7 +103,7 @@ def main():
      win(page,app).wait_for(state='visible')
      page.clock.run_for(50)
      bar=page.locator('.desktop-live > .desktop-taskbar');icons=bar.locator('.taskbar-apps').bounding_box();resources=bar.locator('.taskbar-right').bounding_box();assert icons['x']+icons['width']<=resources['x']+1,(language,viewport,app,icons,resources)
-     title=win(page,app).locator('.window-title').bounding_box();expected=32*viewport[0]/1920;assert abs(title['height']-expected)<2
+     title=win(page,app).locator('.window-title').bounding_box();expected=18*viewport[0]/1920;assert abs(title['height']-expected)<2
      overflows=win(page,app).locator('.win-button,select').evaluate_all("nodes=>nodes.filter(n=>n.clientWidth&&n.scrollWidth>n.clientWidth+3).map(n=>n.textContent)")
      layouts.append({'language':language,'viewport':viewport,'app':app,'overflows':overflows})
      page.screenshot(path=str(OUT/f'{app}-{language}-{viewport[0]}.png'))

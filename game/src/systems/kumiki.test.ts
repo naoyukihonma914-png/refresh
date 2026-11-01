@@ -190,7 +190,8 @@ describe('部品・拡張機能と生成', () => {
   it('自由帳拡張で描いたものを保ち、2コマ目や追加部品・壁紙・新調を使える', () => {
     let state = through('extensions'); state.run.version = 'v1'; state.resources.tokens = 200;
     state = paintDrawing(state, 'free', [0], 6);
-    for (const id of ['expand','animation','extraParts','wallpaper','modern'] as const) state = buyKumikiSkill(state, id);
+    state.persistent.desktopPrefs.skills = ['major1','major2'];
+    for (const id of ['expand','animation','extraParts','wallpaper','update','modern'] as const) state = buyKumikiSkill(state, id);
     expect(state.persistent.artwork.sketchbook.size).toBe(32);
     expect(state.persistent.artwork.sketchbook.frames[0]![0]).toBe(6);
     state = actKumiki(state, { type: 'frame', id: 'folder' }, now);

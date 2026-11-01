@@ -1,9 +1,10 @@
+import { createAppearance, unlockedEditorStage, unlockedDesktopStage, type Appearance } from './appearance';
 import { createDesktopPreferences, isDesktopPreferences, type DesktopPreferences, createDesktopState, isDesktopState, isScreenshot, type DesktopState, type Screenshot } from './desktopState';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -36,6 +37,7 @@ export interface GameState {
     desktop: DesktopState;
   };
   persistent: {
+    appearance:Appearance;
     specs: Record<SpecKey, number>; playerName: string | null;
     productName: string | null;
     numberNotation: 'compact' | 'scientific';
@@ -71,6 +73,7 @@ export function createInitialState(now: number): GameState {
       kumiki: createKumikiState(), desktop: createDesktopState(),
     },
     persistent: {
+      appearance:createAppearance(),
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
       playerName: null, productName: null, numberNotation: 'compact',
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
@@ -99,6 +102,7 @@ export function isGameState(value: unknown): value is GameState {
   if (!isRecord(value) || value.schemaVersion !== SCHEMA_VERSION) return false;
   if (![value.createdAt, value.lastTickAt, value.elapsedMs].every(isAmount)) return false;
   if (value.lastSavedAt !== null && !isAmount(value.lastSavedAt)) return false;
+  if(!isRecord(value.persistent)||!isRecord(value.persistent.appearance)||![value.persistent.appearance.editor,value.persistent.appearance.desktop].every(v=>[0,1,2].includes(v as number)))return false;
   const resources = value.resources;
   const run = value.run;
   const persistent = value.persistent;
@@ -118,6 +122,7 @@ export function isGameState(value: unknown): value is GameState {
     || !(persistent.productionNote === null || typeof persistent.productionNote === 'string' && persistent.productionNote.length <= BALANCE.w3.maxNote)
     || ![persistent.noteUpdatedAt,persistent.homeUpdatedAt,persistent.sketchUpdatedAt].every(v=>v===null||isAmount(v))) return false;
   if (!isKumikiState(run.kumiki) || !isArtwork(persistent.artwork)) return false;
+  if((persistent.appearance as unknown as Appearance).editor>unlockedEditorStage(value as unknown as GameState)||(persistent.appearance as unknown as Appearance).desktop>unlockedDesktopStage(value as unknown as GameState))return false;
   if (run.totalPixelsGenerated < resources.pixels) return false;
   if (!isRecord(run.seed) || !Array.isArray(run.seed.built) || !isCount(run.seed.autoCursors)) return false;
   const itemIds: readonly unknown[] = BALANCE.w1.items.map(item => item.id);

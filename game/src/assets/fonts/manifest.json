@@ -65,6 +65,19 @@
     "fallbacks": {}
   },
   {
+    "file": "mplus1p-regular.woff2",
+    "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/mplus1p/MPLUS1p-Regular.ttf",
+    "source_sha256": "2f294ad496432b1608f070d310e3aa2adcf1de4af429f4901df97ec4bd361ed1",
+    "woff2_sha256": "3bc00b95dfd092fe81572845b3f2bcf45c2c30df41c6c345d3eac74a2323e5e1",
+    "license": "mplus1p-OFL.txt",
+    "conversion": "WOFF2 subset: Joyo kanji, kana, Latin, symbols, locale files and glossary",
+    "charset_sha256": "6c12fe8a63e8a8fbdb14fd41c15e6363b40e444239e8f364106c669ac30c0b9f",
+    "fonttools_version": "4.61.1",
+    "source_codepoints": 8331,
+    "subset_codepoints": 3223,
+    "fallbacks": {}
+  },
+  {
     "file": "dotgothic16.woff2",
     "source": "https://raw.githubusercontent.com/google/fonts/6c1dbe27dcf7d817d4b62cec033ba77fa8e2a5ec/ofl/dotgothic16/DotGothic16-Regular.ttf",
     "source_sha256": "3ad9af88726d42b40f7f365f0dcac785af73cf20ea6f1d5b44e57cc21150b8f1",

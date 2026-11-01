@@ -56,7 +56,7 @@ export const BALANCE = {
       { id: 'expand', band: 1, cost: 1 }, { id: 'snap', band: 2, cost: 15 },
       { id: 'outline', band: 2, cost: 20 }, { id: 'animation', band: 2, cost: 20 },
       { id: 'extraParts', band: 2, cost: 15 }, { id: 'wallpaper', band: 2, cost: 10 },
-      { id: 'modern', band: 2, cost: 25 },
+      { id: 'update', band: 1, cost: 3 }, { id: 'modern', band: 2, cost: 25 },
     ],
   },
   w3: {
@@ -85,6 +85,7 @@ export const BALANCE = {
     screensaverMs: 120_000, screensaverFrameMs: 5_000, slideshowMs: 60_000,
     maxNoteLog: 20, maxCommands: 8,
     skills: [
+      { id: 'major1', band: 1, cost: 4, playful: false }, { id: 'major2', band: 2, cost: 20, playful: false },
       { id: 'snap', band: 1, cost: 2, playful: false }, { id: 'direct', band: 1, cost: 2, playful: false },
       { id: 'burst', band: 1, cost: 4, playful: false }, { id: 'daylight', band: 1, cost: 3, playful: true },
       { id: 'posts', band: 2, cost: 15, playful: false }, { id: 'sortMail', band: 2, cost: 15, playful: false },
@@ -96,6 +97,7 @@ export const BALANCE = {
     baseShotCapacity: 50, storageCapacityMultiplier: 2, requiredApps: 6, requiredFeedback: 10,
     maxNote: 20_000, compactCursors: 8,
   },
+  appearance:{transitionMs:2_000,gessoRequirement:2},
   release: {
     maxProductName: 20,
     base: 25, pixelUnit: 10_000, exponent: 0.4, perElement: 0.05,

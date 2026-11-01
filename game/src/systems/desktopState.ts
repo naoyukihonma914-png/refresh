@@ -10,8 +10,8 @@ export const JOB_IDS = ['tessera','files','photo','terminal'] as const;
 export type JobId = typeof JOB_IDS[number];
 export interface Job { assigned:boolean; cursors:number; updates:number }
 export interface PhotoEdit { source:string; brightness:number; tone:number; crop:number }
-export interface DesktopPreferences { skills:DesktopSkill[]; disabled:DesktopSkill[]; mode:'light'|'dark'; accent:string; radius:number; iconSize:number; slideshow:boolean; wallpaper:PhotoEdit|null; lastShotId:number }
-export const createDesktopPreferences = ():DesktopPreferences => ({skills:[],disabled:[],mode:'light',accent:'#0067c0',radius:8,iconSize:48,slideshow:false,wallpaper:null,lastShotId:0});
+export interface DesktopPreferences { skills:DesktopSkill[]; disabled:DesktopSkill[]; mode:'light'|'dark'; accent:string; radius:number;radiusCustom:boolean; iconSize:number; slideshow:boolean; wallpaper:PhotoEdit|null; lastShotId:number }
+export const createDesktopPreferences = ():DesktopPreferences => ({skills:[],disabled:[],mode:'light',accent:'#0067c0',radius:8,radiusCustom:false,iconSize:48,slideshow:false,wallpaper:null,lastShotId:0});
 export interface Rect { x: number; y: number; width: number; height: number }
 export interface WindowState extends Rect { open: boolean; minimized: boolean; maximized: boolean; z: number; restore: Rect | null }
 export type FeedbackKind = 'redraw' | 'practice' | 'color' | 'screenshot' | 'sort' | 'search' | 'bright' | 'trash' | 'timer' | 'dark';
@@ -97,7 +97,7 @@ export function isScreenshot(x: unknown): x is Screenshot {
 const strings=(x:unknown):x is string[]=>Array.isArray(x)&&x.every(v=>typeof v==='string');
 export const isPhotoEdit=(x:unknown):x is PhotoEdit=>obj(x)&&typeof x.source==='string'&&(/^(coast|night|sketch|shot:[1-9][0-9]*)$/).test(x.source)&&typeof x.brightness==='number'&&x.brightness>=0.5&&x.brightness<=1.5&&typeof x.tone==='number'&&x.tone>=-50&&x.tone<=50&&typeof x.crop==='number'&&x.crop>=0&&x.crop<=40;
 export function isDesktopPreferences(x:unknown):x is DesktopPreferences {
- return obj(x)&&strings(x.skills)&&new Set(x.skills).size===x.skills.length&&x.skills.every(id=>BALANCE.w3.skills.some(s=>s.id===id))&&strings(x.disabled)&&x.disabled.every(id=>(x.skills as string[]).includes(id)&&BALANCE.w3.skills.some(s=>s.id===id&&s.playful))&&['light','dark'].includes(x.mode as string)&&typeof x.accent==='string'&&/^#[0-9a-f]{6}$/i.test(x.accent)&&typeof x.radius==='number'&&x.radius>=0&&x.radius<=8&&[32,48,64].includes(x.iconSize as number)&&typeof x.slideshow==='boolean'&&(x.wallpaper===null||isPhotoEdit(x.wallpaper))&&count(x.lastShotId);
+ return obj(x)&&strings(x.skills)&&new Set(x.skills).size===x.skills.length&&x.skills.every(id=>BALANCE.w3.skills.some(s=>s.id===id))&&strings(x.disabled)&&x.disabled.every(id=>(x.skills as string[]).includes(id)&&BALANCE.w3.skills.some(s=>s.id===id&&s.playful))&&['light','dark'].includes(x.mode as string)&&typeof x.accent==='string'&&/^#[0-9a-f]{6}$/i.test(x.accent)&&typeof x.radius==='number'&&x.radius>=0&&x.radius<=8&&typeof x.radiusCustom==='boolean'&&[32,48,64].includes(x.iconSize as number)&&typeof x.slideshow==='boolean'&&(x.wallpaper===null||isPhotoEdit(x.wallpaper))&&count(x.lastShotId);
 }
 function isDesktopExtras(x:Record<string,unknown>):boolean {
  if(!obj(x.builtAt)||!Object.entries(x.builtAt).every(([id,time])=>(id==='desktop'||BALANCE.w3.apps.some(a=>a.id===id))&&amount(time)))return false;

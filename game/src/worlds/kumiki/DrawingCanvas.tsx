@@ -45,7 +45,7 @@ export function DrawingCanvas({ drawing, target, palette, frame, zoom, tool, i18
     onStroke(cells, tool); previous.current = end;
   };
   const finish = () => { if (previous.current !== null) { previous.current = null; onEnd(); } };
-  return <div className="drawing-scroll"><canvas ref={ref} width={512} height={512} tabIndex={0}
+  return <div className="drawing-scroll" style={{'--drawing-zoom':zoom} as React.CSSProperties}><canvas ref={ref} width={512} height={512} tabIndex={0}
     aria-label={i18n.t('k.drawHint')} style={{ inlineSize: (compact ? 208 : modern ? 288 : 384) * zoom, blockSize: (compact ? 208 : modern ? 288 : 384) * zoom }}
     onPointerDown={event => { if (event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); onBegin(); stroke(point(event)); }}
     onPointerMove={event => { const cell = point(event); if (previous.current !== null && tool !== 'fill' && tool !== 'eyedropper') stroke(cell); }}
