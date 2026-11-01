@@ -354,7 +354,7 @@ button { white-space: normal; overflow-wrap: anywhere; }
 .page-layout-surface {flex:1;position:relative;min-height:720px;width:100%;overflow:auto;}
 .page-layout-canvas {position:relative;}
 .page-part {position:absolute;min-width:0;min-height:0;}
-.page-part-content {height:100%;width:100%;padding:8px 12px;overflow:auto;box-sizing:border-box;}
+.page-part>.page-part-content {height:100%;width:100%;padding:8px 12px;overflow:auto;box-sizing:border-box;}
 .page-part p {margin:8px 0;}.page-part .guide-notices {margin:0;}.page-part .guide-body {line-height:1.4;}
 .page-arranging .page-part {outline:1px dashed #777;touch-action:none;cursor:move;}
 .page-arranging .page-part-content {padding-top:28px;}
@@ -368,18 +368,20 @@ button { white-space: normal; overflow-wrap: anywhere; }
 .seed-page .home-heading {font-family:var(--page-heading-font,inherit);font-size:1.3em;margin:0 0 8px;overflow-wrap:anywhere;}
 .seed-page .goal {font-family:var(--page-heading-font,inherit);}
 .seed-page.page-custom-colors .goal,.seed-page.page-custom-colors .text-button {color:inherit;}
-.page-part[data-page-part=generator] .page-part-content {display:flex;flex-direction:column;}
-.page-part[data-page-part=generator] .pixels-line {flex:none;}
-.page-part[data-page-part=generator] .generator-line {display:flex;flex:1;min-height:64px;margin:4px 0;padding:0;}
-.page-part[data-page-part=generator] .generator-anchor {display:block;width:100%;height:100%;}
-.page-part[data-page-part=generator] .generate-button {width:100%;height:100%;min-height:48px;}
+
 .seed-page.has-motion[data-page-motion=lift] .generate-button {transform:translateY(calc(-1 * var(--press-depth,0px)));}
 .seed-page.has-motion[data-page-motion=fade] .generate-button {transform:none;filter:brightness(calc(1 - var(--press-depth,0px) / 20px));}
 .home-document .seed-page.page-layout-active {height:auto;min-height:800px;}
 .home-document .page-layout-surface {height:760px;flex:none;}
 .home-document .page-footer {max-height:120px;}
 .home-document .page-layout-actions {gap:4px;}.home-document .page-layout-actions button {font-size:11px;}
-.page-layout-paper {position:absolute;pointer-events:none;border:1px solid var(--seed-line,#808080);background:var(--seed-surface,#fff);}
 .page-custom-colors .guide-notices {background:transparent!important;color:inherit;border-color:currentColor;}
 
 .seed-page.page-custom-colors.modern-colors .build-button:not(:disabled) {color:#1a2935;}
+
+/* The standard page uses the same natural card flow as main. Only an edited page is a canvas. */
+.seed-page {position:relative;}
+.page-layout-flow,.page-flow-part,.page-flow-part>.page-part-content,.seed-page:not(.page-layout-active) .page-footer {display:contents;}
+.page-tools {position:absolute;left:16px;right:16px;bottom:8px;font-size:13px;}
+.page-tools p {margin:4px 0;}
+.page-layout-active .page-tools,.home-document .page-tools {position:static;flex:none;padding:8px 16px;}

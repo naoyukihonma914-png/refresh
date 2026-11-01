@@ -27,6 +27,10 @@ def main():
    return '['+t+'~'*int(__import__('math').ceil(len(t)*.4))+']' if lang=='en-XA' else t
   def by(root,lang,key):return root.get_by_role('button',name=text(lang,key),exact=True)
   def check_layout(root):
+   if not root.locator('.page-layout-canvas').count():
+    assert root.locator('.page-layout-flow').count()==1
+    assert root.locator('[data-part=primary]').evaluate('e=>e.offsetWidth<600')
+    return {'standard':True}
    result=root.locator('.page-layout-canvas').evaluate('''e=>({width:e.clientWidth,height:e.clientHeight,parts:[...e.querySelectorAll(':scope>.page-part')].map(p=>({id:p.dataset.pagePart,x:p.offsetLeft,y:p.offsetTop,width:p.offsetWidth,height:p.offsetHeight}))})''')
    for a in result['parts']:
     assert a['x']>=0 and a['y']>=0 and a['width']>=320 and a['x']+a['width']<=result['width'] and a['y']+a['height']<=result['height'],result
@@ -50,7 +54,7 @@ def main():
     # Buy the next three unlocks using real purchase buttons; debug only adds funds.
     for _ in range(10):page.locator('.debug-panel .debug-actions').first.locator('button').first.evaluate('e=>e.click()')
     main.locator('.build-list li').last.locator('button').click();by(main,lang,'seed.settings').click();settings.get_by_label(text(lang,'page.headingFont'),exact=True).select_option('serif');settings.get_by_label(text(lang,'page.bodyFont'),exact=True).select_option('mono');assert settings.locator('.page-design-settings fieldset').count()==2;by(settings,lang,'settings.back').click()
-    main.locator('.build-list li').last.locator('button').click();assert main.locator('.page-layout-surface').count()==1;check_layout(main);page.screenshot(path=str(OUT/f'layout-{lang}-{size[0]}.png'))
+    main.locator('.build-list li').last.locator('button').click();assert main.locator('.page-layout-flow').count()==1;check_layout(main);page.screenshot(path=str(OUT/f'layout-{lang}-{size[0]}.png'))
     by(main,lang,'page.arrange').click();part=main.locator('[data-page-part=generator]');before=part.get_attribute('style');drag(page,part.locator('.page-part-grip'),-150*size[0]/1920,0);assert part.get_attribute('style')!=before;placed=part.get_attribute('style');drag(page,part.locator('.page-part-grip'),-2000,0,True);assert part.get_attribute('style')==placed
     drag(page,part.locator('.page-part-grip'),0,-190*size[0]/1920,True);assert part.get_attribute('style')==placed
     drag(page,part.locator('.page-part-resize'),-1000,0,True);assert part.get_attribute('style')==placed

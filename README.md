@@ -103,7 +103,7 @@ Tesseraは最初は明るいベージュの大きな道具で、1周目から3�
 - `?state=desktop-ready`：全アプリ・12機能、撮影とジョブ
 - `?state=desktop-stalled`：応答なしからの再起動
 
-単体テストは `npm test`（292件）。ブラウザ確認は `tools/check_stage6.py`、 `tools/check_stage5_review.py`、`tools/check_desktop.py`、`tools/check_release.py`、`tools/check_stage3_updates.py`、`tools/check_kumiki.py`、`tools/check_seed.py`、`tools/check_foundation.py`、`tools/check_review_fixes.py`。
+単体テストは `npm test`（293件）。ブラウザ確認は `tools/check_stage6.py`、 `tools/check_stage5_review.py`、`tools/check_desktop.py`、`tools/check_release.py`、`tools/check_stage3_updates.py`、`tools/check_kumiki.py`、`tools/check_seed.py`、`tools/check_foundation.py`、`tools/check_review_fixes.py`。
 実行の前提と結果は `docs/実装メモ.md` に記録する。
 
 書体の再生成は `tools/vendor_fonts.py`。対象文字の一覧と取得元は `tools/font_subsets/`、
@@ -123,3 +123,5 @@ Tesseraは最初は明るいベージュの大きな道具で、1周目から3�
 PR #8レビュー修正の確認は `python tools/check_review8.py --base-url http://127.0.0.1:4173`。撮影の帯は上端のつまみから引き出し、撮影・外側クリック・再クリックで閉じる。パーツの目安の枠は組み立て中だけ表示し、入れたアプリと撮影には表示しない。[最新の確認画像と結果](docs/reviews/pr8/README.md)を参照。
 
 段階6.3の確認：ビルド後に `python tools/check_stage63.py --base-url http://127.0.0.1:4173`。3言語・各時代・2サイズで実際の購入・ドラッグ・サイズ変更・見出し入力・設定共有・写真のつまみ・旧セーブ・撮影を確認する。[確認画像の一覧](docs/reviews/stage63/README.md)。
+
+PR #9の標準配置の比較は [mainと修正後の画像・結果](docs/reviews/pr9/README.md)。独立してビルドしたmainを別ポートの `/play/` で配信し、`python tools/check_review9.py --base-url http://127.0.0.1:4173 --main-url http://127.0.0.1:4174` で再確認できる。

@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';import{gunzipSync}from'node:zlib';
 import {BALANCE} from '../config/balance';
 import {createFixture} from './fixtures';import{createInitialState,isGameState}from'./state';
-import{actPageDesign,createPageDesign,pageColors,contrast,recommendedPage,fitPageLayout,PAGE_PARTS,validPagePlacement}from'./pageDesign';
+import{actPageDesign,createPageDesign,pageColors,contrast,recommendedPage,fitPageLayout,isRecommendedPage,PAGE_PARTS,validPagePlacement}from'./pageDesign';
 import{decodeSave,encodeSave}from'./save';import{createSeedVersion,advanceSeedInstaller}from'./seed';
 import{buildKumiki,placePart,prepareDrawing,targetFor,paintDrawing,availableIcons,exportKumiki,prototypeConditions}from'./kumiki';
 import{passivePixelsPerSecond,manualClickValue,cursorPressesPerSecond}from'./economy';
@@ -28,6 +28,10 @@ describe('段階6.3：作った分だけページを設計する',()=>{
  });
  it('生成の部品を独立して動かし・広げても、ほかの3部品を動かさず報酬を変えない',()=>{
   const s=actPageDesign(evolved(),{type:'recommended'}),layout=structuredClone(s.run.seed.page.layout!);layout.parts.generator.x=16;layout.parts.generator.width=960;const next=actPageDesign(s,{type:'layout',layout});expect(next.run.seed.page.layout).toEqual(layout);expect(next.resources).toEqual(s.resources);expect(next.run.seed.page.layout!.parts.heading).toEqual(s.run.seed.page.layout!.parts.heading);expect(passivePixelsPerSecond(next)).toBe(passivePixelsPerSecond(s));
+ });
+ it('おすすめの記録とカスタム配置を判別し、ボタンの寸法は明示したときだけ保存する',()=>{
+  const s=actPageDesign(evolved(),{type:'recommended'});expect(isRecommendedPage(s.run.seed.page.layout)).toBe(true);const layout=structuredClone(s.run.seed.page.layout!);layout.parts.generator.x=16;expect(isRecommendedPage(layout)).toBe(false);expect(actPageDesign(s,{type:'layout',layout}).run.seed.page.layout!.button).toBeUndefined();layout.button={width:320,height:48};const next=actPageDesign(s,{type:'layout',layout});expect(decodeSave(encodeSave(next)).run.seed.page.layout!.button).toEqual(layout.button);expect(fitPageLayout(layout,800,800).button).toEqual(layout.button);const centered={...recommendedPage(),button:layout.button};expect(isRecommendedPage(centered)).toBe(false);expect(fitPageLayout(centered,800,800).button).toEqual(layout.button);const desktop=createFixture('desktop-ready',now)!;desktop.run.seed.page=next.run.seed.page;desktop.run.desktop.cooldownMs=0;const shot=takeScreenshot(desktop,now,'ja').persistent.screenshots.at(-1)!;expect(restoreScene(shot,[shot]).run.seed.page.layout!.button).toEqual(layout.button);
+  for(const button of [{width:8,height:32},{width:120,height:8},{width:1920,height:32}])expect(actPageDesign(s,{type:'layout',layout:{...layout,button}})).toBe(s);
  });
  it('窓外・重なり・小さすぎる寸法・格子外・NaNの配置は拒み、復旧操作は常に残る',()=>{
   const s=actPageDesign(evolved(),{type:'recommended'});

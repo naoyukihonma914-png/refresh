@@ -511,3 +511,5 @@
 .desktop.desktop-era-2 input[type=range]::-webkit-slider-runnable-track {height:5px;background:linear-gradient(#8c999e,#edf3f5);border-color:#8b989e;box-shadow:none;}
 .desktop.desktop-era-2 input[type=range]::-webkit-slider-thumb {width:12px;height:20px;background:linear-gradient(90deg,#f2fcff,#aacbdc);border-color:#6b8b9e;border-radius:2px;box-shadow:inset 1px 1px #fff;}
 .desktop.desktop-era-2 input[type=range]::-moz-range-thumb {width:11px;height:18px;background:linear-gradient(90deg,#f2fcff,#aacbdc);border-color:#6b8b9e;border-radius:2px;}
+
+.desktop.desktop-era-0 input[type=range]:focus-visible {outline:1px dotted #000;outline-offset:2px;border-radius:0;}
