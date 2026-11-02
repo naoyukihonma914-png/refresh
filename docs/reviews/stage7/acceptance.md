@@ -34,7 +34,7 @@
 - `offlineTerminal.test.ts`：7件。不在の撮影・エクスポート・再配置、時刻と容量の上限、予約との順序、再読み込みで重複しないことを検査。
 - TypeScript・単一HTMLのビルド成功（約5.87MB）。書体3,733文字を検査。最後の文面変更後もi18n・architectureテスト21件を再実行。
 - [flow.json](flow.json)：24経路。[extras.json](extras.json)：78状態と6組の実操作。[desktop.json](desktop.json)：段3の実購入・最大化リボン・記録・音の6条件。
-- [apps.json](apps.json)：段3の全11アプリ×3言語×2サイズ、66条件。時計の予約後の文字も最後に6条件で再確認。
+- [apps.json](apps.json)：段3の全11アプリ×3言語×2サイズ、66条件。時計の予約前・予約後・無効時の文字色と背景色は、最後に6条件でコントラスト4.5以上を再確認。
 - [common-extras.json](common-extras.json)：推定時間の短縮前後と2秒表示、18条件のジョブ10台購入、写真に固定された音量。[common-functional.json](common-functional.json)：両案件・出来事・隠し要素・旧保存の7機能群。
 - [taskbar.json](taskbar.json)：最後の進捗表示の6条件。[seed.json](seed.json)：継承完了・v2の案内・中央の配置・旧姿への切替6条件。
 - [first-worlds.json](first-worlds.json)：導入と素の画面42条件、ページエラー0・外部リクエスト0。外部通信を拒否したループバック配信で実行。
