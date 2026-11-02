@@ -51,10 +51,10 @@
 .store-about td {color:#4b6aab;}
 .store-description {line-height:1.8;}
 .store-photos {margin-block:28px;}
-.store-page h2 {font-size:26px;font-weight:400;line-height:1.4;}
+.store-page h2:where(:not(:is(.store-generation-2,.store-generation-3) [inert] *)) {font-size:26px;font-weight:400;line-height:1.4;}
 .store-photos>div {display:flex;gap:12px;flex-wrap:wrap;}
-.store-photos button {inline-size:150px;padding:3px;background:#fff;border:1px solid #ccc;cursor:pointer;}
-.store-photos button[aria-pressed=true] {outline:2px solid #4b6aab;}
+.store-photos button:where(:not(:is(.store-generation-2,.store-generation-3) [inert] *)) {inline-size:150px;padding:3px;background:#fff;border:1px solid #ccc;cursor:pointer;}
+.store-photos button[aria-pressed=true]:where(:not(:is(.store-generation-2,.store-generation-3) [inert] *)) {outline:2px solid #4b6aab;}
 .store-photos .screenshot-preview {pointer-events:none;}
 .store-reviews>h2 {border-block-end:1px solid #ccc;padding-block-end:10px;}
 .store-reviews article {padding-block:8px 22px;}

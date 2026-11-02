@@ -127,7 +127,7 @@ describe('製品ページは別の骨格でも同じ製品と操作を表示す�
     expect(encodeSave(state)).toBe(before);
   });
 
-  it('同じ情報を、単列ディレクトリ・左情報列のポータル・全幅ヒーローの別DOMへ配置する', () => {
+  it('同じ情報を、単列ディレクトリ・右情報列のストア・縦に積むヒーローの別DOMへ配置する', () => {
     const state = createFixture('stage7-store', now)!, i18n = createI18n('ja');
     const [classic, portal, modern] = generations.map(generation => render(state, generation, i18n, 'store')) as [HtmlElement, HtmlElement, HtmlElement];
     one(classic, 'data-store-layout', 'classic'); one(portal, 'data-store-layout', 'portal'); one(modern, 'data-store-layout', 'modern');
@@ -135,12 +135,20 @@ describe('製品ページは別の骨格でも同じ製品と操作を表示す�
     expect(byClass(classic, 'store-portal-columns')).toHaveLength(0); expect(byClass(classic, 'store-modern-product-hero')).toHaveLength(0);
     const rail = byClass(portal, 'store-portal-rail')[0]!;
     expect(rail.tag).toBe('aside'); one(rail, 'data-store-info', 'environment'); one(rail, 'data-store-info', 'publisher');
+    expect(byClass(portal, 'store-portal-columns')[0]!.children.filter(isElement).map(node => node.tag)).toEqual(['article', 'aside']);
     one(byClass(portal, 'store-portal-order')[0]!, 'data-store-action', 'sales');
     expect(byClass(modern, 'store-sheet')).toHaveLength(0);
     const hero = byClass(modern, 'store-modern-product-hero')[0]!;
-    one(hero, 'data-store-info', 'title'); one(hero, 'data-store-action', 'sales');
+    const introduction = byClass(hero, 'store-modern-introduction')[0]!;
+    for (const key of ['title', 'rating-summary', 'description']) one(introduction, 'data-store-info', key);
+    one(introduction, 'data-store-action', 'sales');
+    expect(all(hero, node => node.attrs['data-store-info'] === 'revenue-counts')).toHaveLength(0);
     expect(all(hero, node => node.attrs['data-store-info'] === 'screenshots')).toHaveLength(0);
     one(byClass(modern, 'store-modern-media-strip')[0]!, 'data-store-info', 'screenshots');
+    const facts = byClass(modern, 'store-modern-facts')[0]!;
+    expect(facts.tag).toBe('aside');
+    for (const key of ['environment', 'publisher', 'release-details', 'revenue-counts']) one(facts, 'data-store-info', key);
+    expect(byClass(modern, 'store-modern-content-rail')[0]!.children.filter(isElement).map(node => node.tag)).toEqual(['article', 'aside']);
   });
 
   it('写真切替の一覧と最初の選択状態を全世代に残す', () => {
@@ -216,19 +224,29 @@ describe('出荷は別の骨格でも同じ帳簿と購入条件を表示する'
     expect(encodeSave(state)).toBe(before);
   });
 
-  it('レジの照会・棒グラフのポータル・左ナビとKPIのアプリへ実際に分岐する', () => {
+  it('レジの照会・折れ線と棒のポータル・密な要約表の販売管理へ実際に分岐する', () => {
     const state = createFixture('stage7-complete', now)!, i18n = createI18n('ja');
     const [first, second, third] = generations.map(generation => render(state, generation, i18n, 'report')) as [HtmlElement, HtmlElement, HtmlElement];
     one(first, 'data-report-layout', 'register-inquiry'); one(second, 'data-report-layout', 'publisher-portal'); one(third, 'data-report-layout', 'partner-console');
     expect(byClass(first, 'shipping-report-main')).toHaveLength(1);
     expect(byClass(first, 'shipping-portal-layout')).toHaveLength(0); expect(byClass(first, 'shipping-app-layout')).toHaveLength(0);
-    one(byClass(second, 'shipping-portal-sidebar')[0]!, 'data-report-info', 'product'); one(second, 'data-report-chart', 'bars');
+    one(byClass(second, 'shipping-portal-sidebar')[0]!, 'data-report-info', 'product');
+    expect(all(second, node => Object.hasOwn(node.attrs, 'data-report-chart')).map(node => node.attrs['data-report-chart'])).toEqual(['line', 'bars']);
+    expect(byClass(second, 'shipping-portal-summary')[0]!.tag).toBe('table');
     expect(byClass(second, 'shipping-app-layout')).toHaveLength(0);
-    expect(byClass(third, 'shipping-app-layout')).toHaveLength(1); expect(byClass(third, 'shipping-kpi-cards')).toHaveLength(1);
+    expect(byClass(third, 'shipping-kpi-cards')).toHaveLength(0);
+    const summary = byClass(third, 'shipping-finance-summary')[0]!;
+    expect(summary.tag).toBe('table');
+    one(summary, 'data-report-info', 'revenue'); one(summary, 'data-report-info', 'available');
     one(third, 'data-report-chart', 'line');
-    const jumps = all(byClass(third, 'shipping-app-rail')[0]!, node => node.tag === 'button');
+    expect(all(third, node => node.attrs['data-report-info'] === 'daily-sales' || node.attrs['data-report-chart'] === 'line').map(node => node.attrs['data-report-info'] ?? node.attrs['data-report-chart'])).toEqual(['daily-sales', 'line']);
+    const outline = all(third, node => node.attrs.class?.split(' ').includes('shipping-finance-summary') || node.attrs['data-report-info'] === 'period' || node.attrs['data-report-info'] === 'daily-sales' || node.attrs['data-report-chart'] === 'line');
+    expect(outline).toEqual([summary, one(third, 'data-report-info', 'period'), one(third, 'data-report-info', 'daily-sales'), one(third, 'data-report-chart', 'line')]);
+    const jumps = all(third, node => Object.hasOwn(node.attrs, 'data-report-jump'));
     expect(jumps.map(node => node.attrs['data-report-jump'])).toEqual(['overview', 'trend', 'daily', 'product', 'specs', 'notes', 'contracts', 'next-version']);
-    expect(jumps.every(node => !Object.hasOwn(node.attrs, 'disabled'))).toBe(true);
+    expect(jumps.every(node => node.tag === 'button' && !Object.hasOwn(node.attrs, 'disabled'))).toBe(true);
+    const shortcuts = all(third, node => Object.hasOwn(node.attrs, 'data-report-shortcut'));
+    expect(shortcuts.every(node => ['product', 'specs', 'notes'].includes(node.attrs['data-report-shortcut']!) && node.tag === 'button' && !Object.hasOwn(node.attrs, 'disabled'))).toBe(true);
   });
 
   it('数え上げの途中も7日の実額・累計・表示残高をそろえ、性能の購入はまだ許可しない', () => {

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { MessageKey } from '../../../content/i18n';
-import { DailySalesTable, NextVersionAction, PublisherNotes, ReportAvailable, ReportComparison, ReportContracts, ReportDataTools, ReportPeriod, ReportProduct, ReportRevenue, SalesTrend, SpecPurchases, type ReportPartProps } from './ReportParts';
+import { DailySalesTable, NextVersionAction, PublisherNotes, ReportAvailable, ReportContracts, ReportDataTools, ReportPeriod, ReportProduct, ReportRevenue, SalesTrend, SpecPurchases, type ReportPartProps } from './ReportParts';
 
 type ReportSection='overview'|'trend'|'daily'|'product'|'specs'|'notes'|'contracts'|'next-version';
 export function GenerationThreeReport(props:ReportPartProps) {
@@ -16,14 +16,20 @@ export function GenerationThreeReport(props:ReportPartProps) {
   return <main className="shipping-page shipping-generation-3" data-generation="3" data-report-layout="partner-console">
     <header className="shipping-app-header"><b>{i18n.t('release.publisher')}</b><h1>{i18n.t('shipping.partnerReport')}</h1><span>{report.title}</span></header>
     <div className="shipping-app-layout">
-      <aside className="shipping-app-rail"><p>{report.title}</p><nav aria-label={i18n.t('shipping.reportSections')}>{targets.map(target=><button key={target.id} data-report-jump={target.id} aria-current={current===target.id?'location':undefined} onClick={()=>jump(target.id)}>{i18n.t(target.label)}</button>)}</nav></aside>
       <div className="shipping-app-workspace">
         <section className="shipping-app-overview" tabIndex={-1} ref={node=>{sections.current.overview=node??undefined;}}>
-          <div className="shipping-app-title"><h2>{i18n.t('shipping.partnerReport')}</h2><ReportPeriod report={report} i18n={i18n}/></div>
-          <dl className="shipping-kpi-cards"><div><dt>{i18n.t('release.revenue')}</dt><dd><ReportRevenue report={report} i18n={i18n}/></dd></div><div><dt>{i18n.t('release.available')}</dt><dd><ReportAvailable report={report} i18n={i18n} snapshot={snapshot}/></dd></div><div><dt>{i18n.t('shipping.comparison')}</dt><dd><ReportComparison report={report} i18n={i18n}/></dd></div></dl>
+          <h2>{i18n.t('shipping.reportProduct',{product:report.title})}</h2>
+          <div className="shipping-finance-overview">
+            <table className="shipping-finance-summary"><tbody>
+              <tr><th scope="row">{i18n.t('release.revenue')}</th><td><ReportRevenue report={report} i18n={i18n}/></td></tr>
+              <tr><th scope="row">{i18n.t('release.available')}</th><td><ReportAvailable report={report} i18n={i18n} snapshot={snapshot}/></td></tr>
+            </tbody><tbody className="shipping-period-comparison" data-first-day={report.days[0]!} data-last-day={report.days.at(-1)!}><tr className="shipping-summary-group"><th colSpan={2}>{i18n.t('shipping.comparison')}</th></tr><tr><th scope="row">{i18n.t('release.dayNumber',{count:1})}</th><td>{i18n.t('release.dollars',{count:report.days[0]!})}</td></tr><tr><th scope="row">{i18n.t('release.dayNumber',{count:report.days.length})}</th><td>{i18n.t('release.dollars',{count:report.days.at(-1)!})}</td></tr></tbody></table>
+            <nav className="shipping-finance-links" aria-label={i18n.t('shipping.reportSections')}><b>{i18n.t('shipping.reportSections')}</b><div>{targets.map(target=><button key={target.id} data-report-jump={target.id} aria-current={current===target.id?'location':undefined} onClick={()=>jump(target.id)}>{i18n.t(target.label)}</button>)}</div></nav>
+          </div>
         </section>
-        <section className="shipping-app-trend" tabIndex={-1} ref={node=>{sections.current.trend=node??undefined;}}><SalesTrend report={report} i18n={i18n} kind="line"/></section>
+        <div className="shipping-app-period-strip"><ReportPeriod report={report} i18n={i18n}/></div>
         <section className="shipping-app-details" tabIndex={-1} ref={node=>{sections.current.daily=node??undefined;}}><h2>{i18n.t('shipping.breakdown')}</h2><DailySalesTable report={report} i18n={i18n}/></section>
+        <section className="shipping-app-trend" tabIndex={-1} ref={node=>{sections.current.trend=node??undefined;}}><SalesTrend report={report} i18n={i18n} kind="line"/></section>
         <div className="shipping-app-management">
           <section className="shipping-app-product" tabIndex={-1} ref={node=>{sections.current.product=node??undefined;}}><h2>{i18n.t('shipping.targetProduct')}</h2><ReportProduct {...props}/></section>
           <section className="shipping-app-specs shipping-right" tabIndex={-1} ref={node=>{sections.current.specs=node??undefined;}}><h2>{i18n.t('shipping.performanceOrder')}</h2><SpecPurchases {...props} balanceMarker={false}/></section>
