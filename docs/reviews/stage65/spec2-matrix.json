@@ -1,0 +1,524 @@
+{
+  "checks": [
+    "3 languages × 2 viewports: seed records, sound and real bulk purchase; all 3 editor/desktop eras: records, sound, manager factors and terminal controls"
+  ],
+  "scenes": [
+    {
+      "world": "seed",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "seed",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "seed",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "seed",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "seed",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "seed",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "editor",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "editor",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    },
+    {
+      "world": "desktop",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "sound": {
+        "appearance": "none",
+        "thumbRadius": "0px"
+      }
+    }
+  ],
+  "pageErrors": []
+}
