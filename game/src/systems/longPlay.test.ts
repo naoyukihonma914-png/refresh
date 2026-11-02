@@ -74,10 +74,10 @@ describe('出来事と隠し要素',()=>{
  it('修理・撮影・返信の累積は変化した事実だけを数え、保存を繰り返しても増えない',()=>{const s=createFixture('kumiki-drift',now)!,after={...s,run:{...s.run,kumiki:{...s.run.kumiki,drift:null}}};const n=observeProgress(s,after);expect(n.persistent.progress.counts.repairs).toBe(1);expect(observeProgress(n,decodeSave(encodeSave(n))).persistent.progress.counts.repairs).toBe(1);});
 });
 
-it('ターミナルの定期命令で完成品をエクスポートし、不在時は勝手に実行しない',()=>{
+it('ターミナルの定期命令で完成品を能動時間と不在の両方でエクスポートする',()=>{
  let s=createFixture('desktop-ready',now)!;s.run.kumiki=createFixture('secret-art',now)!.run.kumiki;s.run.play.terminalCommand='export';s.run.desktop.terminal={...s.run.desktop.terminal,running:true,elapsedMs:59900};
  expect(s.run.kumiki.drawings.folder!.exported).toBe(false);const n=advanceDesktopTime(s,100,now+100);expect(n.run.kumiki.drawings.folder!.exported).toBe(true);expect(n.run.desktop.terminal.executions).toBe(s.run.desktop.terminal.executions+1);expect(n.persistent.screenshots).toEqual(s.persistent.screenshots);
- expect(advanceDesktopTime(s,100,now+100,true).run.kumiki.drawings.folder!.exported).toBe(false);
+ expect(advanceDesktopTime(s,100,now+100,true).run.kumiki.drawings.folder!.exported).toBe(true);
 });
 
 it('書き出し済みのアイコンを描き足した再エクスポートでも隠し絵を得られ、積み上げ数は水増ししない',()=>{

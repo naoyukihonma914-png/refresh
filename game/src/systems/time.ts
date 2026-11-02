@@ -1,5 +1,6 @@
 import {advanceStray} from './longPlay';
 import { advanceDesktopTime } from './desktop';
+import { hasAppPart } from './appBuild';
 import { BALANCE } from '../config/balance';
 import { advanceHomeGeneration } from './economy';
 import type { GameState } from './state';
@@ -57,11 +58,20 @@ export function advanceOfflineTime(state: GameState, wallNow: number, language='
   if(reservation&&!reservation.done&&reservation.at>end&&reservation.at<=wallNow){
     source={...state,run:{...state.run,desktop:{...state.run.desktop,reservation:{...reservation,done:true,result:'expired'}}}};
   }
-  // Split once at the reservation so its recorded screen contains only pixels earned by that time.
-  const first=reservation&&!reservation.done&&reservation.at>state.lastTickAt&&reservation.at<=end?reservation.at-state.lastTickAt:creditedMs;
-  const result=applyTime(source,elapsedMs,first,elapsedMs>limit);
-  result.state=advanceDesktopTime(result.state,first,Math.min(wallNow,state.lastTickAt+first),true,language,captures);
-  if(first<creditedMs){result.state=applyTime(result.state,creditedMs-first,creditedMs-first,false).state;result.state=advanceDesktopTime(result.state,creditedMs-first,end,true,language,captures);}
+  // Each captured screen must contain only the work earned by its own deadline.
+  // The storage cap and the configured one-minute minimum bound this to 1,440 steps.
+  const result=applyTime(source,elapsedMs,0,elapsedMs>limit);
+  let processed=0;
+  while(processed<creditedMs){
+    const current=result.state,terminal=current.run.desktop.terminal;
+    let step=creditedMs-processed;
+    if(captures&&current.run.world==='desktop'&&terminal.running&&hasAppPart(current,'terminal','commands'))step=Math.min(step,terminal.interval-terminal.elapsedMs%terminal.interval);
+    const pending=current.run.desktop.reservation,at=state.lastTickAt+processed;
+    if(pending&&!pending.done&&pending.at>at&&pending.at<=end)step=Math.min(step,pending.at-at);
+    result.state=applyTime(current,step,step,false).state;
+    processed+=step;
+    result.state=advanceDesktopTime(result.state,step,state.lastTickAt+processed,true,language,captures);
+  }
   result.creditedMs=creditedMs;
   // 時計が戻った差は0にし、次回の不在は現在の時計を基準にする。
   return { ...result, pixels:result.state.resources.pixels-state.resources.pixels, state: { ...result.state, lastTickAt: wallNow,

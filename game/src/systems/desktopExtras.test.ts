@@ -51,7 +51,7 @@ describe('段階6：アプリとジョブ',()=>{
   s.persistent.specs.refresh=2;expect(jobCursorRate(s,'files')).toBeCloseTo(before*1.25*4);
  });
  it('不在のジョブはストレージ上限まで入り、集中モードでもジョブは動く',()=>{
-  const s=fixture();s.run.kumiki.focus=true;const rate=passivePixelsPerSecond(s),before=s.run.totalPixelsGenerated;
+  const s=fixture();s.run.kumiki.focus=true;s.run.desktop.terminal.running=false;const rate=passivePixelsPerSecond(s),before=s.run.totalPixelsGenerated;
   const off=advanceOfflineTime(s,now+24*3600000);expect(off.capped).toBe(true);expect(off.creditedMs).toBe(2*3600000);expect(off.state.run.totalPixelsGenerated-before).toBeCloseTo(rate*7200,1);
   expect(s.run.totalPixelsGenerated).toBe(before);
  });
@@ -69,18 +69,18 @@ describe('段階6：アプリとジョブ',()=>{
   s=action(s,{type:'minimize',app:'files'});expect(screenshotParts(s)).toBe(before-3);
  });
  it('予約は指定時刻に1度。不在中は半分、時計を戻しても二重に撮らない',()=>{
-  let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;
+  let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s.run.desktop.terminal.running=false;
   s=request(s,'timer');s=action(s,{type:'reserve',at:now+60000});expect(s.run.desktop.feedback.at(-1)!.completedAt).toBe(now);
   const before=s.resources.pixels,rate=passivePixelsPerSecond(s),reward=screenshotReward(s);
   const next=advanceOfflineTime(s,now+120000).state;expect(next.persistent.screenshots).toHaveLength(1);expect(next.resources.pixels-before).toBeCloseTo(rate*120+reward*.5,1);
   expect(advanceOfflineTime(next,now+60000).state.persistent.screenshots).toHaveLength(1);expect(advanceOfflineTime(next,now+180000).state.persistent.screenshots).toHaveLength(1);
  });
  it('ストレージの不在上限を越える予約は実行せず、後の処理でも報酬を付けない',()=>{
-  let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s=action(s,{type:'reserve',at:now+3*3600000});
+  let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s.run.desktop.terminal.running=false;s=action(s,{type:'reserve',at:now+3*3600000});
   s=advanceOfflineTime(s,now+24*3600000).state;expect(s.persistent.screenshots).toHaveLength(0);expect(s.run.desktop.reservation?.done).toBe(true);expect(advanceActiveTime(s,100).state.persistent.screenshots).toHaveLength(0);
  });
  it('予約の記録はその時刻までの生成だけを含み、残りの不在生成を後で足す',()=>{
-  let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s=action(s,{type:'reserve',at:now+60000});
+  let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s.run.desktop.terminal.running=false;s=action(s,{type:'reserve',at:now+60000});
   const before=s.resources.pixels,rate=passivePixelsPerSecond(s);s=advanceOfflineTime(s,now+120000).state;
   const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.version!==1&&scene.display.wallTime).toBe(now+60000);expect(scene.display.resources.pixels-before).toBeCloseTo(rate*60,1);
  });
@@ -88,7 +88,7 @@ describe('段階6：アプリとジョブ',()=>{
   let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s=action(s,{type:'terminal',interval:60000,running:true});
   s=advanceActiveTime(s,60000).state;expect(s.run.desktop.terminal.executions).toBe(2);expect(s.persistent.screenshots).toHaveLength(1);
   s=action(s,{type:'terminal',interval:3600000,running:false});s=advanceActiveTime(s,60000).state;expect(s.persistent.screenshots).toHaveLength(1);
-  s=action(s,{type:'terminal',interval:60000,running:true});const away=advanceOfflineTime(s,now+3600000).state;expect(away.persistent.screenshots).toHaveLength(1);
+  s=action(s,{type:'terminal',interval:60000,running:true});const away=advanceOfflineTime(s,now+3600000).state;expect(away.persistent.screenshots).toHaveLength(BALANCE.w3.baseShotCapacity);
  });
  it('ごみ箱で容量を空け、元に戻すと元の報酬を返し、繰り返しても累計が増えない',()=>{
   let s=fixture();const shot=s.persistent.screenshots[0]!,before=s.resources.pixels,total=s.run.totalPixelsGenerated,count=activeScreenshots(s).length;
@@ -142,12 +142,12 @@ describe('段階6：アプリとジョブ',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString();const old=JSON.parse(raw);let s=decodeSave(raw);
   expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
   expect(readCapture(s.persistent.screenshots[0]!).version).toBe(1);expect(nextDesktopApp(s)?.id).toBe('sort');
-  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(8);
+  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(9);
   expect(decodeSave(encodeSave(s))).toEqual(s);expect(restoreScene(s.persistent.screenshots[0]!,s.persistent.screenshots).persistent.productionNote).toBe(readCapture(old.persistent.screenshots[0]).note);
  });
  it('V4の写真・テーマ・ジョブ・12機能も撮影時の状態を独立して保つ',()=>{
   let s=fixture();s=action(s,{type:'theme',mode:'dark'});s=action(s,{type:'manager-tab',tab:'performance'});s=action(s,{type:'calendar-month',at:1830297600000});s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);
-  expect(scene.version).toBe(8);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(9);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
   s=action(s,{type:'theme',mode:'light'});s=action(s,{type:'job-update',app:'files'});const restored=restoreScene(shot,s.persistent.screenshots);
   expect(restored.persistent.desktopPrefs.mode).toBe('dark');expect(restored.run.desktop.jobs.files.updates).toBe(1);expect(restored.run.desktop.upgrades).toHaveLength(21);expect(restored.run.desktop.managerTab).toBe('performance');expect(restored.run.desktop.calendarMonth).toBe(1830297600000);expect(scene.version!==1&&scene.display.managerShotRate).toBeGreaterThan(0);
  });
