@@ -7,6 +7,8 @@ import './desktop.css';
 import './appearance.css';
 import './stage7.css';
 import './seedEra.css';
+import './worlds/release/store-page.css';
+import './worlds/release/shipping-page.css';
 
 const platform = createBrowserPlatform();
 const runtime = new GameRuntime(platform);
