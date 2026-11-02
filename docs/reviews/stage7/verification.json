@@ -1,0 +1,31 @@
+{
+  "implementationCommit": "5392480d8a5a530cfc7822617f4e5aaa28bfd5f2",
+  "specCommit": "6e63247a5986a566091fff52c166a9ccf45bc6d1",
+  "unitTests": {
+    "command": "npm test",
+    "passed": 373,
+    "files": 27
+  },
+  "build": {
+    "command": "npm run build",
+    "htmlBytes": 5868056,
+    "singleHtml": true
+  },
+  "fonts": {
+    "command": "python tools/vendor_fonts.py --check",
+    "requestedCodepoints": 3733
+  },
+  "browser": {
+    "flow": 24,
+    "extras": 78,
+    "desktop": 6,
+    "taskbar": 6,
+    "seed": 6,
+    "apps": 66,
+    "firstWorlds": 42,
+    "commonBulk": 18,
+    "commonFunctionalGroups": 7,
+    "pageErrors": 0
+  },
+  "timingTuned": false
+}

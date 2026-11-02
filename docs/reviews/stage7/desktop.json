@@ -1,0 +1,62 @@
+{
+  "checks": [
+    "Buy the third major update through Settings; maximized Files ribbon, records, and sound remain readable in all languages and sizes"
+  ],
+  "scenes": [
+    {
+      "scene": "desktop third update, ribbon, records, sound",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "desktop third update, ribbon, records, sound",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "desktop third update, ribbon, records, sound",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "desktop third update, ribbon, records, sound",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "desktop third update, ribbon, records, sound",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "desktop third update, ribbon, records, sound",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": []
+}
