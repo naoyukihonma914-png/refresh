@@ -125,6 +125,7 @@
 .legacy-capture-preview .recorded-native-slot .line-icon {inline-size:16px;block-size:16px;flex:none;}
 .legacy-capture-preview .recorded-native-slot :is(input,output,label) {font:inherit;color:inherit;}
 .legacy-capture-preview .recorded-native-slot label {display:flex;align-items:center;gap:6px;}
+.legacy-capture-preview .recorded-native-slot label.photo-adjustment-control {display:grid;gap:4px;}
 .legacy-capture-preview .recorded-native-slot input[type=range] {min-inline-size:0;max-inline-size:100%;accent-color:var(--desktop-accent);}
 .legacy-capture-preview .recorded-native-table {inline-size:100%;border-collapse:collapse;font:inherit;background:var(--app-surface,#fff);color:var(--app-text,#111);}
 .legacy-capture-preview .recorded-native-table :is(th,td) {padding:4px 7px;border-block-end:1px solid #aaa;text-align:start;white-space:nowrap;font-weight:normal;}

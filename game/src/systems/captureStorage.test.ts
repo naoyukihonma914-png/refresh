@@ -25,6 +25,16 @@ function disk(limit=Infinity){
 }
 const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now)!,'note'),now,'ja');
 describe('新しい撮影は採用した部品と表示された位置を読み取り専用で残す',()=>{
+ it('新形式の写真表示は撮影時の色深度と解像度を使い、その後のスペック変更や旧形式へ波及しない',()=>{
+  const s=createFixture('stage8b-economy-after-era0',now)!;s.persistent.specs.color=1;s.persistent.specs.resolution=2;
+  const scene=projectCapture(s,'ja'),shot={id:1,at:now,language:'ja',data:encodeCapture(scene)},i18n=createI18n('ja');
+  const render=()=>renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n})),before=render();
+  expect(before).toContain('data-color-steps="6"');expect(before).toContain('data-photo-resolution="2"');expect(before).toContain('type="discrete" tableValues="0 .2 .4 .6 .8 1"');
+  s.persistent.specs.color=3;s.persistent.specs.resolution=3;expect(render()).toBe(before);
+  const older={...scene,version:10 as const};delete (older as {evaluation?:unknown}).evaluation;
+  const legacyShot={...shot,data:encodeCapture(older)},legacy=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot:legacyShot,catalog:[legacyShot],i18n}));
+  expect(legacy).not.toContain('data-color-steps');expect(legacy).not.toContain('data-photo-resolution');
+ });
  it('入れ子の写真でも窓の記号は撮影時の黒字・灰色地を明示し、外側アプリの色を継承しない',()=>{
   const s=createFixture('stage8b-capture-overlap-era0',now)!,nativeWindow=s.run.desktop.windows.note,client={x:nativeWindow.x+5,y:nativeWindow.y+23,width:nativeWindow.width-10,height:nativeWindow.height-28};
   const placements=(['minimize','maximize','close'] as const).map((symbol,index)=>({app:'note',role:`chrome:${symbol}`,rect:{x:nativeWindow.x+nativeWindow.width-54+index*18,y:nativeWindow.y+3,width:16,height:14},paint:{color:'rgb(0, 0, 0)',backgroundColor:'rgb(192, 192, 192)'}}));

@@ -13,6 +13,7 @@ import coast from '../assets/wallpaper/coast.webp';
 import night from '../assets/wallpaper/night.webp';
 import { AppGlyph, LineIcon, ProductGlyph } from './desktop-icons';
 import { RecordedAppParts } from './capture/RecordedAppParts';
+import { PhotoSurface } from './PhotoSurface';
 import { partVisual } from './workshop/partVisual';
 import { WorkshopGlyph } from './workshop/WorkshopGlyph';
 import './workshop/workshop.css';
@@ -105,7 +106,8 @@ function FrozenPhoto({edit,scene,catalog,i18n,ancestors}:{edit:FrozenPhoto|null;
   if(!edit)return null;
   const shot=edit.source.startsWith('shot:')?catalog.find(s=>s.id===Number(edit.source.slice(5))):undefined;
   const style:CSSProperties={filter:`brightness(${edit.brightness}) sepia(${Math.abs(edit.tone)/100})`,transform:`scale(${1+edit.crop/100})`};
-  return <div className="capture-photo" style={style}>{shot&&!ancestors.includes(shot.id)?ancestors.length<BALANCE.w3.capturePreviewDepth?<LegacyCapturePreview shot={shot} catalog={catalog} i18n={i18n} ancestors={ancestors}/>:<CaptureReference shot={shot} i18n={i18n}/>:<img src={edit.source==='night'?night:coast} alt="" data-capture-source={edit.source} data-capture-version={scene.version}/>}</div>;
+  const photograph=<div className="capture-photo" style={style}>{shot&&!ancestors.includes(shot.id)?ancestors.length<BALANCE.w3.capturePreviewDepth?<LegacyCapturePreview shot={shot} catalog={catalog} i18n={i18n} ancestors={ancestors}/>:<CaptureReference shot={shot} i18n={i18n}/>:<img src={edit.source==='night'?night:coast} alt="" data-capture-source={edit.source} data-capture-version={scene.version}/>}</div>;
+  return scene.version===11?<PhotoSurface specs={scene.display.specs}>{photograph}</PhotoSurface>:photograph;
 }
 /** The asset remains intact; only expansion into nested DOM has a presentation budget. */
 function CaptureReference({shot,i18n}:{shot:Screenshot;i18n:I18n}) {

@@ -8,6 +8,7 @@ import { partVisual } from '../workshop/partVisual';
 import { LineIcon } from '../desktop-icons';
 import { commonDesignStyle } from '../AppComposition';
 import { usesNativeComponentColors } from '../../systems/workshopState';
+import { PhotoAdjustment } from '../../components/PhotoAdjustment';
 
 export interface RecordedAppPartsProps {
  app:BuiltApp;scene:CaptureScene;i18n:I18n;
@@ -46,9 +47,10 @@ export function RecordedAppParts({app,scene,i18n,photograph,document,selectedSho
   if(app==='photo')switch(role){
    case 'source':return button(t(scene.view.photo.source==='night'?'photo.night':scene.view.photo.source==='coast'?'photo.coast':'files.screenshots'));
    case 'image':return photograph;
-   case 'brightness':case 'tone':return <label>{t(role==='brightness'?'photo.brightness':'photo.tone')}<input type="range" tabIndex={-1} readOnly min={role==='brightness'?BALANCE.capture.photoControls.brightnessMin:BALANCE.capture.photoControls.toneMin} max={role==='brightness'?BALANCE.capture.photoControls.brightnessMax:BALANCE.capture.photoControls.toneMax} value={role==='brightness'?scene.view.photo.brightness:scene.view.photo.tone}/></label>;
+   case 'brightness':return <PhotoAdjustment label={t('photo.brightness')} min={BALANCE.capture.photoControls.brightnessMin} max={BALANCE.capture.photoControls.brightnessMax} step={BALANCE.capture.photoControls.brightnessStep} value={scene.view.photo.brightness}>{i18n.number(scene.view.photo.brightness)}</PhotoAdjustment>;
+   case 'tone':return <PhotoAdjustment label={t('photo.tone')} min={BALANCE.capture.photoControls.toneMin} max={BALANCE.capture.photoControls.toneMax} value={scene.view.photo.tone}>{i18n.integer(scene.view.photo.tone)}</PhotoAdjustment>;
    case 'wallpaper':return button(t('photo.wallpaper'));
-   case 'crop':return <label>{t('photo.crop')}<output>{i18n.number(scene.view.photo.crop)}</output></label>;
+   case 'crop':return <PhotoAdjustment label={t('photo.crop')} min={BALANCE.capture.photoControls.cropMin} max={BALANCE.capture.photoControls.cropMax} value={scene.view.photo.crop} title={t('photo.cropValue',{count:scene.view.photo.crop})}>{t('number.percent',{value:i18n.integer(scene.view.photo.crop)})}</PhotoAdjustment>;
    case 'compare':return button(t('photo.compare'));
   }
   if(app==='clock')switch(role){

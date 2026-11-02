@@ -7,13 +7,13 @@ import type { WorkshopDispatch } from './WorkshopCustomization';
 import { BALANCE } from '../../config/balance';
 
 /** Shows preparation conditions only; entering the streaming world is outside this stage. */
-export function World4Preparation({state,i18n,dispatch}:{state:GameState;i18n:I18n;dispatch:WorkshopDispatch}) {
+export function World4Preparation({state,i18n,dispatch,onOpenWorkshop}:{state:GameState;i18n:I18n;dispatch:WorkshopDispatch;onOpenWorkshop?:()=>void}) {
  const readiness=world4Preparation(state),t=i18n.t;
  const requiredParts=readiness.requiredSets.flatMap(partsForSet);
  const completeCount=requiredParts.filter(part=>state.run.workshop.parts[part.id]?.step===4).length;
  const streamOwned=state.run.workshop.purchasedSets.includes('stream');
  const next=requiredParts.find(part=>state.run.workshop.parts[part.id]?.step!==4)??requiredParts[0];
- const open=()=>{if(next){dispatch({type:'selectPart',part:next.id});dispatch({type:'view',view:'workbench'});}};
+ const open=()=>{if(next){dispatch({type:'selectPart',part:next.id});dispatch({type:'view',view:'workbench'});onOpenWorkshop?.();}};
  return <section className="ws-world4-preparation" data-world4-preparation data-world4-version-allowed={readiness.versionAllowed} data-world4-desktop-available={readiness.desktopAvailable} data-world4-required-sets={readiness.requiredSets.join(',')} data-world4-completed-sets={readiness.completedSets.join(',')} data-world4-stored-sets={readiness.storedSets.join(',')} data-world4-required-hz={readiness.requiredHz} data-world4-current-hz={readiness.currentHz} data-world4-ready={readiness.ready}>
   <h3>{t('world4.preparationTitle')}</h3>
   <progress aria-label={t('world4.preparationTitle')} max={requiredParts.length} value={completeCount}/>

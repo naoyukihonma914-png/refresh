@@ -20,6 +20,9 @@
 /* Resize glyphs keep their native size and fit the narrower flat-era grip. */
 .desktop .window-resize .line-icon {max-width:100%;max-height:100%;}
 
+/* Expanded locale headings must remain readable in a narrow process table. */
+.desktop .app-layout [data-app-part=processes] .native-table th {white-space:normal;overflow-wrap:anywhere;}
+
 /* Installed controls retain the material's geometry; source design owns the editable details. */
 .desktop .app-layout[data-common-control-radius] .app-layout-part :is(button.win-button,button.nav-button) {border-radius:var(--app-common-button-radius);}
 .desktop .app-layout .app-layout-part[data-own-control-radius] :is(button,input,select,textarea) {border-radius:var(--app-part-control-radius);}

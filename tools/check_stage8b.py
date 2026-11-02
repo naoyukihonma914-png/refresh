@@ -111,9 +111,9 @@ class Review:
         self.report['cases']=[x for x in self.report['cases'] if x['id']!=identity]+[c]
         context=page=None
         try:
-            fixture={'8b1':'economy-before','8b2':'capture-overlap','8b3':'files-archive','8b-migration':'files-archive','8b-release':'files-archive'}[step]
+            fixture={'8b1':'economy-before','8b2':'capture-overlap','8b3':'files-archive','8b-migration':'files-archive','8b-release':'files-archive','8b-custom':'files-archive','8b-photo':'economy-after'}[step]
             context,page=self.open(f'stage8b-{fixture}-era{era}',c)
-            {'8b1':self.economy,'8b2':self.capture_content,'8b3':self.roundtrip,'8b-migration':self.migration,'8b-release':self.release_cycle}[step](page,c)
+            {'8b1':self.economy,'8b2':self.capture_content,'8b3':self.roundtrip,'8b-migration':self.migration,'8b-release':self.release_cycle,'8b-custom':self.customize_desktop,'8b-photo':self.photo_album}[step](page,c)
             assert not c['pageErrors'],c['pageErrors']
             assert not c['externalRequests'],c['externalRequests']
             assert not c['console'],c['console']
@@ -226,9 +226,17 @@ class Review:
     def capture_content(self,page,c):
         self.notices(page)
         overlap_state=self.state(page)
+        windows=overlap_state['run']['desktop']['windows'];file_rect=windows['files'];note_rect=windows['note']
+        desktop=page.locator('.desktop-live');scale=desktop.bounding_box()['width']/overlap_state['run']['desktop']['screen']['width']
+        note=desktop.locator('>.desktop-window[data-app=note]')
+        header=note.locator(':scope>.window-title').bounding_box();x=header['x']+40*scale;y=header['y']+header['height']/2
+        page.mouse.move(x,y);page.mouse.down();page.mouse.move(x+(file_rect['x']-note_rect['x'])*scale,y,steps=6);page.mouse.up()
+        handle=note.locator(':scope>.window-resize').bounding_box();x=handle['x']+handle['width']/2;y=handle['y']+handle['height']/2
+        page.mouse.move(x,y);page.mouse.down();page.mouse.move(x+(file_rect['width']-note_rect['width'])*scale,y,steps=6);page.mouse.up()
         self.capture(page,c,'窓を重ねた状態で撮影','capture-overlap')
         partial,pe=self.take_photo(page)
         assert any(p['visible'] and p['hiddenArea']>0 for p in pe['parts'] if p.get('app')=='files'),'Overlap fixture must partially obscure actual Files content'
+        assert any(not p['visible'] for p in pe['parts'] if p.get('app')=='files'),'The representative overlap must completely hide some actual Files components'
         frozen=partial['data']
         files=self.launch(page,'files');self.maximize(page,'files')
         files.locator('[data-files-folder=screenshots]').click()
@@ -351,7 +359,13 @@ class Review:
         assert reloaded['persistent']['editorCustomization']==custom and reloaded['persistent']['productionNote']==note_text,'Save import and a true reload must preserve the customization and note'
         assert [d for d in reloaded['persistent']['setDocuments'] if d['version']!='v1']==olddocs
         self.navigate(page,f'stage8b-stream-draft-era{c["era"]}',c)
-        self.notices(page);self.maximize(page,'tessera')
+        self.notices(page);self.close(page,'tessera')
+        page.locator('.desktop-live .taskbar-pixels:visible').first.click()
+        upgrades=page.locator('.desktop-live .desktop-upgrades')
+        upgrades.locator('[data-world4-open-set]').click()
+        expect(page.locator('.desktop-live>.desktop-window[data-app=tessera]')).to_be_visible()
+        expect(upgrades).to_be_hidden()
+        self.maximize(page,'tessera')
         workshop=page.locator('.desktop-live [data-workshop=true]');workshop.locator('[data-workshop-zoom]').select_option('0.5')
         target=workshop.locator('[data-stream-part=stream-preview]');target.scroll_into_view_if_needed()
         self.capture(page,c,'世界3の工房で次の世界のプレビューを制作中','world4-crafting')
@@ -384,8 +398,11 @@ class Review:
         assert len(fresh['persistent']['setDocuments'])>=8
         expect(workshop.locator('[data-workshop-action=exit]')).to_be_disabled()
         self.geometry(page,workshop)
+        workshop.locator('[data-workshop-action=place]').click()
+        expect(workshop.locator('[data-workshop-step]')).to_have_attribute('data-workshop-step','1')
+        expect(workshop.locator('[data-workshop-action=exit]')).to_be_disabled()
         self.capture(page,c,'2周目の世界2では今の版のセットを作り直す','second-workshop-rebuild')
-        c['roundtrip']={'currentDocuments':current_count,'archivedDocuments':len(olddocs),'frozenArchive':True,'realImportReload':True,'customization':custom,'streamSourceInteractive':True,'streamSceneInteractive':True,'streamStored':True,'refreshGate':True,'secondRunGate':True}
+        c['roundtrip']={'currentDocuments':current_count,'archivedDocuments':len(olddocs),'frozenArchive':True,'realImportReload':True,'customization':custom,'streamSourceInteractive':True,'streamSceneInteractive':True,'streamStored':True,'refreshGate':True,'secondRunGate':True,'closedEditorEntry':True}
 
     def migration(self,page,c):
         import gzip
@@ -443,12 +460,99 @@ class Review:
         self.capture(page,c,'60Hzを購入してv2の素の画面を開始','release-v2-start')
         c['release']={'revenue':record['revenue'],'fiveConditions':True,'normalUiCycle':True,'newVersion':'v2','mandatorySetsReset':True,'archivePreserved':True}
 
+    def customize_desktop(self,page,c):
+        self.notices(page)
+        self.launch(page,'tessera');self.maximize(page,'tessera')
+        original=page.locator('.desktop-live>.desktop-window[data-app=files]>.window-title').evaluate('node=>({color:getComputedStyle(node).color,background:getComputedStyle(node).backgroundColor,image:getComputedStyle(node).backgroundImage})')
+        w=page.locator('.desktop-live [data-workshop=true]')
+        w.locator('[data-workshop-set-selection]').select_option('common')
+        w.locator('[data-workshop-part=common-frame]').click()
+        overlap=w.locator('.ws-palette-col button').evaluate_all('''nodes=>{
+          const boxes=nodes.map(n=>({label:n.getAttribute('aria-label'),r:n.getBoundingClientRect()})),bad=[];
+          for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){
+            const a=boxes[i].r,b=boxes[j].r;
+            if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>.25&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.25)bad.push([boxes[i].label,boxes[j].label]);
+          }return bad.slice(0,5);
+        }''')
+        assert not overlap,('Palette cells must not overlap',overlap)
+        w.locator('.ws-palette-col [aria-label$="#000000"]').click()
+        state=self.state(page);design=state['run']['workshop']['parts']['common-frame']['design']
+        assert design['color']=='#000000' and not design['nativeColors']
+        unchanged=page.locator('.desktop-live>.desktop-window[data-app=files]>.window-title').evaluate('node=>({color:getComputedStyle(node).color,background:getComputedStyle(node).backgroundColor,image:getComputedStyle(node).backgroundImage})')
+        assert unchanged==original,'Editing materials must leave the installed app unchanged until rebuilt'
+        files=self.launch(page,'files');files.locator(':scope>.window-title .app-rebuild').click()
+        builder=page.locator('.desktop-live [data-building=files]');builder.locator('[data-assembly-action=refresh]').click();builder.locator('[data-assembly-action=recommend]').click();builder.locator('[data-assembly-action=install]').click()
+        files=self.maximize(page,'files')
+        title=files.locator(':scope>.window-title')
+        color=title.evaluate('node=>({color:getComputedStyle(node).color,background:getComputedStyle(node).backgroundColor,image:getComputedStyle(node).backgroundImage})')
+        def rgb(value):return 'rgb('+', '.join(str(int(value[i:i+2],16)) for i in [1,3,5])+')'
+        assert color['background']==rgb(design['color']) and color['color']==rgb(design['textColor']),color
+        controls=title.locator('.window-controls>button').evaluate_all('nodes=>nodes.map(node=>({color:getComputedStyle(node).color,background:getComputedStyle(node).backgroundColor}))')
+        def luminance(css):
+            import re
+            channels=[float(v)/255 for v in re.findall(r'[\d.]+',css)[:3]]
+            assert len(channels)==3,css
+            channels=[v/12.92 if v<=.04045 else ((v+.055)/1.055)**2.4 for v in channels]
+            return sum(v*weight for v,weight in zip(channels,[.2126,.7152,.0722]))
+        for control in controls:
+            foreground=luminance(control['color']);background=luminance(control['background'])
+            assert (max(foreground,background)+.05)/(min(foreground,background)+.05)>=3,(c['era'],control)
+        self.capture(page,c,'世界3の工房で窓枠を調整し、入れ直したアプリへ反映','customized-desktop-app')
+        self.launch(page,'tessera');w.locator('[data-workshop-set-selection]').select_option('foundation');w.locator('[data-workshop-part=foundation-taskbar]').click()
+        for background in ['#ffffff','#000000']:
+            w.locator(f'.ws-palette-col [aria-label$="{background}"]').click()
+            source=self.state(page)['run']['workshop']['parts']['foundation-taskbar']['design']
+            resource=page.locator('.desktop-live .taskbar-pixels:visible').first
+            assert resource.evaluate('node=>getComputedStyle(node).color')==rgb(source['textColor'])
+            assert resource.locator('small').evaluate('node=>getComputedStyle(node).color')==rgb(source['textColor'])
+            assert page.locator('.desktop-live .taskbar-tokens:visible').first.evaluate('node=>getComputedStyle(node).color')==rgb(source['textColor'])
+            self.capture(page,c,'世界3で制作した帯の色を変更','customized-desktop-shell-'+('light' if background=='#ffffff' else 'dark'))
+        c['customization']={'sourceChangesFrozenUntilInstall':True,'newSourceInstalled':True,'readableWindowSymbols':True,'shellForegroundApplied':True}
+
+    def photo_album(self,page,c):
+        self.notices(page);photo=self.maximize(page,'photo')
+        expected={}
+        for role in ['brightness','tone','crop']:
+            part=photo.locator(f'[data-app-part="{role}"]')
+            control=part.locator('input[type=range]');control.focus();control.press('ArrowRight')
+            expected[role]={'value':control.input_value(),'output':part.locator('output').inner_text()}
+        self.geometry(page,photo)
+        self.capture(page,c,'撮影直前の3つの調整値','photo-live-values')
+        shot,_=self.take_photo(page)
+        captured_specs=json.loads(shot['data'])['display']['specs']
+        assert captured_specs['color']==1
+        files=self.launch(page,'files');self.maximize(page,'files')
+        files.locator('[data-files-folder=screenshots]').click();files.locator(f'[data-file="shot:{shot["id"]}"]').dblclick()
+        preview=files.locator(f'[data-preview-shot="{shot["id"]}"]');preview.scroll_into_view_if_needed()
+        photograph=preview.locator('[data-recorded-app=photo] [data-recorded-role=image]>.photo-surface')
+        expect(photograph).to_have_attribute('data-color-steps','6')
+        expect(photograph).to_have_attribute('data-photo-resolution',str(captured_specs['resolution']))
+        for role,values in expected.items():
+            part=preview.locator(f'[data-recorded-app=photo] [data-recorded-role="{role}"]')
+            expect(part.locator('output')).to_have_text(values['output'])
+            assert part.locator('input[type=range]').input_value()==values['value']
+            assert part.locator('input[type=range]').evaluate('node=>node.readOnly')
+            bounds=part.evaluate('node=>{const p=node.getBoundingClientRect(),o=node.querySelector("output").getBoundingClientRect();return {top:o.top-p.top,bottom:p.bottom-o.bottom,left:o.left-p.left,right:p.right-o.right}}')
+            assert all(value>=-2 for value in bounds.values()),(role,bounds)
+        self.capture(page,c,'アルバムにも保存された明るさ・色味・切り抜きの値','photo-album-values')
+        self.launch(page,'photo');photo.locator('[data-app-part=brightness] input').focus();photo.locator('[data-app-part=brightness] input').press('ArrowRight')
+        panel=page.locator('.debug-panel');panel.evaluate('node=>node.style.display="block"');panel.locator('select').nth(1).select_option('2');panel.evaluate('node=>node.style.display="none"')
+        expect(photo.locator('[data-app-part=image] .photo-surface')).to_have_attribute('data-color-steps','full')
+        self.launch(page,'files')
+        for role,values in expected.items():expect(preview.locator(f'[data-recorded-role="{role}"] output')).to_have_text(values['output'])
+        expect(photograph).to_have_attribute('data-color-steps','6')
+        expect(photograph).to_have_attribute('data-photo-resolution',str(captured_specs['resolution']))
+        current=self.state(page)
+        assert next(item for item in current['persistent']['screenshots'] if item['id']==shot['id'])['data']==shot['data']
+        self.capture(page,c,'実画面の色深度と値を変えても撮影時の姿で再生','photo-album-frozen-specs')
+        c['photoAlbum']={'values':expected,'threeRangesAndReadouts':True,'frozenAfterLiveEdit':True,'capturedSpecs':captured_specs,'frozenColorSteps':6,'liveColorSteps':'full','resolutionUsesCapturedSpecs':True,'captureDataFrozen':True}
+
 
 def main():
     a=argparse.ArgumentParser()
     a.add_argument('--base-url',default='http://127.0.0.1:4173')
     a.add_argument('--output-dir',default='game/artifacts/stage8b')
-    a.add_argument('--step',action='append',choices=['8b1','8b2','8b3','8b-migration','8b-release'])
+    a.add_argument('--step',action='append',choices=['8b1','8b2','8b3','8b-migration','8b-release','8b-custom','8b-photo'])
     a.add_argument('--language',action='append',choices=LANGUAGES)
     a.add_argument('--width',action='append',type=int,choices=SIZES)
     a.add_argument('--era',action='append',type=int,choices=[0,1,2,3])

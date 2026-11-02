@@ -1,0 +1,351 @@
+{
+  "measurement": "stage8b-domain-autoplay",
+  "measuredOn": "2026-11-02",
+  "command": "node tools/measure_stage8b.mjs --out game/artifacts/stage8b/economy.json",
+  "fullResult": "game/artifacts/stage8b/economy.json",
+  "repeatability": {
+    "partSeconds": 135,
+    "matched": "Complete scenario JSON, including all action logs and statistics, matched an independent rerun at the same fixed startAt."
+  },
+  "assumptions": {
+    "startAt": 1800000000000,
+    "clicksPerSecond": 2.5,
+    "partSeconds": [
+      90,
+      135,
+      180
+    ],
+    "decisionSeconds": 4,
+    "guideSeconds": 15,
+    "desktopActiveFraction": 0.5,
+    "cursorPaybackSeconds": 120,
+    "jobPaybackSeconds": 600,
+    "maxPhaseSeconds": 86400,
+    "prototypeGoalMinutes": 50,
+    "v1GoalMinutes": 330,
+    "feedbackTrashBatch": 3,
+    "feedbackOpenWindows": 2,
+    "manualModel": "Real pressSeed momentum while waiting; no manual clicks during crafting/reading/assembly.",
+    "desktopTime": "Every active desktop action/part/read segment is paired with idle time to keep the configured active fraction. Timers/jobs/editor assistance continue during both.",
+    "investment": "Current construction purchases are prioritized. Between parts reserve the next monetary offer. Other affordable cursor/job purchases use actual action PPS deltas and the configured payback caps; jobs assigned in editor/files/photo/terminal order until memory is full. Once the release is ready and affordable, no further investments are bought.",
+    "scope": "Both mainline22 and optional25 are produced in v1. No paid editor plugins, optional spec upgrades, hidden elements, stray pixels or offline income. Normal unresponsive-app repairs are performed through the real restart action.",
+    "automation": "Only the real main time pipeline prepares editor stages. It cannot finish a part; every finish dispatch is manual. Terminal exports its still-unexported set once."
+  },
+  "scenarios": [
+    {
+      "partSeconds": 90,
+      "completed": true,
+      "status": "complete",
+      "prototype": {
+        "wallSeconds": 2771.4,
+        "completeSeconds": 2812.4,
+        "revenue": 403,
+        "generatedPixels": 799058.1071792622,
+        "colorLevel": 1,
+        "stats": {
+          "manualClicks": 973,
+          "manualClickPixels": 4529.8788294382775,
+          "manualStages": 88,
+          "assistedStages": 0,
+          "manualStagePixels": 12236.000000000051,
+          "assistedStagePixels": 0,
+          "passivePixels": 782292.2283499611,
+          "capturePixels": 0,
+          "activeDesktopMs": 0,
+          "idleDesktopMs": 0,
+          "feedbackOperations": 0,
+          "investments": 24,
+          "restarts": 0,
+          "restartPixels": 0
+        }
+      },
+      "v1": {
+        "readySeconds": 5980,
+        "completeSeconds": 6032,
+        "revenue": 36267,
+        "generatedPixels": 12845102835.119331,
+        "content": {
+          "seedParts": 9,
+          "parts": 47,
+          "apps": 9,
+          "sets": 10,
+          "total": 75
+        },
+        "conditions": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "canBuy60Hz": true,
+        "rateBeforeRelease": 10530599.485952813,
+        "stats": {
+          "manualClicks": 519,
+          "manualClickPixels": 3838.8546326633204,
+          "manualStages": 113,
+          "assistedStages": 75,
+          "manualStagePixels": 33587.84999781978,
+          "assistedStagePixels": 6754.500000000007,
+          "passivePixels": 10765345501.497526,
+          "capturePixels": 268.53000000000003,
+          "activeDesktopMs": 1719100,
+          "idleDesktopMs": 1719100,
+          "feedbackOperations": 26,
+          "investments": 206,
+          "restarts": 13,
+          "restartPixels": 2079712883.8881462
+        }
+      },
+      "secondVersion": {
+        "version": "v2",
+        "refreshLevel": 1,
+        "parts": 0,
+        "sets": [],
+        "purchasedSets": [],
+        "oldDocuments": 14,
+        "canSkipRequiredGate": false,
+        "world4": {
+          "versionAllowed": true,
+          "desktopAvailable": false,
+          "requiredSets": [
+            "stream"
+          ],
+          "completedSets": [],
+          "storedSets": [],
+          "requiredHz": 60,
+          "currentHz": 60,
+          "ready": false
+        }
+      },
+      "stats": {
+        "manualClicks": 1492,
+        "manualClickPixels": 8368.733462101598,
+        "manualStages": 201,
+        "assistedStages": 75,
+        "manualStagePixels": 45823.84999781983,
+        "assistedStagePixels": 6754.500000000007,
+        "passivePixels": 10766127793.725876,
+        "capturePixels": 268.53000000000003,
+        "activeDesktopMs": 1719100,
+        "idleDesktopMs": 1719100,
+        "feedbackOperations": 26,
+        "investments": 230,
+        "restarts": 13,
+        "restartPixels": 2079712883.8881462
+      },
+      "totalSeconds": 8844.4,
+      "guidesRead": 18
+    },
+    {
+      "partSeconds": 135,
+      "completed": true,
+      "status": "complete",
+      "prototype": {
+        "wallSeconds": 3761.4,
+        "completeSeconds": 3802.4,
+        "revenue": 464,
+        "generatedPixels": 1134076.7846791616,
+        "colorLevel": 1,
+        "stats": {
+          "manualClicks": 973,
+          "manualClickPixels": 4529.8788294382775,
+          "manualStages": 88,
+          "assistedStages": 0,
+          "manualStagePixels": 12235.999999999745,
+          "assistedStagePixels": 0,
+          "passivePixels": 1117310.9058496444,
+          "capturePixels": 0,
+          "activeDesktopMs": 0,
+          "idleDesktopMs": 0,
+          "feedbackOperations": 0,
+          "investments": 24,
+          "restarts": 0,
+          "restartPixels": 0
+        }
+      },
+      "v1": {
+        "readySeconds": 7506.5,
+        "completeSeconds": 7558.5,
+        "revenue": 39643,
+        "generatedPixels": 16341607446.429195,
+        "content": {
+          "seedParts": 9,
+          "parts": 47,
+          "apps": 9,
+          "sets": 10,
+          "total": 75
+        },
+        "conditions": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "canBuy60Hz": true,
+        "rateBeforeRelease": 10530599.485952813,
+        "stats": {
+          "manualClicks": 519,
+          "manualClickPixels": 3838.8546326633204,
+          "manualStages": 113,
+          "assistedStages": 75,
+          "manualStagePixels": 33617.40000024306,
+          "assistedStagePixels": 6768,
+          "passivePixels": 13568394944.011723,
+          "capturePixels": 372.015,
+          "activeDesktopMs": 1987350,
+          "idleDesktopMs": 1987350,
+          "feedbackOperations": 32,
+          "investments": 206,
+          "restarts": 15,
+          "restartPixels": 2773167906.1466837
+        }
+      },
+      "secondVersion": {
+        "version": "v2",
+        "refreshLevel": 1,
+        "parts": 0,
+        "sets": [],
+        "purchasedSets": [],
+        "oldDocuments": 14,
+        "canSkipRequiredGate": false,
+        "world4": {
+          "versionAllowed": true,
+          "desktopAvailable": false,
+          "requiredSets": [
+            "stream"
+          ],
+          "completedSets": [],
+          "storedSets": [],
+          "requiredHz": 60,
+          "currentHz": 60,
+          "ready": false
+        }
+      },
+      "stats": {
+        "manualClicks": 1492,
+        "manualClickPixels": 8368.733462101598,
+        "manualStages": 201,
+        "assistedStages": 75,
+        "manualStagePixels": 45853.40000024281,
+        "assistedStagePixels": 6768,
+        "passivePixels": 13569512254.917572,
+        "capturePixels": 372.015,
+        "activeDesktopMs": 1987350,
+        "idleDesktopMs": 1987350,
+        "feedbackOperations": 32,
+        "investments": 230,
+        "restarts": 15,
+        "restartPixels": 2773167906.1466837
+      },
+      "totalSeconds": 11360.9,
+      "guidesRead": 18
+    },
+    {
+      "partSeconds": 180,
+      "completed": true,
+      "status": "complete",
+      "prototype": {
+        "wallSeconds": 4751.4,
+        "completeSeconds": 4792.4,
+        "revenue": 515,
+        "generatedPixels": 1469095.4621792329,
+        "colorLevel": 1,
+        "stats": {
+          "manualClicks": 973,
+          "manualClickPixels": 4529.8788294382775,
+          "manualStages": 88,
+          "assistedStages": 0,
+          "manualStagePixels": 12235.999999999745,
+          "assistedStagePixels": 0,
+          "passivePixels": 1452329.5833496256,
+          "capturePixels": 0,
+          "activeDesktopMs": 0,
+          "idleDesktopMs": 0,
+          "feedbackOperations": 0,
+          "investments": 24,
+          "restarts": 0,
+          "restartPixels": 0
+        }
+      },
+      "v1": {
+        "readySeconds": 9099.2,
+        "completeSeconds": 9151.2,
+        "revenue": 42177,
+        "generatedPixels": 19079677583.615044,
+        "content": {
+          "seedParts": 9,
+          "parts": 47,
+          "apps": 9,
+          "sets": 10,
+          "total": 75
+        },
+        "conditions": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "canBuy60Hz": true,
+        "rateBeforeRelease": 10530599.485952813,
+        "stats": {
+          "manualClicks": 519,
+          "manualClickPixels": 3838.794632663319,
+          "manualStages": 113,
+          "assistedStages": 75,
+          "manualStagePixels": 33639.45000036421,
+          "assistedStagePixels": 6778.125000457763,
+          "passivePixels": 16151537389.3159,
+          "capturePixels": 357.765,
+          "activeDesktopMs": 2288700,
+          "idleDesktopMs": 2288700,
+          "feedbackOperations": 36,
+          "investments": 206,
+          "restarts": 16,
+          "restartPixels": 2928095580.16314
+        }
+      },
+      "secondVersion": {
+        "version": "v2",
+        "refreshLevel": 1,
+        "parts": 0,
+        "sets": [],
+        "purchasedSets": [],
+        "oldDocuments": 14,
+        "canSkipRequiredGate": false,
+        "world4": {
+          "versionAllowed": true,
+          "desktopAvailable": false,
+          "requiredSets": [
+            "stream"
+          ],
+          "completedSets": [],
+          "storedSets": [],
+          "requiredHz": 60,
+          "currentHz": 60,
+          "ready": false
+        }
+      },
+      "stats": {
+        "manualClicks": 1492,
+        "manualClickPixels": 8368.673462101597,
+        "manualStages": 201,
+        "assistedStages": 75,
+        "manualStagePixels": 45875.450000363955,
+        "assistedStagePixels": 6778.125000457763,
+        "passivePixels": 16152989718.89925,
+        "capturePixels": 357.765,
+        "activeDesktopMs": 2288700,
+        "idleDesktopMs": 2288700,
+        "feedbackOperations": 36,
+        "investments": 230,
+        "restarts": 16,
+        "restartPixels": 2928095580.16314
+      },
+      "totalSeconds": 13943.6,
+      "guidesRead": 18
+    }
+  ]
+}

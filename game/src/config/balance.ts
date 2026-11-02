@@ -144,7 +144,7 @@ export const BALANCE = {
     pixelsPerPart: 1, recyclePixelsPerPart: 0.1,
     maxElements: 1024, maxVisibleRects: 256,
     photoQualityParts: 60, photoQualityKinds: 8, photoQualityWeights: { parts: 0.6, kinds: 0.4 },
-    photoControls: { brightnessMin: 0.5, brightnessMax: 1.5, toneMin: -50, toneMax: 50 },
+    photoControls: { brightnessMin: 0.5, brightnessMax: 1.5, brightnessStep: 0.05, toneMin: -50, toneMax: 50, cropMin: 0, cropMax: 40 },
     frameBorders: [2, 1, 1, 8], frameTopBorders: [2, 1, 1, 0], framePaddings: [0, 3, 5, 0],
     titleHeights: [18, 26, 30, 30], controlHeights: [18, 26, 20, 26],
     contentMargins: [2, 0, 0, 0], contentBorders: [1, 0, 1, 0],
