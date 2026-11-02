@@ -146,3 +146,6 @@ PR #9の標準配置の比較は [mainと修正後の画像・結果](docs/revie
 第3世代は保存した様式だけの見本で、未実装のデスクトップ段4・5は解放しない。[資料の閲覧範囲](docs/reviews/stage7/screen-references.md)。
 
 3世代の骨格の再確認では、`--mode semantic --resume`で同じ製品データの情報集合を比較し、`--mode reference --reference-url <変更前ビルドの配信元> --resume`で第1世代の変更前後を撮影する。`--mode artifacts --resume`で横並びの比較画像2枚と全画像ZIPを再生成できる。画面構成は世代ごとの別コンポーネントに分岐し、情報・操作の小さな部品を共有している。
+
+
+提供画像への忠実度パスは `python tools/check_stage7_screens.py --generation 2 --generation 3 --skip-freeware --output-dir game/artifacts/stage7-fidelity` で第2・第3世代の24条件を確認する。同じ`--output-dir`と`--resume`を付けて`--mode semantic`、`--mode reference --reference-url <変更前配信元>`、`--mode artifacts`を順に実行すると、情報集合・第1世代の比較・全画像ZIPを再生成できる。第1世代の比較はv1/試作版×製品/出荷×日本語2サイズの8条件。参考パックはリポジトリへ含めない。

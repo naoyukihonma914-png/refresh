@@ -3,6 +3,7 @@
 Screenshots, a JSON summary, and a browsable gallery stay under game/artifacts.
 Use --resume to keep successful cases and --generation/--screen/--language/
 --width to repeat the conditions affected by a correction.
+--output-dir separates screenshots and reports for each review pass.
 --mode semantic compares identical product data in all three layouts;
 --mode reference captures the classic layout beside the pre-rework build.
 """
@@ -65,6 +66,8 @@ def comparison_boards(browser):
     outputs = []
     for screen, title in [('store', '製品ページ'), ('sales', '出荷・売上報告')]:
         pictures = [OUT / f'{screen}-gen{generation}-ja-1920.png' for generation in [1, 2, 3]]
+        if not pictures[0].exists():
+            pictures[0] = OUT / f'reference-{screen}-gen1-ja-1920-after.png'
         if not all(path.exists() for path in pictures):
             continue
         before = '<!doctype html><html lang="ja"><meta charset="utf-8"><title>' + title + '：3世代比較</title><style>body{margin:20px;background:#ececec;color:#222;font:16px sans-serif}h1{font-size:22px;margin:0 0 12px}.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}figure{margin:0;background:#fff;border:1px solid #aaa;padding:8px}figcaption{font-weight:bold;margin:0 0 8px}img{display:block;width:100%;height:auto}</style><h1>' + title + ' — 同じ表示サイズでの3世代比較</h1><div class="row">'
@@ -97,7 +100,7 @@ def write_archive(report):
         paths.add(name)
     for case in report.get('referenceComparison', {}).get('scenes', []):
         paths.update(case['files'])
-    archive = OUT / 'stage7-layouts-screens.zip'
+    archive = OUT / f'{OUT.name}-screens.zip'
     with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as package:
         for name in sorted(paths):
             if (OUT / name).is_file():
@@ -106,9 +109,11 @@ def write_archive(report):
 
 
 def main():
+    global OUT
     parser = argparse.ArgumentParser()
     parser.add_argument('--base-url', default='http://127.0.0.1:4173')
     parser.add_argument('--reference-url', default='http://127.0.0.1:4191')
+    parser.add_argument('--output-dir', type=Path, default=OUT)
     parser.add_argument('--mode', choices=['matrix', 'semantic', 'reference', 'artifacts'], default='matrix')
     parser.add_argument('--generation', type=int, choices=[1, 2, 3], action='append')
     parser.add_argument('--screen', choices=['store', 'sales'], action='append')
@@ -121,6 +126,7 @@ def main():
     parser.add_argument('--recheck', action='store_true')
     parser.add_argument('--keep-going', action='store_true')
     args = parser.parse_args()
+    OUT = args.output_dir if args.output_dir.is_absolute() else ROOT / args.output_dir
     OUT.mkdir(parents=True, exist_ok=True)
     locales = {lang: json.loads((ROOT / f'game/src/content/locales/{lang}.json').read_text())['messages'] for lang in ['ja', 'en']}
     baseline = baseline_values()
@@ -364,7 +370,7 @@ def main():
                             context, page = open_scene(fixture, 'ja', width, holder, base_url=address)
                             page.clock.run_for(8500 if screen == 'sales' else 3200)
                             filename = f'reference-{identity}-{label}.png'
-                            page.screenshot(path=str(OUT / filename))
+                            page.screenshot(path=str(OUT / filename), animations='disabled')
                             assert not holder['pageErrors'], holder['pageErrors']
                             files.append(filename)
                             context.close()
@@ -416,14 +422,20 @@ def main():
                             if screen == 'store':
                                 generation = 1 if variant == 'freeware' else int(variant[-1])
                                 assert root.get_attribute('data-store-generation') == str(generation)
-                                if generation == 3:
-                                    controls = root.locator('.store-modern-carousel .desktop-era-3 .window-controls button').evaluate_all('''buttons=>buttons.map(button=>{
+                                if generation in [2, 3]:
+                                    controls = root.locator(f'[data-store-photo-choices] .desktop-era-{generation} .window-controls button').evaluate_all('''buttons=>buttons.map(button=>{
                                       const style=getComputedStyle(button);
                                       return {width:parseFloat(style.width),inlineSize:parseFloat(style.inlineSize),close:button.classList.contains('window-close')};
                                     })''')
-                                    assert controls, 'Modern media must contain the frozen desktop window controls'
-                                    assert all(item['width'] == item['inlineSize'] == (46 if item['close'] else 29) for item in controls), controls
+                                    assert controls, 'Product media must contain the frozen desktop window controls'
+                                    assert all(item['width'] == item['inlineSize'] == (46 if item['close'] else 27 if generation == 2 else 29) for item in controls), controls
                                     case['mediaWindowButtons'] = controls
+                                    headings = root.locator('[data-store-photo-choices] .clock-face h2,[data-store-photo-choices] .clock-timer h2').evaluate_all('''headings=>headings.map(heading=>{
+                                      const style=getComputedStyle(heading);
+                                      return {border:parseFloat(style.borderTopWidth),background:style.backgroundColor,padding:parseFloat(style.paddingTop)};
+                                    })''')
+                                    assert headings and all(item == {'border': 0, 'background': 'rgba(0, 0, 0, 0)', 'padding': 0} for item in headings), headings
+                                    case['mediaClockHeadings'] = headings
                                 assert int(root.locator('[data-store-downloads]').get_attribute('data-store-downloads')) == math.floor(record['revenue'] * baseline['downloadsPerDollar'])
                                 if record['version'] != 'v0.1':
                                     assert int(root.locator('[data-store-purchases]').get_attribute('data-store-purchases')) == math.floor(record['revenue'] / baseline['unitPrice'])
@@ -473,7 +485,8 @@ def main():
     persist()
     print(json.dumps({'passed': report['passed'], 'failed': report['failed'], 'pageErrors': report['pageErrors'], 'externalRequests': report['externalRequests'], 'report': str(OUT / 'summary.json'), 'gallery': str(OUT / 'index.html')}, ensure_ascii=False))
     assert not report['failed'] and not report['pageErrors'] and not report['externalRequests']
-    if report['passed'] == 48:
+    assert all(scene['status'] == 'passed' for scene in report['scenes']), 'Incomplete scene checks remain'
+    if report['passed']:
         print('ARCHIVE', str(write_archive(report)))
 
 

@@ -1,810 +1,6 @@
 {
   "scenes": [
     {
-      "id": "sales-gen1-ja-1920",
-      "screen": "sales",
-      "variant": "gen1",
-      "language": "ja",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen1-ja-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen1-ja-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen1-ja-1366",
-      "screen": "sales",
-      "variant": "gen1",
-      "language": "ja",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen1-ja-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen1-ja-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen1-en-1920",
-      "screen": "sales",
-      "variant": "gen1",
-      "language": "en",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen1-en-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen1-en-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 29
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen1-en-1366",
-      "screen": "sales",
-      "variant": "gen1",
-      "language": "en",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen1-en-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen1-en-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 29
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen1-en-XA-1920",
-      "screen": "sales",
-      "variant": "gen1",
-      "language": "en-XA",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen1-en-XA-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen1-en-XA-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 43
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen1-en-XA-1366",
-      "screen": "sales",
-      "variant": "gen1",
-      "language": "en-XA",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen1-en-XA-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen1-en-XA-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 43
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen2-ja-1920",
-      "screen": "store",
-      "variant": "gen2",
-      "language": "ja",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen2-ja-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen2-ja-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen2-ja-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen2-ja-1920-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen2-ja-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "14px",
-        "lineHeight": "21px"
-      },
-      "layout": "portal",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-cursors",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen2-ja-1366",
-      "screen": "store",
-      "variant": "gen2",
-      "language": "ja",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen2-ja-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen2-ja-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen2-ja-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen2-ja-1366-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen2-ja-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "14px",
-        "lineHeight": "21px"
-      },
-      "layout": "portal",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-cursors",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen2-en-1920",
-      "screen": "store",
-      "variant": "gen2",
-      "language": "en",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen2-en-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen2-en-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen2-en-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen2-en-1920-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen2-en-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "14px",
-        "lineHeight": "21px"
-      },
-      "layout": "portal",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-cursors",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen2-en-1366",
-      "screen": "store",
-      "variant": "gen2",
-      "language": "en",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen2-en-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen2-en-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen2-en-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen2-en-1366-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen2-en-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "14px",
-        "lineHeight": "21px"
-      },
-      "layout": "portal",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-cursors",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen2-en-XA-1920",
-      "screen": "store",
-      "variant": "gen2",
-      "language": "en-XA",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen2-en-XA-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen2-en-XA-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen2-en-XA-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen2-en-XA-1920-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen2-en-XA-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "14px",
-        "lineHeight": "21px"
-      },
-      "layout": "portal",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-cursors",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen2-en-XA-1366",
-      "screen": "store",
-      "variant": "gen2",
-      "language": "en-XA",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen2-en-XA-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen2-en-XA-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen2-en-XA-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen2-en-XA-1366-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen2-en-XA-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "14px",
-        "lineHeight": "21px"
-      },
-      "layout": "portal",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-cursors",
-        "productUnchanged": true
-      }
-    },
-    {
       "id": "sales-gen2-ja-1920",
       "screen": "sales",
       "variant": "gen2",
@@ -835,8 +31,8 @@
       "pageErrors": [],
       "typography": {
         "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
+        "size": "12px",
+        "lineHeight": "16.8px"
       },
       "layout": "publisher-portal",
       "sales": {
@@ -900,8 +96,8 @@
       "pageErrors": [],
       "typography": {
         "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
+        "size": "12px",
+        "lineHeight": "16.8px"
       },
       "layout": "publisher-portal",
       "sales": {
@@ -965,8 +161,8 @@
       "pageErrors": [],
       "typography": {
         "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
+        "size": "12px",
+        "lineHeight": "16.8px"
       },
       "layout": "publisher-portal",
       "sales": {
@@ -1030,8 +226,8 @@
       "pageErrors": [],
       "typography": {
         "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
+        "size": "12px",
+        "lineHeight": "16.8px"
       },
       "layout": "publisher-portal",
       "sales": {
@@ -1095,8 +291,8 @@
       "pageErrors": [],
       "typography": {
         "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
+        "size": "12px",
+        "lineHeight": "16.8px"
       },
       "layout": "publisher-portal",
       "sales": {
@@ -1160,8 +356,8 @@
       "pageErrors": [],
       "typography": {
         "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
+        "size": "12px",
+        "lineHeight": "16.8px"
       },
       "layout": "publisher-portal",
       "sales": {
@@ -1191,1698 +387,6 @@
         "spec": "refresh",
         "paid": 5000,
         "contract": "no-cursors",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen3-ja-1920",
-      "screen": "sales",
-      "variant": "gen3",
-      "language": "ja",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen3-ja-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen3-ja-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "sales-gen3-ja-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "sales-gen3-ja-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
-      },
-      "layout": "partner-console",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-color",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen3-ja-1366",
-      "screen": "sales",
-      "variant": "gen3",
-      "language": "ja",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen3-ja-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen3-ja-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "sales-gen3-ja-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "sales-gen3-ja-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
-      },
-      "layout": "partner-console",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-color",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen3-en-1920",
-      "screen": "sales",
-      "variant": "gen3",
-      "language": "en",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen3-en-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen3-en-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "sales-gen3-en-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "sales-gen3-en-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
-      },
-      "layout": "partner-console",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-color",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen3-en-1366",
-      "screen": "sales",
-      "variant": "gen3",
-      "language": "en",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen3-en-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen3-en-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "sales-gen3-en-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "sales-gen3-en-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
-      },
-      "layout": "partner-console",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-color",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen3-en-XA-1920",
-      "screen": "sales",
-      "variant": "gen3",
-      "language": "en-XA",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen3-en-XA-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen3-en-XA-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "sales-gen3-en-XA-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "sales-gen3-en-XA-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
-      },
-      "layout": "partner-console",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-color",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-gen3-en-XA-1366",
-      "screen": "sales",
-      "variant": "gen3",
-      "language": "en-XA",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-gen3-en-XA-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-gen3-en-XA-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "sales-gen3-en-XA-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "sales-gen3-en-XA-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"Segoe UI Variable Text\", \"Segoe UI\", \"Refresh UI\", sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px"
-      },
-      "layout": "partner-console",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": "no-color",
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-freeware-ja-1920",
-      "screen": "store",
-      "variant": "freeware",
-      "language": "ja",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-freeware-ja-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-freeware-ja-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-freeware-ja-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-freeware-ja-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 11
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-freeware-ja-1366",
-      "screen": "store",
-      "variant": "freeware",
-      "language": "ja",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-freeware-ja-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-freeware-ja-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-freeware-ja-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-freeware-ja-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 11
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-freeware-en-1920",
-      "screen": "store",
-      "variant": "freeware",
-      "language": "en",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-freeware-en-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-freeware-en-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-freeware-en-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-freeware-en-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 23
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-freeware-en-1366",
-      "screen": "store",
-      "variant": "freeware",
-      "language": "en",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-freeware-en-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-freeware-en-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-freeware-en-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-freeware-en-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 23
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-freeware-en-XA-1920",
-      "screen": "store",
-      "variant": "freeware",
-      "language": "en-XA",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-freeware-en-XA-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-freeware-en-XA-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-freeware-en-XA-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-freeware-en-XA-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 40
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-freeware-en-XA-1366",
-      "screen": "store",
-      "variant": "freeware",
-      "language": "en-XA",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-freeware-en-XA-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-freeware-en-XA-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-freeware-en-XA-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-freeware-en-XA-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 40
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-freeware-ja-1920",
-      "screen": "sales",
-      "variant": "freeware",
-      "language": "ja",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-freeware-ja-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-freeware-ja-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-freeware-ja-1366",
-      "screen": "sales",
-      "variant": "freeware",
-      "language": "ja",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-freeware-ja-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-freeware-ja-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-freeware-en-1920",
-      "screen": "sales",
-      "variant": "freeware",
-      "language": "en",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-freeware-en-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-freeware-en-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 29
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-freeware-en-1366",
-      "screen": "sales",
-      "variant": "freeware",
-      "language": "en",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-freeware-en-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-freeware-en-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 29
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-freeware-en-XA-1920",
-      "screen": "sales",
-      "variant": "freeware",
-      "language": "en-XA",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-freeware-en-XA-1920.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-freeware-en-XA-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 43
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "sales-freeware-en-XA-1366",
-      "screen": "sales",
-      "variant": "freeware",
-      "language": "en-XA",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "sales-freeware-en-XA-1366.png",
-          "label": "出荷・売上報告"
-        },
-        {
-          "file": "sales-freeware-en-XA-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 43
-          }
-        ]
-      },
-      "layout": "register-inquiry",
-      "sales": {
-        "revenue": 303,
-        "daily": [
-          88,
-          61,
-          47,
-          38,
-          29,
-          22,
-          18
-        ],
-        "cumulative": [
-          88,
-          149,
-          196,
-          234,
-          263,
-          285,
-          303
-        ],
-        "dollars": 303
-      },
-      "flow": {
-        "nextVersion": "v1",
-        "spec": "color",
-        "paid": 200,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen1-ja-1920",
-      "screen": "store",
-      "variant": "gen1",
-      "language": "ja",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen1-ja-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen1-ja-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen1-ja-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen1-ja-1920-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen1-ja-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen1-ja-1366",
-      "screen": "store",
-      "variant": "gen1",
-      "language": "ja",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen1-ja-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen1-ja-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen1-ja-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen1-ja-1366-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen1-ja-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen1-en-1920",
-      "screen": "store",
-      "variant": "gen1",
-      "language": "en",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen1-en-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen1-en-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen1-en-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen1-en-1920-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen1-en-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen1-en-1366",
-      "screen": "store",
-      "variant": "gen1",
-      "language": "en",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen1-en-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen1-en-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen1-en-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen1-en-1366-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen1-en-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 9
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen1-en-XA-1920",
-      "screen": "store",
-      "variant": "gen1",
-      "language": "en-XA",
-      "viewport": [
-        1920,
-        1080
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen1-en-XA-1920.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen1-en-XA-1920-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen1-en-XA-1920-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen1-en-XA-1920-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen1-en-XA-1920-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 16
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
-        "productUnchanged": true
-      }
-    },
-    {
-      "id": "store-gen1-en-XA-1366",
-      "screen": "store",
-      "variant": "gen1",
-      "language": "en-XA",
-      "viewport": [
-        1366,
-        768
-      ],
-      "status": "passed",
-      "images": [
-        {
-          "file": "store-gen1-en-XA-1366.png",
-          "label": "製品ページ"
-        },
-        {
-          "file": "store-gen1-en-XA-1366-scroll-1-1.png",
-          "label": "ページ途中"
-        },
-        {
-          "file": "store-gen1-en-XA-1366-scroll-1-2.png",
-          "label": "ページ下部"
-        },
-        {
-          "file": "store-gen1-en-XA-1366-selected-photo.png",
-          "label": "写真を選択"
-        },
-        {
-          "file": "store-gen1-en-XA-1366-ready-next.png",
-          "label": "性能購入後・次版の開始"
-        }
-      ],
-      "pageErrors": [],
-      "typography": {
-        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
-        "size": "13px",
-        "lineHeight": "18.85px",
-        "contentWidth": 860,
-        "headingPlatformFonts": [
-          {
-            "familyName": "IPAPGothic",
-            "postScriptName": "IPAPGothic",
-            "isCustomFont": false,
-            "glyphCount": 16
-          }
-        ]
-      },
-      "layout": "classic",
-      "sales": {
-        "revenue": 130556,
-        "daily": [
-          37917,
-          26284,
-          20251,
-          16373,
-          12496,
-          9479,
-          7756
-        ],
-        "cumulative": [
-          37917,
-          64201,
-          84452,
-          100825,
-          113321,
-          122800,
-          130556
-        ],
-        "dollars": 130659
-      },
-      "flow": {
-        "nextVersion": "v2",
-        "spec": "refresh",
-        "paid": 5000,
-        "contract": null,
         "productUnchanged": true
       }
     },
@@ -2921,8 +425,8 @@
       "pageErrors": [],
       "typography": {
         "font": "\"Segoe UI Variable\", \"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "16px",
-        "lineHeight": "25.6px"
+        "size": "15px",
+        "lineHeight": "24px"
       },
       "layout": "modern",
       "mediaWindowButtons": [
@@ -3330,6 +834,28 @@
           "width": 46,
           "inlineSize": 46,
           "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
         }
       ],
       "sales": {
@@ -3397,8 +923,8 @@
       "pageErrors": [],
       "typography": {
         "font": "\"Segoe UI Variable\", \"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "16px",
-        "lineHeight": "25.6px"
+        "size": "15px",
+        "lineHeight": "24px"
       },
       "layout": "modern",
       "mediaWindowButtons": [
@@ -3806,6 +1332,28 @@
           "width": 46,
           "inlineSize": 46,
           "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
         }
       ],
       "sales": {
@@ -3873,8 +1421,8 @@
       "pageErrors": [],
       "typography": {
         "font": "\"Segoe UI Variable\", \"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "16px",
-        "lineHeight": "25.6px"
+        "size": "15px",
+        "lineHeight": "24px"
       },
       "layout": "modern",
       "mediaWindowButtons": [
@@ -4282,6 +1830,28 @@
           "width": 46,
           "inlineSize": 46,
           "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
         }
       ],
       "sales": {
@@ -4349,8 +1919,8 @@
       "pageErrors": [],
       "typography": {
         "font": "\"Segoe UI Variable\", \"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "16px",
-        "lineHeight": "25.6px"
+        "size": "15px",
+        "lineHeight": "24px"
       },
       "layout": "modern",
       "mediaWindowButtons": [
@@ -4758,6 +2328,28 @@
           "width": 46,
           "inlineSize": 46,
           "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
         }
       ],
       "sales": {
@@ -4825,8 +2417,8 @@
       "pageErrors": [],
       "typography": {
         "font": "\"Segoe UI Variable\", \"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "16px",
-        "lineHeight": "25.6px"
+        "size": "15px",
+        "lineHeight": "24px"
       },
       "layout": "modern",
       "mediaWindowButtons": [
@@ -5234,6 +2826,28 @@
           "width": 46,
           "inlineSize": 46,
           "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
         }
       ],
       "sales": {
@@ -5301,8 +2915,8 @@
       "pageErrors": [],
       "typography": {
         "font": "\"Segoe UI Variable\", \"Segoe UI\", Meiryo, Arial, sans-serif",
-        "size": "16px",
-        "lineHeight": "25.6px"
+        "size": "15px",
+        "lineHeight": "24px"
       },
       "layout": "modern",
       "mediaWindowButtons": [
@@ -5712,6 +3326,28 @@
           "close": true
         }
       ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        }
+      ],
       "sales": {
         "revenue": 130556,
         "daily": [
@@ -5739,6 +3375,3384 @@
         "spec": "refresh",
         "paid": 5000,
         "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-ja-1920",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-ja-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-ja-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-ja-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "12px",
+        "lineHeight": "16.2px"
+      },
+      "layout": "partner-console",
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-ja-1366",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-ja-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-ja-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-ja-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "12px",
+        "lineHeight": "16.2px"
+      },
+      "layout": "partner-console",
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-1920",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "12px",
+        "lineHeight": "16.2px"
+      },
+      "layout": "partner-console",
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-1366",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "12px",
+        "lineHeight": "16.2px"
+      },
+      "layout": "partner-console",
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-XA-1920",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-XA-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-XA-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-XA-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "12px",
+        "lineHeight": "16.2px"
+      },
+      "layout": "partner-console",
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-XA-1366",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-XA-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-XA-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-XA-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "12px",
+        "lineHeight": "16.2px"
+      },
+      "layout": "partner-console",
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-ja-1920",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-ja-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-ja-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-ja-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-ja-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Tahoma, \"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "layout": "portal",
+      "mediaWindowButtons": [
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        }
+      ],
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-ja-1366",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-ja-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-ja-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-ja-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-ja-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Tahoma, \"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "layout": "portal",
+      "mediaWindowButtons": [
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        }
+      ],
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-1920",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Tahoma, \"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "layout": "portal",
+      "mediaWindowButtons": [
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        }
+      ],
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-1366",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Tahoma, \"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "layout": "portal",
+      "mediaWindowButtons": [
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        }
+      ],
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-XA-1920",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-XA-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Tahoma, \"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "layout": "portal",
+      "mediaWindowButtons": [
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        }
+      ],
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-XA-1366",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-XA-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Tahoma, \"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "layout": "portal",
+      "mediaWindowButtons": [
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 27,
+          "inlineSize": 27,
+          "close": false
+        },
+        {
+          "width": 46,
+          "inlineSize": 46,
+          "close": true
+        }
+      ],
+      "mediaClockHeadings": [
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        },
+        {
+          "border": 0,
+          "background": "rgba(0, 0, 0, 0)",
+          "padding": 0
+        }
+      ],
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
         "productUnchanged": true
       }
     }
@@ -5772,207 +6786,12 @@
       ]
     }
   },
-  "passed": 48,
+  "passed": 24,
   "failed": 0,
   "comparisonBoards": [
     "comparison-store.png",
     "comparison-sales.png"
   ],
-  "semantic": {
-    "scenes": [
-      {
-        "screen": "store",
-        "generation": 1,
-        "layout": "classic",
-        "information": {
-          "title": "あおぞら v1.0",
-          "author": "作者：ゆう",
-          "screenshots": [
-            17,
-            16,
-            15,
-            14,
-            13,
-            12
-          ],
-          "description": "ボタン1つの画面から育ったデスクトップ環境です。9つのアプリと、6個の自分で描いたアイコンを同梱。窓の配置も、写真の壁紙も、自分で決められます。",
-          "release-details": {
-            "published": 1793577660000,
-            "topic": "デスクトップ・画面づくり・ペイント",
-            "languages": "日本語・英語"
-          },
-          "revenue-counts": {
-            "version": "v1.0",
-            "published": 1793577660000,
-            "downloads": 522224,
-            "purchases": 26111,
-            "reviews": 3
-          },
-          "environment": {
-            "color": 1,
-            "resolution": 0,
-            "refresh": 0,
-            "languages": "日本語・英語"
-          },
-          "publisher": "作者ゆう販売元余白社",
-          "rating-summary": "平均 4.67／5（3件のレビュー）",
-          "reviews": [
-            5,
-            4,
-            5
-          ]
-        }
-      },
-      {
-        "screen": "store",
-        "generation": 2,
-        "layout": "portal",
-        "information": {
-          "release-details": {
-            "published": 1793577660000,
-            "topic": "デスクトップ・画面づくり・ペイント",
-            "languages": "日本語・英語"
-          },
-          "environment": {
-            "color": 1,
-            "resolution": 0,
-            "refresh": 0,
-            "languages": "日本語・英語"
-          },
-          "publisher": "作者ゆう販売元余白社",
-          "title": "あおぞら v1.0",
-          "author": "作者：ゆう",
-          "rating-summary": "平均 4.67／5（3件のレビュー）",
-          "screenshots": [
-            17,
-            16,
-            15,
-            14,
-            13,
-            12
-          ],
-          "revenue-counts": {
-            "version": "v1.0",
-            "published": 1793577660000,
-            "downloads": 522224,
-            "purchases": 26111,
-            "reviews": 3
-          },
-          "description": "ボタン1つの画面から育ったデスクトップ環境です。9つのアプリと、6個の自分で描いたアイコンを同梱。窓の配置も、写真の壁紙も、自分で決められます。",
-          "reviews": [
-            5,
-            4,
-            5
-          ]
-        }
-      },
-      {
-        "screen": "store",
-        "generation": 3,
-        "layout": "modern",
-        "information": {
-          "title": "あおぞら v1.0",
-          "author": "作者：ゆう",
-          "rating-summary": "平均 4.67／5（3件のレビュー）",
-          "revenue-counts": {
-            "version": "v1.0",
-            "published": 1793577660000,
-            "downloads": 522224,
-            "purchases": 26111,
-            "reviews": 3
-          },
-          "screenshots": [
-            17,
-            16,
-            15,
-            14,
-            13,
-            12
-          ],
-          "description": "ボタン1つの画面から育ったデスクトップ環境です。9つのアプリと、6個の自分で描いたアイコンを同梱。窓の配置も、写真の壁紙も、自分で決められます。",
-          "reviews": [
-            5,
-            4,
-            5
-          ],
-          "release-details": {
-            "published": 1793577660000,
-            "topic": "デスクトップ・画面づくり・ペイント",
-            "languages": "日本語・英語"
-          },
-          "environment": {
-            "color": 1,
-            "resolution": 0,
-            "refresh": 0,
-            "languages": "日本語・英語"
-          },
-          "publisher": "作者ゆう販売元余白社"
-        }
-      },
-      {
-        "screen": "sales",
-        "generation": 1,
-        "layout": "register-inquiry",
-        "information": {
-          "period": "2026/11/02 ～ 2026/11/08",
-          "product": "名前あおぞら v1.0版v1.0作者ゆう中身作ったもの 34 エクスポートしたアイコン 6",
-          "daily-sales": "日売上累計1日目37,917 ドル37,917 ドル2日目26,284 ドル64,201 ドル3日目20,251 ドル84,452 ドル4日目16,373 ドル100,825 ドル5日目12,496 ドル113,321 ドル6日目9,479 ドル122,800 ドル7日目7,756 ドル130,556 ドル合計130,556 ドル130,556 ドル",
-          "revenue": "130,556 ドル",
-          "specifications": "使えるドル130,659 ドル項目いま次効き目値段色深度256色フルカラーピクセル ×1.672万買うストレージ128GB256GB留守の間の作業 2時間 → 4時間60買うメモリ4GB8GBカーソルを置ける窓 3 → 4800買う解像度低中アイコン 16×16 → 32×321,500買う通信速度低中フィードバック 4分 → 3分ごと3,000買うリフレッシュレート30Hz60Hz自動の作業 ×2、動きが滑らかに5,000買う描画性能低中スクリーンショットの待ち 30秒 → 20秒6,000買う残ったドルは、次のリリースまで取っておけます。",
-          "available": "130,659 ドル",
-          "publisher-notes": "榎本 湊余白社「この画面で配信したい」という声が届きました。この売上で性能を上げられます。60Hzなら、動く画面を滑らかに映せます。",
-          "contracts": "受託案件次の版で取り組む案件を選びます。途中でやめることもできます。選ばないオートカーソルなしで Tessera を作る16色のまま Tessera を作る達成すると全生成 +5% と専用の見た目が残ります。",
-          "next-version": "「この画面で配信したい」次の版 v2.0：配信に使える画面にする次の版へ進むため、まず60Hzを買いましょう。次のバージョンを作り始める",
-          "data-tools": "言語English日本語データデータをエクスポートデータを読み込む最初からやり直す"
-        }
-      },
-      {
-        "screen": "sales",
-        "generation": 2,
-        "layout": "publisher-portal",
-        "information": {
-          "period": "2026/11/02 ～ 2026/11/08",
-          "revenue": "130,556 ドル",
-          "available": "130,659 ドル",
-          "daily-sales": "日売上累計1日目37,917 ドル37,917 ドル2日目26,284 ドル64,201 ドル3日目20,251 ドル84,452 ドル4日目16,373 ドル100,825 ドル5日目12,496 ドル113,321 ドル6日目9,479 ドル122,800 ドル7日目7,756 ドル130,556 ドル合計130,556 ドル130,556 ドル",
-          "specifications": "使えるドル130,659 ドル項目いま次効き目値段色深度256色フルカラーピクセル ×1.672万買うストレージ128GB256GB留守の間の作業 2時間 → 4時間60買うメモリ4GB8GBカーソルを置ける窓 3 → 4800買う解像度低中アイコン 16×16 → 32×321,500買う通信速度低中フィードバック 4分 → 3分ごと3,000買うリフレッシュレート30Hz60Hz自動の作業 ×2、動きが滑らかに5,000買う描画性能低中スクリーンショットの待ち 30秒 → 20秒6,000買う残ったドルは、次のリリースまで取っておけます。",
-          "product": "名前あおぞら v1.0版v1.0作者ゆう中身作ったもの 34 エクスポートしたアイコン 6",
-          "publisher-notes": "榎本 湊余白社「この画面で配信したい」という声が届きました。この売上で性能を上げられます。60Hzなら、動く画面を滑らかに映せます。",
-          "contracts": "受託案件次の版で取り組む案件を選びます。途中でやめることもできます。選ばないオートカーソルなしで Tessera を作る16色のまま Tessera を作る達成すると全生成 +5% と専用の見た目が残ります。",
-          "next-version": "「この画面で配信したい」次の版 v2.0：配信に使える画面にする次の版へ進むため、まず60Hzを買いましょう。次のバージョンを作り始める",
-          "data-tools": "言語English日本語データデータをエクスポートデータを読み込む最初からやり直す"
-        }
-      },
-      {
-        "screen": "sales",
-        "generation": 3,
-        "layout": "partner-console",
-        "information": {
-          "period": "2026/11/02 ～ 2026/11/08",
-          "revenue": "130,556 ドル",
-          "available": "130,659 ドル",
-          "daily-sales": "日売上累計1日目37,917 ドル37,917 ドル2日目26,284 ドル64,201 ドル3日目20,251 ドル84,452 ドル4日目16,373 ドル100,825 ドル5日目12,496 ドル113,321 ドル6日目9,479 ドル122,800 ドル7日目7,756 ドル130,556 ドル合計130,556 ドル130,556 ドル",
-          "product": "名前あおぞら v1.0版v1.0作者ゆう中身作ったもの 34 エクスポートしたアイコン 6",
-          "specifications": "使えるドル130,659 ドル項目いま次効き目値段色深度256色フルカラーピクセル ×1.672万買うストレージ128GB256GB留守の間の作業 2時間 → 4時間60買うメモリ4GB8GBカーソルを置ける窓 3 → 4800買う解像度低中アイコン 16×16 → 32×321,500買う通信速度低中フィードバック 4分 → 3分ごと3,000買うリフレッシュレート30Hz60Hz自動の作業 ×2、動きが滑らかに5,000買う描画性能低中スクリーンショットの待ち 30秒 → 20秒6,000買う残ったドルは、次のリリースまで取っておけます。",
-          "publisher-notes": "榎本 湊余白社「この画面で配信したい」という声が届きました。この売上で性能を上げられます。60Hzなら、動く画面を滑らかに映せます。",
-          "contracts": "受託案件次の版で取り組む案件を選びます。途中でやめることもできます。選ばないオートカーソルなしで Tessera を作る16色のまま Tessera を作る達成すると全生成 +5% と専用の見た目が残ります。",
-          "next-version": "「この画面で配信したい」次の版 v2.0：配信に使える画面にする次の版へ進むため、まず60Hzを買いましょう。次のバージョンを作り始める",
-          "data-tools": "言語English日本語データデータをエクスポートデータを読み込む最初からやり直す"
-        },
-        "navigation": [
-          "overview",
-          "trend",
-          "daily",
-          "product",
-          "specs",
-          "notes",
-          "contracts",
-          "next-version"
-        ]
-      }
-    ],
-    "sameInformation": true
-  },
   "referenceComparison": {
     "scenes": [
       {
@@ -6025,13 +6844,13 @@
           "reference-store-freeware-ja-1920-before.png",
           "reference-store-freeware-ja-1920-after.png"
         ],
-        "changedPixels": 134,
+        "changedPixels": 121,
         "totalPixels": 2073600,
-        "changedRatio": 6.462191358024691e-05,
+        "changedRatio": 5.835262345679012e-05,
         "bounds": [
-          882,
+          886,
           352,
-          897,
+          899,
           366
         ]
       },
@@ -6041,11 +6860,11 @@
           "reference-store-freeware-ja-1366-before.png",
           "reference-store-freeware-ja-1366-after.png"
         ],
-        "changedPixels": 70,
+        "changedPixels": 53,
         "totalPixels": 1049088,
-        "changedRatio": 6.672462176671547e-05,
+        "changedRatio": 5.052007076622743e-05,
         "bounds": [
-          631,
+          633,
           251,
           641,
           261
@@ -6057,13 +6876,13 @@
           "reference-sales-freeware-ja-1920-before.png",
           "reference-sales-freeware-ja-1920-after.png"
         ],
-        "changedPixels": 44,
+        "changedPixels": 66,
         "totalPixels": 2073600,
-        "changedRatio": 2.1219135802469135e-05,
+        "changedRatio": 3.18287037037037e-05,
         "bounds": [
-          177,
+          172,
           205,
-          184,
+          186,
           214
         ]
       },
@@ -6073,16 +6892,211 @@
           "reference-sales-freeware-ja-1366-before.png",
           "reference-sales-freeware-ja-1366-after.png"
         ],
-        "changedPixels": 36,
+        "changedPixels": 33,
         "totalPixels": 1049088,
-        "changedRatio": 3.4315519765739386e-05,
+        "changedRatio": 3.145589311859444e-05,
         "bounds": [
-          121,
-          145,
+          125,
+          146,
           132,
           152
         ]
       }
     ]
+  },
+  "semantic": {
+    "scenes": [
+      {
+        "screen": "store",
+        "generation": 1,
+        "layout": "classic",
+        "information": {
+          "title": "あおぞら v1.0",
+          "author": "作者：ゆう",
+          "screenshots": [
+            17,
+            16,
+            15,
+            14,
+            13,
+            12
+          ],
+          "description": "ボタン1つの画面から育ったデスクトップ環境です。9つのアプリと、6個の自分で描いたアイコンを同梱。窓の配置も、写真の壁紙も、自分で決められます。",
+          "release-details": {
+            "published": 1793577660000,
+            "topic": "デスクトップ・画面づくり・ペイント",
+            "languages": "日本語・英語"
+          },
+          "revenue-counts": {
+            "version": "v1.0",
+            "published": 1793577660000,
+            "downloads": 522224,
+            "purchases": 26111,
+            "reviews": 3
+          },
+          "environment": {
+            "color": 1,
+            "resolution": 0,
+            "refresh": 0,
+            "languages": "日本語・英語"
+          },
+          "publisher": "作者ゆう販売元余白社",
+          "rating-summary": "平均 4.67／5（3件のレビュー）",
+          "reviews": [
+            5,
+            4,
+            5
+          ]
+        }
+      },
+      {
+        "screen": "store",
+        "generation": 2,
+        "layout": "portal",
+        "information": {
+          "title": "あおぞら v1.0",
+          "author": "作者：ゆう",
+          "rating-summary": "平均 4.67／5（3件のレビュー）",
+          "screenshots": [
+            17,
+            16,
+            15,
+            14,
+            13,
+            12
+          ],
+          "description": "ボタン1つの画面から育ったデスクトップ環境です。9つのアプリと、6個の自分で描いたアイコンを同梱。窓の配置も、写真の壁紙も、自分で決められます。",
+          "reviews": [
+            5,
+            4,
+            5
+          ],
+          "revenue-counts": {
+            "version": "v1.0",
+            "published": 1793577660000,
+            "downloads": 522224,
+            "purchases": 26111,
+            "reviews": 3
+          },
+          "release-details": {
+            "published": 1793577660000,
+            "topic": "デスクトップ・画面づくり・ペイント",
+            "languages": "日本語・英語"
+          },
+          "environment": {
+            "color": 1,
+            "resolution": 0,
+            "refresh": 0,
+            "languages": "日本語・英語"
+          },
+          "publisher": "作者ゆう販売元余白社"
+        }
+      },
+      {
+        "screen": "store",
+        "generation": 3,
+        "layout": "modern",
+        "information": {
+          "title": "あおぞら v1.0",
+          "author": "作者：ゆう",
+          "rating-summary": "平均 4.67／5（3件のレビュー）",
+          "description": "ボタン1つの画面から育ったデスクトップ環境です。9つのアプリと、6個の自分で描いたアイコンを同梱。窓の配置も、写真の壁紙も、自分で決められます。",
+          "screenshots": [
+            17,
+            16,
+            15,
+            14,
+            13,
+            12
+          ],
+          "reviews": [
+            5,
+            4,
+            5
+          ],
+          "environment": {
+            "color": 1,
+            "resolution": 0,
+            "refresh": 0,
+            "languages": "日本語・英語"
+          },
+          "publisher": "作者ゆう販売元余白社",
+          "release-details": {
+            "published": 1793577660000,
+            "topic": "デスクトップ・画面づくり・ペイント",
+            "languages": "日本語・英語"
+          },
+          "revenue-counts": {
+            "version": "v1.0",
+            "published": 1793577660000,
+            "downloads": 522224,
+            "purchases": 26111,
+            "reviews": 3
+          }
+        }
+      },
+      {
+        "screen": "sales",
+        "generation": 1,
+        "layout": "register-inquiry",
+        "information": {
+          "period": "2026/11/02 ～ 2026/11/08",
+          "product": "名前あおぞら v1.0版v1.0作者ゆう中身作ったもの 34 エクスポートしたアイコン 6",
+          "daily-sales": "日売上累計1日目37,917 ドル37,917 ドル2日目26,284 ドル64,201 ドル3日目20,251 ドル84,452 ドル4日目16,373 ドル100,825 ドル5日目12,496 ドル113,321 ドル6日目9,479 ドル122,800 ドル7日目7,756 ドル130,556 ドル合計130,556 ドル130,556 ドル",
+          "revenue": "130,556 ドル",
+          "specifications": "使えるドル130,659 ドル項目いま次効き目値段色深度256色フルカラーピクセル ×1.672万買うストレージ128GB256GB留守の間の作業 2時間 → 4時間60買うメモリ4GB8GBカーソルを置ける窓 3 → 4800買う解像度低中アイコン 16×16 → 32×321,500買う通信速度低中フィードバック 4分 → 3分ごと3,000買うリフレッシュレート30Hz60Hz自動の作業 ×2、動きが滑らかに5,000買う描画性能低中スクリーンショットの待ち 30秒 → 20秒6,000買う残ったドルは、次のリリースまで取っておけます。",
+          "available": "130,659 ドル",
+          "publisher-notes": "榎本 湊余白社「この画面で配信したい」という声が届きました。この売上で性能を上げられます。60Hzなら、動く画面を滑らかに映せます。",
+          "contracts": "受託案件次の版で取り組む案件を選びます。途中でやめることもできます。選ばないオートカーソルなしで Tessera を作る16色のまま Tessera を作る達成すると全生成 +5% と専用の見た目が残ります。",
+          "next-version": "「この画面で配信したい」次の版 v2.0：配信に使える画面にする次の版へ進むため、まず60Hzを買いましょう。次のバージョンを作り始める",
+          "data-tools": "言語English日本語データデータをエクスポートデータを読み込む最初からやり直す"
+        }
+      },
+      {
+        "screen": "sales",
+        "generation": 2,
+        "layout": "publisher-portal",
+        "information": {
+          "period": "2026/11/02 ～ 2026/11/08",
+          "revenue": "130,556 ドル",
+          "available": "130,659 ドル",
+          "daily-sales": "日売上累計1日目37,917 ドル37,917 ドル2日目26,284 ドル64,201 ドル3日目20,251 ドル84,452 ドル4日目16,373 ドル100,825 ドル5日目12,496 ドル113,321 ドル6日目9,479 ドル122,800 ドル7日目7,756 ドル130,556 ドル合計130,556 ドル130,556 ドル",
+          "specifications": "使えるドル130,659 ドル項目いま次効き目値段色深度256色フルカラーピクセル ×1.672万買うストレージ128GB256GB留守の間の作業 2時間 → 4時間60買うメモリ4GB8GBカーソルを置ける窓 3 → 4800買う解像度低中アイコン 16×16 → 32×321,500買う通信速度低中フィードバック 4分 → 3分ごと3,000買うリフレッシュレート30Hz60Hz自動の作業 ×2、動きが滑らかに5,000買う描画性能低中スクリーンショットの待ち 30秒 → 20秒6,000買う残ったドルは、次のリリースまで取っておけます。",
+          "product": "名前あおぞら v1.0版v1.0作者ゆう中身作ったもの 34 エクスポートしたアイコン 6",
+          "publisher-notes": "榎本 湊余白社「この画面で配信したい」という声が届きました。この売上で性能を上げられます。60Hzなら、動く画面を滑らかに映せます。",
+          "contracts": "受託案件次の版で取り組む案件を選びます。途中でやめることもできます。選ばないオートカーソルなしで Tessera を作る16色のまま Tessera を作る達成すると全生成 +5% と専用の見た目が残ります。",
+          "next-version": "「この画面で配信したい」次の版 v2.0：配信に使える画面にする次の版へ進むため、まず60Hzを買いましょう。次のバージョンを作り始める",
+          "data-tools": "言語English日本語データデータをエクスポートデータを読み込む最初からやり直す"
+        }
+      },
+      {
+        "screen": "sales",
+        "generation": 3,
+        "layout": "partner-console",
+        "information": {
+          "revenue": "130,556 ドル",
+          "available": "130,659 ドル",
+          "period": "2026/11/02 ～ 2026/11/08",
+          "daily-sales": "日売上累計1日目37,917 ドル37,917 ドル2日目26,284 ドル64,201 ドル3日目20,251 ドル84,452 ドル4日目16,373 ドル100,825 ドル5日目12,496 ドル113,321 ドル6日目9,479 ドル122,800 ドル7日目7,756 ドル130,556 ドル合計130,556 ドル130,556 ドル",
+          "product": "名前あおぞら v1.0版v1.0作者ゆう中身作ったもの 34 エクスポートしたアイコン 6",
+          "specifications": "使えるドル130,659 ドル項目いま次効き目値段色深度256色フルカラーピクセル ×1.672万買うストレージ128GB256GB留守の間の作業 2時間 → 4時間60買うメモリ4GB8GBカーソルを置ける窓 3 → 4800買う解像度低中アイコン 16×16 → 32×321,500買う通信速度低中フィードバック 4分 → 3分ごと3,000買うリフレッシュレート30Hz60Hz自動の作業 ×2、動きが滑らかに5,000買う描画性能低中スクリーンショットの待ち 30秒 → 20秒6,000買う残ったドルは、次のリリースまで取っておけます。",
+          "publisher-notes": "榎本 湊余白社「この画面で配信したい」という声が届きました。この売上で性能を上げられます。60Hzなら、動く画面を滑らかに映せます。",
+          "contracts": "受託案件次の版で取り組む案件を選びます。途中でやめることもできます。選ばないオートカーソルなしで Tessera を作る16色のまま Tessera を作る達成すると全生成 +5% と専用の見た目が残ります。",
+          "next-version": "「この画面で配信したい」次の版 v2.0：配信に使える画面にする次の版へ進むため、まず60Hzを買いましょう。次のバージョンを作り始める",
+          "data-tools": "言語English日本語データデータをエクスポートデータを読み込む最初からやり直す"
+        },
+        "navigation": [
+          "overview",
+          "trend",
+          "daily",
+          "product",
+          "specs",
+          "notes",
+          "contracts",
+          "next-version"
+        ]
+      }
+    ],
+    "sameInformation": true
   }
 }
