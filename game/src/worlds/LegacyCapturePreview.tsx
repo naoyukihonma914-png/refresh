@@ -4,11 +4,14 @@ import { BALANCE } from '../config/balance';
 import { WORKSHOP_PARTS, getWorkshopPart, type WorkshopPartId } from '../content/workshopCatalog';
 import type { CaptureScene, FrozenPhoto } from '../systems/captureScene';
 import { readCapture } from '../systems/captureScene';
-import type { Screenshot } from '../systems/desktopState';
-import { effectiveEditorBackground, type WorkshopState, type EditorCustomization } from '../systems/workshopState';
+import type { Screenshot, AppId } from '../systems/desktopState';
+import { createComponentDesign, effectiveEditorBackground, usesNativeComponentColors, type WorkshopState, type EditorCustomization } from '../systems/workshopState';
+import { isBuildable } from '../systems/appLayout';
+import { setDocumentPresentation } from '../systems/setDocumentPresentation';
 import coast from '../assets/wallpaper/coast.webp';
 import night from '../assets/wallpaper/night.webp';
-import { LineIcon, ProductGlyph } from './desktop-icons';
+import { AppGlyph, LineIcon, ProductGlyph } from './desktop-icons';
+import { RecordedAppParts } from './capture/RecordedAppParts';
 import { partVisual } from './workshop/partVisual';
 import { WorkshopGlyph } from './workshop/WorkshopGlyph';
 import './workshop/workshop.css';
@@ -85,6 +88,10 @@ function StaticPart({id,production:p,workshop,i18n,now,rows,pixels}:{id:Workshop
     case 'terminal-commands':content=has('command')&&<ul>{(['list','photo','export'] as const).map(command=><li key={command}>{i18n.t(`ws.optional.command.${command}`)}</li>)}</ul>;break;
     case 'terminal-run':content=<>{button('run',i18n.t('ws.preview.runCommand'))}{button('stop',i18n.t('ws.preview.stopCommand'))}</>;break;
     case 'manager-processes':content=<table><thead><tr>{has('process')&&<th>{i18n.t('manager.name')}</th>}{has('rate')&&<th>{i18n.t('manager.rate')}</th>}{has('share')&&<th>{i18n.t('manager.share')}</th>}</tr></thead>{has('process')&&<tbody>{WORKSHOP_PARTS.filter(part=>workshop.parts[part.id]?.step===4).map(part=><tr key={part.id}><td>{i18n.t(part.labelKey as MessageKey)}</td>{has('rate')&&<td/>}{has('share')&&<td/>}</tr>)}</tbody>}</table>;break;
+    case 'stream-preview':content=has('source')&&<span>{i18n.t('ws.stream.source')}</span>;break;
+    case 'stream-sources':content=has('source')&&<span className="capture-part-input">{i18n.t('ws.stream.source')}</span>;break;
+    case 'stream-scenes':content=<>{button('scene',i18n.t('ws.stream.sourceScene'))}{button('preview',i18n.t('ws.stream.messages'))}</>;break;
+    case 'stream-comments':content=has('message')&&<div className="capture-part-scrollbar"><span>{i18n.t('ws.stream.messages')}</span></div>;break;
     case 'plugin-table':content=<table><thead><tr>{has('time')&&<th>{i18n.t('ws.element.time')}</th>}{has('pixels')&&<th>{i18n.t('ws.preview.pixels')}</th>}</tr></thead></table>;break;
     case 'plugin-tabs':content=has('tab')&&<><span className="capture-part-button">{i18n.t('ws.set.files')}</span><span className="capture-part-button">{i18n.t('ws.optional.productionHistory')}</span></>;break;
     // Local selections, photo adjustments, timer state and command logs are not part of a saved WorkshopState.
@@ -107,11 +114,37 @@ function CaptureReference({shot,i18n}:{shot:Screenshot;i18n:I18n}) {
 function FrozenWindowContent({app,scene,catalog,i18n,ancestors}:{app:string;scene:CaptureScene;catalog:Screenshot[];i18n:I18n;ancestors:readonly number[]}) {
   if(app==='note')return <pre className="capture-note">{scene.note}</pre>;
   if(app==='tessera'&&scene.workshop&&scene.editorCustomization)return <WorkshopSnapshot workshop={scene.workshop} customization={scene.editorCustomization} stage={scene.appearance.editor} i18n={i18n} now={scene.display.wallTime} desktopStage={scene.appearance.desktop} files={scene.files} pixels={scene.display.resources.pixels}/>;
+  if(scene.version===11&&scene.evaluation&&isBuildable(app)){
+    const source=scene.selectedSetDocument,presentation=source?setDocumentPresentation(source):null;
+    const document=source&&presentation?<div className="recorded-set-document"><h3>{i18n.t(`ws.set.${source.set}`)} {source.version}</h3><WorkshopSnapshot workshop={presentation.workshop} customization={presentation.customization} stage={scene.appearance.editor} i18n={i18n} now={source.at} desktopStage={scene.appearance.desktop}/></div>:null;
+    const selected=scene.files.find(file=>file.id===scene.desktop.fileSelection),selectedShot=selected?.shotId===undefined?null:catalog.find(shot=>shot.id===selected.shotId);
+    const recordedShot=selectedShot&&!ancestors.includes(selectedShot.id)?ancestors.length<BALANCE.w3.capturePreviewDepth?<LegacyCapturePreview shot={selectedShot} catalog={catalog} i18n={i18n} ancestors={ancestors}/>:<CaptureReference shot={selectedShot} i18n={i18n}/>:null;
+    return <RecordedAppParts app={app} scene={scene} i18n={i18n} photograph={<FrozenPhoto edit={scene.view.photo} scene={scene} catalog={catalog} i18n={i18n} ancestors={ancestors}/>} document={document} selectedShot={recordedShot}/>;
+  }
   if(app==='photo')return <FrozenPhoto edit={scene.view.photo} scene={scene} catalog={catalog} i18n={i18n} ancestors={ancestors}/>;
   if(app==='files'||app==='tessera')return <table className="capture-files"><thead><tr><th>{i18n.t('files.name')}</th><th>{i18n.t('files.modified')}</th><th>{i18n.t('files.type')}</th></tr></thead><tbody>{scene.files.map(f=><tr key={f.id}><td>{f.name}</td><td>{f.at===null?'':i18n.dateTime(f.at)}</td><td>{i18n.t(`files.type.${f.kind}` as MessageKey)}</td></tr>)}</tbody></table>;
   if(app==='mail')return <div className="capture-mail">{scene.desktop.feedback.map(f=><div key={f.id}><b>{i18n.t(`feedback.sender.${f.sender}`)}</b><time>{i18n.dateTime(f.at)}</time><span>{f.completedAt===null?i18n.t('mail.pending'):i18n.t('mail.completed',{date:i18n.dateTime(f.completedAt)})}</span></div>)}</div>;
   if(app==='clock')return <time className="capture-clock">{i18n.time(scene.display.wallTime)}</time>;
   return <table className="capture-files"><tbody>{(Object.keys(scene.display.specs) as (keyof typeof scene.display.specs)[]).map(key=><tr key={key}><th>{i18n.t(`spec.${key}`)}</th><td>{i18n.spec(key,scene.display.specs[key])}</td></tr>)}</tbody></table>;
+}
+function FrozenNativeWindow({app,scene,catalog,i18n,ancestors}:{app:string;scene:CaptureScene;catalog:Screenshot[];i18n:I18n;ancestors:readonly number[]}) {
+  const nativeWindow=scene.desktop.windows[app]!,evaluation=scene.evaluation!,client=evaluation.windowClients[app]??{x:nativeWindow.x,y:nativeWindow.y,width:nativeWindow.width,height:nativeWindow.height};
+  const recordedTitle=evaluation.parts.find(part=>part.id===`${app}:title`)?.rects[0]??{x:nativeWindow.x,y:nativeWindow.y,width:nativeWindow.width,height:client.y-nativeWindow.y};
+  const material=isBuildable(app)?scene.appProjects?.[app]?.installedAssembly?.common.find(part=>part.source==='common-frame'):scene.workshop?.parts['common-frame'];
+  const design=material?.design,customColors=design?!usesNativeComponentColors(design):false;
+  const defaults=createComponentDesign(),custom=design?JSON.stringify({...defaults,...design,nativeColors:!customColors})!==JSON.stringify(defaults):false;
+  const chrome=evaluation.placements.filter(item=>item.app===app&&item.role.startsWith('chrome:'));
+  const titleText=chrome.find(item=>item.role==='chrome:title'),titleIcon=chrome.find(item=>item.role==='chrome:icon');
+  const position=(rectangle:{x:number;y:number;width:number;height:number},origin=recordedTitle):CSSProperties=>({position:'absolute',left:rectangle.x-origin.x,top:rectangle.y-origin.y,width:rectangle.width,height:rectangle.height});
+  const controls=chrome.filter(item=>['chrome:minimize','chrome:maximize','chrome:close'].includes(item.role));
+  return <section className={`desktop-window recorded-native-window app-${app} ${app===scene.desktop.active?'is-active':''} ${nativeWindow.maximized?'is-maximized':''}`} data-recorded-window={app} data-produced-shadow={design?.shadow||undefined} style={{left:nativeWindow.x,top:nativeWindow.y,width:nativeWindow.width,height:nativeWindow.height,zIndex:nativeWindow.z+BALANCE.capture.geometry.windowLayer}}>
+    <header className={`window-title ${custom?'has-produced-chrome':''}`} style={{...position(recordedTitle,nativeWindow),minHeight:0,margin:0,padding:0,background:customColors?design?.color:undefined,color:customColors?design?.textColor:undefined,fontSize:custom?design?.fontSize:undefined,'--recorded-title-height':`${recordedTitle.height}px`,'--produced-title-font':`${design?.fontSize??BALANCE.workshop.design.fontSize}px`} as CSSProperties}>
+      {titleIcon&&<span style={position(titleIcon.rect)}><AppGlyph app={app as AppId} editor={scene.appearance.editor}/></span>}
+      <span style={{...(titleText?position(titleText.rect):{paddingInline:BALANCE.appBuild.grid}),fontSize:'inherit',textAlign:design?.titleAlign,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{evaluation.windowTitles[app]??appName(app,scene,i18n)}</span>
+      {controls.length>0?<div className="window-controls recorded-native-controls">{controls.map((control,index)=>{const symbol=control.role.slice('chrome:'.length) as 'minimize'|'maximize'|'close';return <button type="button" tabIndex={-1} key={index} className={`${symbol==='close'?'window-close':''} ${design?.symbolShape==='square'?'produced-square':''}`} data-recorded-symbol={symbol} style={{...position(control.rect),minHeight:0,color:design?.controlColors[symbol]??(customColors?design?.textColor:undefined),borderRadius:custom?design?.radius:undefined}}><LineIcon kind={symbol==='maximize'&&nativeWindow.maximized?'restore':symbol}/></button>;})}</div>:<span className="recorded-fallback-controls"><LineIcon kind="minimize"/><LineIcon kind="maximize"/><LineIcon kind="close"/></span>}
+    </header>
+    <div className="window-content recorded-native-client" style={{...position(client,nativeWindow),margin:0,border:0}}><FrozenWindowContent app={app} scene={scene} catalog={catalog} i18n={i18n} ancestors={ancestors}/></div>
+  </section>;
 }
 function appName(app:string,scene:CaptureScene,i18n:I18n):string {
   return app==='tessera'?i18n.t(scene.appearance.editor===2?'ws.appGesso':'ws.app'):i18n.t(`desktop.app.${app}` as MessageKey);
@@ -124,10 +157,11 @@ export function LegacyCapturePreview({shot,catalog,i18n,ancestors=[]}:{shot:Scre
   const scale=width/scene.screen.width,visible=['tessera','note',...scene.desktop.apps,'settings'];
   const chain=[...ancestors,shot.id],prefs=scene.view.preferences;
   return <div ref={mount} className="screenshot-preview legacy-capture-preview" role="img" aria-label={i18n.t('files.recorded',{date:i18n.dateTime(shot.at)})} data-capture-format={scene.version} data-preview-shot={shot.id}>
-    <div style={{height:scene.screen.height*scale}}><div className={`screenshot-stage capture-desktop desktop-era-${scene.appearance.desktop} capture-era-${scene.appearance.desktop} ${prefs.mode==='dark'?'capture-dark':''}`} inert aria-hidden="true" style={{width:scene.screen.width,height:scene.screen.height,transform:`scale(${scale})`,background:prefs.wallpaper?'#1f363e':scene.appearance.desktop===0?'#008080':'#42627e'}}>
+    <div style={{height:scene.screen.height*scale}}><div className={`screenshot-stage capture-desktop desktop-era-${scene.appearance.desktop} capture-era-${scene.appearance.desktop} ${scene.version===11?'desktop desktop-frozen capture-native':''} ${prefs.mode==='dark'?'capture-dark desktop-dark':''}`} inert aria-hidden="true" style={{width:scene.screen.width,height:scene.screen.height,transform:`scale(${scale})`,background:scene.version===11?undefined:prefs.wallpaper?'#1f363e':scene.appearance.desktop===0?'#008080':'#42627e','--desktop-accent':prefs.accent} as CSSProperties}>
       {prefs.wallpaper&&<div className="capture-wallpaper"><FrozenPhoto edit={prefs.wallpaper} scene={scene} catalog={catalog} i18n={recorded} ancestors={chain}/></div>}
-      {visible.map(app=>{const icon=scene.desktop.icons[app];return icon?<div className="capture-desktop-icon" key={app} style={{left:icon.x,top:icon.y}}><span><ProductGlyph/></span><small>{appName(app,scene,recorded)}</small></div>:null;})}
-      {Object.entries(scene.desktop.windows).filter(([,w])=>w.open&&!w.minimized).sort(([,a],[,b])=>a.z-b.z).map(([app,w])=><section className={`capture-window ${app===scene.desktop.active?'capture-active':''}`} key={app} style={{left:w.x,top:w.y,width:w.width,height:w.height,borderRadius:scene.appearance.desktop>1?prefs.radius:0}}><header><b>{appName(app,scene,recorded)}</b><span><LineIcon kind="minimize"/><LineIcon kind="maximize"/><LineIcon kind="close"/></span></header><div className="capture-window-client"><FrozenWindowContent app={app} scene={scene} catalog={catalog} i18n={recorded} ancestors={chain}/></div></section>)}
+      {visible.filter(app=>scene.version!==11||app!=='settings').map(app=>{const icon=scene.desktop.icons[app];return icon?<div className={scene.version===11?'desktop-shortcut recorded-desktop-shortcut':'capture-desktop-icon'} key={app} style={{left:icon.x,top:icon.y}}>{scene.version===11?<><AppGlyph app={app as AppId} editor={scene.appearance.editor}/><span>{appName(app,scene,recorded)}</span></>:<><span><ProductGlyph/></span><small>{appName(app,scene,recorded)}</small></>}</div>:null;})}
+      {Object.entries(scene.desktop.windows).filter(([app,w])=>w.open&&!w.minimized&&(!scene.view.desktop.workspaces||typeof scene.view.desktop.workspaces!=='object'||(scene.view.desktop.workspaces as Record<string,unknown>)[app]===scene.view.desktop.workspace)).sort(([,a],[,b])=>a.z-b.z).map(([app,w])=>scene.version===11&&scene.evaluation?<FrozenNativeWindow key={app} app={app} scene={scene} catalog={catalog} i18n={recorded} ancestors={chain}/>:<section className={`capture-window ${app===scene.desktop.active?'capture-active':''}`} key={app} style={{left:w.x,top:w.y,width:w.width,height:w.height,borderRadius:scene.appearance.desktop>1?prefs.radius:0}}><header><b>{appName(app,scene,recorded)}</b><span><LineIcon kind="minimize"/><LineIcon kind="maximize"/><LineIcon kind="close"/></span></header><div className="capture-window-client"><FrozenWindowContent app={app} scene={scene} catalog={catalog} i18n={recorded} ancestors={chain}/></div></section>)}
+      {scene.version===11&&scene.notices?.map(notice=>{const rectangle=scene.evaluation?.parts.find(part=>part.id===notice.id)?.rects[0];return rectangle?<aside className="feedback-toast recorded-notice" key={notice.id} style={{left:rectangle.x,top:rectangle.y,right:'auto',bottom:'auto',width:rectangle.width,height:rectangle.height,zIndex:BALANCE.capture.geometry.notificationLayer}}><header><b>{notice.title}</b></header>{notice.sender&&<b>{notice.sender}</b>}<p>{notice.text}</p></aside>:null;})}
       <footer className="capture-taskbar"><strong>{scene.display.productName??recorded.t('product.untitled')}</strong><span>{recorded.t('foundation.pixels',{pixels:recorded.pixels(scene.display.resources.pixels)})}</span><time>{recorded.time(scene.display.wallTime)}</time></footer>
     </div></div>
   </div>;

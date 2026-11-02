@@ -19,3 +19,15 @@
 
 /* Resize glyphs keep their native size and fit the narrower flat-era grip. */
 .desktop .window-resize .line-icon {max-width:100%;max-height:100%;}
+
+/* Installed controls retain the material's geometry; source design owns the editable details. */
+.desktop .app-layout[data-common-control-radius] .app-layout-part :is(button.win-button,button.nav-button) {border-radius:var(--app-common-button-radius);}
+.desktop .app-layout .app-layout-part[data-own-control-radius] :is(button,input,select,textarea) {border-radius:var(--app-part-control-radius);}
+
+.desktop .app-layout .app-layout-part :is(button.win-button,button.nav-button) {background-color:var(--app-part-control-bg,var(--app-common-button-bg,inherit));color:var(--app-part-control-fg,var(--app-common-button-fg,inherit));font-size:var(--app-part-control-font,var(--app-common-button-font,inherit));filter:var(--app-common-button-filter,none);}
+.desktop .app-layout .app-layout-part :is(h1,h2,h3) {background-color:var(--app-common-heading-bg,transparent);color:var(--app-common-heading-fg,inherit);font-size:var(--app-common-heading-font,inherit);border-bottom:var(--app-common-heading-line,none);}
+.desktop .app-layout .app-layout-part progress {accent-color:var(--app-common-progress-fill,auto);height:var(--app-common-progress-height,auto);border-radius:var(--app-common-progress-radius,0);}
+.desktop .app-layout[data-common-scroll-custom] *::-webkit-scrollbar {width:var(--app-common-scroll-width);height:var(--app-common-scroll-width);}
+.desktop .app-layout[data-common-scroll-custom] *::-webkit-scrollbar-thumb {background-color:var(--app-common-scroll-thumb,#808080);border-radius:var(--app-common-scroll-radius);}
+.desktop .app-layout[data-common-scroll-custom] *::-webkit-scrollbar-track {background-color:var(--app-common-scroll-track,#f0f0f0);}
+.desktop .app-layout[data-common-scroll-custom] *::-webkit-scrollbar-button {display:var(--app-common-scroll-arrows,revert);}

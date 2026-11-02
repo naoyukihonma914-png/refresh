@@ -1,16 +1,17 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
+import { documentFiles, rawDesktopFiles } from '../../systems/desktopFiles';
 import { editorName } from '../../systems/appearance';
 import { BALANCE } from '../../config/balance';
-import type { I18n, MessageKey } from '../../content/i18n';
+import type { I18n } from '../../content/i18n';
 import { feedbackSubject, feedbackBodyText } from '../../content/feedback';
-import { WORKSHOP_PARTS, type UiSetId, type WorkshopPartId } from '../../content/workshopCatalog';
+import type { UiSetId, WorkshopPartId } from '../../content/workshopCatalog';
 import type { GameState } from '../../systems/state';
 import coast from '../../assets/wallpaper/coast.webp';
 import night from '../../assets/wallpaper/night.webp';
 
 export type TargetFileFolder = 'all' | 'sets' | 'exports';
 export type TargetFileSort = 'name' | 'date' | 'type';
-export interface TargetFileEntry { id:string; name:string; type:'set'|'part'|'shot'; date:number; set?:UiSetId; part?:WorkshopPartId; exported:boolean }
+export interface TargetFileEntry { id:string; name:string; type:'set'|'part'|'shot'|'note'|'app'; date:number; set?:UiSetId; part?:WorkshopPartId; exported:boolean }
 export interface TargetMailMessage { id:string; subject:string; body:string; sender:string; date:number }
 export interface TargetPhotoSource { id:'coast'|'night'; src:string; label:string }
 export interface TargetWallpaper { index:number; brightness:number; tone:number; crop:number }
@@ -20,6 +21,7 @@ export interface WorkshopTargetState {
   photo:{index:number;brightness:number;tone:number;crop:number;compare:boolean;wallpaper:TargetWallpaper|null};
   trash:{ids:string[];deletedIds:string[];lastEmptiedIds:string[];selectedId:string|null};
   foundation:{activeApp:'files'|'mail';selectedIcon:string|null;noticeRead:boolean;upgradeOpen:boolean};
+  stream:{scene:'source'|'messages';selectedMessage:string|null;previewSelected:boolean};
 }
 const P=BALANCE.workshop.preview;
 const PHOTO_SOURCE_IDS=['coast','night'] as const;
@@ -30,6 +32,7 @@ export const createWorkshopTargetState=():WorkshopTargetState=>({
   photo:{index:0,brightness:P.brightnessNeutral,tone:P.initialValue,crop:P.rangeMax,compare:false,wallpaper:null},
   trash:{ids:[],deletedIds:[],lastEmptiedIds:[],selectedId:null},
   foundation:{activeApp:'files',selectedIcon:null,noticeRead:false,upgradeOpen:false},
+  stream:{scene:'source',selectedMessage:null,previewSelected:false},
 });
 export type TargetAction =
  | {type:'reset'} | {type:'file-select';id:string|null} | {type:'file-sort';key:TargetFileSort}
@@ -41,11 +44,15 @@ export type TargetAction =
  | {type:'photo-value';key:'brightness'|'tone'|'crop';value:number} | {type:'photo-compare'} | {type:'photo-wallpaper'}
  | {type:'trash-file';id:string} | {type:'trash-select';id:string|null} | {type:'trash-restore';id:string} | {type:'trash-empty'} | {type:'trash-undo-empty'}
  | {type:'foundation-app';app:'files'|'mail'} | {type:'foundation-icon';id:string|null}
- | {type:'foundation-notice'} | {type:'foundation-upgrades'};
+ | {type:'foundation-notice'} | {type:'foundation-upgrades'}
+ | {type:'stream-scene';scene:'source'|'messages'} | {type:'stream-message';id:string} | {type:'stream-preview'};
 export function workshopTargetReducer(state:WorkshopTargetState,action:TargetAction):WorkshopTargetState {
  const f=state.files,m=state.mail,p=state.photo,b=state.foundation,bin=state.trash;
  switch(action.type){
   case 'reset':return createWorkshopTargetState();
+  case 'stream-scene':return {...state,stream:{...state.stream,scene:action.scene,previewSelected:false}};
+  case 'stream-message':return {...state,stream:{...state.stream,selectedMessage:action.id}};
+  case 'stream-preview':return {...state,stream:{...state.stream,previewSelected:!state.stream.previewSelected}};
   case 'file-select':return {...state,files:{...f,selectedId:action.id}};
   case 'file-sort':return {...state,files:{...f,sort:action.key,ascending:f.sort===action.key?!f.ascending:true}};
   case 'file-query':return {...state,files:{...f,query:action.query,selectedId:null}};
@@ -79,13 +86,14 @@ export function workshopTargetReducer(state:WorkshopTargetState,action:TargetAct
  }
 }
 export function targetFileEntries(s:GameState,i18n:I18n):TargetFileEntry[] {
- const entries:TargetFileEntry[]=s.persistent.setDocuments.map(setDoc=>({id:`set:${setDoc.id}`,name:`${i18n.t(`ws.set.${setDoc.set}`)} ${setDoc.version}`,type:'set',date:setDoc.at,set:setDoc.set,exported:Object.values(setDoc.parts).some(p=>p?.exportedAt!==null)}));
- for(const definition of WORKSHOP_PARTS){
-  const production=s.run.workshop.parts[definition.id];if(!production)continue;
-  entries.push({id:`part:${definition.id}`,name:i18n.t(definition.labelKey as MessageKey),type:'part',date:production.exportedAt??production.completedAt??s.run.workshop.enteredAt,set:definition.set,part:definition.id,exported:production.exportedAt!==null});
- }
- for(const shot of s.persistent.screenshots.filter(shot=>!shot.deleted))entries.push({id:`shot:${shot.id}`,name:i18n.t('files.shot',{count:shot.id}),type:'shot',date:shot.at,exported:true});
- return entries;
+ const documents=documentFiles(s,i18n);
+ const documentsAndBlueprints=rawDesktopFiles(s,i18n,'root').filter(file=>file.kind==='note'||file.kind==='app');
+ const shots=rawDesktopFiles(s,i18n,'screenshots');
+ return [...documents,...documentsAndBlueprints,...shots].map(file=>({
+  id:file.id,name:file.name,type:file.kind as TargetFileEntry['type'],date:file.at??s.createdAt,
+  ...(file.setDocument?{set:file.setDocument.set}:{}),
+  exported:file.kind==='shot'||Boolean(file.setDocument&&Object.values(file.setDocument.parts).some(part=>part?.exportedAt!==null)),
+ }));
 }
 export function targetMailMessages(s:GameState,i18n:I18n):TargetMailMessage[] {
  const guides=s.run.workshop.guide.seen.map((id,index)=>({id:`guide:${id}`,subject:`${i18n.t('guide.title')} ${i18n.integer(index+1)}`,body:i18n.t(`ws.guide.${id}`,{app:editorName(s,i18n)}),sender:i18n.t('guide.signature'),date:s.run.workshop.enteredAt}));
@@ -100,6 +108,7 @@ interface TargetActions {
  selectMail:(id:string)=>void;setMailFolder:(folder:'inbox'|'archive')=>void;markMailRead:(read:boolean,id?:string)=>void;archiveMail:(archive:boolean,id?:string)=>void;setDraft:(draft:string)=>void;openReply:(open?:boolean)=>void;
  nextPhoto:(delta?:number)=>void;selectPhoto:(index:number)=>void;setBrightness:(value:number)=>void;setTone:(value:number)=>void;setCrop:(value:number)=>void;toggleCompare:()=>void;applyWallpaper:()=>void;
  trashFile:(id?:string)=>void;selectTrashFile:(id:string|null)=>void;restoreFile:(id?:string)=>void;emptyTrash:()=>void;undoEmptyTrash:()=>void;
+ setStreamScene:(scene:'source'|'messages')=>void;selectStreamMessage:(id:string)=>void;toggleStreamPreview:()=>void;
  selectFoundation:(app:'files'|'mail')=>void;selectFoundationIcon:(id:string|null)=>void;readNotice:()=>void;toggleUpgrade:()=>void;
 }
 export interface WorkshopTargetValue {
@@ -107,7 +116,7 @@ export interface WorkshopTargetValue {
  mail:WorkshopTargetState['mail']&{messages:TargetMailMessage[];visible:TargetMailMessage[];selected:TargetMailMessage|null};
  photo:WorkshopTargetState['photo']&{sources:TargetPhotoSource[];current:TargetPhotoSource;filter:string;wallpaperSource:TargetPhotoSource|null};
  trash:WorkshopTargetState['trash']&{entries:TargetFileEntry[];selected:TargetFileEntry|null};
- foundation:WorkshopTargetState['foundation']&{wallpaper:TargetWallpaper|null};actions:TargetActions;
+ foundation:WorkshopTargetState['foundation']&{wallpaper:TargetWallpaper|null};stream:WorkshopTargetState['stream'];actions:TargetActions;
 }
 const TargetContext=createContext<WorkshopTargetValue|null>(null);
 export function WorkshopTargetProvider({gameState,i18n,children}:{gameState:GameState;i18n:I18n;children:ReactNode}) {
@@ -129,13 +138,14 @@ export function WorkshopTargetProvider({gameState,i18n,children}:{gameState:Game
   const trashEntries=entries.filter(entry=>state.trash.ids.includes(entry.id));
   const selectedTrash=trashEntries.find(entry=>entry.id===state.trash.selectedId)??trashEntries[0]??null;
   const actions:TargetActions={
+   setStreamScene:scene=>dispatch({type:'stream-scene',scene}),selectStreamMessage:id=>dispatch({type:'stream-message',id}),toggleStreamPreview:()=>dispatch({type:'stream-preview'}),
    setFileSort:key=>dispatch({type:'file-sort',key}),setFileQuery:query=>dispatch({type:'file-query',query}),toggleFileLarge:()=>dispatch({type:'file-large'}),selectFile:id=>dispatch({type:'file-select',id}),openFolder:folder=>dispatch({type:'file-folder',folder}),back:()=>dispatch({type:'file-back'}),
    selectMail:id=>dispatch({type:'mail-select',id}),setMailFolder:folder=>dispatch({type:'mail-folder',folder}),markMailRead:(read,id=selectedId)=>{if(id)dispatch({type:'mail-read',id,read});},archiveMail:(archive,id=selectedId)=>{if(id)dispatch({type:'mail-archive',id,archive});},setDraft:draft=>dispatch({type:'mail-draft',draft}),openReply:(open=true)=>dispatch({type:'mail-reply',open}),
    nextPhoto:(delta=1)=>dispatch({type:'photo-next',delta}),selectPhoto:index=>dispatch({type:'photo-index',index}),setBrightness:value=>dispatch({type:'photo-value',key:'brightness',value}),setTone:value=>dispatch({type:'photo-value',key:'tone',value}),setCrop:value=>dispatch({type:'photo-value',key:'crop',value}),toggleCompare:()=>dispatch({type:'photo-compare'}),applyWallpaper:()=>dispatch({type:'photo-wallpaper'}),
    trashFile:(id=selectedFile?.id)=>{if(id&&entries.some(entry=>entry.id===id))dispatch({type:'trash-file',id});},selectTrashFile:id=>dispatch({type:'trash-select',id}),restoreFile:(id=selectedTrash?.id)=>{if(id)dispatch({type:'trash-restore',id});},emptyTrash:()=>dispatch({type:'trash-empty'}),undoEmptyTrash:()=>dispatch({type:'trash-undo-empty'}),
    selectFoundation:app=>dispatch({type:'foundation-app',app}),selectFoundationIcon:id=>dispatch({type:'foundation-icon',id}),readNotice:()=>dispatch({type:'foundation-notice'}),toggleUpgrade:()=>dispatch({type:'foundation-upgrades'}),
   };
-  return {files:{...f,entries,visible,selected:selectedFile,used:gameState.persistent.screenshots.filter(shot=>!shot.deleted).length,capacity:BALANCE.w3.baseShotCapacity*BALANCE.w3.storageCapacityMultiplier**gameState.persistent.specs.storage},mail:{...m,messages,visible:mailVisible,selected:selectedMail},photo:{...p,sources,current:sources[p.index]!,filter:p.compare?'none':targetPhotoFilter(p),wallpaperSource:p.wallpaper?sources[p.wallpaper.index]!:null},trash:{...state.trash,entries:trashEntries,selected:selectedTrash},foundation:{...state.foundation,wallpaper:p.wallpaper},actions};
+  return {files:{...f,entries,visible,selected:selectedFile,used:gameState.persistent.screenshots.filter(shot=>!shot.deleted).length,capacity:BALANCE.w3.baseShotCapacity*BALANCE.w3.storageCapacityMultiplier**gameState.persistent.specs.storage},mail:{...m,messages,visible:mailVisible,selected:selectedMail},photo:{...p,sources,current:sources[p.index]!,filter:p.compare?'none':targetPhotoFilter(p),wallpaperSource:p.wallpaper?sources[p.wallpaper.index]!:null},trash:{...state.trash,entries:trashEntries,selected:selectedTrash},foundation:{...state.foundation,wallpaper:p.wallpaper},stream:state.stream,actions};
  },[state,gameState,i18n]);
  return <TargetContext.Provider value={value}>{children}</TargetContext.Provider>;
 }

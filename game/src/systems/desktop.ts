@@ -1,15 +1,20 @@
-import { pageColors } from './pageDesign';
-import { actAppBuild, ownAppBlueprint, ownFeaturePart, functionalApp, appLayoutBonus, hasAppPart, type AppBuildAction } from './appBuild';
+import { WORKSHOP_PARTS } from '../content/workshopCatalog';
+import { usesNativeComponentColors } from './workshopState';
+import { actAppBuild, ownAppBlueprint, functionalApp, hasAppPart, type AppBuildAction } from './appBuild';
 import { desktopScreen, fitWindow, fitIcon, workHeight } from './desktopGeometry';
 import { desktopStage } from './appearance';
+import { evaluateCapture,screenshotContentCount,screenshotContentReward } from './captureEvaluation';
+import { globalMultiplier } from './longPlay';
+import { nextDesktopOffer,followingDesktopOffer } from './desktopOffers';
+import { APP_REQUIRED,sourceForSlot } from '../content/appRecipes';
 export {fitWindow} from './desktopGeometry';
 import { actDesktopExtra, completeRequests,refreshDesktop, type ExtraAction } from './desktopExtras';
-import { FEATURE_APPS, featureCount, hasDesktopSkill, hasUpgrade } from './desktopJobs';
+import { hasDesktopSkill, hasUpgrade } from './desktopJobs';
 import type { DesktopUpgrade } from '../config/balance';
 import { encodeScene, projectCapture } from './captureScene';
 import { BALANCE } from '../config/balance';
-import { actWorkshop, canAssembleDesktop, completedSets } from './workshop';
-import { creditPixels, passivePixelsPerSecond } from './economy';
+import { actWorkshop, advanceWorkshopAssistance, canAssembleDesktop, completedSets } from './workshop';
+import { creditPixels } from './economy';
 import { APP_IDS, createDesktopState, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
 import type { GameState } from './state';
 export const withDesktop = (state: GameState, desktop: DesktopState): GameState => ({ ...state, run: { ...state.run, desktop } });
@@ -34,29 +39,36 @@ export function focusWindow(state: GameState, app: AppId): GameState {
 function nextActive(state: GameState, app: AppId): AppId | null {
   return visibleApps(state).filter(id => id !== app).sort((a,b) => state.run.desktop.windows[b].z - state.run.desktop.windows[a].z)[0] ?? null;
 }
-export const nextDesktopApp = (state:GameState) => BALANCE.w3.apps.find(item=>!state.run.desktop.upgrades.includes(item.id))??null;
-export const followingDesktopApp = (state:GameState) => BALANCE.w3.apps.filter(item=>!state.run.desktop.upgrades.includes(item.id))[1]??null;
+export const nextDesktopApp = nextDesktopOffer;
+export const followingDesktopApp = followingDesktopOffer;
 export function buyDesktopApp(state:GameState,id:DesktopUpgrade,now=state.lastTickAt):GameState {
- const item=nextDesktopApp(state);if(state.run.world!=='desktop'||item?.id!==id||state.resources.pixels<item.cost)return state;
- const feature=FEATURE_APPS[id as keyof typeof FEATURE_APPS];
- const isApp=APP_IDS.includes(id as AppId)&&!feature;
- let next=withDesktop({...state,resources:{...state.resources,pixels:state.resources.pixels-item.cost}},{...state.run.desktop,upgrades:[...state.run.desktop.upgrades,id],builtAt:{...state.run.desktop.builtAt,[id]:now},apps:state.run.desktop.apps});
- if(isApp)return focusWindow(ownAppBlueprint(next,id as BuiltApp),'tessera');
- if(feature)return focusWindow(ownFeaturePart(next,id,feature),'tessera');
- return next;
+ const offer=nextDesktopOffer(state);
+ if(state.run.world!=='desktop'||offer?.id!==id||state.resources.pixels<offer.cost)return state;
+ if(offer.id==='jobs')return withDesktop({...state,resources:{...state.resources,pixels:state.resources.pixels-offer.cost}},{...state.run.desktop,upgrades:[...state.run.desktop.upgrades,'jobs'],builtAt:{...state.run.desktop.builtAt,jobs:now}});
+ const app=offer.id;
+ let next=state;
+ if(offer.kind==='set')next=actWorkshop(next,{type:'buySet',set:app},now);
+ if(offer.kind==='assemble')next=actAppBuild(ownAppBlueprint(next,app),{type:'app-edit',app});
+ else {
+  const required=APP_REQUIRED[app].map(role=>sourceForSlot(app,role)!);
+  const part=required.find(source=>next.run.workshop.parts[source]?.step!==4)??required[0];
+  if(part)next=actWorkshop(next,{type:'selectPart',part},now);
+  next={...next,run:{...next.run,workshop:{...next.run.workshop,view:'workbench'},desktop:{...next.run.desktop,editingApp:null}}};
+ }
+ return focusWindow(next,'tessera');
 }
 export function desktopConditions(state:GameState):boolean[] {
  return [runningApps(state).filter(id=>!['note','settings'].includes(id)&&(id==='tessera'||functionalApp(state,id as BuiltApp))).length>=BALANCE.w3.requiredApps,
  state.run.desktop.feedback.filter(f=>f.completedAt!==null).length>=BALANCE.w3.requiredFeedback,
  ['common','foundation','files','mail'].every(id=>completedSets(state).includes(id as 'files')),state.persistent.desktopPrefs.wallpaper!==null&&hasAppPart(state,'photo','image')&&hasAppPart(state,'photo','wallpaper'),
- state.run.desktop.terminal.executions>0&&hasAppPart(state,'terminal','commands')];
+ state.run.desktop.terminal.executions>0&&hasAppPart(state,'terminal','commands')&&hasAppPart(state,'terminal','run')];
 }
 export const pendingCapacity=(state:GameState)=>hasDesktopSkill(state,'sortMail')?BALANCE.w3.sortedMailCapacity:BALANCE.w3.maxPending;
 function newFeedback(state: GameState, at: number): Feedback | null {
   const d = state.run.desktop;
   const pending = d.feedback.filter(f => f.completedAt === null);
   if (pending.length >= pendingCapacity(state)) return null;
-  const primaryColor = pageColors(state.run.seed.page,state.persistent.specs.color).button;
+  const primaryColor = state.run.workshop.parts['common-button']?.design.color??BALANCE.workshop.design.color;
   const candidates: { kind: Feedback['kind']; target: string }[] = [];
   if (!pending.some(f => f.kind === 'color')) candidates.push({ kind: 'color', target: 'primary' });
   if (!pending.some(f => f.kind === 'screenshot')) candidates.push({ kind: 'screenshot', target: '' });
@@ -68,8 +80,11 @@ function newFeedback(state: GameState, at: number): Feedback | null {
     ...(hasUpgrade(state,'timer')?[{kind:'timer' as const,target:String(Math.ceil((at+BALANCE.w3.timerRequestDelayMs)/60000)*60000)}]:[]),
     ...(d.apps.includes('theme')?[{kind:'dark' as const,target:''}]:[]),
   ];
+  const unfinished=WORKSHOP_PARTS.find(part=>state.run.workshop.parts[part.id]&&state.run.workshop.parts[part.id]!.step!==4);
+  if(unfinished&&!pending.some(f=>f.kind==='part'))candidates.push({kind:'part',target:unfinished.id});
+  if(!pending.some(f=>f.kind==='capture'))candidates.push({kind:'capture',target:hasAppPart(state,'photo','image')?'photo':state.run.desktop.feedbackSerial%2?'maximized':'windows'});
   candidates.push(...eligible.filter(c=>!pending.some(f=>f.kind===c.kind)));
-  const order: Feedback['kind'][] = ['color','screenshot','sort','search','bright','trash','timer','dark'];
+  const order: Feedback['kind'][] = ['part','color','screenshot','sort','search','bright','trash','timer','dark','capture'];
   const offset = d.feedback.length ? (order.indexOf(d.feedback.at(-1)!.kind) + 1) % order.length : 0;
   const candidate = Array.from({ length: order.length }, (_,i) => candidates.find(c => c.kind === order[(offset+i)%order.length])).find(Boolean);
   if (!candidate) return null;
@@ -79,7 +94,7 @@ function newFeedback(state: GameState, at: number): Feedback | null {
 export function advanceDesktopTime(state: GameState, ms: number, now: number, offline = false, language='ja', captures=true): GameState {
   if (state.run.world !== 'desktop') return state;
   const interval = BALANCE.spec.network[state.persistent.specs.network]!.mailIntervalSeconds * BALANCE.time.millisecondsPerSecond;
-  const automatic = captures && state.run.desktop.terminal.running && hasAppPart(state,'terminal','commands');
+  const automatic = captures && state.run.desktop.terminal.running && hasAppPart(state,'terminal','commands')&&hasAppPart(state,'terminal','run');
   let next = withDesktop(state, { ...state.run.desktop, cooldownMs: offline && !automatic ? state.run.desktop.cooldownMs : Math.max(0, state.run.desktop.cooldownMs-ms), feedbackMs: (state.run.desktop.feedbackMs + ms) % interval });
   const arrivals = Math.floor((state.run.desktop.feedbackMs + ms) / interval);
   for (let i=0; i<Math.min(arrivals,pendingCapacity(state)); i++) {
@@ -87,38 +102,42 @@ export function advanceDesktopTime(state: GameState, ms: number, now: number, of
     if (!request) break;
     next = withDesktop(next, { ...next.run.desktop, feedbackSerial: request.id, feedback: [...next.run.desktop.feedback, request], notice: request.id, success: null });
   }
-  return advanceDesktopEvents(next,ms,now,offline,language,captures);
+  return advanceDesktopEvents(advanceWorkshopAssistance(next,ms,now),ms,now,offline,language,captures);
 }
-function completeFeedback(state: GameState, ids: number[], now: number): GameState {
+function completeFeedback(state: GameState, ids: number[], now: number, automatic=false): GameState {
   const pending = state.run.desktop.feedback.filter(f => ids.includes(f.id) && f.completedAt === null);
   if (!pending.length) return state;
-  return withDesktop({ ...state, resources: { ...state.resources, tokens: state.resources.tokens + pending.length * BALANCE.w3.feedbackTokens } }, { ...state.run.desktop,
-    feedback: state.run.desktop.feedback.map(f => pending.includes(f) ? { ...f, completedAt: now, reward:BALANCE.w3.feedbackTokens } : f),
+  const reward=BALANCE.w3.feedbackTokens*(automatic?BALANCE.w3.autoFeedbackMultiplier:1);
+  return withDesktop({ ...state, resources: { ...state.resources, tokens: state.resources.tokens + pending.length * reward } }, { ...state.run.desktop,
+    feedback: state.run.desktop.feedback.map(f => pending.includes(f) ? { ...f, completedAt: now, reward } : f),
     notice: pending.some(f => f.id === state.run.desktop.notice) ? null : state.run.desktop.notice, success: pending[pending.length-1]!.id });
 }
 export function observeTesseraAction(before: GameState, after: GameState, type: string, now: number): GameState {
   if (after.run.world !== 'desktop' || before === after) return after;
   const done = after.run.desktop.feedback.filter(f => {
     if (f.completedAt !== null) return false;
-    if (type === 'design' && f.kind === 'color') return pageColors(after.run.seed.page,after.persistent.specs.color).button !== f.baselineColor;
+    if(f.kind==='part')return after.run.workshop.parts[f.target as keyof typeof after.run.workshop.parts]?.step===4&&before.run.workshop.parts[f.target as keyof typeof before.run.workshop.parts]?.step!==4;
+    if(type==='adjust'&&f.kind==='color'){const a=before.run.workshop.parts['common-button']?.design,b=after.run.workshop.parts['common-button']?.design;return !!a&&!!b&&(a.color!==b.color||usesNativeComponentColors(a)!==usesNativeComponentColors(b));}
     return false;
   }).map(f => f.id);
   return completeFeedback(after,done,now);
 }
-export function screenshotParts(state: GameState): number {
-  return BALANCE.w3.screenshotBaseParts + visibleApps(state).reduce((sum,id)=>sum+BALANCE.w3.partsPerWindow+featureCount(state,id)*BALANCE.w3.featureParts,0) + installedApps(state).filter(id=>id!=='settings').length + (state.run.desktop.notice !== null || state.run.desktop.success !== null ? 1 : 0);
-}
+export const screenshotParts = screenshotContentCount;
 export const screenshotCapacity = (state: GameState) => BALANCE.w3.baseShotCapacity * BALANCE.w3.storageCapacityMultiplier ** state.persistent.specs.storage;
-export const desktopAppShotGain = (state: GameState) => passivePixelsPerSecond(state) * (BALANCE.w3.partsPerWindow + 1) * BALANCE.w3.screenshotMultiplier * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution;
-export const screenshotReward = (state: GameState) => passivePixelsPerSecond(state) * screenshotParts(state) * BALANCE.w3.screenshotMultiplier * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution * appLayoutBonus(state);
+/** A preview of a small visible-content increment; never a passive production quote. */
+export const desktopAppShotGain = (state: GameState) => BALANCE.capture.pixelsPerPart * (BALANCE.w3.partsPerWindow + 1) * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * globalMultiplier(state);
+export const screenshotReward = screenshotContentReward;
 export function takeScreenshot(state: GameState, now: number, language: string, multiplier=1, automatic=false): GameState {
   if (state.run.world !== 'desktop' || state.run.desktop.cooldownMs > 0 || activeScreenshots(state).length >= screenshotCapacity(state)) return state;
   const frozen = projectCapture({...state,lastTickAt:now},language);
+  const evaluation=frozen.evaluation??evaluateCapture(state),reward=evaluation.reward*multiplier;
   const shot: Screenshot = { id: Math.max(state.persistent.desktopPrefs.lastShotId,state.persistent.screenshots.at(-1)?.id??0)+1, at: now, language, data: encodeScene(frozen) };
-  let next = creditPixels(state,screenshotReward(state)*multiplier);
+  let next = creditPixels(state,reward);
   next = { ...next, persistent: { ...next.persistent, screenshots: [...next.persistent.screenshots,shot], desktopPrefs:{...next.persistent.desktopPrefs,lastShotId:shot.id} } };
-  next = withDesktop(next, { ...next.run.desktop, cooldownMs: screenshotCooldown(state), shotHistory:[...next.run.desktop.shotHistory.filter(h=>h.at>=now-BALANCE.w3.historyMs),{at:now,pixels:screenshotReward(state)*multiplier}].slice(-BALANCE.w3.maxShotHistory) });
-  return visibleApps(state).length>=2?completeRequests(next,['screenshot'],now,automatic):next;
+  next = withDesktop(next, { ...next.run.desktop, cooldownMs: screenshotCooldown(state), shotHistory:[...next.run.desktop.shotHistory.filter(h=>h.at>=now-BALANCE.w3.historyMs),{at:now,pixels:reward}].slice(-BALANCE.w3.maxShotHistory) });
+  const visible=new Set(evaluation.visibleWindows);
+  const completed=next.run.desktop.feedback.filter(f=>f.completedAt===null&&(f.kind==='screenshot'?visible.size>=2:f.kind==='capture'?f.target==='windows'?visible.size>=2:f.target==='photo'?evaluation.parts.some(p=>p.visible&&p.app==='photo'&&p.sourcePartId==='photo-display'):evaluation.visibleWindows.some(id=>state.run.desktop.windows[id as AppId]?.maximized):false)).map(f=>f.id);
+  return completeFeedback(next,completed,now,automatic);
 }
 export type DesktopAction = ExtraAction | AppBuildAction
   | { type: 'open' | 'taskbar' | 'minimize' | 'maximize' | 'close'; app: AppId }
@@ -157,28 +176,27 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number,
     case 'icon': return !installedApps(state).includes(action.app) || !Number.isFinite(action.x) || !Number.isFinite(action.y) ? state : withDesktop(state,{ ...d,icons:{ ...d.icons,[action.app]: fitIcon({x:action.x,y:action.y},d.screen,Math.max(76,state.persistent.desktopPrefs.iconSize+36)) } });
     case 'folder': return !['root','exports','screenshots'].includes(action.folder) ? state : withDesktop(state,{ ...d,fileFolder:action.folder,fileSelection:null });
     case 'file': return withDesktop(state,{ ...d,fileSelection:action.id });
-    case 'mail': return !d.feedback.some(f => f.id === action.id) ? state : withDesktop(state,{ ...d,mailSelection:action.id });
+    case 'mail': return !d.feedback.some(f => f.id === action.id) ? state : withDesktop(state,{ ...d,mailSelection:action.id,feedback:d.feedback.map(f=>f.id===action.id&&f.readAt==null?{...f,readAt:now}:f) });
     case 'notice': return action.id !== null && !d.feedback.some(f => f.id === action.id && f.completedAt === null) ? state : withDesktop(state,{ ...d,notice:action.id });
     case 'success-close': return withDesktop(state,{ ...d,success:null });
     case 'fix': {
       const request=d.feedback.find(f=>f.id===action.id);if(!request)return state;
-      if(request.kind!=='screenshot'){
+      if(request.kind!=='screenshot'&&request.kind!=='capture'){
         const destinations:Partial<Record<Feedback['kind'],AppId>>={sort:'files',search:'files',bright:'photo',trash:'bin',timer:'clock',dark:'theme'};
         const app=destinations[request.kind]??'tessera';
         const required:Partial<Record<Feedback['kind'],[BuiltApp,string[]]>>={sort:['files',['list','sort']],search:['files',['list','search']],bright:['photo',['image','brightness','wallpaper']],trash:['bin',['trash']],timer:['clock',['timer']],dark:['theme',['appearance']]};
         const need=required[request.kind];
         if(need&&state.run.desktop.projects[need[0]]&&need[1].some(part=>!hasAppPart(state,need[0],part)))return focusWindow(actAppBuild(state,{type:'app-edit',app:need[0]}),'tessera');
         let next=focusWindow(withDesktop(state,{...d,notice:null,editingApp:app==='tessera'?null:d.editingApp}),app);
-
+        if(request.kind==='part')next=actWorkshop(next,{type:'selectPart',part:request.target as import('../content/workshopCatalog').WorkshopPartId},now);
+        if(request.kind==='color')next=actWorkshop(next,{type:'selectPart',part:'common-button'},now);
         return next;
       }
-      // Keep two real windows visible and give the capture toolbar a clear destination.
+      // Open the requested tools without replacing the player's saved arrangement.
+      const target=request.kind==='capture'&&request.target==='photo'?'photo':'note';
       let next=focusWindow(withDesktop(state,{...d,notice:null}),'tessera');
-      if(next.run.desktop.windows.tessera.maximized)next=actDesktop(next,{type:'maximize',app:'tessera'},now);
-      next=actDesktop(next,{type:'rect',app:'tessera',rect:{x:16,y:64,width:d.screen.width*.65,height:workHeight(d.screen)*.65}},now);
-      next=focusWindow(next,'note');
-      if(next.run.desktop.windows.note.maximized)next=actDesktop(next,{type:'maximize',app:'note'},now);
-      return focusWindow(actDesktop(next,{type:'rect',app:'note',rect:{x:d.screen.width*.55,y:workHeight(d.screen)*.2,width:d.screen.width*.42,height:workHeight(d.screen)*.72}},now),'note');
+      return focusWindow(next,target);
+
     }
     default:return actDesktopExtra(state,action as ExtraAction,now,language);
     case 'note': return action.text.length > BALANCE.w3.maxNote ? state : { ...state,persistent:{ ...state.persistent,productionNote:action.text,noteUpdatedAt:now } };
@@ -195,7 +213,7 @@ function advanceDesktopEvents(s:GameState,ms:number,now:number,offline:boolean,l
   next=withDesktop(next,{...next.run.desktop,cooldownMs:offline?0:next.run.desktop.cooldownMs,reservation:{...r,done:true,result:captures&&(offline||next.run.desktop.cooldownMs===0)&&activeScreenshots(next).length<screenshotCapacity(next)?'captured':'skipped'}});
   if(captures)next=takeScreenshot(next,Math.max(0,r.at),language,offline?BALANCE.w3.timerOfflineMultiplier:1);
  }
- if(captures&&d.terminal.running&&hasAppPart(next,'terminal','commands')){
+ if(captures&&d.terminal.running&&hasAppPart(next,'terminal','commands')&&hasAppPart(next,'terminal','run')){
   const total=d.terminal.elapsedMs+ms,count=Math.floor(total/d.terminal.interval);
   next=withDesktop(next,{...next.run.desktop,terminal:{...d.terminal,elapsedMs:total%d.terminal.interval}});
   for(let i=0;i<Math.min(count,screenshotCapacity(next)+1);i++){

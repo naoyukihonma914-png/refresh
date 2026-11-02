@@ -10,6 +10,7 @@ import { WorkshopGlyph } from './WorkshopGlyph';
 import { useWorkshopTarget, targetPhotoFilter, type TargetFileSort } from './WorkshopTargetContext';
 import { partVisual } from './partVisual';
 import { OptionalPart } from './OptionalParts';
+import { StreamingPart } from './StreamingPart';
 
 /** The placed controls are pieces of the same destination app, not separate demonstrations. */
 export function DestinationPart({part,production,state,i18n,onInteract,disabled=false,dispatch}:{part:WorkshopPartDefinition;production:PartProduction;state:GameState;i18n:I18n;onInteract:(interaction:TestInteraction)=>void;disabled?:boolean;dispatch:WorkshopDispatch}){
@@ -55,7 +56,7 @@ export function DestinationPart({part,production,state,i18n,onInteract,disabled=
   case 'photo-crop':contents=<div className="ws-destination-crop-tool">{has('image')&&<span>{photo.current.label}</span>}{has('crop-frame')&&<label>{t('ws.preview.crop')}<input type="range" min={P.cropMin} max={P.rangeMax} value={photo.crop} disabled={disabled} onChange={e=>{act('resize',()=>actions.setCrop(Number(e.target.value)));testCrop();}}/></label>}{!state.run.workshop.parts['photo-display']?.elements.includes('image')&&has('image')&&<div className="ws-destination-crop">{currentPhoto}{cropFrame}</div>}</div>;break;
   case 'photo-compare':contents=<label className="ws-destination-check"><input type="checkbox" checked={photo.compare} disabled={disabled} onChange={()=>act('toggle',actions.toggleCompare)}/>{t(photo.compare?'ws.preview.original':'ws.preview.edited')}</label>;break;
   case 'photo-switch':contents=<div className="ws-destination-photo-navigation">{(['previous','next'] as const).filter(has).map(direction=><button type="button" key={direction} disabled={disabled} aria-label={t(direction==='previous'?'ws.preview.previousPhoto':'ws.preview.nextPhoto')} onClick={()=>act('select',()=>actions.nextPhoto(direction==='previous'?-1:1))}><WorkshopGlyph name={direction==='previous'?'up':'down'}/></button>)}<span>{photo.current.label}</span></div>;break;
-  default:return <OptionalPart part={part} production={production} state={state} i18n={i18n} disabled={disabled} onInteract={onInteract}/>;
+  default:if(part.set==='stream')return <StreamingPart part={part} production={production} i18n={i18n} disabled={disabled} onInteract={onInteract}/>;return <OptionalPart part={part} production={production} state={state} i18n={i18n} disabled={disabled} onInteract={onInteract}/>;
  }
  return <div className={`ws-destination-part ws-destination-${part.id}`} onFocusCapture={()=>{if(!disabled&&part.testInteraction==='scroll')onInteract('select');}} data-progress-style={d.progressStyle} data-has-thumb={has('thumb')} data-scroll-arrows={has('arrows')&&d.arrows} data-workshop-preview={part.kind} data-workshop-test-part={part.id} style={styles}>{contents}</div>;
 }

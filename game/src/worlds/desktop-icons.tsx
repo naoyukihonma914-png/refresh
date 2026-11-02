@@ -8,6 +8,10 @@ export function PixelArt({ frames, size, palette, frame = 0, grey = false, style
   </svg>;
 }
 export function AppIcon({ app, state }: { palette?:string[]; app: AppId; state: GameState; frame?: number }) {
+  return <AppGlyph app={app} editor={editorStage(state)}/>;
+}
+/** The icon is a presentation primitive; archived scenes do not need a live game state. */
+export function AppGlyph({app,editor=0}:{app:AppId;editor?:number}) {
   if (['files','mail','photo','bin','clock','settings'].includes(app)) {
     const paths:Record<string,React.ReactNode>={
       files:<><path d="M5 13h15l5 5h18v23H5z" fill="#d6b975" stroke="#74613c"/><path d="M5 19h38v4H5z" fill="#f0dc9b"/></>,
@@ -19,7 +23,7 @@ export function AppIcon({ app, state }: { palette?:string[]; app: AppId; state: 
     };
     return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true">{paths[app]}</svg>;
   }
-  if(app==='tessera'&&editorStage(state)===2)return <svg viewBox="0 0 48 48" className="app-icon gesso-icon" aria-hidden="true"><path d="M6 8h36v34H6z" fill="#526a7e" stroke="#263744"/><path d="M8 10h32v13H8z" fill="#7895ad"/><path d="m14 33 3-8 14-14 5 5-14 14z" fill="#e9e2cf" stroke="#263744"/><path d="m14 33 8-3-5-5z" fill="#d8ab63"/></svg>;
+  if(app==='tessera'&&editor===2)return <svg viewBox="0 0 48 48" className="app-icon gesso-icon" aria-hidden="true"><path d="M6 8h36v34H6z" fill="#526a7e" stroke="#263744"/><path d="M8 10h32v13H8z" fill="#7895ad"/><path d="m14 33 3-8 14-14 5 5-14 14z" fill="#e9e2cf" stroke="#263744"/><path d="m14 33 8-3-5-5z" fill="#d8ab63"/></svg>;
   if(app==='terminal')return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true"><rect x="4" y="8" width="40" height="32" rx="3" fill="#26323a" stroke="#8c9ba5"/><path d="m12 17 6 6-6 6m11 1h10" stroke="#e4ecef" strokeWidth="2" fill="none"/></svg>;
   if(app==='manager')return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true"><rect x="6" y="5" width="36" height="38" fill="#e4eaed" stroke="#536b7e"/><path d="M10 35h28M14 32V22m10 10V12m10 20V17" stroke="#537e9a" strokeWidth="4"/></svg>;
   if(app==='theme')return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true"><path d="M7 6h34v36H7z" fill="#cedae0" stroke="#6c808b"/><path d="M9 8h15v32H9z" fill="#556d7e"/><path d="M27 12h10v10H27z" fill="#bba16e"/></svg>;

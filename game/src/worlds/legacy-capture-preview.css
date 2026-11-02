@@ -101,3 +101,42 @@
 .capture-workshop .capture-part-scrollbar {overflow-y:scroll;}
 .capture-workshop .capture-part-scrollbar[data-static-thumb=false]::-webkit-scrollbar-thumb {visibility:hidden;}
 .capture-workshop .capture-part-scrollbar[data-static-arrows=false]::-webkit-scrollbar-button {display:none;}
+
+/* Format 11 freezes the native slot and client rectangles rather than rebuilding a live world. */
+.legacy-capture-preview .capture-native {--desktop-wallpaper:#008080;}
+.legacy-capture-preview .capture-native .recorded-native-window {position:absolute;display:block;padding:0!important;border:0!important;overflow:hidden;}
+.legacy-capture-preview .capture-native .recorded-native-window>.window-title {position:absolute;display:block;flex:none;overflow:hidden;height:var(--recorded-title-height)!important;}
+.legacy-capture-preview .capture-native .recorded-native-window>.window-title>span {display:flex;align-items:center;min-inline-size:0;max-inline-size:none;flex:none;}
+.legacy-capture-preview .recorded-native-window>.window-title>span>.app-icon {inline-size:100%;block-size:100%;}
+.legacy-capture-preview .recorded-native-controls {position:absolute;inset:0;display:block;gap:0;margin:0;pointer-events:none;}
+.legacy-capture-preview .recorded-native-controls>button {position:absolute;margin:0;padding:0;}
+.legacy-capture-preview .recorded-fallback-controls {position:absolute;inset-block-start:0;inset-inline-end:0;display:flex;gap:4px;}
+.legacy-capture-preview .recorded-fallback-controls .line-icon {inline-size:16px;block-size:16px;}
+.legacy-capture-preview .recorded-native-client {position:absolute;min-inline-size:0;min-block-size:0;overflow:hidden;padding:0;flex:none;}
+.legacy-capture-preview .recorded-native-app {position:relative;inline-size:100%;block-size:100%;overflow:hidden;}
+.legacy-capture-preview .recorded-native-slot {padding:4px;line-height:1.4;}
+.legacy-capture-preview .recorded-native-slot :is(p,h3) {margin:0 0 6px;}
+.legacy-capture-preview .recorded-native-slot .line-icon {inline-size:16px;block-size:16px;flex:none;}
+.legacy-capture-preview .recorded-native-slot :is(input,output,label) {font:inherit;color:inherit;}
+.legacy-capture-preview .recorded-native-slot label {display:flex;align-items:center;gap:6px;}
+.legacy-capture-preview .recorded-native-slot input[type=range] {min-inline-size:0;max-inline-size:100%;accent-color:var(--desktop-accent);}
+.legacy-capture-preview .recorded-native-table {inline-size:100%;border-collapse:collapse;font:inherit;background:var(--app-surface,#fff);color:var(--app-text,#111);}
+.legacy-capture-preview .recorded-native-table :is(th,td) {padding:4px 7px;border-block-end:1px solid #aaa;text-align:start;white-space:nowrap;font-weight:normal;}
+.legacy-capture-preview .recorded-native-table th {background:#e8e8e8;}
+.legacy-capture-preview .recorded-native-button,.legacy-capture-preview .recorded-native-input {display:inline-flex;align-items:center;min-block-size:24px;padding:3px 8px;border:1px solid #888;background:#eee;color:#111;white-space:nowrap;}
+.legacy-capture-preview .desktop-era-0 .recorded-native-button {border:2px outset #ddd;background:#c0c0c0;}
+.legacy-capture-preview .recorded-native-input {background:#fff;border-style:inset;inline-size:100%;}
+.legacy-capture-preview .recorded-native-navigation {display:flex;align-items:center;gap:8px;}
+.legacy-capture-preview .recorded-native-places {display:flex;flex-direction:column;gap:8px;}
+.legacy-capture-preview .recorded-native-messages>div {display:flex;flex-direction:column;padding:5px;border-block-end:1px solid #aaa;}
+.legacy-capture-preview .recorded-native-messages .recorded-unread {font-weight:bold;}
+.legacy-capture-preview .recorded-native-slot time {display:flex;flex-direction:column;align-items:center;}
+.legacy-capture-preview .recorded-slot-time {font-size:32px!important;}
+.legacy-capture-preview .recorded-slot-time small {font-size:14px;}
+.legacy-capture-preview .recorded-native-swatch {display:block;inline-size:24px;block-size:24px;border:1px solid #777;}
+.legacy-capture-preview .recorded-slot-image {padding:0;}
+.legacy-capture-preview .recorded-set-document {block-size:100%;display:flex;flex-direction:column;}
+.legacy-capture-preview .recorded-set-document>.capture-workshop {flex:1;min-block-size:0;}
+.legacy-capture-preview .recorded-desktop-shortcut {position:absolute;inline-size:78px;display:flex;align-items:center;flex-direction:column;gap:2px;}
+.legacy-capture-preview .recorded-desktop-shortcut>.app-icon {inline-size:32px;block-size:32px;}
+.legacy-capture-preview .recorded-notice {position:absolute;overflow:hidden;}

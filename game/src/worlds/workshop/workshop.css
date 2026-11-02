@@ -285,3 +285,10 @@
 .workshop-root .ws-target-window[data-destination-era="3"] .ws-target-title {height:auto;min-height:27px;}
 .workshop-root .ws-colors>.ws-native-colors {display:block;width:100%;min-height:24px;max-height:none;aspect-ratio:auto;margin-bottom:6px;padding:3px 6px;}
 .workshop-root .ws-tool-column>button {display:grid;place-items:center;line-height:1;padding:0;width:100%;min-height:24px;}
+
+.workshop-root .ws-world4-preparation {margin-top:8px;padding-top:8px;border-top:1px solid var(--editor-edge-dark,#8f8574);}
+.workshop-root .ws-world4-preparation h3 {font:inherit;font-weight:bold;margin:0 0 6px;}
+.workshop-root .ws-world4-preparation progress {width:100%;}
+.workshop-root .ws-world4-preparation ul {padding-left:18px;margin:6px 0;}
+.workshop-root .ws-world4-preparation p {margin:6px 0;line-height:1.5;}
+.workshop-root .ws-world4-preparation>button {width:100%;}

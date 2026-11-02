@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { BALANCE, type SpecKey } from '../config/balance';
 import { chooseLanguage, createI18n, LOCALES, TEST_LANGUAGE, type MessageKey } from './i18n';
+import { UI_SETS, WORKSHOP_PARTS } from './workshopCatalog';
 
 function placeholders(text: string): string[] {
   return [...new Set([...text.matchAll(/\{(\w+)\}/g)].map(match => match[1]))].sort() as string[];
@@ -44,6 +45,23 @@ describe('言語ファイルと表示', () => {
           expect(placeholders(text), `${locale._meta.id}.${key}`).toEqual(expected);
         }
       }
+    }
+  });
+
+  it.each(['ja', 'en', TEST_LANGUAGE])('%s で工房カタログの全セット・パーツ・要素の動的キーが解決する', language => {
+    const i18n = createI18n(language);
+    const keys = new Set([
+      ...UI_SETS.map(set => set.labelKey),
+      ...WORKSHOP_PARTS.map(part => part.labelKey),
+      ...WORKSHOP_PARTS.flatMap(part => part.elements.map(element => `ws.element.${element}`)),
+    ]);
+    for (const key of keys) {
+      const source = LOCALES[language === TEST_LANGUAGE ? 'en' : language]!.messages;
+      expect(Object.hasOwn(source, key), `${language}.${key}`).toBe(true);
+      const translated = i18n.t(key as MessageKey);
+      expect(translated.trim(), `${language}.${key}`).not.toBe('');
+      expect(translated, `${language}.${key}`).not.toBe(key);
+      expect(placeholders(translated), `${language}.${key}`).toEqual([]);
     }
   });
 

@@ -8,7 +8,7 @@ import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/
 import { createWorkshopState, createEditorCustomization, isWorkshopState, isEditorCustomization, isSetDocument, isEditorSkill, workshopRectOnGrid, type WorkshopState, type EditorCustomization, type SetDocument, type EditorSkill } from './workshopState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 14;
+export const SCHEMA_VERSION = 15;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -141,6 +141,7 @@ export function isGameState(value: unknown): value is GameState {
     || new Set(persistent.editorSkills).size !== persistent.editorSkills.length
     || !Array.isArray(persistent.setDocuments) || !persistent.setDocuments.every(isSetDocument)
     || new Set(persistent.setDocuments.map(d=>d.id)).size !== persistent.setDocuments.length) return false;
+  if(run.workshop.purchasedSets.includes('stream')&&(run.version!==BALANCE.world4.minimumVersion||!run.desktop.entered))return false;
   if((persistent.appearance as unknown as Appearance).editor>unlockedEditorStage(value as unknown as GameState)||(persistent.appearance as unknown as Appearance).desktop>unlockedDesktopStage(value as unknown as GameState))return false;
   if (run.totalPixelsGenerated < resources.pixels) return false;
   if (!isRecord(run.seed) || !Array.isArray(run.seed.built) || !isCount(run.seed.autoCursors)) return false;

@@ -3,11 +3,12 @@ import { resizeDesktop,fitWindow,workHeight } from './desktopGeometry';
 import { setDesktopStage, type DesktopStage } from './appearance';
 import { BALANCE, type DesktopSkill } from '../config/balance';
 import { createI18n } from '../content/i18n';
-import { creditPixels, passivePixelsPerSecond } from './economy';
+import { creditPixels, passivePixelsPerSecond, producerLedger } from './economy';
 import { desktopFiles } from './desktopFiles';
 import { hasDesktopSkill, hasUpgrade, jobCapacity, jobCursorQuote, jobUpdateCost } from './desktopJobs';
-import { JOB_IDS, type AppId, type DesktopState, type JobId, type PhotoEdit } from './desktopState';
+import { isManagerProcessId, JOB_IDS, type AppId, type DesktopState, type JobId, type PhotoEdit } from './desktopState';
 import { readCapture } from './captureScene';
+import { capturedContentSummary } from './capturePhoto';
 import type { GameState } from './state';
 export type ExtraAction =
  | {type:'job-assign'|'job-buy'|'job-update';app:JobId}
@@ -31,7 +32,7 @@ export function completeRequests(s:GameState,kinds:string[],now:number,automatic
 }
 export function recycleValue(s:GameState,id:string):number {
  if(s.run.desktop.recycled.includes(id))return 0;
- if(id.startsWith('shot:'))return passivePixelsPerSecond(s)*BALANCE.w3.recycleShotSeconds;
+ if(id.startsWith('shot:')){const shot=s.persistent.screenshots.find(item=>`shot:${item.id}`===id);return shot?capturedContentSummary(shot).count*BALANCE.capture.recyclePixelsPerPart:0;}
  return 0;
 }
 export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='ja'):GameState {
@@ -109,9 +110,9 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   const next=desktop(s,{reservation:{at:a.at,done:false}});return matches?completeRequests(next,['timer'],now):next;
  }
  case 'cancel-reservation':return desktop(s,{reservation:null});
- case 'terminal':return hasAppPart(s,'terminal','commands')&&(BALANCE.w3.terminalIntervals as readonly number[]).includes(a.interval)?desktop(s,{terminal:{...d.terminal,interval:a.interval,running:a.running,elapsedMs:0}}):s;
+ case 'terminal':return hasAppPart(s,'terminal','commands')&&(!a.running||hasAppPart(s,'terminal','run'))&&(a.interval===d.terminal.interval||hasAppPart(s,'terminal','interval'))&&(BALANCE.w3.terminalIntervals as readonly number[]).includes(a.interval)?desktop(s,{terminal:{...d.terminal,interval:a.interval,running:a.running,elapsedMs:0}}):s;
  case 'theme':{
-  if((a.mode!==undefined||a.accent!==undefined||a.radius!==undefined||a.autoRadius!==undefined)&&!hasAppPart(s,'theme','appearance'))return s;
+  if(a.mode!==undefined&&!hasAppPart(s,'theme','appearance')||a.accent!==undefined&&!hasAppPart(s,'theme','accent')||(a.radius!==undefined||a.autoRadius!==undefined)&&!hasAppPart(s,'theme','radius'))return s;
   const prefs={...p};
   if(a.mode==='light'||a.mode==='dark')prefs.mode=a.mode;
   if(a.accent&&/^#[0-9a-f]{6}$/i.test(a.accent))prefs.accent=a.accent;
@@ -135,8 +136,8 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
  }
  case 'workspace':return hasDesktopSkill(s,'virtual')?desktop(s,{workspace:a.workspace,active:null}):s;
  case 'move-workspace':return hasDesktopSkill(s,'virtual')?desktop(s,{workspaces:{...d.workspaces,[a.app]:d.workspaces[a.app]===0?1:0},active:null}):s;
- case 'manager-tab':return ['processes','performance'].includes(a.tab)?desktop(s,{managerTab:a.tab}):s;
- case 'manager-process':return ['home','shots','feedback',...JOB_IDS].includes(a.process)?desktop(s,{managerProcess:a.process}):s;
+ case 'manager-tab':return ['processes','performance'].includes(a.tab)&&(a.tab!=='performance'||hasAppPart(s,'manager','performance'))?desktop(s,{managerTab:a.tab}):s;
+ case 'manager-process':return isManagerProcessId(a.process)&&producerLedger(s).some(entry=>entry.id===a.process)?desktop(s,{managerProcess:a.process}):s;
  case 'calendar-month':return Number.isFinite(a.at)&&a.at>=0?desktop(s,{calendarMonth:a.at}):s;
  case 'desktop-stage':return setDesktopStage(s,a.stage);
  case 'settings-page':return desktop(s,{settingsPage:a.page});

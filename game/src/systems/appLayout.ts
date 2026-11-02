@@ -1,19 +1,21 @@
 import { BALANCE } from '../config/balance';
 import type { BuiltApp, Rect } from './desktopState';
 import type { DesktopUpgrade } from '../config/balance';
+import type { AppSlotRole } from '../content/appRecipes';
+import {validAppAssembly,validLegacyMaterials,type AppAssembly,type AssemblyMaterial} from './appAssemblySchema';
 
 export const BUILDABLE_APPS = ['files','mail','photo','bin','clock','theme','terminal','manager'] as const satisfies readonly BuiltApp[];
 export const APP_PARTS = {
  files:{base:['navigation','places','list','status'],features:['sort','search','large']},
- mail:{base:['messages','body'],features:['draft','folders']},
+ mail:{base:['messages','body'],features:['draft','folders','unread']},
  photo:{base:['source','image','brightness','tone','wallpaper'],features:['crop','compare']},
  bin:{base:['trash','empty'],features:['undo']},clock:{base:['time'],features:['timer','calendar']},
- theme:{base:['appearance'],features:['slideshow','iconSize']},terminal:{base:['commands','output'],features:[]},manager:{base:['tabs','processes'],features:[]},
+ theme:{base:['appearance'],features:['accent','radius','slideshow','iconSize']},terminal:{base:['commands','output'],features:['interval','run','history']},manager:{base:['tabs','processes'],features:['performance']},
 } as const;
-export type AppPartId = typeof APP_PARTS[BuiltApp]['base'][number] | typeof APP_PARTS[BuiltApp]['features'][number];
+export type AppPartId = AppSlotRole;
 export interface AppPart extends Rect { id:AppPartId; color:string; fontSize:number; rowHeight:number; striped:boolean }
 export interface AppLayout {width:number;height:number;parts:AppPart[]}
-export interface AppProject {crafted:AppPartId[];draft:AppLayout;installed:AppLayout|null;undo:AppLayout[];redo:AppLayout[]}
+export interface AppProject {crafted:AppPartId[];draft:AppLayout;installed:AppLayout|null;undo:AppLayout[];redo:AppLayout[];draftAssembly?:AppAssembly;installedAssembly?:AppAssembly|null;assemblyUndo?:AppAssembly[];assemblyRedo?:AppAssembly[];legacyMaterials?:AssemblyMaterial[]}
 export type AppProjects=Partial<Record<BuiltApp,AppProject>>;
 export type PartMinimums=Partial<Record<AppPartId,{width:number;height:number}>>;
 export const allAppParts=(app:BuiltApp):readonly AppPartId[]=>[...APP_PARTS[app].base,...APP_PARTS[app].features];
@@ -21,7 +23,7 @@ export const featureApp=(id:string)=>BUILDABLE_APPS.find(app=>(APP_PARTS[app].fe
 export const isBuildable=(id:string):id is BuiltApp=>(BUILDABLE_APPS as readonly string[]).includes(id);
 export const emptyLayout=():AppLayout=>({width:BALANCE.appBuild.width,height:BALANCE.appBuild.height,parts:[]});
 export const emptyProject=():AppProject=>({crafted:[],draft:emptyLayout(),installed:null,undo:[],redo:[]});
-export const bodyParts:readonly AppPartId[]=['places','list','messages','body','image','trash','calendar','appearance','output','processes'];
+export const bodyParts:readonly AppPartId[]=['places','list','messages','body','image','trash','calendar','appearance','output','processes','history','performance'];
 export function minimumPart(id:AppPartId,metrics:PartMinimums={}):{width:number;height:number} {
  const body=bodyParts.includes(id),m=metrics[id];
  return {width:Math.max(({navigation:280,status:224,list:224,messages:200,body:200,source:200,brightness:200,tone:200,crop:200,wallpaper:180,compare:160,search:200,large:160,sort:200,timer:280,commands:320,tabs:280,slideshow:220,iconSize:220,time:200} as Partial<Record<AppPartId,number>>)[id]??(body?BALANCE.appBuild.bodyMinWidth:BALANCE.appBuild.controlMinWidth),m?.width??0),height:Math.max(({time:112,commands:112,timer:128,appearance:192,calendar:224,draft:96} as Partial<Record<AppPartId,number>>)[id]??(body?BALANCE.appBuild.bodyMinHeight:BALANCE.appBuild.controlMinHeight),m?.height??0)};
@@ -76,22 +78,34 @@ export function fitAppLayout(layout:AppLayout,width:number,height:number,metrics
 export function changePart(layout:AppLayout,id:AppPartId,patch:Partial<Rect & Pick<AppPart,'color'|'fontSize'|'rowHeight'|'striped'>>,metrics:PartMinimums={}):AppLayout {
  const part=layout.parts.find(p=>p.id===id);if(!part)return layout;
  const next={...part,...patch};for(const k of ['x','y','width','height'] as const)next[k]=grid(next[k]);
- if(!/^#[0-9a-f]{6}$/i.test(next.color)||![10,12,14,16].includes(next.fontSize)||![20,24,28,32].includes(next.rowHeight)||typeof next.striped!=='boolean'||!validPlacement(layout,next,metrics))return layout;
+ if(!/^#[0-9a-f]{6}$/i.test(next.color)||!(Number.isInteger(next.fontSize)&&next.fontSize>=10&&next.fontSize<=BALANCE.pageDesign.buttonFontMax)||!BALANCE.appBuild.rowHeights.includes(next.rowHeight as never)||typeof next.striped!=='boolean'||!validPlacement(layout,next,metrics))return layout;
  return {...layout,parts:layout.parts.map(p=>p.id===id?next:p)};
 }
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function validLayout(v:unknown,app:BuiltApp):v is AppLayout {
- if(!obj(v)||!Number.isFinite(v.width)||!Number.isFinite(v.height)||(v.width as number)<160||(v.height as number)<100||(v.width as number)>1920||(v.height as number)>1080||!Array.isArray(v.parts)||v.parts.length>allAppParts(app).length)return false;
- if(!v.parts.every(p=>obj(p)&&allAppParts(app).includes(p.id as AppPartId)&&['x','y','width','height'].every(k=>typeof p[k]==='number'&&Number.isFinite(p[k])&&(p[k] as number)%BALANCE.appBuild.grid===0)&&typeof p.color==='string'&&/^#[0-9a-f]{6}$/i.test(p.color)&&[10,12,14,16].includes(p.fontSize as number)&&[20,24,28,32].includes(p.rowHeight as number)&&typeof p.striped==='boolean'))return false;
+ if(!obj(v)||!Number.isFinite(v.width)||!Number.isFinite(v.height)||(v.width as number)<BALANCE.appBuild.minWidth||(v.height as number)<BALANCE.appBuild.minHeight||(v.width as number)>BALANCE.appBuild.maxWidth||(v.height as number)>BALANCE.appBuild.maxHeight||!Array.isArray(v.parts)||v.parts.length>allAppParts(app).length)return false;
+ if(!v.parts.every(p=>obj(p)&&allAppParts(app).includes(p.id as AppPartId)&&['x','y','width','height'].every(k=>typeof p[k]==='number'&&Number.isFinite(p[k])&&(p[k] as number)%BALANCE.appBuild.grid===0)&&typeof p.color==='string'&&/^#[0-9a-f]{6}$/i.test(p.color)&&typeof p.fontSize==='number'&&Number.isInteger(p.fontSize)&&p.fontSize>=10&&p.fontSize<=BALANCE.pageDesign.buttonFontMax&&BALANCE.appBuild.rowHeights.includes(p.rowHeight as never)&&typeof p.striped==='boolean'))return false;
  const layout=v as unknown as AppLayout;return new Set(layout.parts.map(p=>p.id)).size===layout.parts.length&&layout.parts.every(p=>validPlacement(layout,p));
 }
 export function migrateAppProjects(apps:BuiltApp[],upgrades:DesktopUpgrade[],skills:readonly string[]=[]):AppProjects {
- return Object.fromEntries(BUILDABLE_APPS.filter(app=>upgrades.includes(app)).map(app=>{const crafted=[...APP_PARTS[app].base,...APP_PARTS[app].features.filter(id=>upgrades.includes(id)||app==='mail'&&id==='folders'&&skills.includes('sortMail'))] as AppPartId[],layout=recommendedLayout(app,crafted);return [app,{crafted,draft:layout,installed:apps.includes(app)?structuredClone(layout):null,undo:[],redo:[]}];}));
+ return Object.fromEntries(BUILDABLE_APPS.filter(app=>upgrades.includes(app)).map(app=>{const crafted=[...APP_PARTS[app].base,...APP_PARTS[app].features.filter(id=>(upgrades as readonly string[]).includes(id)||app==='mail'&&id==='folders'&&skills.includes('sortMail'))] as AppPartId[],layout=recommendedLayout(app,crafted);return [app,{crafted,draft:layout,installed:apps.includes(app)?structuredClone(layout):null,undo:[],redo:[]}];}));
 }
 export function repairAppProjects(raw:unknown,apps:BuiltApp[],upgrades:DesktopUpgrade[],skills:readonly string[]=[]):AppProjects {
  const fallback=migrateAppProjects(apps,upgrades,skills);if(!obj(raw))return fallback;
  for(const app of BUILDABLE_APPS){const p=raw[app];if(!fallback[app]||!obj(p)||!Array.isArray(p.crafted)||!p.crafted.every(id=>allAppParts(app).includes(id as AppPartId))||new Set(p.crafted).size!==p.crafted.length||!validLayout(p.draft,app)||!(p.installed===null&&!apps.includes(app)||validLayout(p.installed,app))||!Array.isArray(p.undo)||!Array.isArray(p.redo)||p.undo.length>BALANCE.appBuild.history||p.redo.length>BALANCE.appBuild.history||![...p.undo,...p.redo].every(l=>validLayout(l,app)))continue;
-  const project=p as unknown as AppProject;
+  if(p.legacyMaterials!==undefined&&!validLegacyMaterials(p.legacyMaterials,app))continue;
+  const repairAssemblyGeometry=(raw:unknown,layout:AppLayout|null):AppAssembly|null=>{
+   if(!layout)return null;
+   if(validAppAssembly(raw,app))return raw;
+   if(!obj(raw)||!Array.isArray(raw.slots)||!raw.slots.every(slot=>obj(slot)&&layout.parts.some(part=>part.id===slot.role)))return null;
+   const candidate={...raw,width:layout.width,height:layout.height,slots:raw.slots.map(slot=>{const part=layout.parts.find(part=>part.id===slot.role)!;return {...slot,rect:{x:part.x,y:part.y,width:part.width,height:part.height}};})};
+   return validAppAssembly(candidate,app)?candidate:null;
+  };
+  if(p.installedAssembly!==undefined&&(p.installed===null)!==(p.installedAssembly===null))continue;
+  const draftAssembly=p.draftAssembly===undefined?undefined:repairAssemblyGeometry(p.draftAssembly,p.draft as AppLayout);
+  const installedAssembly=p.installedAssembly===undefined?undefined:p.installedAssembly===null?null:repairAssemblyGeometry(p.installedAssembly,p.installed as AppLayout);
+  if(p.draftAssembly!==undefined&&!draftAssembly||p.installedAssembly!==undefined&&p.installedAssembly!==null&&!installedAssembly||p.assemblyUndo!==undefined&&(!Array.isArray(p.assemblyUndo)||p.assemblyUndo.length>BALANCE.appBuild.history||!p.assemblyUndo.every(a=>validAppAssembly(a,app)))||p.assemblyRedo!==undefined&&(!Array.isArray(p.assemblyRedo)||p.assemblyRedo.length>BALANCE.appBuild.history||!p.assemblyRedo.every(a=>validAppAssembly(a,app))))continue;
+  const project=(draftAssembly!==p.draftAssembly||installedAssembly!==p.installedAssembly?{...p,draftAssembly,installedAssembly}:p) as unknown as AppProject;
   if([project.draft,...(project.installed?[project.installed]:[]),...project.undo,...project.redo].some(l=>l.parts.some(part=>!project.crafted.includes(part.id))))continue;
   fallback[app]=project;
  }

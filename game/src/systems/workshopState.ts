@@ -27,6 +27,9 @@ export interface PartProduction {
   completedAt: number|null; exportedAt: number|null; tested: boolean;
 }
 export interface WorkshopState {
+  /** The layout era this version entered with; later upgrades reset inherited panel placement. */
+  editorStageAtEntry?:0|1|2;
+  assistance?: {part:WorkshopPartId|null;elapsedMs:number};
   entered: boolean; enteredAt: number; enterMs: number; purchasedSets: UiSetId[];
   parts: Partial<Record<WorkshopPartId,PartProduction>>; activePart: WorkshopPartId|null;
   view: 'workbench'|'settings'|'exports'; zoom: number; exitInspected: boolean;
@@ -46,16 +49,18 @@ export const createComponentDesign = (): ComponentDesign => ({
   symbolShape: 'line', scrollbarWidth: BALANCE.workshop.design.scrollbarWidth, arrows: true,
   separator: true, progressHeight: BALANCE.workshop.design.progressHeight, progressStyle: 'solid', showPercent: true, motion: 'plain',
 });
-export const createEditorCustomization = (): EditorCustomization => ({
+export const createEditorCustomization = (stage:0|1|2=0): EditorCustomization => ({
   nativeBackground:true,
   accent: BALANCE.workshop.customization.accent, bandPosition: 'top',
   panelWidth: BALANCE.workshop.customization.panelWidth, background: BALANCE.workshop.customization.background,
   grid: true, gridSpacing: BALANCE.workshop.customization.gridSpacing,
   fontSize: BALANCE.workshop.customization.fontSize, docking: 'standard', presets: [],
-  panelPositions: { palette:'left',tools:'right',parts:'right',info:'bottom' },
+  panelPositions: stage===2?{ palette:'right',tools:'left',parts:'left',info:'bottom' }:{ palette:'left',tools:'right',parts:'right',info:'bottom' },
   panelWidths: { palette:BALANCE.workshop.customization.panelWidth,tools:BALANCE.workshop.customization.panelWidth,parts:BALANCE.workshop.customization.panelWidth },
 });
 export const createWorkshopState = (): WorkshopState => ({
+  editorStageAtEntry:0,
+  assistance:{part:null,elapsedMs:0},
   entered:false,enteredAt:0,enterMs:0,purchasedSets:[],parts:{},activePart:null,
   view:'workbench',zoom:1,exitInspected:false,tokenDiscovered:false,
   guide:{seen:[],current:null,collapsed:false},lastActionAt:0,
@@ -150,7 +155,7 @@ export function isPartProduction(x:unknown,id:WorkshopPartId):x is PartProductio
   return x.exportedAt===null||x.step===4&&amount(x.exportedAt)&&x.exportedAt>=Number(x.completedAt);
 }
 export function isWorkshopState(x:unknown):x is WorkshopState {
-  if(!record(x)||typeof x.entered!=='boolean'||!amount(x.enteredAt)||!between(x.enterMs,0,BALANCE.workshop.enterMs)
+  if(!record(x)||(x.editorStageAtEntry!==undefined&&![0,1,2].includes(x.editorStageAtEntry as number))||typeof x.entered!=='boolean'||!amount(x.enteredAt)||!between(x.enterMs,0,BALANCE.workshop.enterMs)
     ||!Array.isArray(x.purchasedSets)||!unique(x.purchasedSets)||!x.purchasedSets.every(s=>SET_IDS.includes(s as UiSetId))
     ||!record(x.parts)||!['workbench','settings','exports'].includes(x.view as string)
     ||!between(x.zoom,BALANCE.workshop.zoomMin,BALANCE.workshop.zoomMax)||typeof x.exitInspected!=='boolean'
@@ -158,6 +163,12 @@ export function isWorkshopState(x:unknown):x is WorkshopState {
   const entries=Object.entries(x.parts);
   if(!entries.every(([id,p])=>WORKSHOP_PARTS.some(d=>d.id===id)&&(x.purchasedSets as unknown[]).includes(getWorkshopPart(id as WorkshopPartId).set)&&isPartProduction(p,id as WorkshopPartId)))return false;
   if(x.activePart!==null&&(!WORKSHOP_PARTS.some(d=>d.id===x.activePart)||!x.parts[x.activePart as string]))return false;
+  if(x.assistance!==undefined){
+    const assistant=x.assistance;
+    if(!record(assistant)||!amount(assistant.elapsedMs)||assistant.elapsedMs>=BALANCE.workshop.assistStepMs
+      ||(assistant.part===null?assistant.elapsedMs!==0:typeof assistant.part!=='string'||!x.parts[assistant.part])
+      ||assistant.elapsedMs>0&&assistant.part!==x.activePart)return false;
+  }
   for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
     const [aId,a]=entries[i] as [WorkshopPartId,PartProduction], [bId,b]=entries[j] as [WorkshopPartId,PartProduction];
     if(a.step>0&&b.step>0&&getWorkshopPart(aId).set===getWorkshopPart(bId).set&&!workshopPairValid(aId,a.rect,bId,b.rect))return false;
@@ -178,5 +189,9 @@ export function isSetDocument(x:unknown):x is SetDocument {
   return record(x)&&typeof x.id==='string'&&SET_IDS.includes(x.set as UiSetId)&&['v0.1','v1','v2'].includes(x.version as string)
     &&amount(x.at)&&record(x.parts)&&Object.keys(x.parts).length>0
     &&Object.entries(x.parts).every(([id,p])=>WORKSHOP_PARTS.some(d=>d.id===id&&d.set===x.set)&&isPartProduction(p,id as WorkshopPartId)&&(p as PartProduction).step===4);
+}
+/** Partial exports are records, but do not satisfy a completed-set requirement. */
+export function isCompleteSetDocument(document:SetDocument):boolean {
+  return WORKSHOP_PARTS.filter(part=>part.set===document.set).every(part=>document.parts[part.id]?.step===4);
 }
 export const isEditorSkill=(x:unknown):x is EditorSkill=>BALANCE.workshop.skills.some(s=>s.id===x);

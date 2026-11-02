@@ -1,6 +1,6 @@
 import { describe,expect,it } from 'vitest';
 import { BALANCE } from '../config/balance';
-import { actAppBuild } from './appBuild';
+import { actAppBuild,hasAppPart } from './appBuild';
 import { actDesktop,advanceDesktopTime,buyDesktopApp,desktopConditions,focusWindow,screenshotCapacity,takeScreenshot,visibleApps } from './desktop';
 import { decodeCapture,encodeCapture } from './desktopState';
 import { createFixture } from './fixtures';
@@ -10,11 +10,16 @@ import { advanceActiveTime,advanceOfflineTime } from './time';
 const now = 1_000_000;
 const desktop = () => createFixture('desktop-early',now)!;
 describe('デスクトップ',()=>{
-  it('ファイル・並べ替え・メールを順に作り、未購入のアプリを開かない',()=>{
-    let s=desktop(); expect(buyDesktopApp(s,'mail')).toBe(s);
-    const start=s.resources.pixels;s=buyDesktopApp(s,'files');expect(s.resources.pixels).toBe(start-300_000);expect(s.run.desktop.active).toBe('tessera');s=actAppBuild(s,{type:'app-recommend',app:'files'});s=actAppBuild(s,{type:'app-install',app:'files'});
-    expect(buyDesktopApp(s,'files')).toBe(s);expect(buyDesktopApp(s,'mail')).toBe(s);s=buyDesktopApp(s,'sort');s=buyDesktopApp(s,'mail');s=actAppBuild(s,{type:'app-recommend',app:'mail'});s=actAppBuild(s,{type:'app-install',app:'mail'});expect(s.resources.pixels).toBe(start-1_150_000);
-    expect(s.run.desktop.apps).toEqual(['files','mail']);expect(desktopConditions(s)[0]).toBe(false);
+  it('制作済みの材料でファイルとメールを組み、組み立てと取り付けでは二重に支払わない',()=>{
+    let s=desktop();const start=s.resources.pixels;
+    expect(buyDesktopApp(s,'mail')).toBe(s);
+    s=actDesktop(s,{type:'open',app:'files'},now);expect(visibleApps(s)).not.toContain('files');
+    s=buyDesktopApp(s,'files');expect(s.resources.pixels).toBe(start);expect(s.run.desktop.active).toBe('tessera');expect(s.run.desktop.apps).not.toContain('files');
+    s=actAppBuild(s,{type:'app-recommend',app:'files'});s=actAppBuild(s,{type:'app-install',app:'files'});
+    expect(hasAppPart(s,'files','sort')).toBe(true);expect(buyDesktopApp(s,'files')).toBe(s);expect(buyDesktopApp(s,'sort')).toBe(s);
+    s=buyDesktopApp(s,'mail');s=actAppBuild(s,{type:'app-recommend',app:'mail'});s=actAppBuild(s,{type:'app-install',app:'mail'});
+    expect(s.resources.pixels).toBe(start);expect(s.run.desktop.apps).toEqual(['files','mail']);expect(desktopConditions(s)[0]).toBe(false);
+    expect(decodeSave(encodeSave(s))).toEqual(s);
   });
   it('窓の移動・大きさ・前後・最小化・最大化・復元・閉じる・開き直しとアイコン位置を保存する',()=>{
     let s=focusWindow(desktop(),'note');
@@ -47,10 +52,10 @@ describe('デスクトップ',()=>{
   it('メール作成前から4分ごとに届き、留守でも最大3件。未解放の依頼は生成しない',()=>{
     let s=desktop();s=advanceDesktopTime(s,239_900,now);expect(s.run.desktop.feedback).toHaveLength(0);
     s=advanceDesktopTime(s,100,now);expect(s.run.desktop.feedback).toHaveLength(1);
-    s=advanceOfflineTime(s,now+24*3_600_000).state;expect(s.run.desktop.feedback).toHaveLength(2);
-    expect(s.run.desktop.feedback.every(f=>['color','screenshot'].includes(f.kind))).toBe(true);
+    s=advanceOfflineTime(s,now+24*3_600_000).state;expect(s.run.desktop.feedback).toHaveLength(BALANCE.w3.maxPending);
+    expect(s.run.desktop.feedback.every(f=>['color','screenshot','capture'].includes(f.kind))).toBe(true);
     expect(s.run.desktop.apps).toEqual([]);
-    s=advanceDesktopTime(s,24*3_600_000,now);expect(s.run.desktop.feedback).toHaveLength(2);
+    s=advanceDesktopTime(s,24*3_600_000,now);expect(s.run.desktop.feedback).toHaveLength(BALANCE.w3.maxPending);
     s.persistent.specs.network=1;s.run.desktop.feedback=[];s.run.desktop.feedbackMs=0;
     expect(advanceDesktopTime(s,180_000,now).run.desktop.feedback).toHaveLength(1);
   });

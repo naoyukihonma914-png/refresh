@@ -2,6 +2,12 @@ import {describe,it,expect} from 'vitest';
 import {createFixture,FIXTURE_NAMES,completeWorkshopPartFixture} from './fixtures';
 import {isGameState} from './state';
 import {encodeSave,decodeSave} from './save';
+import {adoptedPartIds} from './appAssembly';
+import {producerLedger} from './economy';
+import {rawDesktopFiles} from './desktopFiles';
+import {createI18n} from '../content/i18n';
+import {world4Preparation} from './world4';
+import {canAssembleDesktop} from './workshop';
 import {WORKSHOP_PARTS} from '../content/workshopCatalog';
 const now=1_800_000_000_000;
 describe('第3版：ブラウザ固定状態の整合性',()=>{
@@ -23,7 +29,7 @@ describe('第3版：ブラウザ固定状態の整合性',()=>{
   expect(Object.values(ready.run.workshop.parts).filter(p=>p?.step===4)).toHaveLength(22);
   expect(ready.persistent.setDocuments.map(d=>d.set)).toEqual(['common','foundation','files','mail']);
   expect(ready.persistent.specs.color).toBe(0);
-  expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras')).toHaveLength(47);
+  expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras'&&p.set!=='stream')).toHaveLength(47);
  });
  it('ファイル完成の固定状態は6パーツの書類ができたエクスポート直前を示す',()=>{
   const state=createFixture('stage8a-files-complete-era0',now)!;
@@ -41,5 +47,30 @@ describe('第3版：ブラウザ固定状態の整合性',()=>{
    expect(state.run.world).toBe('desktop');
    expect(state.run.workshop.parts['common-frame']?.design).toMatchObject({nativeColors:false,color:'#1f3f7a',textColor:'#f4efe4',controlSides:{close:'start',minimize:'end',maximize:'end'}});
   }
+ });
+ it('8bの生産前後は未採用素材とインストール済みsourceを区別する',()=>{
+  for(const era of [0,1,2,3]){
+   const before=createFixture(`stage8b-economy-before-era${era}`,now)!;
+   const after=createFixture(`stage8b-economy-after-era${era}`,now)!;
+   expect(before.run.workshop.parts['photo-crop']?.step).toBe(3);
+   expect(adoptedPartIds(before,'photo')).not.toContain('photo-crop');
+   expect(adoptedPartIds(after,'photo')).toContain('photo-crop');
+   const row=(state:typeof before)=>producerLedger(state).find(item=>item.id==='app:photo')!;
+   expect(row(after).baseRate).toBeGreaterThan(row(before).baseRate);
+  }
+ });
+ it('8bの旧版書類・次版関門・世界4条件の固定状態を区別する',()=>{
+  const files=createFixture('stage8b-files-archive-era0',now)!;
+  const entries=rawDesktopFiles(files,createI18n('ja'));
+  expect(entries.find(entry=>entry.id==='note')?.kind).toBe('note');
+  expect(entries.some(entry=>entry.kind==='set'&&entry.edition==='current')).toBe(true);
+  expect(entries.some(entry=>entry.kind==='set'&&entry.edition==='archive')).toBe(true);
+  const again=createFixture('stage8b-second-workshop-era0',now)!;
+  expect(again.run.workshop.purchasedSets).toEqual(['common']);
+  expect(Object.values(again.run.workshop.parts).every(part=>part?.step===0)).toBe(true);
+  expect(canAssembleDesktop(again)).toBe(false);
+  expect(world4Preparation(createFixture('stage8b-stream-ready-era0',now)!).ready).toBe(true);
+  expect(world4Preparation(createFixture('stage8b-stream-draft-era0',now)!).ready).toBe(false);
+  expect(world4Preparation(createFixture('stage8b-stream-spec-blocked-era0',now)!).ready).toBe(false);
  });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BALANCE } from '../config/balance';
 import { readCapture } from './captureScene';
+import { actAppBuild,hasAppPart } from './appBuild';
 import { actDesktop, activeScreenshots, screenshotCapacity, screenshotReward } from './desktop';
 import { passivePixelsPerSecond } from './economy';
 import { createFixture } from './fixtures';
@@ -18,7 +19,7 @@ function automated() {
   return state;
 }
 
-describe('第2版：不在中のターミナル', () => {
+describe('第3版：不在中のターミナル', () => {
   it('次回までの端数を保ち、各実行時刻までの生成を撮り、その後の生成を混ぜない', () => {
     const state = automated(), rate = passivePixelsPerSecond(state), reward = screenshotReward(state);
     state.run.desktop.terminal.elapsedMs = 15_000;
@@ -59,9 +60,16 @@ describe('第2版：不在中のターミナル', () => {
   it('停止中・命令パーツなし・保存失敗の代替計算では自動撮影を作らない', () => {
     const stopped = automated(); stopped.run.desktop.terminal.running = false;
     expect(advanceOfflineTime(stopped, now + 120_000).state.persistent.screenshots).toHaveLength(0);
-    const missing = automated();
-    missing.run.desktop.projects.terminal!.installed!.parts = missing.run.desktop.projects.terminal!.installed!.parts.filter(part => part.id !== 'commands');
-    expect(advanceOfflineTime(missing, now + 120_000).state.persistent.screenshots).toHaveLength(0);
+    let missing = actAppBuild(automated(), { type:'app-edit', app:'terminal' });
+    missing = actAppBuild(missing, { type:'app-remove', app:'terminal', part:'commands' });
+    // Editing the draft must not disable the running app until it is installed.
+    expect(hasAppPart(missing,'terminal','commands')).toBe(true);
+    missing = actAppBuild(missing, { type:'app-install', app:'terminal' });
+    expect(hasAppPart(missing,'terminal','commands')).toBe(false);
+    expect(missing.run.workshop.parts['terminal-commands']!.step).toBe(4);
+    const withoutCommands = advanceOfflineTime(missing, now + 120_000).state;
+    expect(withoutCommands.persistent.screenshots).toHaveLength(0);
+    expect(withoutCommands.run.desktop.terminal.executions).toBe(0);
     const fallback = advanceOfflineTime(automated(), now + 120_000, 'ja', false).state;
     expect(fallback.persistent.screenshots).toHaveLength(0);
     expect(fallback.run.desktop.terminal.executions).toBe(0);

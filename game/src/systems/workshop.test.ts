@@ -34,14 +34,14 @@ function completeSet(s:GameState,set:UiSetId):GameState {
 
 describe('第3版：工房の制作と経済',()=>{
   it('47部品は本線22と任意25、2つのプラグインは別枠で個別の毎秒を持つ',()=>{
-    expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras')).toHaveLength(47);
+    expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras'&&p.set!=='stream')).toHaveLength(47);
     expect(WORKSHOP_PARTS.filter(p=>['common','foundation','files','mail'].includes(p.set))).toHaveLength(22);
     expect(WORKSHOP_PARTS.filter(p=>p.set==='extras')).toHaveLength(2);
-    expect(new Set(WORKSHOP_PARTS.map(p=>p.id)).size).toBe(49);
+    expect(new Set(WORKSHOP_PARTS.map(p=>p.id)).size).toBe(53);expect(WORKSHOP_PARTS.filter(p=>p.set==='stream')).toHaveLength(4);
     expect(new Set(Object.values(BALANCE.workshop.partRates)).size).toBeGreaterThan(10);
   });
-  it('49部品すべての標準配置は同時に置いても最小寸法・刻み・包含・非重複を満たす',()=>{
-    const s=workshop();s.persistent.editorSkills=['extraParts'];s.run.workshop.purchasedSets=UI_SETS.map(set=>set.id);
+  it('未来用4つを含む53部品すべての標準配置は同時に置いても最小寸法・刻み・包含・非重複を満たす',()=>{
+    const s=workshop();s.run.version='v2';s.run.world='desktop';s.run.desktop.entered=true;s.persistent.specs.color=1;s.persistent.editorSkills=['extraParts'];s.run.workshop.purchasedSets=UI_SETS.map(set=>set.id);
     for(const definition of WORKSHOP_PARTS)s.run.workshop.parts[definition.id]={step:1,rect:{...definition.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
     for(const definition of WORKSHOP_PARTS){const min=partMinimumSize(s,definition.id);expect(definition.defaultRect.width).toBeGreaterThanOrEqual(min.width);expect(definition.defaultRect.height).toBeGreaterThanOrEqual(min.height);expect(partRectValid(s,definition.id,definition.defaultRect)).toBe(true);}
     expect(isGameState(s)).toBe(true);
@@ -291,11 +291,11 @@ describe('工房：同じ行き先の部品が共有する操作状態',()=>{
     expect(target.photo.wallpaper).toBe(applied);expect(applied!.brightness).toBe(75);
     target=workshopTargetReducer(target,{type:'photo-compare'});expect(target.photo.compare).toBe(true);expect(target.photo.brightness).toBe(100);
   });
-  it('ファイルのデータは実際に購入した部品と完成書類から作り、検索・並替・戻るの状態を共有する',()=>{
-    const i18n=createI18n('ja');let s=workshop();expect(targetFileEntries(s,i18n)).toEqual([]);
+  it('ファイルは完成セット書類と最初からある制作ノートを使い、検索・並替・戻るの状態を共有する',()=>{
+    const i18n=createI18n('ja');let s=workshop();expect(targetFileEntries(s,i18n)).toMatchObject([{id:'note',type:'note',name:i18n.t('desktop.app.note')}]);
     s=completeSet(s,'common');const entries=targetFileEntries(s,i18n);
-    expect(entries.filter(entry=>entry.type==='set')).toHaveLength(1);expect(entries.filter(entry=>entry.type==='part')).toHaveLength(5);
-    expect(entries.find(entry=>entry.id==='part:common-button')!.name).toBe(i18n.t('ws.part.common-button'));
+    expect(entries.filter(entry=>entry.type==='set')).toHaveLength(1);expect(entries.filter(entry=>entry.type==='part')).toHaveLength(0);
+    expect(entries.find(entry=>entry.id==='set:v0.1:common')!.set).toBe('common');expect(entries.find(entry=>entry.id==='note')).toBeDefined();
     let target=createWorkshopTargetState();target=workshopTargetReducer(target,{type:'file-query',query:entries[0]!.name});
     target=workshopTargetReducer(target,{type:'file-sort',key:'date'});expect(target.files).toMatchObject({query:entries[0]!.name,sort:'date',ascending:true});
     target=workshopTargetReducer(target,{type:'file-folder',folder:'sets'});target=workshopTargetReducer(target,{type:'file-back'});
