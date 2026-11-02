@@ -984,6 +984,8 @@
     "shipping.nextVersion": "次版の作成",
     "shipping.comparison": "期間内の比較",
     "shipping.trend": "日別売上の推移",
-    "shipping.breakdown": "売上の内訳"
+    "shipping.breakdown": "売上の内訳",
+    "shipping.overview": "概要",
+    "shipping.reportSections": "販売レポートの項目"
   }
 }

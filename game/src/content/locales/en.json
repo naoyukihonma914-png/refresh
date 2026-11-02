@@ -1024,6 +1024,8 @@
     "shipping.nextVersion": "Start the next version",
     "shipping.comparison": "Comparison within the period",
     "shipping.trend": "Daily sales trend",
-    "shipping.breakdown": "Sales breakdown"
+    "shipping.breakdown": "Sales breakdown",
+    "shipping.overview": "Overview",
+    "shipping.reportSections": "Sales report sections"
   }
 }
