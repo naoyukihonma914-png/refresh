@@ -23,7 +23,7 @@
 .seed-construction .seed-generate {min-block-size:32px;position:relative;}
 .seed-construction .seed-generator-line {min-block-size:100px;}
 .seed-construction .seed-generator-anchor {display:inline-block;position:relative;min-inline-size:240px;max-inline-size:100%;}
-.seed-construction .seed-auto-cursor {position:absolute;inline-size:18px;block-size:24px;pointer-events:none;}
+.seed-construction .seed-auto-cursor {position:absolute;width:18px;height:24px;inline-size:18px;block-size:24px;pointer-events:none;}
 .seed-construction .seed-gain {position:absolute;inset-inline-start:50%;inset-block-start:-12px;pointer-events:none;white-space:nowrap;}
 .seed-construction .seed-construction-resources {display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
 .seed-construction .seed-construction-resources small {font-size:13px;}
@@ -59,7 +59,7 @@
 .seed-construction .seed-built-parts ul {list-style:none;margin:8px 0;padding:0;}
 .seed-construction .seed-built-parts li {padding:4px 0;border-block-end:1px solid var(--editor-edge-dark);}
 .seed-construction .seed-construction-tool {padding:8px;}
-.seed-construction .seed-construction-tool svg {inline-size:28px;block-size:28px;fill:none;stroke:currentColor;stroke-width:1.5;}
+.seed-construction .seed-construction-tool svg {width:28px;height:28px;inline-size:28px;block-size:28px;fill:none;stroke:currentColor;stroke-width:1.5;}
 .seed-construction .seed-construction-layers {padding:4px 12px;font:12px 'Refresh Pixel','Refresh UI',sans-serif;}
 .seed-construction .page-settings {flex:1;inline-size:100%;padding:16px 24px;overflow:auto;background:#fff;color:#111;font:16px/1.5 'Refresh Serif',serif;}
 .seed-construction .page-settings h1 {font:700 20px 'Refresh Serif',serif;}
