@@ -148,7 +148,7 @@ describe('製品ページは別の骨格でも同じ製品と操作を表示す�
     product.screenshots = [product.screenshots![0]!, product.capture!];
     for (const generation of generations) {
       const tree = render(state, generation, createI18n('en'), 'store');
-      const photos = byClass(tree, 'store-photo-list')[0]!;
+      const photos = one(tree, 'data-store-photo-choices', 'true');
       const buttons = photos.children.filter(isElement).filter(node => node.tag === 'button');
       expect(buttons).toHaveLength(2);
       expect(buttons.map(node => node.attrs['aria-pressed'])).toEqual(['true', 'false']);
