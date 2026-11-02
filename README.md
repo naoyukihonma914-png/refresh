@@ -135,3 +135,12 @@ PR #9の標準配置の比較は [mainと修正後の画像・結果](docs/revie
 - `?state=stage7-store`／`stage7-shipping`／`stage7-complete`：製品ページ、売上集計中、出荷完了。
 - `?state=stage7-v2`／`stage7-v2-inherit`：60Hz購入済みのv2と、構成の継承中。
 - `?state=stage7-advice0`〜`stage7-advice3`／`stage7-offline0`〜`stage7-offline3`：各時代の助言・不在の知らせ。実セーブから隔離した確認用。
+
+
+製品ページと出荷画面の世代確認は `python tools/check_stage7_screens.py --base-url http://127.0.0.1:4173`。3世代と試作版×3言語×2サイズの48場面を操作し、画像・JSON・全画像の一覧を `game/artifacts/stage7-screens/` に出力する。`--generation`・`--screen`・`--language`・`--width`で絞り込み、`--resume`で成功した条件を保って再開できる。第1世代はOSのゴシック体を使い、確認環境の書体については[確認記録](docs/reviews/stage7/screen-verification.md)に記載。
+
+- `?state=stage7-store-gen1`〜`stage7-store-gen3`：ソフトウェアの製品ページ3世代。
+- `?state=stage7-sales-gen1`〜`stage7-sales-gen3`：ソフトウェアの売上レポート3世代。
+- `?state=stage7-freeware`／`stage7-freeware-sales`：第1世代の試作版ページと出荷。
+
+第3世代は保存した様式だけの見本で、未実装のデスクトップ段4・5は解放しない。[資料の閲覧範囲](docs/reviews/stage7/screen-references.md)。

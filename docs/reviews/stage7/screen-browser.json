@@ -1,0 +1,3239 @@
+{
+  "scenes": [
+    {
+      "id": "store-gen2-ja-1920",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-ja-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-ja-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-ja-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-ja-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "14px",
+        "lineHeight": "21px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-ja-1366",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-ja-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-ja-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-ja-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-ja-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "14px",
+        "lineHeight": "21px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-1920",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "14px",
+        "lineHeight": "21px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-1366",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "14px",
+        "lineHeight": "21px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-XA-1920",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-XA-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "14px",
+        "lineHeight": "21px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen2-en-XA-1366",
+      "screen": "store",
+      "variant": "gen2",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen2-en-XA-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen2-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "14px",
+        "lineHeight": "21px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen2-ja-1920",
+      "screen": "sales",
+      "variant": "gen2",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen2-ja-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen2-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen2-ja-1366",
+      "screen": "sales",
+      "variant": "gen2",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen2-ja-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen2-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen2-en-1920",
+      "screen": "sales",
+      "variant": "gen2",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen2-en-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen2-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen2-en-1366",
+      "screen": "sales",
+      "variant": "gen2",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen2-en-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen2-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen2-en-XA-1920",
+      "screen": "sales",
+      "variant": "gen2",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen2-en-XA-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen2-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen2-en-XA-1366",
+      "screen": "sales",
+      "variant": "gen2",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen2-en-XA-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen2-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "Arial, Meiryo, \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-cursors",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen3-ja-1920",
+      "screen": "store",
+      "variant": "gen3",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen3-ja-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen3-ja-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen3-ja-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen3-ja-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen3-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "15px",
+        "lineHeight": "24px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen3-ja-1366",
+      "screen": "store",
+      "variant": "gen3",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen3-ja-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen3-ja-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen3-ja-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen3-ja-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen3-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "15px",
+        "lineHeight": "24px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen3-en-1920",
+      "screen": "store",
+      "variant": "gen3",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen3-en-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen3-en-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen3-en-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen3-en-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen3-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "15px",
+        "lineHeight": "24px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen3-en-1366",
+      "screen": "store",
+      "variant": "gen3",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen3-en-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen3-en-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen3-en-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen3-en-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen3-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "15px",
+        "lineHeight": "24px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen3-en-XA-1920",
+      "screen": "store",
+      "variant": "gen3",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen3-en-XA-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen3-en-XA-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen3-en-XA-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen3-en-XA-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen3-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "15px",
+        "lineHeight": "24px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen3-en-XA-1366",
+      "screen": "store",
+      "variant": "gen3",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen3-en-XA-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen3-en-XA-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen3-en-XA-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen3-en-XA-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen3-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", Meiryo, Arial, sans-serif",
+        "size": "15px",
+        "lineHeight": "24px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-ja-1920",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-ja-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-ja-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-ja-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-ja-1366",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-ja-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-ja-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-ja-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-1920",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-1366",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-XA-1920",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-XA-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-XA-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-XA-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen3-en-XA-1366",
+      "screen": "sales",
+      "variant": "gen3",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen3-en-XA-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen3-en-XA-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "sales-gen3-en-XA-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "sales-gen3-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"Segoe UI\", \"Refresh UI\", sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px"
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": "no-color",
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen1-ja-1920",
+      "screen": "store",
+      "variant": "gen1",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen1-ja-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen1-ja-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen1-ja-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen1-ja-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen1-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen1-ja-1366",
+      "screen": "store",
+      "variant": "gen1",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen1-ja-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen1-ja-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen1-ja-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen1-ja-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen1-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen1-en-1920",
+      "screen": "store",
+      "variant": "gen1",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen1-en-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen1-en-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen1-en-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen1-en-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen1-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen1-en-1366",
+      "screen": "store",
+      "variant": "gen1",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen1-en-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen1-en-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen1-en-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen1-en-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen1-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen1-en-XA-1920",
+      "screen": "store",
+      "variant": "gen1",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen1-en-XA-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen1-en-XA-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen1-en-XA-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen1-en-XA-1920-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen1-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 16
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-gen1-en-XA-1366",
+      "screen": "store",
+      "variant": "gen1",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-gen1-en-XA-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-gen1-en-XA-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-gen1-en-XA-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-gen1-en-XA-1366-selected-photo.png",
+          "label": "写真を選択"
+        },
+        {
+          "file": "store-gen1-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 16
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen1-ja-1920",
+      "screen": "sales",
+      "variant": "gen1",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen1-ja-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen1-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen1-ja-1366",
+      "screen": "sales",
+      "variant": "gen1",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen1-ja-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen1-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen1-en-1920",
+      "screen": "sales",
+      "variant": "gen1",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen1-en-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen1-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 29
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen1-en-1366",
+      "screen": "sales",
+      "variant": "gen1",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen1-en-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen1-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 29
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen1-en-XA-1920",
+      "screen": "sales",
+      "variant": "gen1",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen1-en-XA-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen1-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 43
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-gen1-en-XA-1366",
+      "screen": "sales",
+      "variant": "gen1",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-gen1-en-XA-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-gen1-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 43
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 130556,
+        "daily": [
+          37917,
+          26284,
+          20251,
+          16373,
+          12496,
+          9479,
+          7756
+        ],
+        "cumulative": [
+          37917,
+          64201,
+          84452,
+          100825,
+          113321,
+          122800,
+          130556
+        ],
+        "dollars": 130659
+      },
+      "flow": {
+        "nextVersion": "v2",
+        "spec": "refresh",
+        "paid": 5000,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-freeware-ja-1920",
+      "screen": "store",
+      "variant": "freeware",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-freeware-ja-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-freeware-ja-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-freeware-ja-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-freeware-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 11
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-freeware-ja-1366",
+      "screen": "store",
+      "variant": "freeware",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-freeware-ja-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-freeware-ja-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-freeware-ja-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-freeware-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 11
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-freeware-en-1920",
+      "screen": "store",
+      "variant": "freeware",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-freeware-en-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-freeware-en-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-freeware-en-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-freeware-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 23
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-freeware-en-1366",
+      "screen": "store",
+      "variant": "freeware",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-freeware-en-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-freeware-en-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-freeware-en-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-freeware-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 23
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-freeware-en-XA-1920",
+      "screen": "store",
+      "variant": "freeware",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-freeware-en-XA-1920.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-freeware-en-XA-1920-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-freeware-en-XA-1920-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-freeware-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 40
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "store-freeware-en-XA-1366",
+      "screen": "store",
+      "variant": "freeware",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "store-freeware-en-XA-1366.png",
+          "label": "製品ページ"
+        },
+        {
+          "file": "store-freeware-en-XA-1366-scroll-1-1.png",
+          "label": "ページ途中"
+        },
+        {
+          "file": "store-freeware-en-XA-1366-scroll-1-2.png",
+          "label": "ページ下部"
+        },
+        {
+          "file": "store-freeware-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "contentWidth": 860,
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 40
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-freeware-ja-1920",
+      "screen": "sales",
+      "variant": "freeware",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-freeware-ja-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-freeware-ja-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-freeware-ja-1366",
+      "screen": "sales",
+      "variant": "freeware",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-freeware-ja-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-freeware-ja-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 9
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-freeware-en-1920",
+      "screen": "sales",
+      "variant": "freeware",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-freeware-en-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-freeware-en-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 29
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-freeware-en-1366",
+      "screen": "sales",
+      "variant": "freeware",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-freeware-en-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-freeware-en-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 29
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-freeware-en-XA-1920",
+      "screen": "sales",
+      "variant": "freeware",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-freeware-en-XA-1920.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-freeware-en-XA-1920-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 43
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    },
+    {
+      "id": "sales-freeware-en-XA-1366",
+      "screen": "sales",
+      "variant": "freeware",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ],
+      "status": "passed",
+      "images": [
+        {
+          "file": "sales-freeware-en-XA-1366.png",
+          "label": "出荷・売上報告"
+        },
+        {
+          "file": "sales-freeware-en-XA-1366-ready-next.png",
+          "label": "性能購入後・次版の開始"
+        }
+      ],
+      "pageErrors": [],
+      "typography": {
+        "font": "\"MS PGothic\", \"ＭＳ Ｐゴシック\", \"MS UI Gothic\", Osaka, IPAPGothic, sans-serif",
+        "size": "13px",
+        "lineHeight": "18.85px",
+        "headingPlatformFonts": [
+          {
+            "familyName": "IPAPGothic",
+            "postScriptName": "IPAPGothic",
+            "isCustomFont": false,
+            "glyphCount": 43
+          }
+        ]
+      },
+      "sales": {
+        "revenue": 303,
+        "daily": [
+          88,
+          61,
+          47,
+          38,
+          29,
+          22,
+          18
+        ],
+        "cumulative": [
+          88,
+          149,
+          196,
+          234,
+          263,
+          285,
+          303
+        ],
+        "dollars": 303
+      },
+      "flow": {
+        "nextVersion": "v1",
+        "spec": "color",
+        "paid": 200,
+        "contract": null,
+        "productUnchanged": true
+      }
+    }
+  ],
+  "pageErrors": [],
+  "externalRequests": [],
+  "baseline": {
+    "downloadsPerDollar": 4.0,
+    "unitPrice": 5.0,
+    "weights": [
+      88,
+      61,
+      47,
+      38,
+      29,
+      22,
+      18
+    ],
+    "prices": {
+      "color": [
+        0,
+        200,
+        20000,
+        20000000
+      ],
+      "refresh": [
+        0,
+        5000,
+        300000,
+        300000000
+      ]
+    }
+  },
+  "passed": 48,
+  "failed": 0
+}
