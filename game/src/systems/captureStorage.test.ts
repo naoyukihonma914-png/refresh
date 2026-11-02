@@ -23,7 +23,7 @@ const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now
 describe('場面の保存形式と独立した記録',()=>{
  it('表示に必要な場面だけを持ち、製品・報酬台帳・過去の会話・全生成履歴をコピーしない',()=>{
   const s=shotState(),scene=readCapture(s.persistent.screenshots[0]!);
-  expect(scene.version).toBe(8);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(9);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
   expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene.editor.picture).not.toHaveProperty('rewarded');
   expect(scene.home.rows.length).toBeLessThanOrEqual(4);expect(scene.home.history.length).toBeLessThanOrEqual(4);
   const source=structuredClone(s);source.persistent.screenshots=[];
@@ -75,7 +75,7 @@ describe('場面の保存形式と独立した記録',()=>{
   // Emulate a lower game schema with the already-versioned scene reference envelope.
   stored.schemaVersion=6;
   const restored=decodeSave(JSON.stringify(stored),ref=>captureStore(target.storage).get(ref));
-  expect(restored.schemaVersion).toBe(13);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(8);
+  expect(restored.schemaVersion).toBe(13);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(9);
  });
  it('隠し絵128角2コマと毎回変わる累積記録があっても400枚を5MiBへ保存できる',()=>{
   let s=createFixture('desktop-files',now)!;s.persistent.specs.storage=3;

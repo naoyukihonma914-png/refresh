@@ -5,6 +5,10 @@ import { BALANCE, type SeedItem, type SeedSkill } from '../config/balance';
 import { creditPixels, manualClickValue } from './economy';
 import { createInitialState, type GameState, type GuideId } from './state';
 import { enterKumiki } from './kumiki';
+import { seedAppearanceForNewVersion } from './seedAppearance';
+import { desktopStage } from './appearance';
+import { createDesktopState } from './desktopState';
+import { desktopScreen, resizeDesktop } from './desktopGeometry';
 
 export function visibleSeedItems(state: GameState): SeedItem[] {
   const { built, autoCursors } = state.run.seed;
@@ -104,6 +108,7 @@ export function applySeedSkills(state: GameState, selected: readonly SeedSkill[]
   return { ...state, resources: { ...state.resources, tokens: state.resources.tokens - cost },
     run: { ...state.run, seed: { ...state.run.seed, lastActionAt: state.elapsedMs } },
     persistent: { ...state.persistent, seedSkills: owned, seedAppearance: {
+      ...state.persistent.seedAppearance,
       pattern: owned.includes('pattern') ? pattern : 'none', marquee: owned.includes('marquee') && marquee,
     } },
   };
@@ -114,6 +119,10 @@ export function createSeedVersion(previous: GameState, version: 'v1' | 'v2', now
   const next = createInitialState(now);
   next.run.version = version;
   next.persistent = {...structuredClone({...previous.persistent,screenshots:[]}),screenshots:[...previous.persistent.screenshots]};
+  next.persistent.seedAppearance = seedAppearanceForNewVersion(previous);
+  // Appearance is permanent, but desktop contents and window positions belong to the old version.
+  const screen = desktopScreen(desktopStage(next));
+  next.run.desktop = resizeDesktop(createDesktopState(screen), screen, next.persistent.desktopPrefs.iconSize);
   next.resources.tokens = previous.resources.tokens;
   next.resources.dollars = previous.resources.dollars;
   if(version==='v2'&&next.persistent.progress.selected&&next.persistent.progress.records['v1-released']!==undefined){next.run.play.contract={id:next.persistent.progress.selected,status:'active'};next.persistent.progress.selected=null;}

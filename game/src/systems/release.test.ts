@@ -1,17 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import { BALANCE } from '../config/balance';
 import { createFixture, FIXTURE_NAMES } from './fixtures';
-import { createInitialState, isGameState } from './state';
+import { createInitialState, isGameState, type GameState } from './state';
 import { decodeSave, encodeSave, loadGame, saveGame, createMemoryStorage } from './save';
 import { advanceActiveTime, advanceOfflineTime } from './time';
 import { buildSeed, canBuildSeed, cursorPrice, pressSeed, freshMomentum } from './seed';
 import { availableIcons, buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, prototypeConditions, targetFor } from './kumiki';
 import { passivePixelsPerSecond } from './economy';
-import { beginPrototypeRelease, buySpec, canBuySpec, canFundNextVersion, canReleasePrototype, canStartNextVersion, dailySales, displayedSales, productPreviewState, releaseEstimate, shippingComplete, shippingProduct, SPEC_ORDER, startNextVersion } from './release';
+import { beginProductRelease, beginPrototypeRelease, buySpec, canBuySpec, canFundNextVersion, canRelease, canReleasePrototype, canStartNextVersion, dailySales, displayedSales, productPreviewState, releaseEstimate, releaseScreenshotBonus, selectedReleaseScreenshots, shippingComplete, shippingProduct, showShipping, SPEC_ORDER, startNextVersion, storeComplete, v1Conditions } from './release';
+import { focusWindow, takeScreenshot } from './desktop';
+import { actCommon } from './longPlay';
+import { readCapture, restoreScene } from './captureScene';
 
 const now = 1_800_000_000_000;
 const ready = () => createFixture('release-ready', now)!;
 const shipped = () => createFixture('release-complete', now)!;
+const v1Ready = () => {
+  let state = createFixture('desktop-ready', now)!;
+  for (const app of ['files','mail','clock','bin'] as const) state = focusWindow(state, app);
+  state.run.desktop.feedback = Array.from({ length: 10 }, (_, index) => ({ id: index + 1, kind: 'sort' as const, sender: 'hikari' as const,
+    target: '', baseline: [], baselineColor: '#0067c0', at: now, completedAt: now }));
+  state.run.desktop.feedbackSerial = 10;
+  return state;
+};
 
 describe('試作版のリリース', () => {
   it('出口の16色の壁と3条件がそろうまではリリースできない', () => {
@@ -214,6 +225,138 @@ describe('試作版のリリース', () => {
   it.each(FIXTURE_NAMES.filter(name => name.startsWith('release-')))('固定状態%sを保存・復元できる', name => {
     const state = createFixture(name, now)!;
     expect(isGameState(state)).toBe(true); expect(decodeSave(encodeSave(state))).toEqual(state);
+  });
+});
+
+describe('製品ページからv1.0を出荷する', () => {
+  it('動いているアプリ6つ・今の版の要望10件・名前つき6種・写真の壁紙・自動化の5条件をそれぞれ判定する', () => {
+    const state = v1Ready();
+    expect(v1Conditions(state)).toEqual([true,true,true,true,true]);
+    expect(canRelease(state)).toBe(true);
+    for (const [index, mutate] of [
+      [0, (s: GameState) => { s.run.desktop.windows.bin.open = false; }],
+      [1, (s: GameState) => { s.run.desktop.feedback = s.run.desktop.feedback.slice(1); }],
+      [2, (s: GameState) => { s.run.kumiki.exports = s.run.kumiki.exports.filter(e => e.id !== 'clock'); }],
+      [3, (s: GameState) => { s.persistent.desktopPrefs.wallpaper = null; }],
+      [4, (s: GameState) => { s.run.desktop.terminal.executions = 0; }],
+    ] as const) {
+      const invalid = structuredClone(state); mutate(invalid);
+      expect(v1Conditions(invalid)[index]).toBe(false);
+      expect(canRelease(invalid)).toBe(false);
+      expect(beginProductRelease(invalid, now)).toBe(invalid);
+    }
+    state.run.version = 'v2'; expect(canRelease(state)).toBe(false);
+  });
+
+  it('製品ページの3秒と出荷の8秒を分け、閉じ直しと重複操作で売上を二重に付けない', () => {
+    const before = v1Ready(), estimate = releaseEstimate(before);
+    let state = beginProductRelease(before, now, { language: 'en' });
+    const product = shippingProduct(state)!;
+    expect(product.version).toBe('v1.0'); expect(state.run.shipping?.phase).toBe('store');
+    expect(state.resources.dollars).toBe(before.resources.dollars + estimate);
+    expect(canBuySpec(state, 'refresh')).toBe(false); expect(showShipping(state)).toBe(state);
+    state = advanceActiveTime(state, BALANCE.release.storeAnimationMs).state;
+    expect(storeComplete(state)).toBe(true); expect(shippingComplete(state)).toBe(false);
+    expect(state.run.shipping?.elapsedMs).toBe(0);
+    state = decodeSave(encodeSave(state));
+    expect(storeComplete(state)).toBe(true);
+    state = showShipping(state);
+    expect(state.run.shipping?.phase).toBe('shipping'); expect(storeComplete(state)).toBe(false);
+    expect(showShipping(state)).toBe(state); expect(beginProductRelease(state, now)).toBe(state);
+    state = advanceActiveTime(state, BALANCE.release.animationMs).state;
+    expect(shippingComplete(state)).toBe(true); expect(state.resources.dollars).toBe(before.resources.dollars + estimate);
+    expect(decodeSave(encodeSave(state))).toEqual(state);
+  });
+
+  it('動きを減らす設定でも製品ページを読め、売上へ進む操作を残す', () => {
+    const state = beginProductRelease(v1Ready(), now, { reducedMotion: true });
+    expect(storeComplete(state)).toBe(true); expect(state.run.shipping?.phase).toBe('store');
+    expect(shippingComplete(state)).toBe(false);
+    expect(shippingComplete(showShipping(state, true))).toBe(true);
+  });
+
+  it('通常の出荷時点でv1実績を一度だけ取り、受託選択と60Hzを次の素の画面へ引き継ぐ', () => {
+    const original = v1Ready(); original.persistent.seedSkills = ['inherit'];
+    let state = showShipping(beginProductRelease(original, now, { reducedMotion: true }), true);
+    expect(state.persistent.progress.records['v1-released']).toBe(now);
+    state = actCommon(state, { type: 'contract-select', id: 'no-color' }, now);
+    expect(state.persistent.progress.selected).toBe('no-color');
+    state = buySpec(state, 'refresh');
+    const next = startNextVersion(state, now + 1_000);
+    expect(next.run.world).toBe('seed'); expect(next.run.version).toBe('v2');
+    expect(next.persistent.specs.refresh).toBe(1); expect(next.resources.tokens).toBe(state.resources.tokens);
+    expect(next.persistent.progress.records['v1-released']).toBe(now);
+    expect(next.run.play.contract).toEqual({ id: 'no-color', status: 'active' });
+    expect(next.persistent.progress.selected).toBeNull();
+    expect(next.run.seed.installer?.items).not.toContain('color');
+    expect(next.run.desktop.apps).toEqual([]); expect(next.run.desktop.feedback).toEqual([]);
+    expect(next.run.seed.autoCursors).toBe(0); expect(next.resources.pixels).toBe(0);
+    expect(next.persistent.products).toEqual(state.persistent.products); expect(isGameState(next)).toBe(true);
+  });
+
+  it('60Hzの予算をほかの買い物で使い切れず、売上不足のときは作業へ戻れる', () => {
+    let state = showShipping(beginProductRelease(v1Ready(), now, { reducedMotion: true }), true);
+    state.resources.dollars = BALANCE.spec.refresh[1]!.price;
+    expect(canStartNextVersion(state)).toBe(false); expect(canBuySpec(state, 'storage')).toBe(false);
+    expect(canBuySpec(state, 'refresh')).toBe(true);
+    state = buySpec(state, 'refresh');
+    expect(state.resources.dollars).toBe(0); expect(canStartNextVersion(state)).toBe(true);
+    const low = v1Ready(); low.resources.pixels = 0; low.run.totalPixelsGenerated = 0; low.resources.dollars = 0;
+    expect(canFundNextVersion(low)).toBe(false); expect(beginProductRelease(low, now)).toBe(low);
+  });
+
+  it('撮っていない場合も出荷時のデスクトップを凍結し、後から窓や絵を変えてもプレビューを保つ', () => {
+    const original = v1Ready(); original.persistent.screenshots = [];
+    const state = beginProductRelease(original, now), product = shippingProduct(state)!;
+    expect(product.screenshots).toEqual([]); expect(product.capture).toBeDefined();
+    const scene = readCapture(product.capture!);
+    original.run.desktop.windows.files.open = false;
+    original.run.kumiki.exports[0]!.frames[0]!.fill(-1);
+    expect(readCapture(product.capture!)).toEqual(scene);
+    expect(scene.desktop.windows.files.open).toBe(true);
+    expect(isGameState(state)).toBe(true);
+  });
+
+  it('未選択は新しい順、指定時は掲載順を保存し、枚数を追加しても写真の加点を減らさない', () => {
+    const original = v1Ready(), ids = original.persistent.screenshots.map(s => s.id);
+    expect(selectedReleaseScreenshots(original).map(s => s.id)).toEqual([...ids].reverse());
+    const selected = [ids[0]!, ids[2]!];
+    const bonus = releaseScreenshotBonus(original, [selected[0]!]);
+    expect(releaseScreenshotBonus(original, selected)).toBeGreaterThanOrEqual(bonus);
+    expect(releaseScreenshotBonus(original, selected)).toBeLessThanOrEqual(BALANCE.release.screenshotBonusMax);
+    const state = beginProductRelease(original, now, { screenshotIds: selected }), product = shippingProduct(state)!;
+    expect(product.screenshots?.map(s => s.id)).toEqual(selected);
+    expect(product.revenue).toBe(releaseEstimate(original, selected));
+    original.persistent.screenshots[0]!.language = 'changed';
+    expect(product.screenshots?.[0]?.language).toBe('ja');
+  });
+
+  it('製品の写真・壁紙元・fallbackを共有して保存し、アルバム削除後と再開後も読める', () => {
+    let original = v1Ready();
+    const source = original.persistent.screenshots[0]!;
+    original.run.desktop.photo.source = `shot:${source.id}`;
+    original.run.desktop.cooldownMs = 0; original = takeScreenshot(original, now + 100, 'ja');
+    const latest = original.persistent.screenshots.at(-1)!;
+    let state = beginProductRelease(original, now + 200, { screenshotIds: [latest.id] });
+    const product = shippingProduct(state)!;
+    expect(product.captureCatalog?.some(shot => shot.id === source.id)).toBe(true);
+    state = { ...state, persistent: { ...state.persistent, screenshots: [] } };
+    const storage = createMemoryStorage();
+    expect(saveGame(storage, state, now + 300).kind).toBe('saved');
+    const loaded = loadGame(storage); expect(loaded.kind).toBe('loaded');
+    if (loaded.kind !== 'loaded') throw new Error('save failed');
+    const savedProduct = shippingProduct(loaded.state)!;
+    expect(savedProduct).toEqual(product);
+    expect(() => restoreScene(savedProduct.screenshots![0]!, savedProduct.captureCatalog ?? [])).not.toThrow();
+    expect(readCapture(savedProduct.capture!)).toEqual(readCapture(product.capture!));
+  });
+
+  it('新しい製品情報や助言を持たない旧保存を読み、売上と出荷位置を保つ', () => {
+    const old = shipped(), raw = JSON.parse(encodeSave(old));
+    delete raw.run.advice;
+    const migrated = decodeSave(JSON.stringify(raw));
+    expect(migrated.resources).toEqual(old.resources); expect(migrated.persistent.products).toEqual(old.persistent.products);
+    expect(migrated.run.shipping).toEqual(old.run.shipping); expect(migrated.run.advice.seen).toEqual([]);
   });
 });
 

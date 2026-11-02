@@ -1,0 +1,669 @@
+{
+  "checks": [
+    "All 11 flat-era apps maximize without clipped text; the Files ribbon stays above content, clock date/reservation fit, and photo controls keep square thumbs"
+  ],
+  "scenes": [
+    {
+      "scene": "maximized flat application",
+      "app": "files",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "mail",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "manager",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "photo",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "bin",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "theme",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "terminal",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "note",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "settings",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "files",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "mail",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "manager",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "photo",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "bin",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "theme",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "terminal",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "note",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "settings",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "files",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "mail",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "manager",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "photo",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "bin",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "theme",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "terminal",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "note",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "settings",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "tessera",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "tessera",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "tessera",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "files",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "mail",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "manager",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "photo",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "bin",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "theme",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "terminal",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "note",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "settings",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "tessera",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "files",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "mail",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "manager",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "photo",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "bin",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "theme",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "terminal",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "note",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "settings",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "tessera",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "files",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "mail",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "manager",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "photo",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "bin",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "theme",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "terminal",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "note",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "settings",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "tessera",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "clock",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "clock",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "clock",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "clock",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "clock",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "maximized flat application",
+      "app": "clock",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": [],
+  "complete": true
+}

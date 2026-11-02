@@ -1,4 +1,5 @@
 import {createProgress,createPlay,migrateProgress} from './longPlay';
+import { createAdviceState } from './advice';
 import { ICON_IDS } from '../content/kumikiArt';
 import { BALANCE } from '../config/balance';
 import { createPageDesign, isPageDesign } from './pageDesign';
@@ -43,7 +44,7 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   3(data) {
     const next = { ...(data as GameState), schemaVersion: 4 };
     const projected = { ...next, schemaVersion: SCHEMA_VERSION,
-      run: { ...next.run,play:createPlay(), seed:{...next.run.seed,page:createPageDesign()},shipping: null, restartMs: 0, desktop: createDesktopState() },
+      run: { ...next.run,advice:createAdviceState(),play:createPlay(), seed:{...next.run.seed,page:createPageDesign()},shipping: null, restartMs: 0, desktop: createDesktopState() },
       persistent: { ...next.persistent,progress:createProgress(), appearance:createAppearance(), products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
     };
     if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
@@ -116,14 +117,20 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
 export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameState {
   let data: unknown = JSON.parse(raw);
   const stored=data as GameState;
-  if(Array.isArray(stored?.persistent?.screenshots)) {
-    stored.persistent.screenshots=stored.persistent.screenshots.map(shot=>{
+  const inflateShot = (shot:GameState['persistent']['screenshots'][number]) => {
       if('data' in shot)return shot;
       const ref=(shot as unknown as {sceneRef?:unknown}).sceneRef;
       if(typeof ref!=='string'||!readScene)throw new Error('Screenshot assets are required');
       const {sceneRef:_ref,...metadata}=shot as unknown as Record<string,unknown>;return {...metadata,data:readScene(ref)} as unknown as GameState['persistent']['screenshots'][number];
-    });
+  };
+  if(Array.isArray(stored?.persistent?.screenshots)) {
+    stored.persistent.screenshots=stored.persistent.screenshots.map(inflateShot);
   }
+  if(Array.isArray(stored?.persistent?.products))stored.persistent.products=stored.persistent.products.map(product=>({...product,
+    ...(Array.isArray(product.screenshots)?{screenshots:product.screenshots.map(inflateShot)}:{}),
+    ...(product.capture?{capture:inflateShot(product.capture)}:{}),
+    ...(Array.isArray(product.captureCatalog)?{captureCatalog:product.captureCatalog.map(inflateShot)}:{}),
+  }));
   const versionOf = (value: unknown): number => {
     if (typeof value !== 'object' || value === null || !('schemaVersion' in value)
       || !Number.isSafeInteger(value.schemaVersion)) throw new Error('保存形式を確認できません');
@@ -143,6 +150,7 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   const candidate=data as GameState;
   if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
   if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
+  if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
   return migrated && data.run.seed.built.includes('kumiki') && !data.run.kumiki.entered ? enterKumiki(data) : data;
 }
@@ -194,8 +202,14 @@ export function saveGame(storage: SaveStorage, state: GameState, now: number, { 
   try {
     if(!isGameState(saved))throw new Error('Invalid game state');
     scenes=captureStore(storage);scenes.begin();
-    const screenshots=saved.persistent.screenshots.map(({data,...metadata})=>({...metadata,sceneRef:scenes!.put(data)}));
-    const raw=JSON.stringify({...saved,persistent:{...saved.persistent,screenshots}});
+    const packShot = ({data,...metadata}:GameState['persistent']['screenshots'][number])=>({...metadata,sceneRef:scenes!.put(data)});
+    const screenshots=saved.persistent.screenshots.map(packShot);
+    const products=saved.persistent.products.map(product=>({...product,
+      ...(product.screenshots?{screenshots:product.screenshots.map(packShot)}:{}),
+      ...(product.capture?{capture:packShot(product.capture)}:{}),
+      ...(product.captureCatalog?{captureCatalog:product.captureCatalog.map(packShot)}:{}),
+    }));
+    const raw=JSON.stringify({...saved,persistent:{...saved.persistent,screenshots,products}});
     const previous=storage.getItem(SAVE_KEYS.primary);
     if(previous!==null){
       let valid=verifiedPrimary.get(storage)===previous;

@@ -87,7 +87,8 @@ function newFeedback(state: GameState, at: number): Feedback | null {
 export function advanceDesktopTime(state: GameState, ms: number, now: number, offline = false, language='ja', captures=true): GameState {
   if (state.run.world !== 'desktop') return state;
   const interval = BALANCE.spec.network[state.persistent.specs.network]!.mailIntervalSeconds * BALANCE.time.millisecondsPerSecond;
-  let next = withDesktop(state, { ...state.run.desktop, cooldownMs: offline ? state.run.desktop.cooldownMs : Math.max(0, state.run.desktop.cooldownMs-ms), feedbackMs: (state.run.desktop.feedbackMs + ms) % interval });
+  const automatic = captures && state.run.desktop.terminal.running && hasAppPart(state,'terminal','commands');
+  let next = withDesktop(state, { ...state.run.desktop, cooldownMs: offline && !automatic ? state.run.desktop.cooldownMs : Math.max(0, state.run.desktop.cooldownMs-ms), feedbackMs: (state.run.desktop.feedbackMs + ms) % interval });
   const arrivals = Math.floor((state.run.desktop.feedbackMs + ms) / interval);
   for (let i=0; i<Math.min(arrivals,pendingCapacity(state)); i++) {
     const request = newFeedback(next, Math.max(0, now - ms + interval - state.run.desktop.feedbackMs + i * interval));
@@ -203,19 +204,19 @@ export const activeScreenshots=(s:GameState)=>s.persistent.screenshots.filter(sh
 export const screenshotCooldown=(s:GameState)=>BALANCE.spec.graphics[s.persistent.specs.graphics]!.shotCooldownSeconds*BALANCE.time.millisecondsPerSecond*(hasDesktopSkill(s,'burst')?BALANCE.w3.burstMultiplier:1);
 function advanceDesktopEvents(s:GameState,ms:number,now:number,offline:boolean,language:string,captures:boolean):GameState {
  let d=s.run.desktop,next=s;
- // Timers are one-shot, including during absence; automatic terminal jobs run while open.
+ // Timers are one-shot. Offline time is split at each automation deadline by time.ts.
  const r=d.reservation;
  if(r&&!r.done&&r.at<=now){
   next=withDesktop(next,{...next.run.desktop,cooldownMs:offline?0:next.run.desktop.cooldownMs,reservation:{...r,done:true,result:captures&&(offline||next.run.desktop.cooldownMs===0)&&activeScreenshots(next).length<screenshotCapacity(next)?'captured':'skipped'}});
   if(captures)next=takeScreenshot(next,Math.max(0,r.at),language,offline?BALANCE.w3.timerOfflineMultiplier:1);
  }
- if(captures&&!offline&&d.terminal.running&&hasAppPart(next,'terminal','commands')){
+ if(captures&&d.terminal.running&&hasAppPart(next,'terminal','commands')){
   const total=d.terminal.elapsedMs+ms,count=Math.floor(total/d.terminal.interval);
   next=withDesktop(next,{...next.run.desktop,terminal:{...d.terminal,elapsedMs:total%d.terminal.interval}});
   for(let i=0;i<Math.min(count,screenshotCapacity(next)+1);i++){
    const at=Math.max(0,now-total%d.terminal.interval-(count-1-i)*d.terminal.interval);
-   const before=next;
    if(i>0)next=withDesktop(next,{...next.run.desktop,cooldownMs:Math.max(0,next.run.desktop.cooldownMs-d.terminal.interval)});
+   const before=next;
    next=next.run.play.terminalCommand==='export'?exportKumiki(next,at):next.run.play.terminalCommand==='refresh'?refreshDesktop(next,at):takeScreenshot(next,at,language,1,hasDesktopSkill(next,'autoFeedback'));
    const ok=next.run.play.terminalCommand==='capture'?before.persistent.screenshots.length!==next.persistent.screenshots.length:before!==next;
    next=withDesktop(next,{...next.run.desktop,terminal:{...next.run.desktop.terminal,executions:next.run.desktop.terminal.executions+(ok?1:0),log:[...next.run.desktop.terminal.log,{at,ok}].slice(-BALANCE.w3.maxNoteLog)}});

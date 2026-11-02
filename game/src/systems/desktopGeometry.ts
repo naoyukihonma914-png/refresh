@@ -1,10 +1,10 @@
 import { BALANCE } from '../config/balance';
 import type { AppId, DesktopState, Rect } from './desktopState';
-import type { VisualStage } from './appearance';
+import type { DesktopStage } from './appearance';
 import type { LogicalSize } from './viewport';
 
 export const LEGACY_DESKTOP:LogicalSize={width:1920,height:1080};
-export const desktopScreen=(stage:VisualStage):LogicalSize=>({...BALANCE.appearance.screens[stage]});
+export const desktopScreen=(stage:DesktopStage):LogicalSize=>({...BALANCE.appearance.screens[stage]});
 export const taskbarHeight=(screen:LogicalSize)=>screen.width===800?28:screen.width===1024?30:screen.width===1366?40:48;
 export const workHeight=(screen:LogicalSize)=>screen.height-taskbarHeight(screen);
 export const MIN_WINDOW_WIDTH={tessera:520,note:300,files:440,mail:520,manager:480,photo:440,bin:340,clock:280,theme:360,terminal:360,settings:480} as const;

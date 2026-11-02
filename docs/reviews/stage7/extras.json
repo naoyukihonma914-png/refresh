@@ -1,0 +1,703 @@
+{
+  "checks": [
+    "All three editor eras: the release ring opens the current five-condition list",
+    "Prototype follows its own freeware page, then buys 256 colors and restarts v1",
+    "Each desktop era renders native advice and absence notices; both are readable and dismissible",
+    "Space opens the release screenshot summary with keyboard/hold skills and does not press the background generator",
+    "A valid previous Scene-8 picture keeps the original progress bars and does not receive the new release ring",
+    "A release with no screenshots renders its frozen current desktop as the product image"
+  ],
+  "scenes": [
+    {
+      "scene": "editor conditions",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "editor conditions",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "prototype release flow",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "prototype release flow",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "prototype release flow",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "prototype release flow",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "prototype release flow",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "prototype release flow",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "advice",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "offline",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "store without photos",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "store without photos",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "store without photos",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "store without photos",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "store without photos",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "store without photos",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": []
+}

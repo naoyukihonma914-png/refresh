@@ -1,0 +1,56 @@
+{
+  "checks": [
+    "The v2 homepage is centered, keeps layout controls below it, and can return to the classic appearance"
+  ],
+  "scenes": [
+    {
+      "scene": "v2 homepage, guide and appearance settings",
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "v2 homepage, guide and appearance settings",
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "v2 homepage, guide and appearance settings",
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "v2 homepage, guide and appearance settings",
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "v2 homepage, guide and appearance settings",
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "v2 homepage, guide and appearance settings",
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": []
+}

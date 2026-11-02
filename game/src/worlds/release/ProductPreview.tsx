@@ -3,9 +3,10 @@ import type { I18n } from '../../content/i18n';
 import type { ProductRecord } from '../../systems/releaseState';
 import { productPreviewState } from '../../systems/release';
 import type { GameRuntime, RuntimeSnapshot } from '../../systems/runtime';
+import { ScreenshotPreview } from '../Desktop';
 import { HomeDocument } from '../kumiki/HomeDocument';
 
-export function ProductPreview({ product, runtime, snapshot, i18n }: { product: ProductRecord; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
+function HomeProductPreview({ product, runtime, snapshot, i18n }: { product: ProductRecord; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
   const mount = useRef<HTMLDivElement>(null);
   const [fit, setFit] = useState({ scale: .3, left: 0, top: 0 });
   const state = useMemo(() => productPreviewState(product), [product]);
@@ -26,4 +27,9 @@ export function ProductPreview({ product, runtime, snapshot, i18n }: { product: 
       <HomeDocument runtime={runtime} snapshot={{ ...snapshot, state, press: null, offline: null }} i18n={i18n} selected={null} onSelect={() => {}} selecting={false} dragPart={null} onDrop={() => {}} preview legacyHome={!product.screen.page} />
     </div>
   </div>;
+}
+
+export function ProductPreview(props: { product: ProductRecord; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
+  const { product } = props;
+  return product.capture ? <div className="product-preview product-desktop-preview"><ScreenshotPreview {...props} shot={product.capture} catalog={[...(product.captureCatalog ?? []), ...(product.screenshots ?? []), product.capture]}/></div> : <HomeProductPreview {...props}/>;
 }

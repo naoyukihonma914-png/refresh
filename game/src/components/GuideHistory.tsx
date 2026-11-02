@@ -5,7 +5,7 @@ import type { GuideRecord } from '../systems/releaseState';
 
 export function GuideHistory({ state, i18n }: { state: GameState; i18n: I18n }) {
   const [selected, setSelected] = useState<GuideRecord | null>(null);
-  const key = (entry: GuideRecord) => `${entry.kind === 'seed' ? 'guide' : entry.kind === 'kumiki' ? 'k.guide' : 'release'}.${entry.id}` as MessageKey;
+  const key = (entry: GuideRecord) => entry.kind==='seed'&&entry.id==='return'&&entry.version==='v2'?'guide.return.v2':entry.kind==='release'&&entry.version!=='v0.1'?`release.${entry.id}.v1` as MessageKey:`${entry.kind === 'seed' ? 'guide' : entry.kind === 'kumiki' ? 'k.guide' : 'release'}.${entry.id}` as MessageKey;
   if (!state.persistent.guideArchive.length) return null;
   return <section className="guide-history"><h3>{i18n.t('release.guideHistory')}</h3>
     <ul>{state.persistent.guideArchive.map(entry => <li key={`${entry.version}:${entry.kind}:${entry.id}`}>

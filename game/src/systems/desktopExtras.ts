@@ -1,6 +1,6 @@
 import { hasAppPart, ownFeaturePart } from './appBuild';
 import { resizeDesktop,fitWindow,workHeight } from './desktopGeometry';
-import { setDesktopStage, type VisualStage } from './appearance';
+import { setDesktopStage, type DesktopStage } from './appearance';
 import { BALANCE, type DesktopSkill } from '../config/balance';
 import { createI18n } from '../content/i18n';
 import { PRACTICE_IDS } from '../content/kumikiArt';
@@ -22,7 +22,7 @@ export type ExtraAction =
  | {type:'skill';id:DesktopSkill} | {type:'toggle-skill';id:DesktopSkill}
  | {type:'workspace';workspace:0|1} | {type:'move-workspace';app:AppId}
  | {type:'manager-tab';tab:DesktopState['managerTab']} | {type:'manager-process';process:string} | {type:'calendar-month';at:number}
- | {type:'desktop-stage';stage:VisualStage}
+ | {type:'desktop-stage';stage:DesktopStage}
  | {type:'settings-page';page:DesktopState['settingsPage']} | {type:'restart';app:AppId} | {type:'activity'};
 const desktop=(s:GameState,patch:Partial<DesktopState>):GameState=>({...s,run:{...s.run,desktop:{...s.run.desktop,...patch}}});
 export function completeRequests(s:GameState,kinds:string[],now:number,automatic=false):GameState {
@@ -127,10 +127,10 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   if(prefs.mode==='dark')next=completeRequests(next,['dark'],now);return next;
  }
  case 'skill':{
-  if(a.id==='major2'&&!p.skills.includes('major1'))return s;
+  if(a.id==='major2'&&!p.skills.includes('major1')||a.id==='major3'&&(!p.skills.includes('major2')||!d.apps.includes('terminal')))return s;
   const skill=BALANCE.w3.skills.find(x=>x.id===a.id);if(!skill||p.skills.includes(a.id)||skill.band===2&&s.run.version==='v0.1'||s.resources.tokens<skill.cost)return s;
   const next:GameState={...s,resources:{...s.resources,tokens:s.resources.tokens-skill.cost},persistent:{...s.persistent,desktopPrefs:{...p,skills:[...p.skills,a.id]}},run:{...s.run,desktop:{...d,...(a.id==='burst'?{cooldownMs:d.cooldownMs*BALANCE.w3.burstMultiplier}:{}),...(a.id==='sortMail'?{mailFolder:'pending' as const}:{})}}};
-  return a.id==='major1'?setDesktopStage(next,1):a.id==='major2'?setDesktopStage(next,2):a.id==='sortMail'?ownFeaturePart(next,'folders','mail'):next;
+  return a.id==='major1'?setDesktopStage(next,1):a.id==='major2'?setDesktopStage(next,2):a.id==='major3'?setDesktopStage(next,3):a.id==='sortMail'?ownFeaturePart(next,'folders','mail'):next;
  }
  case 'toggle-skill':{
   if(!p.skills.includes(a.id)||!BALANCE.w3.skills.find(x=>x.id===a.id)?.playful)return s;

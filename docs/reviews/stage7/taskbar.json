@@ -1,0 +1,62 @@
+{
+  "checks": [
+    "Flat taskbar keeps n/5 visible with a complete title; refreshed principal release images retain readable controls"
+  ],
+  "scenes": [
+    {
+      "scene": "flat taskbar count and refreshed release images",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "flat taskbar count and refreshed release images",
+      "era": 3,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "flat taskbar count and refreshed release images",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "flat taskbar count and refreshed release images",
+      "era": 3,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "scene": "flat taskbar count and refreshed release images",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "scene": "flat taskbar count and refreshed release images",
+      "era": 3,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": []
+}

@@ -1,4 +1,5 @@
 import {createProgress,createPlay,isProgress,isPlay,type Progress,type PlayState} from './longPlay';
+import { createAdviceState, isAdviceState, type AdviceState } from './advice';
 import { createPageDesign, isPageDesign, type PageDesign } from './pageDesign';
 import { desktopScreen } from './desktopGeometry';
 import { createAppearance, unlockedEditorStage, unlockedDesktopStage, type Appearance } from './appearance';
@@ -32,6 +33,7 @@ export interface GameState {
   elapsedMs: number;
   resources: { pixels: number; tokens: number; dollars: number };
   run: {
+    advice:AdviceState;
     play:PlayState;
     version: 'v0.1' | 'v1' | 'v2';
     world: 'seed' | 'kumiki' | 'release' | 'desktop';
@@ -49,7 +51,7 @@ export interface GameState {
     productName: string | null;
     numberNotation: 'compact' | 'scientific';
     seedSkills: SeedSkill[];
-    seedAppearance: { pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean };
+    seedAppearance: { pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean; era?:0|1; availableEra?:0|1 };
     artwork: Artwork;
     products: ProductRecord[];
     guideArchive: GuideRecord[];
@@ -72,7 +74,7 @@ export function createInitialState(now: number): GameState {
     elapsedMs: 0,
     resources: { pixels: 0, tokens: 0, dollars: 0 },
     run: {
-      play:createPlay(),version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
+      advice:createAdviceState(),play:createPlay(),version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
       seed: {
         page:createPageDesign(),built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
@@ -109,11 +111,12 @@ export function isGameState(value: unknown): value is GameState {
   if (!isRecord(value) || value.schemaVersion !== SCHEMA_VERSION) return false;
   if (![value.createdAt, value.lastTickAt, value.elapsedMs].every(isAmount)) return false;
   if (value.lastSavedAt !== null && !isAmount(value.lastSavedAt)) return false;
-  if(!isRecord(value.persistent)||!isRecord(value.persistent.appearance)||![value.persistent.appearance.editor,value.persistent.appearance.desktop].every(v=>[0,1,2].includes(v as number)))return false;
+  if(!isRecord(value.persistent)||!isRecord(value.persistent.appearance)||![0,1,2].includes(value.persistent.appearance.editor as number)||![0,1,2,3].includes(value.persistent.appearance.desktop as number))return false;
   const resources = value.resources;
   const run = value.run;
   const persistent = value.persistent;
   if (!isRecord(resources) || !isRecord(run) || !isRecord(persistent)) return false;
+  if(!isAdviceState(run.advice))return false;
   if (!isAmount(resources.pixels) || !isAmount(resources.tokens) || !isAmount(resources.dollars)) return false;
   if (!['v0.1', 'v1', 'v2'].includes(run.version as string) || !['seed', 'kumiki', 'release', 'desktop'].includes(run.world as string) || !isAmount(run.totalPixelsGenerated)) return false;
   if (!isAmount(run.restartMs) || run.restartMs > BALANCE.release.restartMs || !isGuideArchive(persistent.guideArchive) || !isDesignMap(persistent.homeTheme)) return false;
@@ -122,6 +125,9 @@ export function isGameState(value: unknown): value is GameState {
   if (run.world === 'release' ? !isRecord(run.shipping) || !isCount(run.shipping.productId)
     || !persistent.products.some(p => p.id === (run.shipping as Record<string, unknown>).productId)
     || !isAmount(run.shipping.elapsedMs) || run.shipping.elapsedMs > BALANCE.release.animationMs : run.shipping !== null) return false;
+  if(isRecord(run.shipping)&&((run.shipping.phase!==undefined&&!['store','shipping'].includes(run.shipping.phase as string))
+    || (run.shipping.storeElapsedMs!==undefined&&(!isAmount(run.shipping.storeElapsedMs)||run.shipping.storeElapsedMs>BALANCE.release.storeAnimationMs))
+    || run.shipping.phase==='store'&&(run.shipping.storeElapsedMs===undefined||run.shipping.elapsedMs!==0)))return false;
   if(!isProgress(persistent.progress)||!isPlay(run.play))return false;
   if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;
@@ -155,6 +161,9 @@ export function isGameState(value: unknown): value is GameState {
     || new Set(persistent.seedSkills).size !== persistent.seedSkills.length) return false;
   if (!isRecord(persistent.seedAppearance) || !['none', 'dots', 'grid', 'diagonal'].includes(persistent.seedAppearance.pattern as string)
     || typeof persistent.seedAppearance.marquee !== 'boolean') return false;
+  if((persistent.seedAppearance.era!==undefined&&![0,1].includes(persistent.seedAppearance.era as number))
+    ||(persistent.seedAppearance.availableEra!==undefined&&![0,1].includes(persistent.seedAppearance.availableEra as number))
+    ||Number(persistent.seedAppearance.era??0)>Number(persistent.seedAppearance.availableEra??0))return false;
   if (!(persistent.productName === null || typeof persistent.productName === 'string' && [...persistent.productName].length <= BALANCE.release.maxProductName) || !['compact','scientific'].includes(persistent.numberNotation as string)) return false;
   if (persistent.playerName !== null && typeof persistent.playerName !== 'string') return false;
   const specs = persistent.specs;

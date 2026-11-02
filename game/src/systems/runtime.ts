@@ -1,3 +1,5 @@
+import { advanceAdvice, readAdvice, type AdviceId } from './advice';
+import { setSeedEra, type SeedEra } from './seedAppearance';
 import {refreshDesktop} from './desktopExtras';
 import {reconcileProgress,actCommon,activeContract,type AchievementId,type CommonAction} from './longPlay';
 import {observeProgress} from './longPlayEvents';
@@ -18,7 +20,7 @@ import { advanceActiveTime, advanceOfflineTime, isInactiveGap, type TimeResult }
 import { applySeedSkills, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
 import type { GuideId } from './state';
 import { actKumiki, enterKumiki, type KumikiAction } from './kumiki';
-import { archiveGuide, beginPrototypeRelease, buySpec, canReleasePrototype, shippingComplete, startNextVersion } from './release';
+import { archiveGuide, beginProductRelease, buySpec, canRelease, shippingComplete, showShipping, startNextVersion } from './release';
 
 export interface RuntimeSnapshot {
   state: GameState;
@@ -84,6 +86,7 @@ export class GameRuntime {
       if(additions.includes('secret-button')){const note=state.persistent.productionNote??defaultNote(createI18n(this.snapshot.language)),extra='\n\n'+createI18n(this.snapshot.language).t('secret.note');state={...state,persistent:{...state.persistent,productionNote:note.length+extra.length<=BALANCE.w3.maxNote?note+extra:note,progress:{...state.persistent.progress,noteOverflow:note.length+extra.length>BALANCE.w3.maxNote},noteUpdatedAt:this.platform.clock.wallNow()}};}
       for(const id of additions)this.platform.unlockAchievement(id);
       if(additions.length){state={...state,run:{...state.run,play:{...state.run.play,achievement:{id:additions.at(-1)!,until:this.platform.clock.wallNow()+BALANCE.longPlay.achievementNoticeMs}}}};this.sound('notification',state);}
+      if(state.run.advice.current && state.run.advice.current !== previous.run.advice.current)this.sound('notification',state);
       if(state.run.desktop.notice!==null&&state.run.desktop.notice!==previous.run.desktop.notice)this.sound('notification',state);
       if(state.persistent.screenshots.at(-1)?.id!==previous.persistent.screenshots.at(-1)?.id&&state.persistent.screenshots.length>previous.persistent.screenshots.length)this.sound('screenshot',state);
       if(activeContract(previous)&&state.run.play.contract?.status==='complete')this.sound('build',state);
@@ -115,7 +118,7 @@ export class GameRuntime {
     state = { ...state, persistent: { ...state.persistent, numberNotation: this.platform.settings.read().numberNotation ?? state.persistent.numberNotation } };
     const result = this.durableTime(state,advanceOfflineTime(state, this.platform.clock.wallNow(),this.snapshot.language),()=>advanceOfflineTime(state,this.platform.clock.wallNow(),this.snapshot.language,false));
     this.publish({
-      state: result.state, status: 'ready',
+      state: this.fixture ? result.state : {...result.state,run:{...result.state.run,advice:{...result.state.run.advice,current:null,fingerprint:'',idleMs:0}}}, status: 'ready',
       notice: this.snapshot.notice==='save.failed'?'save.failed':loaded.kind === 'recovered' ? 'save.recovered'
         : loaded.kind === 'unavailable' ? 'save.storageUnavailable' : null,
       offline: loaded.kind !== 'empty' ? offlineNotice(result) : null,
@@ -167,12 +170,13 @@ export class GameRuntime {
       this.momentum = freshMomentum();
       const before=this.snapshot.state;
       const result = this.durableTime(before,advanceOfflineTime(before, wallNow,this.snapshot.language),()=>advanceOfflineTime(before,wallNow,this.snapshot.language,false));
-      this.publish({ state: result.state, offline: offlineNotice(result) });
+      this.publish({ state: {...result.state,run:{...result.state.run,advice:{...result.state.run.advice,current:null,fingerprint:'',idleMs:0}}}, offline: offlineNotice(result) });
     } else {
       const before=this.snapshot.state,duration=monotonicElapsed+this.activeRemainderMs;
       const result = this.durableTime(before,advanceActiveTime(before,duration,this.snapshot.language),()=>advanceActiveTime(before,duration,this.snapshot.language,false));
       this.activeRemainderMs = result.remainderMs;
-      this.publish({state:{...result.state,lastTickAt:wallNow}});
+      const advice = result.state.run.version === 'v0.1' ? result.state.run.advice : advanceAdvice(result.state.run.advice, result.state, result.creditedMs);
+      this.publish({state:{...result.state,lastTickAt:wallNow,run:{...result.state.run,advice}}});
     }
     return inactive;
   }
@@ -206,7 +210,7 @@ export class GameRuntime {
     } else if (this.suspended) {
       const before=this.snapshot.state;
       const result = this.durableTime(before,advanceOfflineTime(before, this.platform.clock.wallNow(),this.snapshot.language),()=>advanceOfflineTime(before,this.platform.clock.wallNow(),this.snapshot.language,false));
-      this.publish({ state: result.state, offline: offlineNotice(result) });
+      this.publish({ state: {...result.state,run:{...result.state.run,advice:{...result.state.run.advice,current:null,fingerprint:'',idleMs:0}}}, offline: offlineNotice(result) });
       this.lastActiveAt = this.platform.clock.monotonicNow();
       this.suspended = false;
       this.persist();
@@ -391,7 +395,7 @@ export class GameRuntime {
       this.activeRemainderMs = 0;
       this.momentum = freshMomentum();
       this.lastActiveAt = this.platform.clock.monotonicNow();
-      this.publish({ state: result.state, offline: offlineNotice(result), notice: null, press: null, introVisible: false, releaseConfirmation: false },false);
+      this.publish({ state: {...result.state,run:{...result.state.run,advice:{...result.state.run.advice,current:null,fingerprint:'',idleMs:0}}}, offline: offlineNotice(result), notice: null, press: null, introVisible: false, releaseConfirmation: false },false);
       this.persist();
       return true;
     } catch {
@@ -421,8 +425,8 @@ export class GameRuntime {
   requestPrototypeRelease = () => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
-    if (!canReleasePrototype(this.snapshot.state)) return;
-    this.publish({ releaseConfirmation: true, state: archiveGuide(this.snapshot.state, { kind: 'release', id: 'confirm', version: 'v0.1' }) });
+    if (!canRelease(this.snapshot.state)) return;
+    this.publish({ releaseConfirmation: true, state: archiveGuide(this.snapshot.state, { kind: 'release', id: 'confirm', version: this.snapshot.state.run.version }) });
     this.persist();
   };
 
@@ -450,17 +454,40 @@ export class GameRuntime {
     return true;
   }
 
-  confirmPrototypeRelease = () => {
+  confirmPrototypeRelease = () => this.confirmProductRelease();
+
+  confirmProductRelease = (screenshotIds: number[] = []) => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden() || !this.snapshot.releaseConfirmation) return;
     this.advanceForeground();
     const before = saveGame(this.platform.storage, this.snapshot.state, this.platform.clock.wallNow());
     if (before.kind !== 'saved') { this.publish({ notice: 'save.failed' }); return; }
     this.publish({ state: before.state });
-    const state = beginPrototypeRelease({ ...before.state, persistent: { ...before.state.persistent, productName: before.state.persistent.productName?.trim() || null } }, this.platform.clock.wallNow(), this.platform.animation.reducedMotion());
+    const state = beginProductRelease({ ...before.state, persistent: { ...before.state.persistent, productName: before.state.persistent.productName?.trim() || null } }, this.platform.clock.wallNow(), {language: this.snapshot.language, screenshotIds, reducedMotion: this.platform.animation.reducedMotion()});
     if (!this.commitReleaseChange(state)) return;
     this.momentum = freshMomentum();
     this.publish({ releaseConfirmation: false, press: null, offline: null });
     this.sound('release',state);
+  };
+
+  showShipping = () => {
+    if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    this.commitReleaseChange(showShipping(this.snapshot.state, this.platform.animation.reducedMotion()));
+  };
+
+  dismissOffline = () => { if (this.canOperate()) this.publish({ offline: null }); };
+
+  readAdvice = (id: AdviceId | null) => {
+    if (!this.canOperate()) return;
+    const state = this.snapshot.state;
+    this.publish({state:{...state,run:{...state.run,advice:readAdvice(state.run.advice,id)}}});
+    this.persist();
+  };
+
+  setSeedEra = (era: SeedEra) => {
+    if (!this.canOperate()) return;
+    this.publish({state:setSeedEra(this.snapshot.state,era)});
+    this.persist();
   };
 
   purchaseSpec = (key: SpecKey) => {
