@@ -56,7 +56,13 @@ export class CaptureStore {
     this.refs.clear();this.values.clear();this.added=[];
   }
   collect(primary:string,backup:string|null,previous:string|null){
-    const roots=(raw:string|null):string[]=>{if(!raw)return [];const value=JSON.parse(raw);return (value.persistent?.screenshots??[]).flatMap((s:{sceneRef?:string})=>s.sceneRef?[s.sceneRef]:[]);};
+    const roots=(raw:string|null):string[]=>{
+      if(!raw)return [];
+      const value=JSON.parse(raw);
+      const products=value.persistent?.products??[];
+      const images=[...(value.persistent?.screenshots??[]),...products.flatMap((p:{screenshots?:unknown[];capture?:unknown;captureCatalog?:unknown[]})=>[...(p.screenshots??[]),...(p.capture?[p.capture]:[]),...(p.captureCatalog??[])])];
+      return images.flatMap((s:{sceneRef?:string})=>typeof s.sceneRef==='string'?[s.sceneRef]:[]);
+    };
     const current=roots(primary),currentSet=new Set(current),old=roots(previous);
     if(!this.collectionPending&&!old.some(ref=>!currentSet.has(ref)))return;
     this.collectionPending=old.some(ref=>!currentSet.has(ref));

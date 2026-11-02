@@ -4,20 +4,70 @@ import { flushHomeBank, prototypeConditions } from './kumiki';
 import { createInitialState, type GameState } from './state';
 import { createSeedVersion } from './seed';
 import type { GuideRecord, ProductRecord, ProductScreen } from './releaseState';
+import { activeScreenshots, desktopConditions } from './desktop';
+import { encodeScene, projectCapture, readCapture } from './captureScene';
+import type { Screenshot } from './desktopState';
+import { reconcileProgress } from './longPlay';
 
 export const SPEC_ORDER: readonly SpecKey[] = ['color', 'storage', 'memory', 'resolution', 'network', 'refresh', 'graphics'];
 const uniqueExports = (state: GameState) => [...new Map(state.run.kumiki.exports.map(work => [`${work.kind}:${work.id}`, work])).values()];
-export function releaseEstimate(state: GameState): number {
+export const v1Conditions = (state: GameState): boolean[] => desktopConditions(state);
+export function selectedReleaseScreenshots(state: GameState, selectedIds?: readonly number[]): Screenshot[] {
+  const available = activeScreenshots(state);
+  const selected = selectedIds?.length ? selectedIds.flatMap(id => available.find(shot => shot.id === id) ?? []) : [...available].reverse();
+  return [...new Map(selected.map(shot => [shot.id, shot])).values()].slice(0, state.run.version === 'v0.1' ? 2 : BALANCE.release.storeMaxScreenshots);
+}
+function captureDependencies(roots: Screenshot[], catalog: Screenshot[]): Screenshot[] {
+  const included = new Set(roots.map(shot => shot.id)), dependencies = new Map<number, Screenshot>();
+  const visit = (shot: Screenshot) => {
+    const scene = readCapture(shot), refs = scene.files.flatMap(file => file.shotId === undefined ? [] : [file.shotId]);
+    if (scene.version !== 1) for (const source of [scene.view.photo.source, scene.view.preferences.wallpaper?.source]) {
+      if (source?.startsWith('shot:')) refs.push(Number(source.slice(5)));
+    }
+    for (const id of refs) {
+      if (included.has(id)) continue;
+      const dependency = catalog.find(shot => shot.id === id);
+      if (!dependency) continue;
+      included.add(id); dependencies.set(id, dependency); visit(dependency);
+    }
+  };
+  for (const shot of roots) visit(shot);
+  return structuredClone([...dependencies.values()].sort((a, b) => a.id - b.id));
+}
+export function releaseScreenshotBonus(state: GameState, selectedIds?: readonly number[]): number {
   const r = BALANCE.release;
-  const elements = state.run.seed.built.length + state.run.kumiki.built.length + uniqueExports(state).filter(e => e.kind === 'icon').length;
-  return Math.floor(r.base * ((state.run.totalPixelsGenerated + state.run.kumiki.bank) / r.pixelUnit) ** r.exponent * (1 + r.perElement * elements));
+  return selectedReleaseScreenshots(state, selectedIds).reduce((best, shot) => {
+    const scene = readCapture(shot), windows = Object.values(scene.desktop.windows).filter(w => w.open && !w.minimized);
+    const screen = 'screen' in scene ? scene.screen : { width: 1920, height: 1080 };
+    const fits = windows.length ? windows.filter(w => w.x >= 0 && w.y >= 0 && w.x + w.width <= screen.width && w.y + w.height <= screen.height).length / windows.length : 0;
+    const quality = Math.min(1, scene.display.parts / r.screenshotQualityParts) * r.screenshotQualityWeights.parts
+      + Math.min(1, windows.length / r.screenshotQualityApps) * r.screenshotQualityWeights.apps + fits * r.screenshotQualityWeights.placement;
+    return Math.max(best, Math.min(r.screenshotBonusMax, quality * r.screenshotBonusMax));
+  }, 0);
+}
+export function releaseEstimate(state: GameState, selectedIds?: readonly number[]): number {
+  const r = BALANCE.release;
+  const elements = state.run.seed.built.length + state.run.kumiki.built.length + uniqueExports(state).filter(e => e.kind === 'icon').length
+    + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length);
+  return Math.floor(r.base * ((state.run.totalPixelsGenerated + state.run.kumiki.bank) / r.pixelUnit) ** r.exponent * (1 + r.perElement * elements) * (1 + releaseScreenshotBonus(state, selectedIds)));
 }
 export function canReleasePrototype(state: GameState): boolean {
   return state.run.world === 'kumiki' && state.run.version === 'v0.1' && state.run.kumiki.exitInspected
     && state.persistent.specs.color === 0 && prototypeConditions(state).every(Boolean)
     && !state.persistent.products.some(p => p.version === 'v0.1');
 }
-export const canFundNextVersion = (state: GameState) => state.resources.dollars + releaseEstimate(state) >= BALANCE.spec.color[BALANCE.release.prototypeColorLevel]!.price;
+export function canReleaseV1(state: GameState): boolean {
+  return state.run.world === 'desktop' && state.run.version === 'v1' && v1Conditions(state).every(Boolean)
+    && !state.persistent.products.some(p => p.version === 'v1.0');
+}
+export const canRelease = (state: GameState) => canReleasePrototype(state) || canReleaseV1(state);
+const nextVersionRequirements = (state: GameState): [SpecKey, number][] => state.run.version === 'v0.1'
+  ? [['color', BALANCE.release.prototypeColorLevel]]
+  : [['color', BALANCE.release.prototypeColorLevel], ['refresh', BALANCE.release.v1RefreshLevel]];
+function requiredSpecBudget(state: GameState, buying?: SpecKey): number {
+  return nextVersionRequirements(state).reduce((sum, [key, goal]) => sum + BALANCE.spec[key].slice(state.persistent.specs[key] + (buying === key ? 2 : 1), goal + 1).reduce((price, step) => price + step.price, 0), 0);
+}
+export const canFundNextVersion = (state: GameState, selectedIds?: readonly number[]) => state.resources.dollars + releaseEstimate(state, selectedIds) >= requiredSpecBudget(state);
 
 export function dailySales(total: number): number[] {
   const weights = BALANCE.release.dailyWeights, sum = weights.reduce((a, b) => a + b, 0);
@@ -35,8 +85,8 @@ export function archiveGuide(state: GameState, entry: GuideRecord): GameState {
   if (state.persistent.guideArchive.some(e => e.kind === entry.kind && e.id === entry.id && e.version === entry.version)) return state;
   return { ...state, persistent: { ...state.persistent, guideArchive: [...state.persistent.guideArchive, entry] } };
 }
-export function beginPrototypeRelease(original: GameState, now: number, reducedMotion = false): GameState {
-  if (!canReleasePrototype(original) || !canFundNextVersion(original)) return original;
+function createReleasedProduct(original: GameState, now: number, reducedMotion: boolean, store: boolean, language: string, selectedIds?: readonly number[]): GameState {
+  if (!(store ? canRelease(original) : canReleasePrototype(original)) || !canFundNextVersion(original, selectedIds)) return original;
   const state = flushHomeBank(original);
   const k = state.run.kumiki, p = state.persistent;
   const screen: ProductScreen = structuredClone({
@@ -45,33 +95,53 @@ export function beginPrototypeRelease(original: GameState, now: number, reducedM
     specs: p.specs, seedSkills: p.seedSkills, pattern: p.seedAppearance.pattern, marquee: p.seedAppearance.marquee,
     kumikiSkills: p.artwork.skills, modern: p.artwork.modern, log: k.generationLog, history: state.run.seed.history,
   });
-  const product: ProductRecord = { id: p.products.length + 1, name: p.productName, version: 'v0.1', releasedAt: now, author: p.playerName,
-    generatedPixels: state.run.totalPixelsGenerated, builtCount: screen.built.length + screen.kumikiBuilt.length,
-    revenue: releaseEstimate(state), screen, exports: structuredClone(uniqueExports(state)) };
+  const product: ProductRecord = { id: Math.max(0, ...p.products.map(p => p.id)) + 1, name: p.productName, version: state.run.version === 'v0.1' ? 'v0.1' : 'v1.0', releasedAt: now, author: p.playerName,
+    generatedPixels: state.run.totalPixelsGenerated, builtCount: screen.built.length + screen.kumikiBuilt.length + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length),
+    revenue: releaseEstimate(state, selectedIds), screen, exports: structuredClone(uniqueExports(state)),
+    ...(store ? { screenshots: structuredClone(selectedReleaseScreenshots(state, selectedIds)), screenshotBonus: releaseScreenshotBonus(state, selectedIds) } : {}),
+    ...(store && state.run.world === 'desktop' ? { capture: { id: Math.max(p.desktopPrefs.lastShotId, p.screenshots.at(-1)?.id ?? 0) + 1, at: now, language, data: encodeScene(projectCapture(state, language)) } } : {}),
+  };
+  if (store) product.captureCatalog = captureDependencies([...(product.screenshots ?? []), ...(product.capture ? [product.capture] : [])], p.screenshots);
   let next: GameState = { ...state, resources: { ...state.resources, dollars: state.resources.dollars + product.revenue },
-    run: { ...state.run, world: 'release', shipping: { productId: product.id, elapsedMs: reducedMotion ? BALANCE.release.animationMs : 0 } },
+    run: { ...state.run, world: 'release', shipping: { productId: product.id, elapsedMs: !store && reducedMotion ? BALANCE.release.animationMs : 0,
+      ...(store ? { phase: 'store' as const, storeElapsedMs: reducedMotion ? BALANCE.release.storeAnimationMs : 0 } : {}) } },
     persistent: { ...p, products: [...p.products, product], homeTheme: structuredClone(k.design) },
   };
   for (const id of state.run.seed.guide.seen) next = archiveGuide(next, { kind: 'seed', id, version: state.run.version });
   for (const id of k.guide.seen) next = archiveGuide(next, { kind: 'kumiki', id, version: state.run.version });
-  next = archiveGuide(next, { kind: 'release', id: 'confirm', version: 'v0.1' });
-  return archiveGuide(next, { kind: 'release', id: 'sales', version: 'v0.1' });
+  next = archiveGuide(next, { kind: 'release', id: 'confirm', version: state.run.version });
+  next = archiveGuide(next, { kind: 'release', id: 'sales', version: state.run.version });
+  return store ? reconcileProgress(next, now) : next;
+}
+// Existing saved shipping scenes and fixtures continue from the sales screen.
+export function beginPrototypeRelease(state: GameState, now: number, reducedMotion = false): GameState {
+  return createReleasedProduct(state, now, reducedMotion, false, 'ja');
+}
+export interface ProductReleaseOptions { language?: string; screenshotIds?: readonly number[]; reducedMotion?: boolean }
+export function beginProductRelease(state: GameState, now: number, options: ProductReleaseOptions = {}): GameState {
+  return createReleasedProduct(state, now, options.reducedMotion ?? false, true, options.language ?? 'ja', options.screenshotIds);
+}
+export const storeComplete = (state: GameState) => state.run.world === 'release' && state.run.shipping?.phase === 'store'
+  && (state.run.shipping.storeElapsedMs ?? 0) >= BALANCE.release.storeAnimationMs;
+export function showShipping(state: GameState, reducedMotion = false): GameState {
+  if (!storeComplete(state)) return state;
+  return { ...state, run: { ...state.run, shipping: { ...state.run.shipping!, phase: 'shipping', elapsedMs: reducedMotion ? BALANCE.release.animationMs : 0 } } };
 }
 export function advanceShipping(state: GameState, activeMs: number): GameState {
   const shipping = state.run.shipping;
   if (state.run.world !== 'release' || !shipping) return state;
-  return { ...state, run: { ...state.run, shipping: { ...shipping, elapsedMs: Math.min(BALANCE.release.animationMs, shipping.elapsedMs + activeMs) } } };
+  if (shipping.phase === 'store') return { ...state, run: { ...state.run, shipping: { ...shipping, storeElapsedMs: Math.min(BALANCE.release.storeAnimationMs, (shipping.storeElapsedMs ?? 0) + Math.max(0, activeMs)) } } };
+  return { ...state, run: { ...state.run, shipping: { ...shipping, elapsedMs: Math.min(BALANCE.release.animationMs, shipping.elapsedMs + Math.max(0, activeMs)) } } };
 }
-export const shippingComplete = (state: GameState) => state.run.world === 'release' && !!state.run.shipping && state.run.shipping.elapsedMs >= BALANCE.release.animationMs;
+export const shippingComplete = (state: GameState) => state.run.world === 'release' && !!state.run.shipping && state.run.shipping.phase !== 'store' && state.run.shipping.elapsedMs >= BALANCE.release.animationMs;
 export const shippingProduct = (state: GameState) => state.persistent.products.find(p => p.id === state.run.shipping?.productId);
 
 export function canBuySpec(state: GameState, key: SpecKey): boolean {
   if (!shippingComplete(state)) return false;
   const level = state.persistent.specs[key], item = BALANCE.spec[key][level + 1];
   if (!item || item.price > state.resources.dollars) return false;
-  // 256色へ進めなくなる買い方を避け、先に必要な購入分を残す。
-  const reserve = key !== 'color' && state.persistent.specs.color < BALANCE.release.prototypeColorLevel
-    ? BALANCE.spec.color[BALANCE.release.prototypeColorLevel]!.price : 0;
+  // Keep the money needed for the next world's display requirement (256 colors / 60 Hz).
+  const reserve = requiredSpecBudget(state, key);
   return state.resources.dollars - item.price >= reserve;
 }
 export function buySpec(state: GameState, key: SpecKey): GameState {
@@ -80,7 +150,7 @@ export function buySpec(state: GameState, key: SpecKey): GameState {
   return { ...state, resources: { ...state.resources, dollars: state.resources.dollars - BALANCE.spec[key][level]!.price },
     persistent: { ...state.persistent, specs: { ...state.persistent.specs, [key]: level } } };
 }
-export const canStartNextVersion = (state: GameState) => shippingComplete(state) && state.persistent.specs.color >= BALANCE.release.prototypeColorLevel;
+export const canStartNextVersion = (state: GameState) => shippingComplete(state) && nextVersionRequirements(state).every(([key, level]) => state.persistent.specs[key] >= level);
 export function startNextVersion(state: GameState, now: number): GameState {
   if (!canStartNextVersion(state)) return state;
   const next = createSeedVersion(state,state.run.version==='v0.1'?'v1':'v2',now);
@@ -93,7 +163,7 @@ export function productPreviewState(product: ProductRecord): GameState {
   if(s.progress)next.persistent.progress=structuredClone(s.progress);else next.legacyGeneration=true;
   next.resources.pixels = s.pixels;
   next.run.totalPixelsGenerated = product.generatedPixels;
-  next.run.version = product.version; next.run.world = 'kumiki';
+  next.run.version = product.version === 'v0.1' ? 'v0.1' : 'v1'; next.run.world = 'kumiki';
   next.run.seed.built = [...s.built]; next.run.seed.autoCursors = s.cursors;
   next.run.seed.history = s.history;
   if(s.page)next.run.seed.page=structuredClone(s.page);

@@ -3,6 +3,7 @@ import { isPageDesign, type PageDesign } from './pageDesign';
 import { BALANCE, type KumikiItem, type KumikiSkill, type PartId, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { isDesignMap, isExportedWork, PART_IDS, type Design, type ExportedWork } from './kumikiState';
 import type { SeedState } from './state';
+import { isScreenshot, type Screenshot } from './desktopState';
 
 export interface ProductScreen {
   progress?:Progress;page?:PageDesign;legacyBonus?:{auto:number;drawing:number};
@@ -14,11 +15,12 @@ export interface ProductScreen {
   history: SeedState['history'];
 }
 export interface ProductRecord {
-  id: number; name: string | null; version: 'v0.1'; releasedAt: number; author: string | null;
+  id: number; name: string | null; version: 'v0.1' | 'v1.0'; releasedAt: number; author: string | null;
   generatedPixels: number; builtCount: number; revenue: number;
   screen: ProductScreen; exports: ExportedWork[];
+  screenshots?: Screenshot[]; capture?: Screenshot; captureCatalog?: Screenshot[]; screenshotBonus?: number;
 }
-export interface ShippingState { productId: number; elapsedMs: number }
+export interface ShippingState { productId: number; elapsedMs: number; phase?: 'store' | 'shipping'; storeElapsedMs?: number }
 export interface GuideRecord { kind: 'seed' | 'kumiki' | 'release'; id: string; version: 'v0.1' | 'v1' | 'v2' }
 
 const obj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
@@ -26,7 +28,7 @@ const amount = (x: unknown): x is number => typeof x === 'number' && Number.isFi
 const count = (x: unknown): x is number => amount(x) && Number.isSafeInteger(x);
 const ids = (x: unknown, allowed: readonly unknown[]): x is string[] => Array.isArray(x) && new Set(x).size === x.length && x.every(id => allowed.includes(id));
 export function isProductRecord(x: unknown): x is ProductRecord {
-  if (!obj(x) || !(x.name === null || typeof x.name === 'string' && [...x.name].length <= BALANCE.release.maxProductName) || !count(x.id) || x.id < 1 || x.version !== 'v0.1' || !amount(x.releasedAt)
+  if (!obj(x) || !(x.name === null || typeof x.name === 'string' && [...x.name].length <= BALANCE.release.maxProductName) || !count(x.id) || x.id < 1 || !['v0.1','v1.0'].includes(x.version as string) || !amount(x.releasedAt)
     || x.author !== null && typeof x.author !== 'string' || !amount(x.generatedPixels) || !count(x.builtCount) || !count(x.revenue)) return false;
   const s = x.screen;
   if (!obj(s) || !amount(s.pixels) || !count(s.cursors) || !ids(s.built, BALANCE.w1.items.map(i => i.id))
@@ -37,6 +39,10 @@ export function isProductRecord(x: unknown): x is ProductRecord {
     || !ids(s.kumikiSkills, BALANCE.w2.skills.map(i => i.id)) || typeof s.modern !== 'boolean') return false;
   if(s.progress!==undefined&&!isProgress(s.progress))return false;
   if(s.page!==undefined&&!isPageDesign(s.page))return false;
+  if(x.screenshots!==undefined&&(!Array.isArray(x.screenshots)||x.screenshots.length>BALANCE.release.storeMaxScreenshots||!x.screenshots.every(isScreenshot)||new Set(x.screenshots.map(shot=>shot.id)).size!==x.screenshots.length))return false;
+  if(x.capture!==undefined&&!isScreenshot(x.capture))return false;
+  if(x.captureCatalog!==undefined&&(!Array.isArray(x.captureCatalog)||!x.captureCatalog.every(isScreenshot)||new Set(x.captureCatalog.map(shot=>shot.id)).size!==x.captureCatalog.length))return false;
+  if(x.screenshotBonus!==undefined&&(!amount(x.screenshotBonus)||x.screenshotBonus>BALANCE.release.screenshotBonusMax))return false;
   if(s.legacyBonus!==undefined&&(!obj(s.legacyBonus)||!amount(s.legacyBonus.auto)||s.legacyBonus.auto<1||s.legacyBonus.auto>1.2||!amount(s.legacyBonus.drawing)||s.legacyBonus.drawing<1||s.legacyBonus.drawing>2))return false;
   if (!obj(s.specs) || !(Object.keys(BALANCE.spec) as SpecKey[]).every(key => obj(s.specs) && count(s.specs[key]) && s.specs[key] < BALANCE.spec[key].length)) return false;
   if (!Array.isArray(s.log) || !s.log.every(e => obj(e) && amount(e.at) && amount(e.pixels))) return false;

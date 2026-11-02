@@ -33,7 +33,7 @@ export function reconcileProgress(s:GameState,now:number):GameState {
  icons6:ICON_IDS.every(id=>known.some(w=>w.kind==='icon'&&w.id===id)),practice10:PRACTICE_IDS.every(id=>known.some(w=>w.kind==='icon'&&w.id===id)),
  'parts-all':['button','input','frame','taskbar'].every(id=>k.placed.includes(id as 'input'))||archived.some(p=>['button','input','frame','taskbar'].every(id=>p.screen.placed.includes(id as 'input'))),
  repairs10:p.counts.repairs>=10,'editor-update':s.persistent.artwork.skills.includes('update'),'editor-modern':s.persistent.artwork.skills.includes('modern'),'desktop-update':s.persistent.desktopPrefs.skills.includes('major1'),
- 'product-name':!!s.persistent.productName||archived.some(p=>!!p.name),'prototype-released':archived.length>0,'v1-released':s.run.version==='v2',
+ 'product-name':!!s.persistent.productName||archived.some(p=>!!p.name),'prototype-released':archived.some(p=>p.version==='v0.1'),'v1-released':archived.some(p=>p.version==='v1.0')||s.run.version==='v2',
  'first-shot':p.counts.shots>0||s.persistent.screenshots.length>0,shots100:p.counts.shots>=100||s.persistent.screenshots.length>=100,
  feedback10:p.counts.feedback>=10||d.feedback.filter(f=>f.completedAt!==null).length>=10,feedback50:p.counts.feedback>=50||d.feedback.filter(f=>f.completedAt!==null).length>=50,
  'jobs-full':d.upgrades.includes('jobs')&&Object.values(d.jobs).filter(j=>j.assigned&&j.cursors>0).length>=BALANCE.spec.memory[s.persistent.specs.memory]!.posts+(s.persistent.desktopPrefs.skills.includes('posts')&&!s.persistent.desktopPrefs.disabled.includes('posts')?BALANCE.w3.extraPosts:0),

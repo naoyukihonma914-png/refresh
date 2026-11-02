@@ -107,6 +107,11 @@ export const BALANCE = {
     animationMs: 8_000, restartMs: 1_000,
     dailyWeights: [88, 61, 47, 38, 29, 22, 18],
     prototypeColorLevel: 1,
+    v1RefreshLevel: 1,
+    storeAnimationMs: 3_000, storeMaxScreenshots: 6,
+    storeUnitPrice: 5, storeDownloadsPerDollar: 4,
+    screenshotBonusMax: .1, screenshotQualityParts: 60, screenshotQualityApps: 4,
+    screenshotQualityWeights: { parts: .5, apps: .3, placement: .2 },
   },
   spec: {
     color: [
