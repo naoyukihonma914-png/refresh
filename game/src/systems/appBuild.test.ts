@@ -113,7 +113,7 @@ describe('段階6.2：アプリの組み立てと詰みの防止',()=>{
  });
  it('撮影した場面・アプリの配置・稼働中の色を、後の編集と外観変更から独立して保つ',()=>{
   let s=ready();s.run.kumiki.workspace='compose';s=focusWindow(s,'files');s=actAppBuild(s,{type:'app-edit',app:'files'});s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot),frozen=shot.data;s=actAppBuild(s,{type:'app-remove',app:'files',part:'list'});s=actAppBuild(s,{type:'app-install',app:'files'});
-  expect(scene.version).toBe(8);const restored=restoreScene(shot,s.persistent.screenshots);expect(restored.run.kumiki.workspace).toBe('compose');expect(restored.run.desktop.projects.files!.installed!.parts.some(p=>p.id==='list')).toBe(true);expect(shot.data).toBe(frozen);expect(projectCapture(restored,'ja').editingApp).toBe('files');
+  expect(scene.version).toBe(9);const restored=restoreScene(shot,s.persistent.screenshots);expect(restored.run.kumiki.workspace).toBe('compose');expect(restored.run.desktop.projects.files!.installed!.parts.some(p=>p.id==='list')).toBe(true);expect(shot.data).toBe(frozen);expect(projectCapture(restored,'ja').editingApp).toBe('files');
  });
  it('配置ボーナスは色の好みで変わらず、端にそろっていない配置には付けない',()=>{
   const s=ready(),before=appLayoutBonus(s);for(const p of Object.values(s.run.desktop.projects))for(const part of p!.installed!.parts)part.color='#008080';expect(appLayoutBonus(s)).toBe(before);

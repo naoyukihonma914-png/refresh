@@ -523,3 +523,84 @@
 .desktop.desktop-era-2 input[type=range]::-moz-range-thumb {width:11px;height:18px;background:linear-gradient(90deg,#f2fcff,#aacbdc);border-color:#6b8b9e;border-radius:2px;}
 
 .desktop.desktop-era-0 input[type=range]:focus-visible {outline:1px dotted #000;outline-offset:2px;border-radius:0;}
+
+/* The third major update replaces glass with broad, flat window chrome. */
+.desktop.desktop-era-3 {--flat-accent:#1f6fae;--app-font:'Segoe UI','Meiryo UI','Refresh Glass','Refresh UI',sans-serif;background:#16476b;font-family:'Segoe UI','Meiryo UI','Refresh Glass','Refresh UI',sans-serif;}
+.desktop.desktop-era-3 .desktop-window {padding:0;border:8px solid #ebebeb;border-top:0;border-radius:0!important;background:#ebebeb;box-shadow:0 0 0 1px #aaa,0 3px 16px #0005;backdrop-filter:none;}
+.desktop.desktop-era-3 .desktop-window.is-active {border-color:var(--flat-accent);background:var(--flat-accent);box-shadow:0 0 0 1px #16507d,0 3px 16px #0006;}
+.desktop.desktop-era-3 .window-title {height:30px;gap:5px;padding:0;margin:0;color:#444;background:#ebebeb;text-shadow:none;font-weight:normal;}
+.desktop.desktop-era-3 .is-active>.window-title {color:#fff;background:var(--flat-accent);}
+.desktop.desktop-era-3 .window-title>span {flex:1;text-align:center;padding:4px 4px 0;}
+.desktop.desktop-era-3 .window-controls {height:26px;gap:0;padding:0;align-self:flex-start;}
+.desktop.desktop-era-3 .window-controls button {width:29px;height:25px;border:0;background:transparent;color:inherit;box-shadow:none;}
+.desktop.desktop-era-3 .window-controls .window-close {width:46px;background:#c75050;color:#fff;}
+.desktop.desktop-era-3 .window-controls button:hover {background:#ffffff30;}
+.desktop.desktop-era-3 .window-controls .window-close:hover {background:#e04343;}
+.desktop.desktop-era-3 .window-content {margin:0;border:0;background:#fff;}
+.desktop.desktop-era-3 .window-resize {width:12px;height:12px;color:#fff;}
+.desktop.desktop-era-3 .win-button,.desktop.desktop-era-3 .nav-button {min-height:26px;border:1px solid #acacac;border-radius:0;box-shadow:none;background:#f2f2f2;color:#111;}
+.desktop.desktop-era-3 .win-button:hover:not(:disabled),.desktop.desktop-era-3 .nav-button:hover:not(:disabled) {background:#e5f1fb;border-color:#7eb4ea;}
+.desktop.desktop-era-3 .win-button.accent {background:var(--flat-accent);border-color:#16507d;color:#fff;}
+.desktop.desktop-era-3 input,.desktop.desktop-era-3 select,.desktop.desktop-era-3 textarea {border:1px solid #ababab;box-shadow:none;border-radius:0;min-height:24px;}
+.desktop.desktop-era-3 .app-toolbar,.desktop.desktop-era-3 .files-address,.desktop.desktop-era-3 .files-status,.desktop.desktop-era-3 .note-app footer {background:#f5f6f7;border-color:#dadbdc;box-shadow:none;}
+.desktop.desktop-era-3 .files-sidebar,.desktop.desktop-era-3 .mail-app aside,.desktop.desktop-era-3 .settings-app>aside,.desktop.desktop-era-3 .manager-app>nav {background:#f5f6f7;border-color:#e1e1e1;}
+.desktop.desktop-era-3 .file-list th {background:#fff;box-shadow:none;border-bottom:1px solid #e5e5e5;}
+.desktop.desktop-era-3 .selected {background:#d9eaf7!important;color:#111!important;}
+.desktop.desktop-era-3 .desktop-taskbar {height:40px;padding:0 5px 0 0;gap:3px;background:#123452d1;box-shadow:none;border-top:1px solid #ffffff24;backdrop-filter:none;color:#fff;}
+.desktop.desktop-era-3 .taskbar-product {height:39px;width:max-content;max-width:200px;padding:0 12px;background:var(--flat-accent);color:#fff;border:0;box-shadow:none;}
+.desktop.desktop-era-3 .taskbar-product>.app-icon {width:24px;height:24px;}
+.desktop.desktop-era-3 .taskbar-apps {height:39px;gap:3px;}
+.desktop.desktop-era-3 .taskbar-apps button {flex:0 1 58px;max-width:58px;min-width:34px;height:39px;padding:4px 8px;border:1px solid transparent;border-radius:0;box-shadow:none;background:#ffffff10;color:#fff;}
+.desktop.desktop-era-3 .taskbar-apps button.running {background:#ffffff14;border-color:#ffffff16;}
+.desktop.desktop-era-3 .taskbar-apps button.active {background:#ffffff38;border-color:#ffffff60;box-shadow:none;}
+.desktop.desktop-era-3 .taskbar-apps .app-icon,.desktop.desktop-era-3 .taskbar-apps .pixel-art {width:28px;height:28px;}
+.desktop.desktop-era-3 .taskbar-app-name {display:none;}
+.desktop.desktop-era-3 .taskbar-right {height:39px;gap:8px;padding:0 6px;background:none;box-shadow:none;color:#fff;}
+.desktop.desktop-era-3 .desktop-resources {gap:10px;}
+.desktop.desktop-era-3 .taskbar-progress,.desktop.desktop-era-3 .taskbar-pixels,.desktop.desktop-era-3 .taskbar-tokens,.desktop.desktop-era-3 .taskbar-clock,.desktop.desktop-era-3 .notification-button,.desktop.desktop-era-3 .taskbar-job-source {color:#fff;box-shadow:none;}
+.desktop.desktop-era-3 .taskbar-pixels b {font-weight:normal;}
+.desktop.desktop-era-3 .taskbar-pixels small {display:block;font-size:11px;color:#e4edf5;}
+.desktop.desktop-era-3 .taskbar-progress {max-width:170px;}
+.desktop.desktop-era-3 .era-progress {display:none;}
+.desktop.desktop-era-3 .progress-caption {display:block;text-align:left;white-space:nowrap;font-size:12px;}
+.desktop.desktop-era-3 .taskbar-job-source {height:38px;}
+.desktop.desktop-era-3 .taskbar-clock {height:38px;min-width:80px;}
+.desktop.desktop-era-3 .taskbar-clock>span+span {display:block;}
+.desktop.desktop-era-3 .desktop-conditions,.desktop.desktop-era-3 .notification-center,.desktop.desktop-era-3 .desktop-upgrades {border:1px solid #888;border-radius:0;background:#fff;box-shadow:0 3px 12px #0005;color:#111;}
+.desktop.desktop-era-3 .desktop-programs>button:hover,.desktop.desktop-era-3 .desktop-programs>button:focus-visible {background:#d9eaf7;color:#111;}
+.desktop.desktop-era-3 .feedback-toast {top:110px;right:16px;bottom:auto;width:360px;border:1px solid #16507d;border-radius:0;background:var(--flat-accent);box-shadow:0 3px 14px #0005;color:#fff;}
+.desktop.desktop-era-3 .feedback-toast>header {height:28px;background:transparent;color:#fff;}
+.desktop.desktop-era-3 .feedback-toast .toast-actions .win-button {background:transparent;color:#fff;border-color:#ffffffc0;}
+.desktop.desktop-era-3 .feedback-toast .toast-actions .win-button.accent {background:#fff;color:#1f6fae;border-color:#fff;}
+.desktop.desktop-era-3 .feedback-toast .nav-button {background:transparent;color:#fff;border:0;}
+.desktop.desktop-era-3 .achievement-toast.beside-feedback {right:388px;}
+.desktop.desktop-era-3 .screenshot-toggle {background:#ebebeb;border-color:#777;box-shadow:none;}
+.desktop.desktop-era-3 .screenshot-toolbar {background:#f5f6f7;border:1px solid #aaa;border-radius:0;box-shadow:0 2px 6px #0004;}
+.desktop.desktop-era-3 .desktop-shortcut>.pixel-art,.desktop.desktop-era-3 .desktop-shortcut>.app-icon {filter:drop-shadow(1px 2px 1px #0007);}
+.desktop.desktop-era-3 .builder-preview-frame {background:var(--flat-accent);border-color:var(--flat-accent);border-radius:0;}
+.desktop.desktop-era-3 .builder-preview-frame>h2 {background:var(--flat-accent);color:#fff;}
+.desktop.desktop-era-3 input[type=range]::-webkit-slider-runnable-track {height:4px;background:#bbb;border:0;box-shadow:none;}
+.desktop.desktop-era-3 input[type=range]::-webkit-slider-thumb {width:10px;height:20px;margin-top:-8px;background:var(--flat-accent);border:0;border-radius:0;box-shadow:none;}
+.desktop.desktop-era-3 input[type=range]::-moz-range-track {height:4px;background:#bbb;border:0;}
+.desktop.desktop-era-3 input[type=range]::-moz-range-thumb {width:10px;height:20px;background:var(--flat-accent);border:0;border-radius:0;box-shadow:none;}
+/* The ribbon belongs to window chrome, outside the player's app composition. */
+.files-ribbon {flex:none;background:#f5f6f7;border-bottom:1px solid #dadbdc;color:#333;}
+.ribbon-tabs {display:flex;align-items:center;min-height:26px;gap:0;border-bottom:1px solid #dadbdc;}
+.ribbon-tabs>span,.ribbon-tabs>b {padding:5px 18px;font-weight:normal;}
+.ribbon-tabs>span {background:#1f6fae;color:#fff;}
+.ribbon-tabs>b {background:#fff;border-inline:1px solid #dadbdc;}
+.ribbon-groups {display:flex;gap:0;overflow:auto;}
+.ribbon-group {display:flex;flex-direction:column;padding:3px 8px;border-inline-end:1px solid #dedede;}
+.ribbon-actions {display:flex;flex:1;gap:2px;align-items:stretch;}
+.ribbon-command {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:94px;max-width:120px;min-height:60px;padding:4px;border:1px solid transparent;color:inherit;background:transparent;line-height:1.25;}
+.ribbon-command:hover,.ribbon-command:focus-visible {border-color:#a4cef1;background:#e5f1fb;}
+.ribbon-command[aria-pressed=true] {border-color:#9cc8e9;background:#d9eaf7;}
+.ribbon-command>span {max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+.desktop .ribbon-command>.app-icon,.desktop .ribbon-command>.line-icon,.desktop .ribbon-command>svg {width:24px;height:24px;}
+.ribbon-group>small {display:block;text-align:center;padding-top:3px;font-size:11px;color:#777;}
+.desktop.desktop-era-3.desktop-dark .files-ribbon {background:#333;color:#eee;border-color:#444;}
+.desktop.desktop-era-3.desktop-dark .ribbon-tabs {border-color:#444;}
+.desktop.desktop-era-3.desktop-dark .ribbon-tabs>b {background:#444;border-color:#555;}
+.desktop.desktop-era-3.desktop-dark .ribbon-group {border-color:#555;}
+.desktop.desktop-era-3.desktop-dark .ribbon-group>small {color:#ccc;}
+.desktop.desktop-era-3.desktop-dark .ribbon-command:hover,.desktop.desktop-era-3.desktop-dark .ribbon-command[aria-pressed=true] {background:#4b6170;}

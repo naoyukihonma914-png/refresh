@@ -872,6 +872,15 @@
     "settings.open": "設定",
     "contract.completed": "案件完了：{name} · 全生成 +5%",
     "terminal.executing": "定期実行中 − 完了 {count} 回",
-    "terminal.paused": "定期実行は停止中 − 完了 {count} 回"
+    "terminal.paused": "定期実行は停止中 − 完了 {count} 回",
+    "appearance.desktop.3": "大型アップデート3回目の後",
+    "desktop.skill.major3": "大型アップデート（3回目）",
+    "desktop.skill.major3.description": "平らな単色の窓とリボン。通知は右上に届きます。",
+    "desktop.skill.major3.requirement": "先にターミナルを入れる必要があります",
+    "files.ribbon": "ファイルのリボン",
+    "files.ribbon.home": "ホーム",
+    "files.ribbon.places": "開く場所",
+    "files.ribbon.view": "表示",
+    "appearance.guide.desktop3": "平らな窓とリボンになりました。作ったアプリは、そのまま使えます。"
   }
 }

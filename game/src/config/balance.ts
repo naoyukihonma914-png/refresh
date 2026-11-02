@@ -84,7 +84,7 @@ export const BALANCE = {
     screensaverMs: 120_000, screensaverFrameMs: 5_000, slideshowMs: 60_000,
     maxNoteLog: 20, maxCommands: 8,
     skills: [
-      { id: 'major1', band: 1, cost: 4, playful: false }, { id: 'major2', band: 2, cost: 20, playful: false },
+      { id: 'major1', band: 1, cost: 4, playful: false }, { id: 'major2', band: 2, cost: 20, playful: false }, { id: 'major3', band: 2, cost: 40, playful: false },
       { id: 'snap', band: 1, cost: 2, playful: false }, { id: 'direct', band: 1, cost: 2, playful: false },
       { id: 'burst', band: 1, cost: 4, playful: false }, { id: 'daylight', band: 1, cost: 3, playful: true },
       { id: 'posts', band: 2, cost: 15, playful: false }, { id: 'sortMail', band: 2, cost: 15, playful: false },
@@ -100,7 +100,7 @@ export const BALANCE = {
   pageDesign:{buttonFontMin:12,buttonFontMax:36,buttonMinWidth:120,buttonMinHeight:32,width:1920,height:920,grid:8,cardWidth:800,minWidth:320,minHeights:{heading:64,notice:64,generator:160,upgrades:120},compactHeights:{heading:80,notice:80,generator:280,upgrades:160},recommendedHeights:{heading:112,notice:160,generator:176,upgrades:224}},
   legacyHome:{switchRefund:20_000,sliderRefund:32_000},
   appBuild:{width:640,height:416,grid:8,bodyMinWidth:112,bodyMinHeight:64,controlMinWidth:112,controlMinHeight:48,history:30,layoutBonus:.1},
-  appearance:{transitionMs:2_000,gessoRequirement:2,screens:[{width:800,height:600},{width:1024,height:768},{width:1366,height:768}]},
+  appearance:{transitionMs:2_000,gessoRequirement:2,screens:[{width:800,height:600},{width:1024,height:768},{width:1366,height:768},{width:1366,height:768}]},
   release: {
     maxProductName: 20,
     base: 25, pixelUnit: 10_000, exponent: 0.4, perElement: 0.05,

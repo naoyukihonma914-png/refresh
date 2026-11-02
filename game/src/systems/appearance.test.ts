@@ -57,10 +57,43 @@ describe('段階6.1：見た目の進化と互換性',()=>{
  });
  it('V4撮影は撮影時の段・角の設定を持ち、後の変更を受けない。過去のV1・V2も混在できる',()=>{
   let s=createFixture('desktop-stage2',now)!;s=actDesktop(s,{type:'theme',radius:3},now);s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!;const scene=readCapture(shot);
-  expect(scene.version).toBe(8);expect(isCaptureScene(scene)).toBe(true);s=setDesktopStage(setEditorStage(s,0),0);s=actDesktop(s,{type:'theme',autoRadius:true},now);
+  expect(scene.version).toBe(9);expect(isCaptureScene(scene)).toBe(true);s=setDesktopStage(setEditorStage(s,0),0);s=actDesktop(s,{type:'theme',autoRadius:true},now);
   const frozen=restoreScene(shot,s.persistent.screenshots);expect(frozen.persistent.appearance).toEqual({editor:2,desktop:2});expect(frozen.persistent.desktopPrefs).toMatchObject({radius:3,radiusCustom:true});
   const invalid=structuredClone(scene);if(invalid.version===4){invalid.appearance.desktop=9 as never;expect(isCaptureScene(invalid)).toBe(false);}
   const mixed=decodeSave(gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString());mixed.persistent.screenshots.push({...shot,id:10});mixed.persistent.desktopPrefs.lastShotId=10;expect(decodeSave(encodeSave(mixed))).toEqual(mixed);
  });
  it.each(['editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2'])('%sの状態を往復できる',name=>{const s=createFixture(name,now)!;expect(isGameState(s)).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);});
+});
+
+
+describe('段階7：平らなデスクトップへの進化',()=>{
+ it('3回目は2回目とターミナルの導入後だけ買え、同じ購入を繰り返しても払わない',()=>{
+  let s=createFixture('desktop-photo',now)!;s.resources.tokens=200;
+  expect(actDesktop(s,{type:'skill',id:'major3'},now)).toBe(s);
+  s=actDesktop(s,{type:'skill',id:'major1'},now);s=actDesktop(s,{type:'skill',id:'major2'},now);
+  expect(actDesktop(s,{type:'skill',id:'major3'},now)).toBe(s);
+  let ready=createFixture('desktop-stage2',now)!;ready.resources.tokens=40;const projects=ready.run.desktop.projects,jobs=ready.run.desktop.jobs;
+  ready=actDesktop(ready,{type:'skill',id:'major3'},now);
+  expect(ready.resources.tokens).toBe(0);expect(ready.persistent.appearance).toEqual({editor:2,desktop:3});
+  expect(ready.run.desktop.screen).toEqual({width:1366,height:768});expect(ready.run.desktop.projects).toBe(projects);expect(ready.run.desktop.jobs).toBe(jobs);
+  expect(actDesktop(ready,{type:'skill',id:'major3'},now)).toBe(ready);
+  expect(isGameState(ready)).toBe(true);expect(decodeSave(encodeSave(ready))).toEqual(ready);
+ });
+ it('段3を撮影した記録は段0に戻した後も平らな枠と作品・配置を保持する',()=>{
+  let s=createFixture('desktop-stage2',now)!;const old=s.persistent.screenshots[0]!;const oldData=old.data;
+  s=actDesktop(s,{type:'skill',id:'major3'},now);s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');
+  const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);expect(isCaptureScene(scene)).toBe(true);
+  const frozen=restoreScene(shot,s.persistent.screenshots);expect(frozen.persistent.appearance).toEqual({editor:2,desktop:3});
+  expect(frozen.persistent.desktopPrefs.skills).toContain('major3');
+  const windows=frozen.run.desktop.windows;s=setDesktopStage(s,0);expect(s.persistent.appearance.desktop).toBe(0);
+  expect(restoreScene(shot,s.persistent.screenshots).run.desktop.windows).toEqual(windows);expect(old.data).toBe(oldData);
+  expect(readCapture(old).version).toBe(9);expect(decodeSave(encodeSave(s))).toEqual(s);
+ });
+ it('段3を持っていると表示を古い段へ戻してもGessoの動作環境を満たす',()=>{
+  let s=createFixture('desktop-stage2',now)!;s=actDesktop(s,{type:'skill',id:'major3'},now);s=setDesktopStage(s,0);
+  s.persistent.artwork.skills=s.persistent.artwork.skills.filter(id=>id!=='modern');s=setEditorStage(s,1);
+  expect(unlockedDesktopStage(s)).toBe(3);expect(canSwitchEditor(s)).toBe(true);
+  const next=buyKumikiSkill(s,'modern');expect(next.persistent.appearance.editor).toBe(2);expect(next.persistent.appearance.desktop).toBe(0);
+  expect(setEditorStage(next,3 as never)).toBe(next);expect(setDesktopStage(next,4 as never)).toBe(next);
+ });
 });

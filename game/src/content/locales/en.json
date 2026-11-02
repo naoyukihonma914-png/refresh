@@ -912,6 +912,15 @@
     "settings.open": "Settings",
     "contract.completed": "Contract complete: {name} · All production +5%",
     "terminal.executing": "Repeating — {count} commands completed",
-    "terminal.paused": "Stopped — {count} commands completed"
+    "terminal.paused": "Stopped — {count} commands completed",
+    "appearance.desktop.3": "After the third major update",
+    "desktop.skill.major3": "Third major update",
+    "desktop.skill.major3.description": "Flat window frames, a ribbon, and notifications at the upper right.",
+    "desktop.skill.major3.requirement": "Install Terminal first",
+    "files.ribbon": "Files ribbon",
+    "files.ribbon.home": "Home",
+    "files.ribbon.places": "Locations",
+    "files.ribbon.view": "View",
+    "appearance.guide.desktop3": "Your windows are now flat, with a ribbon in Files. Your apps still work as you built them."
   }
 }
