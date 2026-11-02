@@ -65,9 +65,9 @@ export function createFixture(name: string | null, now: number): GameState | nul
   }
 
   if(name?.startsWith('longplay-')||name==='stray-seed'||name==='secret-art'||name?.startsWith('contract')){
-    let next=name==='contracts-offer'?createFixture('release-rich',now)!:name?.startsWith('contract-')?state:name==='secret-art'?createFixture('kumiki-mature',now)!:name?.startsWith('longplay-editor')?createFixture('editor-stage'+name.at(-1),now)!:name?.startsWith('longplay-desktop')?createFixture('desktop-stage'+name.at(-1),now)!:createFixture('seed-motion',now)!;
+    let next=name==='contracts-offer'?createFixture('stage7-complete',now)!:name?.startsWith('contract-')?state:name==='secret-art'?createFixture('kumiki-mature',now)!:name?.startsWith('longplay-editor')?createFixture('editor-stage'+name.at(-1),now)!:name?.startsWith('longplay-desktop')?createFixture('desktop-stage'+name.at(-1),now)!:createFixture('seed-motion',now)!;
     if(name?.startsWith('contract-')){next.run.version='v2';next.run.play.contract={id:name==='contract-no-color'?'no-color':'no-cursors',status:'active'};next.resources.pixels=next.run.totalPixelsGenerated=100000;}
-    if(name==='contracts-offer'){next.run.version='v1';next.persistent.specs.color=1;next.persistent.seedSkills=['inherit'];next.persistent.progress.records['v1-released']=now;next.persistent.specs.refresh=1;}
+    if(name==='contracts-offer'){next.run.version='v1';next.persistent.specs.color=1;next.persistent.seedSkills=['inherit'];next.persistent.progress.records['v1-released']=now;next=buySpec(next,'refresh');}
     if(name==='stray-seed')next.run.play.stray={waitMs:120000,lifeMs:30000,x:.2,y:.7,serial:1};
     if(name==='secret-art'){const d=next.run.kumiki.drawings.folder!,target=targetFor(next,'folder',d.size);let count=0;for(let i=0;i<target.length&&count<16;i++)if(target[i]===-1){d.frames[0]![i]=0;count++;}d.exported=false;d.dirty=true;next.run.kumiki.exports=next.run.kumiki.exports.filter(w=>!(w.kind==='icon'&&w.id==='folder'));}
     return reconcileProgress(next,now);
@@ -81,7 +81,7 @@ export function createFixture(name: string | null, now: number): GameState | nul
     next.persistent.artwork.skills=['fill','mirror','layers','eyedropper','expand','snap','outline','animation','extraParts','wallpaper','update','modern'];
     next.persistent.desktopPrefs.skills=index===3?['major1','major2','major3']:['major1','major2'];next.persistent.appearance={editor:Math.min(index,2) as 0|1|2,desktop:index};next.persistent.artwork.modern=index>=2;
     next.run.desktop=resizeDesktop(next.run.desktop,desktopScreen(index));
-    if(name.startsWith('desktop'))next=advanceDesktopTime(next,720_000,now,true);
+    if(name.startsWith('desktop')){next=advanceDesktopTime(next,720_000,now,true);next.run.desktop.cooldownMs=0;}
     next.run.kumiki.guide.collapsed=true;next.resources.tokens=200;return next;
   }
   if (name?.startsWith('desktop-')) {
