@@ -1,5 +1,5 @@
 import { BALANCE } from '../config/balance';
-import { homeButtonColor, paletteFor } from '../content/kumikiArt';
+import { homeButtonColor, paletteFor } from '../content/palette';
 import { readableText } from './appLayout';
 import type { GameState } from './state';
 export const PAGE_PARTS=['heading','notice','generator','upgrades'] as const;
@@ -13,27 +13,36 @@ export interface PageDesign{background:string|null;text:string|null;button:strin
 export const createPageDesign=():PageDesign=>({background:null,text:null,button:null,headingFont:'sans',bodyFont:'sans',motion:'push',heading:'',layout:null});
 export const pageFonts:Record<PageFont,string>={sans:"'Refresh Sans',sans-serif",serif:"'Refresh Serif',serif",pixel:"'Refresh Pixel',monospace",mono:"'Refresh Mono',monospace"};
 export function contrast(a:string,b:string){const l=(c:string)=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i]!,0);const x=l(a),y=l(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
-export function pageColors(page:PageDesign,color:number){const background=page.background??(color===0?'#c0c0c0':'#e8edf1'),button=page.button??homeButtonColor(color),requested=page.text??(page.background?readableText(background):color===0?'#000000':'#1a2935'),text=contrast(background,requested)>=4.5?requested:readableText(background);return {background,button,text,buttonText:readableText(button)};}
+export function pageColors(page:PageDesign,color:number,editor?:{background:string;accent:string}){const background=page.background??editor?.background??(color===0?'#c0c0c0':'#e8edf1'),button=page.button??editor?.accent??homeButtonColor(color),requested=page.text??readableText(background),text=contrast(background,requested)>=4.5?requested:readableText(background);return {background,button,text,buttonText:readableText(button)};}
 const snap=(n:number)=>Math.round(n/BALANCE.pageDesign.grid)*BALANCE.pageDesign.grid;
 const up=(n:number)=>Math.ceil(n/BALANCE.pageDesign.grid)*BALANCE.pageDesign.grid;
 export const pageMinimum=(id:PagePart)=>({width:BALANCE.pageDesign.minWidth,height:BALANCE.pageDesign.minHeights[id]});
 const overlaps=(a:PageRect,b:PageRect)=>a.x<b.x+b.width&&a.x+a.width>b.x&&a.y<b.y+b.height&&a.y+a.height>b.y;
 export function validPagePlacement(layout:PageLayout,id:PagePart,r:PageRect){const m=pageMinimum(id);return Object.values(r).every(Number.isFinite)&&r.x>=0&&r.y>=0&&r.width>=m.width&&r.height>=m.height&&r.x+r.width<=layout.width&&r.y+r.height<=layout.height&&!PAGE_PARTS.some(other=>other!==id&&overlaps(r,layout.parts[other]));}
 export function recommendedPage(width:number=BALANCE.pageDesign.width,height:number=BALANCE.pageDesign.height):PageLayout{
- const w=up(Math.max(BALANCE.pageDesign.minWidth+32,width)),inner=Math.min(BALANCE.pageDesign.cardWidth,w-32),x=snap((w-inner)/2),gap=BALANCE.pageDesign.grid*2;
- let y=16;const parts={} as Record<PagePart,PageRect>;
- for(const id of PAGE_PARTS){const h=w<1000?BALANCE.pageDesign.compactHeights[id]:BALANCE.pageDesign.recommendedHeights[id];parts[id]={x,y,width:inner,height:h};y+=h+gap;}
+ const gap=BALANCE.pageDesign.grid*2,w=up(Math.max(BALANCE.pageDesign.minWidth+gap*2,width));
+ const heights=w<1000?BALANCE.pageDesign.compactHeights:BALANCE.pageDesign.recommendedHeights;
+ const parts={} as Record<PagePart,PageRect>;
+ if(w>=1000){
+  const sidebar=up(Math.max(BALANCE.pageDesign.minWidth,w*.28)),main=w-sidebar-gap*3;
+  let y=gap;
+  for(const id of ['heading','notice','generator'] as const){parts[id]={x:gap,y,width:main,height:heights[id]};y+=heights[id]+gap;}
+  parts.upgrades={x:main+gap*2,y:gap,width:sidebar,height:up(Math.max(heights.upgrades,y-gap*2))};
+  return {width:w,height:up(Math.max(height,y)),parts};
+ }
+ let y=gap;
+ for(const id of PAGE_PARTS){parts[id]={x:gap,y,width:w-gap*2,height:heights[id]};y+=heights[id]+gap;}
  return {width:w,height:up(Math.max(height,y)),parts};
 }
 export function fitPageLayout(layout:PageLayout,width:number,height:number):PageLayout{
  const w=Math.max(352,Math.floor(width/8)*8),h=Math.max(720,Math.floor(height/8)*8);
- if(w<1000&&isRecommendedPage(layout))return recommendedPage(w,h);
+ if(isRecommendedPage(layout))return recommendedPage(w,h);
  const parts=Object.fromEntries(PAGE_PARTS.map(id=>{const p=layout.parts[id],min=pageMinimum(id),pw=Math.min(w,up(Math.max(min.width,p.width*w/layout.width))),ph=up(Math.max(min.height,p.height));return [id,{x:Math.max(0,Math.min(w-pw,snap(p.x*w/layout.width))),y:Math.max(0,snap(p.y)),width:pw,height:ph}];})) as PageLayout['parts'];
  const result={...layout,width:w,height:Math.max(h,...PAGE_PARTS.map(id=>parts[id].y+parts[id].height)),parts};if(PAGE_PARTS.every(id=>validPagePlacement(result,id,parts[id])))return result;
  if(w<1000){let y=16;for(const id of [...PAGE_PARTS].sort((a,b)=>layout.parts[a].y-layout.parts[b].y||layout.parts[a].x-layout.parts[b].x)){parts[id].y=Math.max(y,parts[id].y);y=parts[id].y+parts[id].height+16;}const reflow={...layout,width:w,height:up(Math.max(h,y)),parts};if(reflow.height<=1080&&PAGE_PARTS.every(id=>validPagePlacement(reflow,id,parts[id])))return reflow;}
  return recommendedPage(w,h);
 }
-// Existing recommended layouts remain a marker for the natural, content-sized card.
+// A recommendation is an editor arrangement, never a marker for a separate home document.
 export const isRecommendedPage=(layout:PageLayout|null)=>layout===null||!layout.button&&JSON.stringify(layout.parts)===JSON.stringify(recommendedPage(layout.width,layout.height).parts);
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 // Structural contract, also used by scene format 7; UI minima may change independently.
@@ -47,12 +56,16 @@ export function isPageDesign(v:unknown):v is PageDesign{
 export type PageAction={type:'color';slot:'background'|'button'|'text';color:string|null}|{type:'font';slot:'headingFont'|'bodyFont';font:PageFont}|{type:'motion';motion:PageDesign['motion']}|{type:'layout';layout:PageLayout}|{type:'recommended'|'reset'}|{type:'heading';heading:string};
 export function actPageDesign(s:GameState,a:PageAction):GameState{
  const p=s.run.seed.page,b=s.run.seed.built;let page={...p};
- if(a.type==='color'){if(!b.includes('color')||a.color!==null&&!paletteFor(s.persistent.specs.color).includes(a.color))return s;page[a.slot]=a.color;const colors=pageColors(page,s.persistent.specs.color);if(a.slot==='text'&&page.text&&contrast(colors.background,page.text)<4.5)return s;if(a.slot==='background'&&page.text&&contrast(colors.background,page.text)<4.5)page.text=readableText(colors.background);}
+ if(a.type==='color'){if(!b.includes('color')||a.color!==null&&!paletteFor(s.persistent.specs.color).includes(a.color))return s;page[a.slot]=a.color;const colors=pageColors(page,s.persistent.specs.color,s.persistent.editorCustomization);if(a.slot==='text'&&page.text&&contrast(colors.background,page.text)<4.5)return s;if(a.slot==='background'&&page.text&&contrast(colors.background,page.text)<4.5)page.text=readableText(colors.background);}
  if(a.type==='font'){if(!b.includes('font')||!PAGE_FONTS.includes(a.font))return s;page[a.slot]=a.font;}
  if(a.type==='motion'){if(!b.includes('motion')||!PAGE_MOTIONS.includes(a.motion))return s;page.motion=a.motion;}
  if(a.type==='layout'){if(a.layout.button&&(a.layout.button.width<BALANCE.pageDesign.buttonMinWidth||a.layout.button.height<BALANCE.pageDesign.buttonMinHeight||a.layout.button.width>a.layout.parts.generator.width-24||a.layout.button.height>a.layout.parts.generator.height-120))return s;if(!b.includes('layout')||!isPageDesign({...p,layout:a.layout})||!PAGE_PARTS.every(id=>validPagePlacement(a.layout,id,a.layout.parts[id])))return s;page.layout=a.layout;}
  if(a.type==='recommended'){if(!b.includes('layout'))return s;page.layout=recommendedPage();}
  if(a.type==='reset')page={...createPageDesign(),heading:p.heading,layout:b.includes('layout')?recommendedPage():null};
- if(a.type==='heading'){if(!s.run.kumiki.placed.includes('input'))return s;page.heading=[...a.heading].slice(0,BALANCE.w2.maxName).join('');}
- return {...s,persistent:{...s.persistent,homeUpdatedAt:s.lastTickAt},run:{...s.run,seed:{...s.run.seed,page}}};
+ if(a.type==='heading'){if(!b.includes('font'))return s;page.heading=[...a.heading].slice(0,80).join('');}
+ const editorCustomization={...s.persistent.editorCustomization};
+ if(a.type==='color'&&a.slot==='button')editorCustomization.accent=a.color??BALANCE.workshop.customization.accent;
+ if(a.type==='color'&&a.slot==='background')editorCustomization.background=a.color??BALANCE.workshop.customization.background;
+ if(a.type==='reset'){editorCustomization.accent=BALANCE.workshop.customization.accent;editorCustomization.background=BALANCE.workshop.customization.background;}
+ return {...s,persistent:{...s.persistent,editorCustomization},run:{...s.run,seed:{...s.run.seed,page}}};
 }

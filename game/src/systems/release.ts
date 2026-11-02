@@ -1,17 +1,17 @@
-import { BALANCE, type SpecKey } from '../config/balance';
-import { createKumikiState } from './kumikiState';
-import { flushHomeBank, prototypeConditions } from './kumiki';
-import { createInitialState, type GameState } from './state';
-import { createSeedVersion } from './seed';
-import type { GuideRecord, ProductRecord, ProductScreen } from './releaseState';
-import { activeScreenshots, desktopConditions } from './desktop';
-import { encodeScene, projectCapture, readCapture } from './captureScene';
+import { BALANCE,type SpecKey } from '../config/balance';
+import { editorStage } from './appearance';
+import { encodeScene,projectCapture,readCapture } from './captureScene';
+import { activeScreenshots,desktopConditions } from './desktop';
 import type { Screenshot } from './desktopState';
 import { reconcileProgress } from './longPlay';
 import { presentationAtRelease } from './releasePresentation';
+import type { GuideRecord,ProductRecord,ProductScreen } from './releaseState';
+import { createSeedVersion } from './seed';
+import { createInitialState,type GameState } from './state';
+import { completedParts,prototypeConditions,setComplete } from './workshop';
 
 export const SPEC_ORDER: readonly SpecKey[] = ['color', 'storage', 'memory', 'resolution', 'network', 'refresh', 'graphics'];
-const uniqueExports = (state: GameState) => [...new Map(state.run.kumiki.exports.map(work => [`${work.kind}:${work.id}`, work])).values()];
+const uniqueExports = (state:GameState) => Object.entries(state.run.workshop.parts).flatMap(([id,part])=>part.exportedAt===null?[]:[{kind:'part' as const,id,name:null,at:part.exportedAt}]);
 export const v1Conditions = (state: GameState): boolean[] => desktopConditions(state);
 export function selectedReleaseScreenshots(state: GameState, selectedIds?: readonly number[]): Screenshot[] {
   const available = activeScreenshots(state);
@@ -48,13 +48,13 @@ export function releaseScreenshotBonus(state: GameState, selectedIds?: readonly 
 }
 export function releaseEstimate(state: GameState, selectedIds?: readonly number[]): number {
   const r = BALANCE.release;
-  const elements = state.run.seed.built.length + state.run.kumiki.built.length + uniqueExports(state).filter(e => e.kind === 'icon').length
+  const elements = state.run.seed.built.length + completedParts(state).length
     + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length);
-  return Math.floor(r.base * ((state.run.totalPixelsGenerated + state.run.kumiki.bank) / r.pixelUnit) ** r.exponent * (1 + r.perElement * elements) * (1 + releaseScreenshotBonus(state, selectedIds)));
+  return Math.floor(r.base * (state.run.totalPixelsGenerated / r.pixelUnit) ** r.exponent * (1 + r.perElement * elements) * (1 + releaseScreenshotBonus(state, selectedIds)));
 }
 export function canReleasePrototype(state: GameState): boolean {
-  return state.run.world === 'kumiki' && state.run.version === 'v0.1' && state.run.kumiki.exitInspected
-    && state.persistent.specs.color === 0 && prototypeConditions(state).every(Boolean)
+  return state.run.world === 'kumiki' && state.run.version === 'v0.1' && state.run.workshop.exitInspected
+    && state.persistent.specs.color === 0 && setComplete(state,'files') && setComplete(state,'mail') && prototypeConditions(state).every(Boolean)
     && !state.persistent.products.some(p => p.version === 'v0.1');
 }
 export function canReleaseV1(state: GameState): boolean {
@@ -88,16 +88,14 @@ export function archiveGuide(state: GameState, entry: GuideRecord): GameState {
 }
 function createReleasedProduct(original: GameState, now: number, reducedMotion: boolean, store: boolean, language: string, selectedIds?: readonly number[]): GameState {
   if (!(store ? canRelease(original) : canReleasePrototype(original)) || !canFundNextVersion(original, selectedIds)) return original;
-  const state = flushHomeBank(original);
-  const k = state.run.kumiki, p = state.persistent;
+  const state = original;
+  const k = state.run.workshop, p = state.persistent;
   const screen: ProductScreen = structuredClone({
-    progress:state.persistent.progress,page:state.run.seed.page,...(k.legacyBonus?{legacyBonus:k.legacyBonus}:{}),pixels: state.resources.pixels, built: state.run.seed.built, cursors: state.run.seed.autoCursors,
-    kumikiBuilt: k.built, placed: k.placed, design: k.design, focus: k.focus, interval: k.interval, exportName: k.exportName,
-    specs: p.specs, seedSkills: p.seedSkills, pattern: p.seedAppearance.pattern, marquee: p.seedAppearance.marquee,
-    kumikiSkills: p.artwork.skills, modern: p.artwork.modern, log: k.generationLog, history: state.run.seed.history,
+    pixels:state.resources.pixels,built:state.run.seed.built,cursors:state.run.seed.autoCursors,specs:p.specs,
+    workshop:k,editorCustomization:p.editorCustomization,editorStage:editorStage(state),
   });
   const product: ProductRecord = { presentation: presentationAtRelease(state), id: Math.max(0, ...p.products.map(p => p.id)) + 1, name: p.productName, version: state.run.version === 'v0.1' ? 'v0.1' : 'v1.0', releasedAt: now, author: p.playerName,
-    generatedPixels: state.run.totalPixelsGenerated, builtCount: screen.built.length + screen.kumikiBuilt.length + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length),
+    generatedPixels: state.run.totalPixelsGenerated, builtCount: screen.built.length + completedParts(state).length + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length),
     revenue: releaseEstimate(state, selectedIds), screen, exports: structuredClone(uniqueExports(state)),
     ...(store ? { screenshots: structuredClone(selectedReleaseScreenshots(state, selectedIds)), screenshotBonus: releaseScreenshotBonus(state, selectedIds) } : {}),
     ...(store && state.run.world === 'desktop' ? { capture: { id: Math.max(p.desktopPrefs.lastShotId, p.screenshots.at(-1)?.id ?? 0) + 1, at: now, language, data: encodeScene(projectCapture(state, language)) } } : {}),
@@ -106,7 +104,7 @@ function createReleasedProduct(original: GameState, now: number, reducedMotion: 
   let next: GameState = { ...state, resources: { ...state.resources, dollars: state.resources.dollars + product.revenue },
     run: { ...state.run, world: 'release', shipping: { productId: product.id, elapsedMs: !store && reducedMotion ? BALANCE.release.animationMs : 0,
       ...(store ? { phase: 'store' as const, storeElapsedMs: reducedMotion ? BALANCE.release.storeAnimationMs : 0 } : {}) } },
-    persistent: { ...p, products: [...p.products, product], homeTheme: structuredClone(k.design) },
+    persistent: { ...p, products: [...p.products, product] },
   };
   for (const id of state.run.seed.guide.seen) next = archiveGuide(next, { kind: 'seed', id, version: state.run.version });
   for (const id of k.guide.seen) next = archiveGuide(next, { kind: 'kumiki', id, version: state.run.version });
@@ -159,19 +157,13 @@ export function startNextVersion(state: GameState, now: number): GameState {
   next.run.seed.guide = { seen: ['return'], current: 'return', collapsed: false };
   return next;
 }
-export function productPreviewState(product: ProductRecord): GameState {
-  const s = product.screen, next = createInitialState(product.releasedAt);
-  if(s.progress)next.persistent.progress=structuredClone(s.progress);else next.legacyGeneration=true;
-  next.resources.pixels = s.pixels;
-  next.run.totalPixelsGenerated = product.generatedPixels;
-  next.run.version = product.version === 'v0.1' ? 'v0.1' : 'v1'; next.run.world = 'kumiki';
-  next.run.seed.built = [...s.built]; next.run.seed.autoCursors = s.cursors;
-  next.run.seed.history = s.history;
-  if(s.page)next.run.seed.page=structuredClone(s.page);
-  next.run.kumiki = { ...createKumikiState(), entered: true, activeDrawing: 'free', built: s.kumikiBuilt, placed: s.placed,
-    design: s.design,legacyBonus:s.legacyBonus, focus: s.focus, interval: s.interval, exportName: s.exportName, generationLog: s.log };
-  next.persistent.specs = s.specs; next.persistent.seedSkills = s.seedSkills;
-  next.persistent.seedAppearance = { pattern: s.pattern, marquee: s.marquee };
-  next.persistent.artwork.skills = s.kumikiSkills; next.persistent.artwork.modern = s.modern;
-  return next;
+export function productPreviewState(product:ProductRecord):GameState {
+ const s=product.screen,next=createInitialState(product.releasedAt);
+ next.resources.pixels=s.pixels;next.run.totalPixelsGenerated=product.generatedPixels;
+ next.run.version=product.version==='v0.1'?'v0.1':'v1';next.run.world='kumiki';
+ next.run.seed.built=s.built.filter(id=>BALANCE.w1.items.some(item=>item.id===id)) as GameState['run']['seed']['built'];
+ next.run.seed.autoCursors=s.cursors;next.persistent.specs={...s.specs};
+ if(s.workshop)next.run.workshop=structuredClone(s.workshop);
+ if(s.editorCustomization)next.persistent.editorCustomization=structuredClone(s.editorCustomization);
+ return next;
 }

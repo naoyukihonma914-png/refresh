@@ -25,7 +25,7 @@ export function StorePage({ runtime, snapshot, i18n }: { runtime: GameRuntime; s
     runtime, snapshot, i18n, product, generation, prototype,
     title: productLabel(i18n, product.name, prototype ? i18n.t('release.prototype') : i18n.t('release.version.v1')),
     publisher: i18n.t('release.publisher'), topic: i18n.t(prototype ? 'store.topic.prototype' : 'store.topic.desktop'),
-    description: i18n.t(prototype ? 'store.description.prototype' : 'store.description.desktop', { built: product.builtCount, icons: product.exports.filter(work => work.kind === 'icon').length, apps: product.capture ? 1 + readCapture(product.capture).desktop.apps.length : 0 }),
+    description: i18n.t(prototype ? 'store.description.prototype' : 'store.description.desktop', { built: product.builtCount, icons: product.exports.length, apps: product.capture ? 1 + readCapture(product.capture).desktop.apps.length : 0 }),
     published: generation === 1 ? i18n.legacyDate(product.releasedAt) : i18n.date(product.releasedAt),
     purchases: Math.floor(product.revenue / BALANCE.release.storeUnitPrice * progress),
     downloads: Math.floor(product.revenue * BALANCE.release.storeDownloadsPerDollar * progress), complete: storeComplete(state),

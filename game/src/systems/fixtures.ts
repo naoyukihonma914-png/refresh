@@ -1,25 +1,20 @@
-import {advanceAdvice,createAdviceState} from './advice';
-import {reconcileProgress} from './longPlay';
+import { advanceAdvice, createAdviceState } from './advice';
+import { reconcileProgress } from './longPlay';
 import { actAppBuild } from './appBuild';
 import { featureApp, isBuildable } from './appLayout';
-import type { DesktopUpgrade } from '../config/balance';
-import { desktopScreen,resizeDesktop } from './desktopGeometry';
-import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, advanceDesktopTime, takeScreenshot, nextDesktopApp } from './desktop';
-import { BALANCE } from '../config/balance';
+import { BALANCE, type DesktopUpgrade } from '../config/balance';
+import { desktopScreen, resizeDesktop } from './desktopGeometry';
+import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, takeScreenshot } from './desktop';
 import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
-import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, targetFor } from './kumiki';
-import { blankDrawing } from './kumikiState';
-import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion } from './release';
+import { UI_SETS, WORKSHOP_PARTS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
+import { createComponentDesign, type PartProduction } from './workshopState';
+import { actWorkshop, enterWorkshop } from './workshop';
+import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion, releaseEstimate } from './release';
 import { softwarePresentation, type SoftwareStage } from './releasePresentation';
 
-function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
- let next=buyBlueprint(state,id);const app=isBuildable(id)?id:featureApp(id);
- if(app){next=actAppBuild(next,{type:'app-recommend',app});next=actAppBuild(next,{type:'app-install',app});next=focusWindow(next,app);}
- return next;
-}
-
-export const FIXTURE_NAMES = [
+// Public regression URLs now construct workshop state, never removed drawings.
+const LEGACY_FIXTURES = [
   'stage7-store-gen1','stage7-store-gen2','stage7-store-gen3','stage7-sales-gen1','stage7-sales-gen2','stage7-sales-gen3','stage7-freeware','stage7-freeware-sales',
   'stage7-ready0','stage7-ready1','stage7-ready2','stage7-ready3','stage7-no-photos','stage7-store','stage7-shipping','stage7-complete','stage7-v2','stage7-v2-inherit','stage7-advice','stage7-advice0','stage7-advice1','stage7-advice2','stage7-advice3','stage7-offline','stage7-offline0','stage7-offline1','stage7-offline2','stage7-offline3','desktop-stage3',
   'longplay-seed','stray-seed','secret-art','contract-no-cursors','contract-no-color','contracts-offer','longplay-editor0','longplay-editor1','longplay-editor2','longplay-desktop0','longplay-desktop1','longplay-desktop2',
@@ -32,220 +27,157 @@ export const FIXTURE_NAMES = [
   'kumiki-early', 'kumiki-mature', 'kumiki-wall', 'kumiki-modern', 'kumiki-drift',
   'release-ready', 'release-counting', 'release-complete', 'release-rich', 'release-restarting', 'release-rebuilt', 'release-v1-tessera',
 ] as const;
+const STAGE8A_VIEWS = ['entry','set-shop','main','catalog','files-complete','required-complete-16color','common-custom','editor-custom'] as const;
+export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
+  ...['stage8a-seed-ready','stage8a-seed-layout-before','stage8a-seed-workspace-before','stage8a-seed-export-before'].flatMap(name=>[name,`${name}-era1`,`${name}-era2`]),
+  ...STAGE8A_VIEWS.flatMap(view=>[`stage8a-${view}`,...[0,1,2].map(era=>`stage8a-${view}-era${era}`)]),
+  ...WORKSHOP_PARTS.flatMap(part=>[0,1,2,3,4].flatMap(step=>[0,1,2].map(era=>`stage8a-part-${part.id}-step-${step}-era${era}`))),
+];
+const MAIN_SETS:readonly UiSetId[]=['common','foundation','files','mail'];
+const BASE_SETS=UI_SETS.filter(set=>set.id!=='extras').map(set=>set.id);
 
-// 実セーブと混ざらないよう、ランタイムは固定状態ではメモリ内の保存領域を使う。
-export function createFixture(name: string | null, now: number): GameState | null {
-  if (!FIXTURE_NAMES.some(item => item === name)) return null;
-  const state = createInitialState(now);
-  if (name === 'intro') return state;
-  if(name?.startsWith('stage7-freeware')){
-    let next=beginProductRelease(createFixture('release-ready',now)!,now,{language:'ja'});
-    next=advanceShipping(next,BALANCE.release.storeAnimationMs);
-    if(name==='stage7-freeware-sales')next=advanceShipping(showShipping(next),BALANCE.release.animationMs);
-    return next;
-  }
-  if(name?.match(/^stage7-(store|sales)-gen[1-3]$/)){
-    const generation=Number(name.at(-1));
-    let next=createFixture(`stage7-ready${generation===1?0:generation===2?2:3}`,now)!;
-    next=advanceShipping(beginProductRelease(next,now,{language:'ja'}),BALANCE.release.storeAnimationMs);
-    // Generation 3 is a presentation preview, without unlocking future desktop gameplay.
-    next.persistent.products.at(-1)!.presentation=softwarePresentation(((generation-1)*2) as SoftwareStage);
-    if(name.startsWith('stage7-sales'))next=advanceShipping(showShipping(next),BALANCE.release.animationMs);
-    return next;
-  }
-  if(name?.startsWith('stage7-')){
-    const era=/[0-3]$/.test(name)?Number(name.at(-1)):3;
-    let next=createFixture('desktop-stage'+era,now)!;
-    for(const app of ['tessera','files','mail','photo','bin','clock'] as const)next=focusWindow(next,app);
-    next.run.desktop.feedback=Array.from({length:10},(_,index)=>({id:index+1,sender:'hikari' as const,kind:'screenshot' as const,target:'',baseline:[],baselineColor:'#000000',at:now-60000,completedAt:now-30000}));
-    next.run.desktop.feedbackSerial=10;next.run.desktop.notice=null;next.run.desktop.success=null;next.run.desktop.mailSelection=null;
-    next.run.desktop.terminal.running=false;next.run.desktop.idleMs=0;next.run.desktop.stalled=null;
-    next.persistent.productName='あおぞら';next.persistent.playerName='ゆう';next.persistent.seedSkills=[...new Set([...next.persistent.seedSkills,'inherit' as const])];
-    next.run.kumiki.guide.collapsed=true;next.run.desktop.windows.tessera.minimized=true;
-    next=reconcileProgress(next,now);
-    next.run.play.achievement=null;
-    if(name==='stage7-no-photos')next.persistent.screenshots=[];
-    else{next.run.desktop.cooldownMs=0;next=takeScreenshot(next,now,'ja');next.run.desktop.cooldownMs=0;}
-    if(name.startsWith('stage7-advice')){next.run.advice=advanceAdvice(advanceAdvice(createAdviceState(),next,0),next,BALANCE.w2.hintMs);return next;}
-    if(name.startsWith('stage7-offline')){next.lastTickAt=now-3600000;return next;}
-    if(name.startsWith('stage7-ready')||name==='stage7-no-photos')return next;
-    next=beginProductRelease(next,now,{language:'ja'});
-    if(name==='stage7-store')return advanceShipping(next,BALANCE.release.storeAnimationMs);
-    next=showShipping(advanceShipping(next,BALANCE.release.storeAnimationMs));
-    if(name==='stage7-shipping')return advanceShipping(next,2400);
-    next=advanceShipping(next,BALANCE.release.animationMs);
-    if(name==='stage7-complete')return next;
-    next=buySpec(next,'refresh');next=startNextVersion(next,now);
-    if(name==='stage7-v2-inherit')return next;
-    next.run.seed.installer=null;next.run.seed.built=[];next.run.restartMs=0;
-    return next;
-  }
+function seedState(now:number,count:number):GameState {
+ const s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.slice(0,count).map(item=>item.id);
+ s.run.seed.history=s.run.seed.built.map((item,i)=>({item,at:Math.max(0,now-(count-i)*60_000)}));
+ s.run.seed.autoCursors=count>1?8:0;s.resources.pixels=100_000;s.run.totalPixelsGenerated=250_000;
+ if(count>1)s.lastSavedAt=now;return updateSeedGuide(s);
+}
+function workshopState(now:number,era=0):GameState {
+ let s=enterWorkshop(seedState(now,BALANCE.w1.items.length));s.run.workshop.enterMs=0;
+ s.resources.pixels=s.run.totalPixelsGenerated=1e12;s.resources.tokens=200;
+ s.persistent.editorSkills=era===0?[]:era===1?['update']:['update','modern'];
+ s.persistent.appearance.editor=Math.min(era,2) as 0|1|2;
+ if(era===2){s.persistent.desktopPrefs.skills=['major1','major2'];s.persistent.appearance.desktop=2;s.run.desktop=resizeDesktop(s.run.desktop,desktopScreen(2),s.persistent.desktopPrefs.iconSize);}
+ s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;return s;
+}
+function production(id:WorkshopPartId,step:PartProduction['step'],now:number):PartProduction {
+ const p=getWorkshopPart(id);return {step,rect:{...p.defaultRect},elements:step>=2?[...p.elements]:[],design:createComponentDesign(),completedAt:step===4?now:null,exportedAt:null,tested:step===4};
+}
+function addSets(s:GameState,sets:readonly UiSetId[],step:PartProduction['step'],now:number,exported=false):GameState {
+ s.run.workshop.purchasedSets=[...new Set([...s.run.workshop.purchasedSets,...sets])];
+ for(const set of sets)for(const p of partsForSet(set))s.run.workshop.parts[p.id]=production(p.id,step,now);
+ s.run.workshop.activePart??=sets[0]?partsForSet(sets[0])[0]!.id:null;
+ return exported?actWorkshop(s,{type:'export'},now):s;
+}
+// Tests may complete a part through the same new domain actions as the UI.
+export function completeWorkshopPartFixture(s:GameState,id:WorkshopPartId,now:number,exported=true):GameState {
+ const p=getWorkshopPart(id);s.resources.pixels=Math.max(s.resources.pixels,1e12);
+ if(!s.run.workshop.purchasedSets.includes(p.set))s=addSets(s,[p.set],0,now);
+ s=actWorkshop(s,{type:'selectPart',part:id},now);s=actWorkshop(s,{type:'place',part:id,rect:{...p.defaultRect}},now);
+ for(const element of p.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
+ s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);s=actWorkshop(s,{type:'test',part:id,interaction:p.testInteraction},now);
+ return exported?actWorkshop(s,{type:'export',part:id},now):s;
+}
+function customizeCommon(s:GameState):GameState {
+ const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','close','minimize','maximize'];p.design={...p.design,color:'#000080',textColor:'#ffffff',titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:'#ffffff',minimize:'#ffffff',maximize:'#ffffff'},symbolShape:'square'};}
+ s.run.workshop.activePart='common-frame';return s;
+}
+function customEditor(s:GameState,era:number):GameState {
+ const c=s.persistent.editorCustomization;c.accent='#008080';c.bandPosition='bottom';
+ if(era>0){c.docking='left';c.panelWidth=208;c.background='#000000';c.gridSpacing=16;c.fontSize=14;c.panelPositions={palette:'right',tools:'left',parts:'left',info:'top'};c.panelWidths={palette:208,tools:208,parts:208};}
+ s.run.workshop.view='settings';return s;
+}
+function buyDesktopApp(s:GameState,id:DesktopUpgrade):GameState {
+ let n=buyBlueprint(s,id);const app=isBuildable(id)?id:featureApp(id);
+ if(app){n=actAppBuild(n,{type:'app-recommend',app});n=actAppBuild(n,{type:'app-install',app});n=focusWindow(n,app);}return n;
+}
+function desktopState(now:number,era=0,stop:DesktopUpgrade|'all'|'none'='all'):GameState {
+ let s=workshopState(now,Math.min(era,2));s.run.version='v1';s.persistent.specs.color=1;s=addSets(s,BASE_SETS,4,now,true);
+ s.persistent.desktopPrefs.skills=era===0?[]:era===1?['major1']:era===2?['major1','major2']:['major1','major2','major3'];
+ const stage=Math.min(era,3) as 0|1|2|3;s.persistent.appearance.desktop=stage;s=enterDesktop(s);s.elapsedMs+=BALANCE.w3.enterMs;
+ if(stop!=='none')for(const item of BALANCE.w3.apps){s=buyDesktopApp(s,item.id);if(item.id===stop)break;}
+ s.run.desktop=resizeDesktop(s.run.desktop,desktopScreen(stage),s.persistent.desktopPrefs.iconSize);s.run.desktop.editingApp=null;s.run.desktop.idleMs=0;s.run.desktop.stalled=null;
+ s.run.desktop.notice=s.run.desktop.success=null;s.run.desktop.feedback=[];s.run.desktop.feedbackSerial=0;
+ s.resources.pixels=s.run.totalPixelsGenerated=1e12;s.resources.tokens=200;return s;
+}
+function prototypeReady(now:number):GameState {
+ let s=addSets(workshopState(now),MAIN_SETS,4,now,true);s.run.workshop.exitInspected=true;
+ s.run.workshop.guide.seen=[...new Set([...s.run.workshop.guide.seen,'wall' as const])];s.run.workshop.guide.current='wall';s.run.workshop.guide.collapsed=false;s.persistent.playerName='Aoi';s.resources.pixels=BALANCE.w2.desktopCost;s.run.seed.autoCursors=41;
+ let low=0,high=1e12;for(let i=0;i<64;i++){const mid=(low+high)/2;s.run.totalPixelsGenerated=mid;if(releaseEstimate(s)<304)low=mid;else high=mid;}
+ s.run.totalPixelsGenerated=low;return s;
+}
 
-  if(name?.startsWith('longplay-')||name==='stray-seed'||name==='secret-art'||name?.startsWith('contract')){
-    let next=name==='contracts-offer'?createFixture('stage7-complete',now)!:name?.startsWith('contract-')?state:name==='secret-art'?createFixture('kumiki-mature',now)!:name?.startsWith('longplay-editor')?createFixture('editor-stage'+name.at(-1),now)!:name?.startsWith('longplay-desktop')?createFixture('desktop-stage'+name.at(-1),now)!:createFixture('seed-motion',now)!;
-    if(name?.startsWith('contract-')){next.run.version='v2';next.run.play.contract={id:name==='contract-no-color'?'no-color':'no-cursors',status:'active'};next.resources.pixels=next.run.totalPixelsGenerated=100000;}
-    if(name==='contracts-offer'){next.run.version='v1';next.persistent.specs.color=1;next.persistent.seedSkills=['inherit'];next.persistent.progress.records['v1-released']=now;next=buySpec(next,'refresh');}
-    if(name==='stray-seed')next.run.play.stray={waitMs:120000,lifeMs:30000,x:.2,y:.7,serial:1};
-    if(name==='secret-art'){const d=next.run.kumiki.drawings.folder!,target=targetFor(next,'folder',d.size);let count=0;for(let i=0;i<target.length&&count<16;i++)if(target[i]===-1){d.frames[0]![i]=0;count++;}d.exported=false;d.dirty=true;next.run.kumiki.exports=next.run.kumiki.exports.filter(w=>!(w.kind==='icon'&&w.id==='folder'));}
-    return reconcileProgress(next,now);
-  }
-
-  if(name==='app-build-missing'){const next=createFixture('desktop-stage2',now)!;next.run.desktop.projects.files!.draft.parts=next.run.desktop.projects.files!.draft.parts.filter(p=>p.id!=='sort');next.run.desktop.projects.files!.installed=structuredClone(next.run.desktop.projects.files!.draft);next.run.desktop.feedback=[{id:1,kind:'sort',sender:'hikari',target:'',baseline:[],baselineColor:'#000000',at:now,completedAt:null}];next.run.desktop.feedbackSerial=1;next.run.desktop.notice=1;next.run.desktop.success=null;return next;}
-  if(name==='app-build-empty'||name==='app-build-files'){let next=createFixture('desktop-early',now)!;next.resources.pixels=next.run.totalPixelsGenerated=1e9;next=buyBlueprint(next,'files');if(name==='app-build-files'){next=actAppBuild(next,{type:'app-recommend',app:'files'});next=buyBlueprint(next,'sort');}next.persistent.artwork.skills.push('update');next.persistent.appearance.editor=1;next.run.desktop.windows.tessera={...next.run.desktop.windows.tessera,x:0,y:0,width:800,height:572,maximized:true,restore:{x:40,y:40,width:600,height:400}};return next;}
-  if(name?.startsWith('editor-stage')||name?.startsWith('desktop-stage')){
-    const index=Number(name.at(-1)) as 0|1|2|3;
-    let next=createFixture(name.startsWith('editor')?'kumiki-modern':'desktop-ready',now)!;
-    next.persistent.artwork.skills=['fill','mirror','layers','eyedropper','expand','snap','outline','animation','extraParts','wallpaper','update','modern'];
-    next.persistent.desktopPrefs.skills=index===3?['major1','major2','major3']:['major1','major2'];next.persistent.appearance={editor:Math.min(index,2) as 0|1|2,desktop:index};next.persistent.artwork.modern=index>=2;
-    next.run.desktop=resizeDesktop(next.run.desktop,desktopScreen(index));
-    if(name.startsWith('desktop')){next=advanceDesktopTime(next,720_000,now,true);next.run.desktop.cooldownMs=0;}
-    next.run.kumiki.guide.collapsed=true;next.resources.tokens=200;return next;
-  }
-  if (name?.startsWith('desktop-')) {
-    let next = createFixture('release-v1-tessera',now)!;
-    next.resources.pixels = 2_000_000; next.run.totalPixelsGenerated = 4_000_000;
-    next = enterDesktop(next); next.elapsedMs += BALANCE.w3.enterMs;
-    if (name === 'desktop-early') return next;
-    if (name === 'desktop-wait') { next.resources.pixels=20_000; return next; }
-    next = buyDesktopApp(next,'files');
-    if (name === 'desktop-files') return next;
-    next=buyDesktopApp(next,'sort');next = buyDesktopApp(next,'mail'); next = focusWindow(next,'tessera');
-    if (name === 'desktop-modern') {
-      next.persistent.artwork.skills.push('update','modern','fill','layers'); next.persistent.artwork.modern=true;next.persistent.appearance={editor:2,desktop:2};next.persistent.desktopPrefs.skills.push('major1','major2');next.run.desktop=resizeDesktop(next.run.desktop,desktopScreen(2));
-    }
-    next = advanceDesktopTime(next,720_000,now);next.run.desktop.idleMs=0;next.run.desktop.stalled=null;next.run.desktop.stalledClosed=false;next.run.desktop.stallMs=BALANCE.w3.stallMinMs;
-    if(['desktop-jobs','desktop-photo','desktop-ready','desktop-stalled'].includes(name!)){
-      next.resources.pixels=next.run.totalPixelsGenerated=1e12;next.resources.tokens=200;
-      const stop=name==='desktop-jobs'?'jobs':name==='desktop-photo'?'compare':'terminal';
-      while(nextDesktopApp(next)){const id=nextDesktopApp(next)!.id;next=buyDesktopApp(next,id);if(id===stop)break;}
-      next.run.desktop.feedback=[];next.run.desktop.feedbackSerial=0;next.run.desktop.notice=null;
-      for(const id of ['folder','bin','clock','mail','photo','settings']){
-        next=prepareDrawing(next,id);const work=next.run.kumiki.drawings[id]!,target=targetFor(next,id,work.size);
-        for(const color of new Set(target.filter(c=>c>=0)))next=paintDrawing(next,id,target.flatMap((c,i)=>c===color?[i]:[]),color);
-        next=exportKumiki(next,now);
-      }
-      for(const id of ['tessera','files','photo'] as const){if(id!=='tessera'&&!next.run.desktop.apps.includes(id))continue;next.run.desktop.jobs[id]={assigned:true,cursors:8,updates:1};}
-      next=focusWindow(next,'tessera');next=focusWindow(next,'note');
-      if(name!=='desktop-jobs')next=focusWindow(next,'photo');
-      for(const id of ['manager','mail','bin','clock','theme','terminal','settings'] as const)next.run.desktop.windows[id].open=false;
-      if(name==='desktop-stalled')next.run.desktop.stalled='photo';
-      if(name==='desktop-ready'){
-        next.persistent.desktopPrefs.wallpaper={source:'coast',brightness:1.1,tone:0,crop:0};
-        next.run.desktop.terminal={...next.run.desktop.terminal,running:true,executions:1};
-        for(let i=0;i<4;i++){next.run.desktop.cooldownMs=0;next=takeScreenshot(next,now+i,'ja');}
-        next.run.desktop.cooldownMs=0;
-      }
-      return next;
-    }
-    if (name === 'desktop-full') {
-      for(let i=0;i<BALANCE.w3.baseShotCapacity;i++) { next.run.desktop.cooldownMs=0; next=takeScreenshot(next,now,'ja'); }
-      next.run.desktop.cooldownMs=0;
-    }
-    return next;
-  }
-  if (name?.startsWith('release-')) {
-    let next = createFixture('kumiki-wall', now)!;
-    for (const id of ['clock', 'mail', 'photo', 'settings']) {
-      next = prepareDrawing(next, id);
-      const drawing = next.run.kumiki.drawings[id]!;
-      const target = targetFor(next, id, drawing.size);
-      for (const color of new Set(target.filter(c => c >= 0))) next = paintDrawing(next, id, target.flatMap((c, i) => c === color ? [i] : []), color);
-      next = exportKumiki(next, now);
-    }
-    next.persistent.playerName = 'Aoi';
-    next.resources.pixels = 51_872;
-    next.run.seed.autoCursors = 41;
-    next.run.totalPixelsGenerated = 1_000_000;
-    const elements=next.run.seed.built.length+next.run.kumiki.built.length+next.run.kumiki.exports.filter(e=>e.kind==='icon').length;
-    next.run.totalPixelsGenerated=BALANCE.release.pixelUnit*(303.5/(BALANCE.release.base*(1+BALANCE.release.perElement*elements)))**(1/BALANCE.release.exponent);
-    if (name === 'release-ready') return next;
-    next = beginPrototypeRelease(next, now);
-    next = advanceShipping(next, name === 'release-counting' ? 2_400 : BALANCE.release.animationMs);
-    if (name === 'release-rich') { next.resources.dollars = 1_000_000; return next; }
-    if (name === 'release-restarting' || name === 'release-rebuilt' || name === 'release-v1-tessera') {
-      next = startNextVersion(buySpec(next, 'color'), now);
-      if (name === 'release-rebuilt') {
-        next.run.restartMs = 0;
-        next.run.seed.built = ['border', 'save', 'color']; next.run.seed.autoCursors = 1;
-        next.resources.pixels = 2_236; next.run.totalPixelsGenerated = 5_000;
-        next.lastSavedAt = now;
-      }
-      if (name === 'release-v1-tessera') {
-        next.run.restartMs = 0;
-        next.run.seed.built = BALANCE.w1.items.map(item => item.id); next.run.seed.autoCursors = 41;
-        next.resources.pixels = 1_000_000; next.run.totalPixelsGenerated = 2_000_000;
-        next = enterKumiki(next);
-        for (const item of BALANCE.w2.items) next = buildKumiki(next, item.id);
-        for (const part of ownedParts(next)) next = placePart(next, part);
-      }
-    }
-    return next;
-  }
-  if (name?.startsWith('kumiki-')) {
-    state.run.seed.built = BALANCE.w1.items.map(item => item.id);
-    state.run.seed.autoCursors = 12;
-    state.resources.pixels = 1_000_000; state.run.totalPixelsGenerated = 2_000_000;
-    state.lastSavedAt = now;
-    if (name === 'kumiki-modern') {
-      state.run.version = 'v2'; state.persistent.specs.color = 1; state.persistent.specs.resolution = 1;
-      state.persistent.artwork.skills = BALANCE.w2.skills.map(skill => skill.id);
-      state.persistent.artwork.modern = true;state.persistent.appearance={editor:2,desktop:2};state.persistent.desktopPrefs.skills=['major1','major2'];state.run.desktop=resizeDesktop(state.run.desktop,desktopScreen(2));
-      state.persistent.artwork.sketchbook = blankDrawing(32);
-    }
-    let next = enterKumiki(state);
-    if (name === 'kumiki-early') { next.resources.pixels = 0; return next; }
-    for (const item of BALANCE.w2.items) {
-      next = buildKumiki(next, item.id);
-      if (name === 'kumiki-mature' && item.id === 'extensions') break;
-    }
-    for (const part of ownedParts(next)) if (name !== 'kumiki-mature' || part === 'button') next = placePart(next, part);
-    for (const id of ['folder', 'bin']) {
-      next = prepareDrawing(next, id);
-      const drawing = next.run.kumiki.drawings[id]!;
-      const target = targetFor(next, id, drawing.size);
-      for (const color of new Set(target.filter(c => c >= 0))) next = paintDrawing(next, id, target.flatMap((c,i) => c === color ? [i] : []), color);
-      next = exportKumiki(next, now);
-    }
-    next = prepareDrawing(next, 'clock');
-    const clock = next.run.kumiki.drawings.clock!;
-    const target = targetFor(next, 'clock', clock.size);
-    for (const color of new Set(target.filter(c => c >= 0))) next = paintDrawing(next, 'clock', target.flatMap((c,i) => c === color && i < target.length / 2 ? [i] : []), color);
-    next.resources.pixels = name === 'kumiki-wall' ? BALANCE.w2.desktopCost : 31_240;
-    next.run.kumiki.guide.current = name === 'kumiki-wall' ? 'wall' : 'export';
-    if (next.run.version !== 'v0.1') { next.run.kumiki.guide.current = null; next.run.kumiki.guide.collapsed = true; }
-    if (name === 'kumiki-drift') next.run.kumiki.drift = { part: 'input', dx: 10, dy: -6, angle: 3 };
-    return next;
-  }
-  if (name?.startsWith('seed-')) {
-    if (name === 'seed-start') { state.resources.pixels = state.run.totalPixelsGenerated = 7; return state; }
-    const end = name === 'seed-border' ? 'border' : name === 'seed-saved' ? 'save'
-      : name === 'seed-color' ? 'color' : name === 'seed-font' ? 'font'
-        : name === 'seed-layout' ? 'layout' : name === 'seed-complete' ? 'kumiki' : 'motion';
-    state.run.seed.built = BALANCE.w1.items.slice(0, BALANCE.w1.items.findIndex(item => item.id === end) + 1).map(item => item.id);
-    state.run.seed.history = state.run.seed.built.map((item, index) => ({ item, at: now - (10 - index) * 60_000 }));
-    state.run.seed.autoCursors = end === 'border' || end === 'save' ? 0 : name === 'seed-motion' ? 24 : 8;
-    state.resources.pixels = 12_000;
-    state.run.totalPixelsGenerated = 40_000;
-    state.lastSavedAt = now;
-    if (name === 'seed-return' || name === 'seed-inheriting') {
-      state.run.version = 'v1';
-      state.persistent.specs.color = 1;
-      state.resources.tokens = 40;
-      if (name === 'seed-inheriting') {
-        state.persistent.seedSkills = ['inherit'];
-        return createSeedVersion(state, 'v2', now);
-      }
-    }
-    return updateSeedGuide(state);
-  }
-  if (name === 'foundation-start') return state;
-  state.run.seed.built = ['border', 'save'];
-  state.run.seed.autoCursors = 1;
-  state.lastSavedAt = now;
-  if (name === 'foundation-offline-capped') {
-    state.lastTickAt -= BALANCE.debug.offlineFixtureHours * BALANCE.time.millisecondsPerHour;
-    state.createdAt = state.lastTickAt;
-    state.lastSavedAt = state.lastTickAt;
-  }
-  return state;
+// Runtime fixed states use memory storage and never overwrite a real save.
+export function createFixture(name:string|null,now:number):GameState|null {
+ if(!name||!FIXTURE_NAMES.includes(name))return null;
+ if(name==='intro')return createInitialState(now);
+ if(name.startsWith('stage8a-seed-')){
+  const era=Number(/-era([12])$/.exec(name)?.[1]??0),base=name.replace(/-era[12]$/,'');
+  const id=base==='stage8a-seed-layout-before'?'layout':base==='stage8a-seed-workspace-before'?'workspace':'export';
+  const s=seedState(now,base==='stage8a-seed-ready'?0:BALANCE.w1.items.findIndex(item=>item.id===id));
+  if(era){s.persistent.editorSkills=era===1?['update']:['update','modern'];s.persistent.appearance.editor=era as 1|2;s.run.version=era===1?'v1':'v2';s.persistent.specs.color=1;if(era===2)s.persistent.desktopPrefs.skills=['major1','major2'];}
+  return s;
+ }
+ const part=/^stage8a-part-(.+)-step-([0-4])-era([0-2])$/.exec(name);
+ if(part){let s=addSets(workshopState(now,Number(part[3])),UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);const id=part[1] as WorkshopPartId;s.run.workshop.parts[id]=production(id,Number(part[2]) as PartProduction['step'],now);s.run.workshop.activePart=id;return s;}
+ const view=/^stage8a-(entry|set-shop|main|catalog|files-complete|required-complete-16color|common-custom|editor-custom)(?:-era([0-2]))?$/.exec(name);
+ if(view){const mode=view[1]!,era=Number(view[2]??0);let s=workshopState(now,era);
+  if(mode==='entry'||mode==='set-shop')return s;
+  if(mode==='main')return addSets(s,[...MAIN_SETS,'photo'],0,now);
+  if(mode==='catalog'){s=addSets(s,UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);return s;}
+  s=addSets(s,mode==='files-complete'?['common','foundation','files']:MAIN_SETS,4,now,true);
+  if(mode==='files-complete'){s.run.workshop.view='exports';return s;}
+  if(mode==='required-complete-16color'){s.run.workshop.exitInspected=true;s.run.workshop.guide.seen=[...new Set([...s.run.workshop.guide.seen,'wall' as const])];s.run.workshop.guide.current='wall';s.run.workshop.guide.collapsed=false;return s;}
+  return mode==='common-custom'?customizeCommon(s):customEditor(s,era);
+ }
+ if(name.startsWith('stage7-freeware')){let s=advanceShipping(beginProductRelease(prototypeReady(now),now,{language:'ja'}),BALANCE.release.storeAnimationMs);return name.endsWith('-sales')?advanceShipping(showShipping(s),BALANCE.release.animationMs):s;}
+ if(/^stage7-(store|sales)-gen[1-3]$/.test(name)){const generation=Number(name.at(-1));let s=createFixture(`stage7-ready${generation===1?0:generation===2?2:3}`,now)!;s=advanceShipping(beginProductRelease(s,now,{language:'ja'}),BALANCE.release.storeAnimationMs);s.persistent.products.at(-1)!.presentation=softwarePresentation(((generation-1)*2) as SoftwareStage);return name.startsWith('stage7-sales')?advanceShipping(showShipping(s),BALANCE.release.animationMs):s;}
+ if(name.startsWith('stage7-')){
+  const era=/[0-3]$/.test(name)?Number(name.at(-1)):3;let s=createFixture(`desktop-stage${era}`,now)!;
+  for(const app of ['tessera','files','mail','photo','bin','clock'] as const)s=focusWindow(s,app);
+  s.run.desktop.feedback=Array.from({length:10},(_,i)=>({id:i+1,sender:'hikari' as const,kind:'screenshot' as const,target:'',baseline:[],baselineColor:'#000000',at:now-60_000,completedAt:now-30_000}));
+  s.run.desktop.feedbackSerial=10;s.run.desktop.terminal.running=true;s.run.desktop.terminal.executions=1;s.persistent.desktopPrefs.wallpaper={source:'coast',brightness:1.1,tone:0,crop:0};
+  s.persistent.productName='あおぞら';s.persistent.playerName='ゆう';s.persistent.seedSkills=['inherit'];s.run.desktop.windows.tessera.minimized=true;s=reconcileProgress(s,now);s.run.play.achievement=null;
+  if(name!=='stage7-no-photos'){s=takeScreenshot(s,now,'ja');s.run.desktop.cooldownMs=0;}
+  if(name.startsWith('stage7-advice')){s.run.advice=advanceAdvice(advanceAdvice(createAdviceState(),s,0),s,BALANCE.w2.hintMs);return s;}
+  if(name.startsWith('stage7-offline')){s.lastTickAt=now-3_600_000;return s;}
+  if(name.startsWith('stage7-ready')||name==='stage7-no-photos')return s;
+  s=beginProductRelease(s,now,{language:'ja'});if(name==='stage7-store')return advanceShipping(s,BALANCE.release.storeAnimationMs);
+  s=showShipping(advanceShipping(s,BALANCE.release.storeAnimationMs));if(name==='stage7-shipping')return advanceShipping(s,2_400);
+  s=advanceShipping(s,BALANCE.release.animationMs);if(name==='stage7-complete')return s;
+  s=startNextVersion(buySpec(s,'refresh'),now);if(name==='stage7-v2-inherit')return s;s.run.seed.installer=null;s.run.seed.built=[];s.run.restartMs=0;return s;
+ }
+ if(name.startsWith('release-')){
+  let s=prototypeReady(now);if(name==='release-ready')return s;s=advanceShipping(beginPrototypeRelease(s,now),name==='release-counting'?2_400:BALANCE.release.animationMs);
+  if(name==='release-rich'){s.resources.dollars=1_000_000;return s;}
+  if(['release-restarting','release-rebuilt','release-v1-tessera'].includes(name)){s=startNextVersion(buySpec(s,'color'),now);
+   if(name==='release-rebuilt'){s.run.restartMs=0;s.run.seed.built=['border','save','color'];s.run.seed.autoCursors=1;s.resources.pixels=2_236;s.run.totalPixelsGenerated=5_000;s.lastSavedAt=now;}
+   if(name==='release-v1-tessera'){s.run.restartMs=0;s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s.run.seed.autoCursors=41;s.resources.pixels=1_000_000;s.run.totalPixelsGenerated=2_000_000;s=addSets(enterWorkshop(s),MAIN_SETS,4,now,true);s.run.workshop.enterMs=0;}}
+  return s;
+ }
+ if(name.startsWith('editor-stage')||name.startsWith('longplay-editor')){const era=Number(name.at(-1));const s=addSets(workshopState(now,era),BASE_SETS,4,now,true);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);return s;}
+ if(name.startsWith('desktop-')||name.startsWith('longplay-desktop')||name.startsWith('app-build-')){
+  const era=/stage[0-3]$/.test(name)?Number(name.at(-1)):name.startsWith('longplay-desktop')?Number(name.at(-1)):name==='desktop-modern'?2:0;
+  const stop=['desktop-early','desktop-wait','app-build-empty','app-build-files'].includes(name)?'none':name==='desktop-files'?'files':name==='desktop-mail'||name==='desktop-modern'?'mail':name==='desktop-jobs'?'jobs':name==='desktop-photo'?'compare':'all';
+  let s=desktopState(now,era,stop);
+  if(name.startsWith('desktop-stage')){s.persistent.desktopPrefs.skills=era===3?['major1','major2','major3']:['major1','major2'];s.run.desktop.feedback=[{id:1,kind:'color',sender:'hikari',target:'primary',baseline:[],baselineColor:'#000000',at:now,completedAt:null}];s.run.desktop.feedbackSerial=1;s.run.desktop.notice=1;}
+  if(name==='desktop-wait')s.resources.pixels=20_000;
+  if(name==='desktop-files'){for(const app of s.run.desktop.apps)s.run.desktop.windows[app].open=app==='files';s=focusWindow(s,'files');}
+  if(['desktop-jobs','desktop-photo','desktop-ready'].includes(name)||name.startsWith('desktop-stage')||name.startsWith('longplay-desktop')){
+   for(const app of ['tessera','files','photo'] as const)s.run.desktop.jobs[app]={assigned:true,cursors:8,updates:1};s=focusWindow(focusWindow(s,'tessera'),'note');if(name!=='desktop-jobs')s=focusWindow(s,'photo');
+   for(const app of ['manager','mail','bin','clock','theme','terminal','settings'] as const)s.run.desktop.windows[app].open=false;
+   if(name==='desktop-ready'||name.startsWith('desktop-stage')){s.persistent.desktopPrefs.wallpaper={source:'coast',brightness:1.1,tone:0,crop:0};s.run.desktop.terminal.running=true;s.run.desktop.terminal.executions=1;for(let i=0;i<4;i++){s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+i,'ja');}s.run.desktop.cooldownMs=0;}}
+  if(name==='desktop-stalled')s.run.desktop.stalled='photo';
+  if(name==='desktop-full'){for(let i=0;i<BALANCE.w3.baseShotCapacity;i++){s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');}s.run.desktop.cooldownMs=0;}
+  if(name==='app-build-empty'||name==='app-build-files'){s=buyBlueprint(s,'files');if(name==='app-build-files')s=actAppBuild(s,{type:'app-recommend',app:'files'});s.persistent.editorSkills=['update'];s.persistent.appearance.editor=1;}
+  if(name==='app-build-missing'){const p=s.run.desktop.projects.files!;p.draft.parts=p.draft.parts.filter(part=>part.id!=='sort');p.installed=structuredClone(p.draft);s.run.desktop.feedback=[{id:1,kind:'sort',sender:'hikari',target:'',baseline:[],baselineColor:'#000000',at:now,completedAt:null}];s.run.desktop.feedbackSerial=1;s.run.desktop.notice=1;}
+  return s;
+ }
+ if(name.startsWith('kumiki-')||name==='secret-art'){
+  let s=workshopState(now,name==='kumiki-modern'?2:0);if(name==='kumiki-early'){s.resources.pixels=0;return s;}
+  s=addSets(s,name==='kumiki-wall'?MAIN_SETS:['common'],name==='kumiki-mature'||name==='secret-art'?3:4,now,name==='kumiki-wall');
+  if(name==='kumiki-wall'){s.resources.pixels=BALANCE.w2.desktopCost;s.run.workshop.exitInspected=true;s.run.workshop.guide.seen=[...new Set([...s.run.workshop.guide.seen,'wall' as const])];s.run.workshop.guide.current='wall';s.run.workshop.guide.collapsed=false;}
+  if(name==='kumiki-drift'){s=customizeCommon(s);s.run.workshop.activePart='common-button';}return s;
+ }
+ if(name==='contracts-offer'){const s=createFixture('stage7-complete',now)!;s.persistent.seedSkills=['inherit'];s.persistent.progress.records['v1-released']=now;return buySpec(s,'refresh');}
+ if(name.startsWith('contract-')){const s=createInitialState(now);s.run.version='v2';s.run.play.contract={id:name==='contract-no-color'?'no-color':'no-cursors',status:'active'};s.resources.pixels=s.run.totalPixelsGenerated=100_000;return s;}
+ if(name.startsWith('seed-')||name==='longplay-seed'||name==='stray-seed'){
+  if(name==='seed-start'){const s=createInitialState(now);s.resources.pixels=s.run.totalPixelsGenerated=7;return s;}
+  const end=name==='seed-border'?'border':name==='seed-saved'?'save':name==='seed-color'?'color':name==='seed-font'?'font':name==='seed-layout'?'layout':name==='seed-complete'?'export':'motion';
+  let s=seedState(now,BALANCE.w1.items.findIndex(item=>item.id===end)+1);s.resources.pixels=12_000;s.run.totalPixelsGenerated=40_000;if(name==='seed-motion'||name==='longplay-seed'||name==='stray-seed')s.run.seed.autoCursors=24;
+  if(name==='stray-seed')s.run.play.stray={waitMs:120_000,lifeMs:30_000,x:.2,y:.7,serial:1};
+  if(name==='seed-return'||name==='seed-inheriting'){s.run.version='v1';s.persistent.specs.color=1;s.resources.tokens=40;if(name==='seed-inheriting'){s.persistent.seedSkills=['inherit'];s=createSeedVersion(s,'v2',now);}}return s;
+ }
+ if(name==='foundation-start')return createInitialState(now);const s=seedState(now,2);s.run.seed.autoCursors=1;
+ if(name==='foundation-offline-capped'){s.lastTickAt-=BALANCE.debug.offlineFixtureHours*BALANCE.time.millisecondsPerHour;s.createdAt=s.lastSavedAt=s.lastTickAt;}return s;
 }

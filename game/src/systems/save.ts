@@ -1,118 +1,85 @@
-import {createProgress,createPlay,migrateProgress} from './longPlay';
 import { createAdviceState } from './advice';
-import { ICON_IDS } from '../content/kumikiArt';
-import { BALANCE } from '../config/balance';
 import { createPageDesign, isPageDesign } from './pageDesign';
-import { migrateAppProjects, repairAppProjects } from './appLayout';
-import { desktopScreen, resizeDesktop, LEGACY_DESKTOP } from './desktopGeometry';
-import { createAppearance } from './appearance';
+import { repairAppProjects } from './appLayout';
+import { getWorkshopPart, WORKSHOP_PARTS, type UiSetId, type WorkshopPartId, type WorkshopRect } from '../content/workshopCatalog';
+import { isPartProduction, minimumPartSize, workshopPairValid, workshopRectOnGrid, type PartProduction } from './workshopState';
+import { normalizeWorkshopRect } from './workshop';
 import { captureStore } from '../platform/captures';
-import { migrateCaptureV6 } from './captureMigration';
-import { createDesktopPreferences, createDesktopState } from './desktopState';
-import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameState } from './state';
+import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
+import { migrateLegacySave } from './legacySave';
 import type { SaveStorage } from '../platform/storage';
-import { createArtwork, createKumikiState } from './kumikiState';
-import { enterKumiki } from './kumiki';
-import { LEGACY_COLOR_MAP, legacyPalette, paletteFor } from '../content/kumikiArt';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
 export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup' } as const;
 
-// 配布・PRで使用した第1〜第4版を順に変換する。試作の形式は推測しない。
-const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
-  12(data){const old=data as GameState;return migrateProgress({...old,schemaVersion:13,run:{...old.run,play:createPlay()},persistent:{...old.persistent,progress:createProgress()}});},
-  1(data) {
-    const old = data as GameState;
-    const defaults = createInitialState(0);
-    return { ...old, schemaVersion: 2,
-      run: { ...old.run, seed: { ...old.run?.seed,
-        history: [], guide: defaults.run.seed.guide, lastActionAt: 0, installer: null,
-      } },
-      persistent: { ...old.persistent,
-        seedSkills: [], seedAppearance: defaults.persistent.seedAppearance,
-      },
-    };
-  },
-  2(data) {
-    const old = data as GameState;
-    const next = { ...old, schemaVersion: 3,
-      run: { ...old.run, kumiki: createKumikiState() },
-      persistent: { ...old.persistent, artwork: createArtwork() },
-    };
-    return next;
-  },
-  3(data) {
-    const next = { ...(data as GameState), schemaVersion: 4 };
-    const projected = { ...next, schemaVersion: SCHEMA_VERSION,
-      run: { ...next.run,advice:createAdviceState(),play:createPlay(), seed:{...next.run.seed,page:createPageDesign()},shipping: null, restartMs: 0, desktop: createDesktopState() },
-      persistent: { ...next.persistent,progress:createProgress(), appearance:createAppearance(), products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
-    };
-    if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
-    const palette = paletteFor(1);
-    const rgb = (color: string) => [1, 3, 5].map(start => parseInt(color.slice(start, start + 2), 16));
-    const oldPalette = legacyPalette();
-    const mapping = oldPalette.map((color, index) => {
-      if (index < LEGACY_COLOR_MAP.length) return LEGACY_COLOR_MAP[index]!;
-      const exact = palette.indexOf(color);
-      if (exact >= 0) return exact;
-      const source = rgb(color);
-      const distances = palette.map(c => rgb(c).reduce((sum, value, i) => sum + (value - source[i]!) ** 2, 0));
-      return distances.indexOf(Math.min(...distances));
-    });
-    const frames = (items: number[][]) => items.map(frame => frame.map(color => color < 0 ? color : mapping[color]!));
-    const k = next.run.kumiki, art = next.persistent.artwork;
-    for (const drawing of [...Object.values(k.drawings), ...Object.values(k.underlays), ...Object.values(art.icons), art.sketchbook, ...(art.wallpaper ? [art.wallpaper] : [])]) drawing.frames = frames(drawing.frames);
-    for (const work of k.exports) work.frames = frames(work.frames);
-    for (const design of Object.values(k.design)) {
-      const index = oldPalette.indexOf(design.color.toLowerCase());
-      if (index >= 0) design.color = palette[mapping[index]!]!;
+/** Geometry can be repaired without resetting a paid/completed production. */
+function repairWorkshopRects(state: GameState): void {
+  const workshop = state.run?.workshop;
+  if (!workshop || !workshop.parts || typeof workshop.parts !== 'object' || Array.isArray(workshop.parts)) return;
+  const entries = Object.entries(workshop.parts) as [WorkshopPartId, PartProduction][];
+  const repaired = { ...workshop.parts }, pending = new Set<WorkshopPartId>();
+  const byId = new Map(entries);
+  for (const [id, part] of entries) {
+    const descriptor = WORKSHOP_PARTS.find(p => p.id === id);
+    // A rect repair must not legitimize fabricated completion, missing elements,
+    // changed timestamps, or an unknown part from an edited save.
+    const reference = descriptor && part ? normalizeWorkshopRect(state, id, descriptor.defaultRect) : null;
+    if (!descriptor || !part || !reference || !isPartProduction({ ...part, rect: reference }, id)) throw new Error('保存データの内容が不正です');
+    if (!isPartProduction(part, id) || !workshopRectOnGrid(part.rect, state.persistent.specs.resolution)) pending.add(id);
+  }
+  // A window perimeter is the container, so restore it rather than moving valid
+  // controls into an accidentally shrunken frame.
+  const frame = byId.get('common-frame');
+  if (frame && frame.step > 0 && !pending.has('common-frame') && entries.some(([id, part]) => id !== 'common-frame' && getWorkshopPart(id).set === 'common' && part.step > 0 && !pending.has(id) && !workshopPairValid('common-frame', frame.rect, id, part.rect))) pending.add('common-frame');
+  const settled = new Set<WorkshopPartId>();
+  const fits = (id: WorkshopPartId, rect: WorkshopRect): boolean => {
+    const part = byId.get(id)!;
+    return isPartProduction({ ...part, rect }, id) && workshopRectOnGrid(rect, state.persistent.specs.resolution)
+      && (part.step === 0 || [...settled].every(other => {
+        const sibling = repaired[other]!;
+        return sibling.step === 0 || getWorkshopPart(other).set !== getWorkshopPart(id).set || workshopPairValid(id, rect, other, sibling.rect);
+      }));
+  };
+  for (const [id, part] of entries) if (!pending.has(id)) {
+    if (fits(id, part.rect)) settled.add(id);
+    else pending.add(id);
+  }
+  const resetSet = (set: UiSetId) => {
+    const ids = entries.filter(([id]) => getWorkshopPart(id).set === set).map(([id]) => id);
+    for (const id of ids) settled.delete(id);
+    for (const id of ids) {
+      const rect = normalizeWorkshopRect(state, id, getWorkshopPart(id).defaultRect);
+      if (!rect || !fits(id, rect)) throw new Error('保存データの内容が不正です');
+      repaired[id] = { ...byId.get(id)!, rect }; settled.add(id); pending.delete(id);
     }
-    return next;
-  },
-  4(data) {
-    const old = data as GameState;
-    return { ...old, schemaVersion: 5,
-      run: { ...old.run, shipping: null, restartMs: 0 },
-      persistent: { ...old.persistent, products: [], guideArchive: [], homeTheme: {} },
-    };
-  },
-  5(data) {
-    const old = data as GameState;
-    return { ...old, schemaVersion: 6, run: { ...old.run, desktop: createDesktopState() },
-      persistent: { ...old.persistent, productName: null, numberNotation: 'compact', products: (old.persistent.products ?? []).map(p => ({ ...p, name: null })), screenshots: [], productionNote: null, noteUpdatedAt: null } };
-  },
-  6(data) {
-    const old=data as GameState;
-    return {...old,schemaVersion:7,persistent:{...old.persistent,homeUpdatedAt:null,sketchUpdatedAt:null,screenshots:old.persistent.screenshots.map(migrateCaptureV6)},
-      run:{...old.run,desktop:{...old.run.desktop,feedback:old.run.desktop.feedback.map(f=>({...f,sender:f.sender??'hikari'}))}}};
-  },
-  7(data) {
-    const old=data as GameState, defaults=createDesktopState(), prefs=createDesktopPreferences();
-    prefs.lastShotId=Math.max(0,...old.persistent.screenshots.map(s=>s.id));
-    return {...old,schemaVersion:8,persistent:{...old.persistent,desktopPrefs:prefs},run:{...old.run,desktop:{...defaults,...old.run.desktop,upgrades:[...old.run.desktop.apps],windows:{...defaults.windows,...old.run.desktop.windows},icons:{...defaults.icons,...old.run.desktop.icons}}}};
-  },
-  8(data) {
-    const old=data as GameState,modern=old.persistent.artwork.skills.includes('modern');
-    // The old paid modern tool ran in a modern desktop. Preserve both the paid tool and its runtime.
-    const skills=modern?[...new Set([...old.persistent.artwork.skills,'update' as const])]:old.persistent.artwork.skills;
-    const desktopSkills=modern?[...new Set([...old.persistent.desktopPrefs.skills,'major1' as const,'major2' as const])]:old.persistent.desktopPrefs.skills;
-    return {...old,schemaVersion:9,persistent:{...old.persistent,appearance:{editor:old.persistent.artwork.modern?2:0,desktop:modern?2:0},artwork:{...old.persistent.artwork,skills},desktopPrefs:{...old.persistent.desktopPrefs,skills:desktopSkills,radiusCustom:old.persistent.desktopPrefs.radius!==8}}};
-  },
-  11(data) {
-    const old=data as GameState,k=old.run.kumiki,sw=k.built.includes('switch'),slider=k.built.includes('slider'),refund=(sw?BALANCE.legacyHome.switchRefund:0)+(slider?BALANCE.legacyHome.sliderRefund:0),bank=k.bank;
-    const pixels=old.resources.pixels+refund+bank;
-    const built=k.built.filter(id=>!['switch','slider'].includes(id));
-    // Keep an already completed prototype requirement completed after replacing it.
-    if(sw&&k.built.includes('button')&&k.placed.includes('button')&&k.exports.filter(e=>e.kind==='icon'&&ICON_IDS.includes(e.id as typeof ICON_IDS[number])).length>=2&&!built.includes('input'))built.push('input');
-    return {...old,schemaVersion:12,resources:{...old.resources,pixels},run:{...old.run,totalPixelsGenerated:Math.max(old.run.totalPixelsGenerated+bank,pixels),seed:{...old.run.seed,page:{...createPageDesign(),button:k.design.primary?.color??null}},kumiki:{...k,built,placed:k.placed.filter(id=>!['switch','slider'].includes(id)),focus:false,interval:1,bank:0,batchMs:0,legacyBonus:{auto:slider?BALANCE.w2.sliderMultiplier:1,drawing:sw?BALANCE.w2.focusMultiplier:1},drift:k.drift&&['switch','slider'].includes(k.drift.part)?null:k.drift}}};
-  },
-  10(data) {
-    const old=data as GameState;return {...old,schemaVersion:11,run:{...old.run,desktop:{...old.run.desktop,editingApp:null,projects:migrateAppProjects(old.run.desktop.apps,old.run.desktop.upgrades,old.persistent.desktopPrefs.skills)}}};
-  },
-  9(data) {
-    const old=data as GameState;return {...old,schemaVersion:10,run:{...old.run,desktop:resizeDesktop({...old.run.desktop,screen:LEGACY_DESKTOP},desktopScreen(old.persistent.appearance.desktop),old.persistent.desktopPrefs.iconSize)}};
-  },
-};
+  };
+  for (const id of [...pending]) {
+    if (!pending.has(id)) continue;
+    const descriptor = getWorkshopPart(id), part = byId.get(id)!;
+    const original = normalizeWorkshopRect(state, id, part.rect), standard = normalizeWorkshopRect(state, id, descriptor.defaultRect);
+    const minSize = minimumPartSize(id, part.design);
+    const minimum = normalizeWorkshopRect(state, id, { ...descriptor.defaultRect, width: minSize.width, height: minSize.height });
+    const siblings = [...settled].filter(other => repaired[other]!.step > 0 && getWorkshopPart(other).set === descriptor.set).map(other => repaired[other]!.rect);
+    let chosen: WorkshopRect | undefined;
+    // Empty rectangles can slide until an edge meets the canvas or a sibling.
+    // Checking those edges is bounded by the set's part count, even at 1px grid.
+    for (const size of id === 'common-frame' ? [standard, original, minimum] : [original, standard, minimum]) {
+      if (!size || chosen) continue;
+      const xs = new Set([size.x, descriptor.defaultRect.x, ...siblings.flatMap(r => [r.x, r.x + r.width, r.x - size.width, r.x + r.width - size.width])]);
+      const ys = new Set([size.y, descriptor.defaultRect.y, ...siblings.flatMap(r => [r.y, r.y + r.height, r.y - size.height, r.y + r.height - size.height])]);
+      for (const x of xs) {
+        for (const y of ys) {
+          const rect = normalizeWorkshopRect(state, id, { ...size, x, y });
+          if (rect && fits(id, rect)) { chosen = rect; break; }
+        }
+        if (chosen) break;
+      }
+    }
+    if (chosen) { repaired[id] = { ...part, rect: chosen }; settled.add(id); pending.delete(id); }
+    else resetSet(descriptor.set);
+  }
+  workshop.parts = repaired;
+}
 
 export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameState {
   let data: unknown = JSON.parse(raw);
@@ -137,22 +104,19 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
     return value.schemaVersion as number;
   };
   let version = versionOf(data);
-  const migrated = version < SCHEMA_VERSION;
   if (version > SCHEMA_VERSION) throw new Error('新しい版で保存されたデータです');
-  while (version < SCHEMA_VERSION) {
-    const migrate = migrations[version];
-    if (!migrate) throw new Error('この版の保存データには対応していません');
-    data = migrate(data);
-    const next = versionOf(data);
-    if (next !== version + 1) throw new Error('保存データの変換に失敗しました');
-    version = next;
+  if (version < SCHEMA_VERSION) {
+    data = migrateLegacySave(data);
+    version = versionOf(data);
+    if (version !== SCHEMA_VERSION) throw new Error('保存データの変換に失敗しました');
   }
   const candidate=data as GameState;
   if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
   if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
   if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();
+  repairWorkshopRects(candidate);
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
-  return migrated && data.run.seed.built.includes('kumiki') && !data.run.kumiki.entered ? enterKumiki(data) : data;
+  return data;
 }
 
 export function encodeSave(state: GameState): string {

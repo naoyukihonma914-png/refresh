@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { BALANCE } from '../config/balance';
 import { estimateSeconds } from './estimate';
 import {createFixture} from './fixtures';
 import {createProgress} from './longPlay';
@@ -11,15 +12,21 @@ it('推定時間は自動生成だけで求め、買える・毎秒0・99時間�
   expect(estimateSeconds(600,0,1)).toBe(600);expect(estimateSeconds(601,0,1)).toBe(660);
   expect(estimateSeconds(3601,0,1)).toBe(4200);expect(estimateSeconds(3700,0,2)).toBe(1860);
 });
-it('実際の生成倍率から60秒を見積もり、カーソル倍増で30秒になり、手動の連打速度は足さない',()=>{
+it('推定は自動カーソルと完成部品の合計だけを使い、手動連打を含めない',()=>{
  const s=createFixture('seed-motion',1800000000000)!;s.resources.pixels=0;s.run.seed.autoCursors=10;
  s.persistent.progress=createProgress();s.persistent.progress.records={'first-pixel':s.createdAt,'save-created':s.createdAt};s.persistent.progress.completed={'no-color':s.createdAt};
- // 10 cursors × .5 presses × Color 1.5 × click 4 × permanent bonus 1.07 = 32.1/s.
- expect(passivePixelsPerSecond(s)).toBeCloseTo(32.1,8);expect(estimateSeconds(1926,0,passivePixelsPerSecond(s))).toBe(60);
- const clicked=pressSeed(s,freshMomentum(),0).state;expect(passivePixelsPerSecond(clicked)).toBeCloseTo(32.1,8);
- expect(estimateSeconds(1926,clicked.resources.pixels,passivePixelsPerSecond(clicked))).toBe(60);
- s.run.seed.autoCursors=20;expect(estimateSeconds(1926,0,passivePixelsPerSecond(s))).toBe(30);
- s.run.seed.autoCursors=0;expect(estimateSeconds(1926,clicked.resources.pixels,passivePixelsPerSecond(s))).toBeNull();
+ const permanent=1+2*BALANCE.longPlay.achievementBonus+BALANCE.longPlay.contractBonus;
+ const partRate=BALANCE.w1.items.filter(item=>s.run.seed.built.includes(item.id)).reduce((n,item)=>n+item.perSecond,0)*permanent;
+ const cursorRate=10*BALANCE.w1.cursor_press_per_sec*BALANCE.w1.color_cursor_mult*(BALANCE.w1.base_click+BALANCE.w1.border_bonus)*BALANCE.w1.font_mult*permanent;
+ const rate=cursorRate+partRate,cost=rate*59.9;
+ expect(passivePixelsPerSecond(s)).toBeCloseTo(rate,8);expect(estimateSeconds(cost,0,passivePixelsPerSecond(s))).toBe(60);
+ const clicked=pressSeed(s,freshMomentum(),0).state;expect(passivePixelsPerSecond(clicked)).toBeCloseTo(rate,8);
+ expect(estimateSeconds(cost,clicked.resources.pixels,passivePixelsPerSecond(clicked))).toBe(60);
+ s.run.seed.autoCursors=20;expect(passivePixelsPerSecond(s)).toBeCloseTo(cursorRate*2+partRate);
+ expect(estimateSeconds(cost,0,passivePixelsPerSecond(s))).toBe(Math.ceil(cost/(cursorRate*2+partRate)));
+ // Existing parts continue generating even after the last cursor is removed.
+ s.run.seed.autoCursors=0;expect(passivePixelsPerSecond(s)).toBeCloseTo(partRate);
+ expect(estimateSeconds(cost,clicked.resources.pixels,passivePixelsPerSecond(s))).toBe(Math.ceil((cost-clicked.resources.pixels)/partRate));
 });
 it('まとめ買いの推定は選んだ全台数の価格を使い、最大購入では残高内なので待ち時間を出さない',()=>{
  const s=createFixture('seed-motion',1800000000000)!;s.resources.pixels=0;s.run.seed.autoCursors=11;s.persistent.progress=createProgress();

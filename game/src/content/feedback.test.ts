@@ -1,10 +1,10 @@
-import { describe,it,expect } from 'vitest';
-import { createI18n } from './i18n';
-import { feedbackBodyText } from './feedback';
-import { createFixture } from '../systems/fixtures';
+import { describe,expect,it } from 'vitest';
 import { setEditorStage } from '../systems/appearance';
+import { readCapture } from '../systems/captureScene';
 import { takeScreenshot } from '../systems/desktop';
-import { restoreScene } from '../systems/captureScene';
+import { createFixture } from '../systems/fixtures';
+import { feedbackBodyText } from './feedback';
+import { createI18n } from './i18n';
 const now=1800000000000;
 describe('フィードバックのペイントソフト名',()=>{
  it.each(['ja','en'])('%s：本文と完了済みの履歴も現在の名前へ揃え、前の姿へ戻すとTesseraになる',lang=>{
@@ -13,10 +13,10 @@ describe('フィードバックのペイントソフト名',()=>{
   expect(feedbackBodyText(s,{...request,completedAt:now},i18n)).toContain('Gesso');
   expect(feedbackBodyText(setEditorStage(s,0),request,i18n)).toContain('Tessera');
  });
- it.each(['ja','en'])('%s：撮影のメールは撮影時の姿を使い、後の切り戻しに影響されない',lang=>{
+ it.each(['ja','en'])('%s：撮影は制作時の段とメール文面を静的に保持する',lang=>{
   let s=createFixture('desktop-stage2',now)!;s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,lang);const shot=s.persistent.screenshots.at(-1)!;
-  s=setEditorStage(s,0);const frozen=restoreScene(shot,s.persistent.screenshots),request=frozen.run.desktop.feedback.find(f=>f.kind==='color')!,i18n=createI18n(lang,{strictInterpolation:true});
-  expect(feedbackBodyText(s,request,i18n)).toContain('Tessera');expect(feedbackBodyText(frozen,request,i18n)).toContain('Gesso');
-  expect(feedbackBodyText(frozen,request,i18n,true)).toContain('Tessera');
+  const frozen=readCapture(shot),request=s.run.desktop.feedback.find(f=>f.kind==='color')!,i18n=createI18n(lang,{strictInterpolation:true});
+  s=setEditorStage(s,0);expect(feedbackBodyText(s,request,i18n)).toContain('Tessera');
+  expect(frozen.appearance.editor).toBe(2);expect(frozen).not.toHaveProperty('home');
  });
 });

@@ -1,35 +1,12 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { I18n } from '../../content/i18n';
 import type { ProductRecord } from '../../systems/releaseState';
-import { productPreviewState } from '../../systems/release';
 import type { GameRuntime, RuntimeSnapshot } from '../../systems/runtime';
-import { ScreenshotPreview } from '../Desktop';
-import { HomeDocument } from '../kumiki/HomeDocument';
+import { LegacyCapturePreview, WorkshopSnapshot } from '../LegacyCapturePreview';
 
-function HomeProductPreview({ product, runtime, snapshot, i18n }: { product: ProductRecord; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
-  const mount = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ scale: .3, left: 0, top: 0 });
-  const state = useMemo(() => productPreviewState(product), [product]);
-  useLayoutEffect(() => {
-    const node = mount.current?.querySelector<HTMLElement>('.home-document');
-    if (!node) return;
-    const measure = () => {
-      const scale = Math.min(280 / node.offsetWidth, 176 / node.offsetHeight);
-      setFit({ scale, left: (280 - node.offsetWidth * scale) / 2, top: (176 - node.offsetHeight * scale) / 2 });
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [product, i18n.language]);
-  return <div className={`product-preview kumiki ${product.screen.modern ? 'is-modern' : ''}`} role="img" aria-label={i18n.t('release.preview')}>
-    <div ref={mount} className="product-preview-mount" inert aria-hidden="true" style={{ transform: `translate(${fit.left}px, ${fit.top}px) scale(${fit.scale})` }}>
-      <HomeDocument runtime={runtime} snapshot={{ ...snapshot, state, press: null, offline: null }} i18n={i18n} selected={null} onSelect={() => {}} selecting={false} dragPart={null} onDrop={() => {}} preview legacyHome={!product.screen.page} />
-    </div>
-  </div>;
-}
-
-export function ProductPreview(props: { product: ProductRecord; runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
-  const { product } = props;
-  return product.capture ? <div className="product-preview product-desktop-preview"><ScreenshotPreview {...props} shot={product.capture} catalog={[...(product.captureCatalog ?? []), ...(product.screenshots ?? []), product.capture]}/></div> : <HomeProductPreview {...props}/>;
+/** Published previews never instantiate a live game or an obsolete drawing editor. */
+export function ProductPreview({product,i18n}:{product:ProductRecord;runtime?:GameRuntime;snapshot?:RuntimeSnapshot;i18n:I18n}) {
+  if(product.capture)return <div className="product-preview product-desktop-preview"><LegacyCapturePreview shot={product.capture} catalog={[...(product.captureCatalog??[]),...(product.screenshots??[]),product.capture]} i18n={i18n}/></div>;
+  return <div className="product-preview product-preview-static" role="img" aria-label={i18n.t('release.preview')}><div className="capture-product-stage" inert aria-hidden="true">
+    {product.screen.workshop&&product.screen.editorCustomization?<WorkshopSnapshot workshop={product.screen.workshop} customization={product.screen.editorCustomization} stage={product.screen.editorStage??0} now={product.releasedAt} i18n={i18n}/>:<div className="capture-product-legacy"><h2>{product.name??i18n.t('release.preview')}</h2><p>{i18n.t('release.summary',{built:product.builtCount,icons:product.exports.length})}</p><p>{i18n.t('foundation.pixels',{pixels:i18n.pixels(product.generatedPixels)})}</p><p><b>{i18n.t('release.version')}</b> {product.version}</p></div>}
+  </div></div>;
 }

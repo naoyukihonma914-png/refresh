@@ -6,10 +6,9 @@ export {fitWindow} from './desktopGeometry';
 import { actDesktopExtra, completeRequests,refreshDesktop, type ExtraAction } from './desktopExtras';
 import { FEATURE_APPS, featureCount, hasDesktopSkill, hasUpgrade } from './desktopJobs';
 import type { DesktopUpgrade } from '../config/balance';
-import { encodeScene, projectCapture, restoreScene } from './captureScene';
+import { encodeScene, projectCapture } from './captureScene';
 import { BALANCE } from '../config/balance';
-import { ICON_IDS, PRACTICE_IDS } from '../content/kumikiArt';
-import { availableIcons, drawingFor, prepareDrawing,exportKumiki } from './kumiki';
+import { actWorkshop, canAssembleDesktop, completedSets } from './workshop';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import { APP_IDS, createDesktopState, type AppId, type BuiltApp, type DesktopState, type Feedback, type Rect, type Screenshot } from './desktopState';
 import type { GameState } from './state';
@@ -18,7 +17,7 @@ export const installedApps = (state: GameState): AppId[] => ['tessera', 'note', 
 export const runningApps = (state: GameState): AppId[] => installedApps(state).filter(id => state.run.desktop.windows[id].open);
 export const visibleApps = (state: GameState): AppId[] => runningApps(state).filter(id => !state.run.desktop.windows[id].minimized && (!hasDesktopSkill(state,'virtual')||state.run.desktop.workspaces[id]===state.run.desktop.workspace));
 export function enterDesktop(state: GameState): GameState {
-  if (state.run.world !== 'kumiki' || state.run.desktop.entered || state.persistent.specs.color < 1 || !state.run.kumiki.built.includes('taskbar') || state.resources.pixels < BALANCE.w2.desktopCost) return state;
+  if (!canAssembleDesktop(state) || state.run.desktop.entered) return state;
   const d = createDesktopState(desktopScreen(desktopStage(state))); d.entered = true; d.enteredAt = state.elapsedMs;d.builtAt.desktop=state.lastTickAt; d.active = 'tessera'; d.windows.tessera.open = true; d.windows.tessera.z = 1;
   return { ...state, resources: { ...state.resources, pixels: state.resources.pixels - BALANCE.w2.desktopCost }, run: { ...state.run, world: 'desktop', desktop: d } };
 }
@@ -49,7 +48,7 @@ export function buyDesktopApp(state:GameState,id:DesktopUpgrade,now=state.lastTi
 export function desktopConditions(state:GameState):boolean[] {
  return [runningApps(state).filter(id=>!['note','settings'].includes(id)&&(id==='tessera'||functionalApp(state,id as BuiltApp))).length>=BALANCE.w3.requiredApps,
  state.run.desktop.feedback.filter(f=>f.completedAt!==null).length>=BALANCE.w3.requiredFeedback,
- ICON_IDS.every(id=>state.run.kumiki.exports.some(e=>e.kind==='icon'&&e.id===id)),state.persistent.desktopPrefs.wallpaper!==null&&hasAppPart(state,'photo','image')&&hasAppPart(state,'photo','wallpaper'),
+ ['common','foundation','files','mail'].every(id=>completedSets(state).includes(id as 'files')),state.persistent.desktopPrefs.wallpaper!==null&&hasAppPart(state,'photo','image')&&hasAppPart(state,'photo','wallpaper'),
  state.run.desktop.terminal.executions>0&&hasAppPart(state,'terminal','commands')];
 }
 export const pendingCapacity=(state:GameState)=>hasDesktopSkill(state,'sortMail')?BALANCE.w3.sortedMailCapacity:BALANCE.w3.maxPending;
@@ -59,30 +58,23 @@ function newFeedback(state: GameState, at: number): Feedback | null {
   if (pending.length >= pendingCapacity(state)) return null;
   const primaryColor = pageColors(state.run.seed.page,state.persistent.specs.color).button;
   const candidates: { kind: Feedback['kind']; target: string }[] = [];
-  const redraw = [...ICON_IDS].sort((a,b) => {
-    const last=(id:string)=>d.feedback.filter(f=>f.kind==='redraw'&&f.target===id).at(-1)?.id??0;
-    return last(a)-last(b);
-  }).find(id => state.run.kumiki.exports.some(e => e.kind === 'icon' && e.id === id) && !pending.some(f => f.kind === 'redraw' && f.target === id));
-  const practice = PRACTICE_IDS.find(id => availableIcons(state).includes(id) && !drawingFor(state,id)?.exported && !pending.some(f => f.kind === 'practice' && f.target === id));
-  if (redraw) candidates.push({ kind: 'redraw', target: redraw });
-  if (practice) candidates.push({ kind: 'practice', target: practice });
   if (!pending.some(f => f.kind === 'color')) candidates.push({ kind: 'color', target: 'primary' });
   if (!pending.some(f => f.kind === 'screenshot')) candidates.push({ kind: 'screenshot', target: '' });
   const eligible:{kind:Feedback['kind'];target:string}[]=[
     ...(hasUpgrade(state,'sort')?[{kind:'sort' as const,target:''}]:[]),
-    ...(hasUpgrade(state,'search')?[{kind:'search' as const,target:'home'}]:[]),
+    ...(hasUpgrade(state,'search')?[{kind:'search' as const,target:'note'}]:[]),
     ...(d.apps.includes('photo')?[{kind:'bright' as const,target:''}]:[]),
     ...(d.apps.includes('bin')&&state.persistent.screenshots.filter(s=>!s.deleted&&!d.trash.some(t=>t.id===`shot:${s.id}`)).length>=3?[{kind:'trash' as const,target:''}]:[]),
     ...(hasUpgrade(state,'timer')?[{kind:'timer' as const,target:String(Math.ceil((at+BALANCE.w3.timerRequestDelayMs)/60000)*60000)}]:[]),
     ...(d.apps.includes('theme')?[{kind:'dark' as const,target:''}]:[]),
   ];
   candidates.push(...eligible.filter(c=>!pending.some(f=>f.kind===c.kind)));
-  const order: Feedback['kind'][] = ['redraw','practice','color','screenshot','sort','search','bright','trash','timer','dark'];
+  const order: Feedback['kind'][] = ['color','screenshot','sort','search','bright','trash','timer','dark'];
   const offset = d.feedback.length ? (order.indexOf(d.feedback.at(-1)!.kind) + 1) % order.length : 0;
   const candidate = Array.from({ length: order.length }, (_,i) => candidates.find(c => c.kind === order[(offset+i)%order.length])).find(Boolean);
   if (!candidate) return null;
   return { id: d.feedbackSerial + 1, sender: (['hikari','ren','maki'] as const)[d.feedbackSerial % 3]!, ...candidate, at, completedAt: null,
-    baseline: candidate.kind==='trash'?[]:[...(drawingFor(state,candidate.target)?.frames[0] ?? [])], baselineColor: primaryColor };
+    baseline: [], baselineColor: primaryColor };
 }
 export function advanceDesktopTime(state: GameState, ms: number, now: number, offline = false, language='ja', captures=true): GameState {
   if (state.run.world !== 'desktop') return state;
@@ -109,11 +101,7 @@ export function observeTesseraAction(before: GameState, after: GameState, type: 
   const done = after.run.desktop.feedback.filter(f => {
     if (f.completedAt !== null) return false;
     if (type === 'design' && f.kind === 'color') return pageColors(after.run.seed.page,after.persistent.specs.color).button !== f.baselineColor;
-    if (type !== 'export' || !['redraw','practice'].includes(f.kind)) return false;
-    const old = drawingFor(before, f.target), work = after.run.kumiki.exports.find(e => e.kind === 'icon' && e.id === f.target);
-    if (!old?.dirty || !work) return false;
-    if (f.kind === 'practice') return !old.exported && !!drawingFor(after,f.target)?.exported;
-    return work.frames[0]!.filter((c,i) => c !== f.baseline[i]).length >= BALANCE.w3.redrawCells;
+    return false;
   }).map(f => f.id);
   return completeFeedback(after,done,now);
 }
@@ -131,9 +119,6 @@ export function takeScreenshot(state: GameState, now: number, language: string, 
   next = { ...next, persistent: { ...next.persistent, screenshots: [...next.persistent.screenshots,shot], desktopPrefs:{...next.persistent.desktopPrefs,lastShotId:shot.id} } };
   next = withDesktop(next, { ...next.run.desktop, cooldownMs: screenshotCooldown(state), shotHistory:[...next.run.desktop.shotHistory.filter(h=>h.at>=now-BALANCE.w3.historyMs),{at:now,pixels:screenshotReward(state)*multiplier}].slice(-BALANCE.w3.maxShotHistory) });
   return visibleApps(state).length>=2?completeRequests(next,['screenshot'],now,automatic):next;
-}
-export function restoreScreenshot(shot: Screenshot, catalog: Screenshot[]): GameState {
-  return restoreScene(shot,catalog);
 }
 export type DesktopAction = ExtraAction | AppBuildAction
   | { type: 'open' | 'taskbar' | 'minimize' | 'maximize' | 'close'; app: AppId }
@@ -184,7 +169,7 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number,
         const need=required[request.kind];
         if(need&&state.run.desktop.projects[need[0]]&&need[1].some(part=>!hasAppPart(state,need[0],part)))return focusWindow(actAppBuild(state,{type:'app-edit',app:need[0]}),'tessera');
         let next=focusWindow(withDesktop(state,{...d,notice:null,editingApp:app==='tessera'?null:d.editingApp}),app);
-        if(hasDesktopSkill(state,'direct')&&['redraw','practice'].includes(request.kind)){next=prepareDrawing(next,request.target);next={...next,run:{...next.run,kumiki:{...next.run.kumiki,activeDrawing:request.target}}};}
+
         return next;
       }
       // Keep two real windows visible and give the capture toolbar a clear destination.
@@ -217,7 +202,7 @@ function advanceDesktopEvents(s:GameState,ms:number,now:number,offline:boolean,l
    const at=Math.max(0,now-total%d.terminal.interval-(count-1-i)*d.terminal.interval);
    if(i>0)next=withDesktop(next,{...next.run.desktop,cooldownMs:Math.max(0,next.run.desktop.cooldownMs-d.terminal.interval)});
    const before=next;
-   next=next.run.play.terminalCommand==='export'?exportKumiki(next,at):next.run.play.terminalCommand==='refresh'?refreshDesktop(next,at):takeScreenshot(next,at,language,1,hasDesktopSkill(next,'autoFeedback'));
+   next=next.run.play.terminalCommand==='export'?actWorkshop(next,{type:'export'},at):next.run.play.terminalCommand==='refresh'?refreshDesktop(next,at):takeScreenshot(next,at,language,1,hasDesktopSkill(next,'autoFeedback'));
    const ok=next.run.play.terminalCommand==='capture'?before.persistent.screenshots.length!==next.persistent.screenshots.length:before!==next;
    next=withDesktop(next,{...next.run.desktop,terminal:{...next.run.desktop.terminal,executions:next.run.desktop.terminal.executions+(ok?1:0),log:[...next.run.desktop.terminal.log,{at,ok}].slice(-BALANCE.w3.maxNoteLog)}});
    if(!ok&&activeScreenshots(next).length>=screenshotCapacity(next))break;

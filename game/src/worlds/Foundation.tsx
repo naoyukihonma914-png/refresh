@@ -1,22 +1,21 @@
-import { AdviceMessage, AdviceHistory } from '../components/WorldAdvice';
-import { seedEra } from '../systems/seedAppearance';
-import {BulkControl,ContractStatus} from '../components/LongPlaySettings';
-import { PageLayoutSurface,type PageLayoutHandle } from './PageLayoutSurface';
-import { pageColors,pageFonts,isRecommendedPage,type PageLayout } from '../systems/pageDesign';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { EditorShell } from '../components/EditorShell';
 import { Estimate } from '../components/Estimate';
-import { v1Conditions } from '../systems/release';
-import { productLabel } from '../content/products';
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { LanguageSelect } from '../components/LanguageSelect';
+import { BulkControl, ContractStatus } from '../components/LongPlaySettings';
 import { BALANCE, type SeedItem } from '../config/balance';
 import type { I18n } from '../content/i18n';
-import { canSave } from '../systems/state';
+import { paletteFor } from '../content/palette';
+import { editorName, editorStage } from '../systems/appearance';
+import { manualClickValue, cursorPixelsPerSecond, cursorPressesPerSecond, passivePixelsPerSecond } from '../systems/economy';
+import { pageColors, pageFonts, type PageLayout } from '../systems/pageDesign';
 import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
-import { canBuildSeed,seedCursorQuote, visibleSeedItems } from '../systems/seed';
-import { cursorPixelsPerSecond, cursorPressesPerSecond, manualClickValue, passivePixelsPerSecond } from '../systems/economy';
-import { LanguageSelect } from '../components/LanguageSelect';
+import { canBuildSeed, seedCursorQuote, visibleSeedItems } from '../systems/seed';
+import { canSave } from '../systems/state';
+import { globalMultiplier } from '../systems/longPlay';
+import { PageLayoutSurface, type PageLayoutHandle } from './PageLayoutSurface';
 import { PageSettings } from './PageSettings';
-import { designStyle } from './kumiki/design';
-import { GuideHistory } from '../components/GuideHistory';
+import './seedConstruction.css';
 
 export function useAnimationClock(runtime: GameRuntime, enabled: boolean, refresh: number) {
   const [now, setNow] = useState(() => runtime.platform.clock.monotonicNow());
@@ -31,193 +30,71 @@ export function useAnimationClock(runtime: GameRuntime, enabled: boolean, refres
   return now;
 }
 
-function RollingPixels({ value, now, enabled, i18n }: { value: number; now: number; enabled: boolean; i18n: I18n }) {
-  const rolling = useRef({ target: value, from: value, displayed: value, at: now });
-  if (rolling.current.target !== value) rolling.current = { target: value, from: rolling.current.displayed, displayed: rolling.current.displayed, at: now };
-  const roll = rolling.current;
-  const progress = Math.min(1, Math.max(0, now - roll.at) / BALANCE.w1.numberRollMs);
-  roll.displayed = enabled && value >= roll.from ? roll.from + (value - roll.from) * progress : value;
-  return <span className="pixel-count" data-value={value}>{i18n.t('foundation.pixels', { pixels: i18n.pixels(roll.displayed) })}</span>;
+function PixelCounter({ value, now, moving, i18n }: { value: number; now: number; moving: boolean; i18n: I18n }) {
+  const roll = useRef({ from: value, to: value, value, at: now });
+  if (roll.current.to !== value) roll.current = { from: roll.current.value, to: value, value, at: now };
+  const r = roll.current;
+  r.value = moving && r.to >= r.from ? r.from + (r.to - r.from) * Math.min(1, Math.max(0, now - r.at) / BALANCE.w1.numberRollMs) : value;
+  return <span data-seed-pixels={value}>{i18n.t('foundation.pixels', { pixels: i18n.pixels(r.value) })}</span>;
 }
 
-export function Foundation({ snapshot, i18n, runtime, embedded = false, preview = false, interactive = true, legacyHome = false, children }: { snapshot: RuntimeSnapshot; i18n: I18n; runtime: GameRuntime; embedded?: boolean; preview?: boolean; interactive?: boolean; legacyHome?:boolean; children?: ReactNode }) {
-  const { state, offline, press } = snapshot;
-  const { seed } = state.run;
-  const era = legacyHome ? 0 : seedEra(state);
+/** This is the editor under construction. It is never embedded as a separate home document. */
+export function Foundation({ runtime, snapshot, i18n }: { runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
+  const { state, press } = snapshot, seed = state.run.seed, page = seed.page;
   const has = (id: SeedItem) => seed.built.includes(id);
-  const [settings, setSettings] = useState(false);
-  const [arranging,setArranging]=useState(false);
-  const surface=useRef<PageLayoutHandle>(null),[editingLayout,setEditingLayout]=useState<PageLayout|null>(null);
-  const layoutUnlocked=has('layout')&&!legacyHome;
-  const customLayout=layoutUnlocked&&(arranging||!isRecommendedPage(seed.page.layout));
-  const arrange=()=>{if(!arranging)setEditingLayout(isRecommendedPage(seed.page.layout)?surface.current?.measure()??null:null);else setEditingLayout(null);setArranging(!arranging);};
-  const restorePage=(type:'recommended'|'reset')=>{setEditingLayout(null);setArranging(false);runtime.actPage({type});};
-  const page=seed.page,colors=pageColors(page,state.persistent.specs.color);
-  const [conditions, setConditions] = useState(false);
-  const [archive, setArchive] = useState(false);
-  const held = useRef(false);
-  const anchor = useRef<HTMLSpanElement>(null);
-  const motion = has('motion') && !runtime.platform.animation.reducedMotion();
-  const now = useAnimationClock(runtime, !preview && (seed.autoCursors > 0 || has('motion') || state.persistent.seedSkills.includes('hold')), state.persistent.specs.refresh);
-  const [floating, setFloating] = useState<NonNullable<RuntimeSnapshot['press']>[]>([]);
-  useEffect(() => {
-    if (!motion || !press) { setFloating([]); return; }
-    setFloating(previous => [...previous.filter(item => press.at - item.at < BALANCE.w1.floatMs).slice(-(BALANCE.w1.maxFloatingGains - 1)), press]);
-  }, [press, motion]);
-  const lastHeld = useRef(0);
-  const skills = state.persistent.seedSkills;
+  const stage = editorStage(state), colors = pageColors(page, state.persistent.specs.color, state.persistent.editorCustomization);
+  const customization = state.persistent.editorCustomization;
+  const [settings, setSettings] = useState(false), [arranging, setArranging] = useState(false), [history, setHistory] = useState(false);
+  const surface = useRef<PageLayoutHandle>(null), [editingLayout, setEditingLayout] = useState<PageLayout | null>(null);
+  const held = useRef(false), lastHeld = useRef(0);
+  const moving = has('motion') && !runtime.platform.animation.reducedMotion();
+  const now = useAnimationClock(runtime, moving, state.persistent.specs.refresh);
+  const rate = passivePixelsPerSecond(state), generate = manualClickValue(state);
+  const showCursors = Math.min(seed.autoCursors, BALANCE.w1.maxVisibleCursors);
+  const cycle = now / 1000 * cursorPressesPerSecond(state) * Math.max(1, showCursors), phase = cycle % 1;
+  const pressed = moving && (press && now - press.at < BALANCE.w1.numberRollMs || showCursors > 0 && phase > .45 && phase < .65);
   useEffect(() => runtime.platform.keyboard.subscribe(key => {
     if (key.code !== 'Space') return;
     if (!key.pressed) { held.current = false; return; }
-    if (preview || !interactive || key.editable || settings || snapshot.releaseConfirmation) return;
+    if (key.editable || settings || arranging || snapshot.releaseConfirmation || !state.persistent.seedSkills.some(id => id === 'keyboard' || id === 'hold')) return;
     key.preventDefault();
-    if (!skills.includes('keyboard') && !skills.includes('hold')) return;
     if (key.repeat || held.current) return;
-    held.current = true;
-    lastHeld.current = runtime.platform.clock.monotonicNow();
-    runtime.pressSeed();
-  }), [runtime, skills, settings, preview, interactive, snapshot.releaseConfirmation]);
+    held.current = true; lastHeld.current = runtime.platform.clock.monotonicNow(); runtime.pressSeed();
+  }), [runtime, settings, arranging, snapshot.releaseConfirmation, state.persistent.seedSkills]);
   useEffect(() => {
-    if (preview || !interactive || !skills.includes('hold') || settings || snapshot.releaseConfirmation) return;
-    const interval = 1_000 / (BALANCE.w1.holdPressesPerSecond * BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier);
+    if (settings || arranging || !state.persistent.seedSkills.includes('hold')) return;
+    const interval = 1000 / (BALANCE.w1.holdPressesPerSecond * BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier);
     return runtime.platform.every(interval, () => {
-      const time = runtime.platform.clock.monotonicNow();
-      if (held.current && time - lastHeld.current >= interval) { lastHeld.current = time; runtime.pressSeed(); }
+      const at = runtime.platform.clock.monotonicNow();
+      if (held.current && at - lastHeld.current >= interval) { lastHeld.current = at; runtime.pressSeed(); }
     });
-  }, [runtime, skills, settings, state.persistent.specs.refresh, preview, interactive, snapshot.releaseConfirmation]);
-  useEffect(() => { if (!interactive || snapshot.releaseConfirmation) held.current = false; }, [interactive,snapshot.releaseConfirmation]);
-  const items = visibleSeedItems(state);
-  const guide = seed.guide;
-  const showCursors = Math.min(state.run.world === 'desktop' ? BALANCE.w3.compactCursors : BALANCE.w1.maxVisibleCursors, seed.autoCursors);
-  const generate = manualClickValue(state);
-  const activePress = motion && press && press.target === 'primary' && now - press.at < BALANCE.w1.numberRollMs;
-  const cursorsWorking = !(legacyHome && embedded && state.run.kumiki.placed.includes('switch') && state.run.kumiki.focus);
-  const cursorCycle = cursorsWorking ? now / 1_000 * cursorPressesPerSecond(state) * showCursors : 0;
-  const cursorPhase = cursorCycle % 1;
-  const secondaryNode = embedded ? anchor.current?.closest('.seed-page')?.querySelector<HTMLElement>('.second-generate') : null;
-  const secondaryPoint = { x: 0, y: 0 };
-  if (secondaryNode && anchor.current) {
-    const a = anchor.current.getBoundingClientRect(), b = secondaryNode.getBoundingClientRect(), scale = a.width / anchor.current.offsetWidth;
-    secondaryPoint.x = (b.left - a.left + b.width * 0.35) / scale;
-    secondaryPoint.y = (b.top - a.top + b.height * 0.2) / scale;
-  }
-  const [cursorBox,setCursorBox]=useState({width:0,buttonWidth:0,buttonHeight:0});
-  useLayoutEffect(()=>{if(!layoutUnlocked)return;const a=anchor.current,line=a?.parentElement,button=a?.querySelector('button');if(!a||!line||!button)return;const measure=()=>{const next={width:line.clientWidth,buttonWidth:a.offsetWidth,buttonHeight:button.offsetHeight};setCursorBox(old=>JSON.stringify(old)===JSON.stringify(next)?old:next);};measure();const observer=new ResizeObserver(measure);observer.observe(line);observer.observe(button);return()=>observer.disconnect();},[layoutUnlocked,customLayout,settings]);
-  const fitQueue=customLayout||cursorBox.width>0&&cursorBox.width<cursorBox.buttonWidth+36+Math.max(0,Math.min(10,showCursors)-1)*18;
-  const sideColumns=Math.floor((cursorBox.width-cursorBox.buttonWidth-36)/18),below=sideColumns<Math.min(4,showCursors);
-  const queueColumns=below?Math.max(1,Math.floor((cursorBox.width-18)/18)):Math.max(1,Math.min(10,sideColumns));
-  const queueBottom=(below?cursorBox.buttonHeight+8:8)+Math.ceil(showCursors/queueColumns)*24;
-  const buttonSize=(editingLayout??page.layout)?.button;
-  const preferredFont=buttonSize?Math.max(13.33,Math.min(BALANCE.pageDesign.buttonFontMax,buttonSize.height*.4)):13.33;
-  const [buttonFit,setButtonFit]=useState({font:preferredFont,wrap:false});
-  useLayoutEffect(()=>setButtonFit({font:preferredFont,wrap:false}),[preferredFont,buttonSize?.width,buttonSize?.height,page.bodyFont,i18n.language]);
-  useLayoutEffect(()=>{
-    const button=anchor.current?.querySelector('button');if(!customLayout||!buttonSize||!button||buttonFit.wrap)return;
-    const ratio=Math.min(button.clientWidth/button.scrollWidth,button.clientHeight/button.scrollHeight);
-    if(ratio<.99)setButtonFit(old=>old.font>BALANCE.pageDesign.buttonFontMin?{font:Math.max(BALANCE.pageDesign.buttonFontMin,Math.floor(old.font*ratio*.95*10)/10),wrap:false}:{...old,wrap:true});
-  },[customLayout,buttonSize,buttonFit,generate,page.bodyFont,i18n.language]);
-  const useSecond = !!secondaryNode && Math.floor(cursorCycle) % 2 === 1;
-  const autoPressed = motion && cursorsWorking && !useSecond && showCursors > 0 && cursorPhase > 0.45 && cursorPhase < 0.65;
-  const appearance = state.persistent.seedAppearance;
-  const className = ['foundation', 'seed-page', era === 1 && 'seed-era-1', page.button && 'page-custom-button', embedded && 'is-embedded', has('border') && 'has-border', has('color') && 'has-color',
-    has('font') && 'has-font', has('layout') && 'has-layout', motion && 'has-motion',
-    state.persistent.specs.color > 0 && 'modern-colors', skills.includes('pattern') && `pattern-${appearance.pattern}`,
-    skills.includes('marquee') && appearance.marquee && 'has-marquee'].filter(Boolean).join(' ');
+  }, [runtime, settings, arranging, state.persistent.seedSkills, state.persistent.specs.refresh]);
+  useEffect(() => { if (settings || arranging) held.current = false; }, [settings, arranging]);
+  const restore = (type: 'recommended' | 'reset') => { setArranging(false); setEditingLayout(null); runtime.actPage({ type }); };
+  const arrange = () => { if (!arranging) setEditingLayout(surface.current?.measure() ?? page.layout); else setEditingLayout(null); setArranging(!arranging); };
   const purchase = (id: SeedItem | 'cursor') => {
-    const cost = id === 'cursor' ? seedCursorQuote(state).cost : BALANCE.w1.items.find(item => item.id === id)!.cost;
-    const label = i18n.t(`seed.buy.${id}`, { cost: i18n.integer(cost) });
-    const quantity=id==='cursor'?seedCursorQuote(state).count:1;
-    const name = id === 'cursor' ? i18n.t('seed.cursor') : i18n.t(`item.${id}`);
-    const effect = id === 'border' ? i18n.t('effect.clickAdd', { value: BALANCE.w1.border_bonus })
-      : id === 'color' ? i18n.t('effect.cursorMult', { value: BALANCE.w1.color_cursor_mult })
-        : id === 'font' ? i18n.t('effect.clickMult', { value: BALANCE.w1.font_mult })
-          : id === 'motion' ? i18n.t('effect.momentum', { value: BALANCE.w1.momentum.max })
-            : id === 'cursor' ? i18n.t('effect.cursorRate', { value: i18n.rate(cursorPixelsPerSecond(state)*quantity) }) : '';
-    return <li key={id}>{has('layout') && <span>{name}{id==='cursor'&&<BulkControl state={state} runtime={runtime} i18n={i18n}/>}<small className="bulk-count">{id==='cursor'&&quantity!==1?i18n.t('bulk.count',{count:quantity}):''}</small>{effect && <small className="purchase-effect">{effect}</small>}</span>}
-      <button className="build-button" disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)} aria-label={label} aria-description={effect || undefined}>
-        {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : <>{label}{effect && <small className="purchase-effect">{effect}</small>}</>}
-      </button><Estimate cost={cost} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} i18n={i18n} runtime={runtime} preview={preview}/>{id==='cursor'&&!has('layout')&&<BulkControl state={state} runtime={runtime} i18n={i18n}/>}</li>;
+    const item = id === 'cursor' ? null : BALANCE.w1.items.find(item => item.id === id)!;
+    const quote = id === 'cursor' ? seedCursorQuote(state) : { cost: item!.cost, count: 1 };
+    const label = i18n.t(`seed.buy.${id}`, { cost: i18n.integer(quote.cost) });
+    const effect = id === 'border' ? i18n.t('effect.clickAdd', { value: BALANCE.w1.border_bonus }) : id === 'color' ? i18n.t('effect.cursorMult', { value: BALANCE.w1.color_cursor_mult }) : id === 'font' ? i18n.t('effect.clickMult', { value: BALANCE.w1.font_mult }) : id === 'motion' ? i18n.t('effect.momentum', { value: BALANCE.w1.momentum.max }) : '';
+    const perSecond = id === 'cursor' ? cursorPixelsPerSecond(state) * quote.count : item!.perSecond * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * globalMultiplier(state);
+    return <li key={id}><div className="seed-upgrade-name"><span>{i18n.t(id === 'cursor' ? 'seed.cursor' : `item.${id}`)}</span>{effect && <small>{effect}</small>}<small>{i18n.t('seed8.production', { pixels: i18n.number(perSecond) })}</small>{id === 'cursor' && <BulkControl state={state} runtime={runtime} i18n={i18n}/>}</div>
+      <button data-seed-upgrade={id} aria-label={label} disabled={!canBuildSeed(state, id)} onClick={() => runtime.buildSeed(id)}>{i18n.t('seed.buildPrice', { cost: i18n.integer(quote.cost) })}</button><Estimate cost={quote.cost} pixels={state.resources.pixels} rate={rate} i18n={i18n} runtime={runtime}/></li>;
   };
-  const headingNode=<>{era===1&&!page.heading&&<h1 className="seed-era-title">{i18n.t('seed.era.title',{product:productLabel(i18n,state.persistent.productName,state.run.version==='v2'?'v2.0':'v1.0')})}</h1>}<ContractStatus state={state} runtime={runtime} i18n={i18n}/>{!embedded&&state.run.play.achievement&&<p className="achievement-line" role="status">{i18n.t('achievement.notice',{name:i18n.t(`achievement.${state.run.play.achievement.id}`)})}</p>}{!legacyHome&&page.heading&&<h1 className="home-heading">{page.heading}</h1>}      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{(state.run.version!=='v0.1'||state.persistent.products.length)?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName,state.run.version==='v2'?'v2.0':'v1.0')}):i18n.t('foundation.goal')}
-        {!embedded && <button className="text-button goal-progress" onClick={() => setConditions(!conditions)} aria-expanded={conditions}>{i18n.t('seed.goalProgress', { done: v1Conditions(state).filter(Boolean).length, total: 5 })}</button>}
-      </p>
-      {conditions && <section className="release-conditions"><h2>{i18n.t('seed.conditions')}</h2><ul>
-        {(['apps', 'requests', 'icons', 'wallpaper', 'automation'] as const).map((id,index) => <li key={id}><input type="checkbox" readOnly checked={v1Conditions(state)[index]}/>{i18n.t(`seed.condition.${id}`)}</li>)}
-      </ul></section>}
-</>;
-  const noticeNode=<>      {!embedded && (guide.seen.length > 0 || state.run.advice.current) && <section className="guide-notices">
-        {state.run.advice.current ? <AdviceMessage memory={state.run.advice} i18n={i18n} app={i18n.t('k.app')} onRead={runtime.readAdvice}/> : guide.collapsed ? <button className="text-button" onClick={() => { runtime.readSeedGuide(guide.current!); setArchive(true); }}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>
-          : <><h2>{i18n.t('guide.title')}</h2>
-            <p className="guide-body">{guide.current && i18n.t(guide.current==='return'&&state.run.version==='v2'?'guide.return.v2':`guide.${guide.current}`)}</p>
-            <p className="guide-signature">{i18n.t('guide.signature')}</p>
-            <div className="guide-actions">
-              {guide.current === 'intro' && !guide.seen.includes('instructions') && <button className="text-button" onClick={() => runtime.readSeedGuide('listen')}>{i18n.t('guide.listen')}</button>}
-              <button className="text-button" onClick={() => { runtime.readSeedGuide('close'); setArchive(false); }}>{i18n.t(guide.current === 'intro' ? 'guide.later' : 'guide.close')}</button>
-              {guide.seen.length > 1 && <button className="text-button" onClick={() => setArchive(!archive)}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>}
-            </div></>}
-        {archive && <ul className="notice-archive">{guide.seen.map(id => <li key={id}><button className="text-button" onClick={() => runtime.readSeedGuide(id)}>{i18n.t('guide.read', { title: i18n.t(`guide.${id}.title`) })}</button></li>)}</ul>}
-        {archive && <GuideHistory state={state} i18n={i18n} />}<AdviceHistory memory={state.run.advice} i18n={i18n} app={i18n.t('k.app')} onRead={runtime.readAdvice}/>
-      </section>}
-</>;
-  const generatorNode=<>      {seed.installer && <section className="installer" role="status"><p>{i18n.t('installer.title')}</p>
-        <progress max={BALANCE.w1.inheritMs} value={seed.installer.elapsedMs} aria-label={i18n.t('installer.title')} />
-        <p>{i18n.t('installer.progress', { done: seed.built.length, total: seed.installer.items.length })}</p></section>}
-      <p className="pixels-line"><RollingPixels value={state.resources.pixels} now={now} enabled={motion} i18n={i18n} />
-        {seed.autoCursors > 0 && <span className="passive-rate" data-rate={passivePixelsPerSecond(state)}>{i18n.t('seed.rate', { pixels: i18n.rate(snapshot.frozenRate ?? passivePixelsPerSecond(state)) })}</span>}
-      </p>
-      <p className="generator-line" style={fitQueue&&showCursors?{minBlockSize:(motion?48:0)+Math.max(cursorBox.buttonHeight,queueBottom)+8}:undefined}><span className="generator-anchor" ref={anchor}>
-        <button type="button" className="generate-button" data-part="primary" onClick={event => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          runtime.pressSeed(event.detail === 0 ? undefined : { x: (event.clientX - rect.left) / rect.width * 100, y: (event.clientY - rect.top) / rect.height * 100 });
-        }} disabled={preview || !!seed.installer || state.run.restartMs > 0}
-          style={{ '--press-depth': activePress ? `${1 + (press.momentum - 1) * 5}px` : autoPressed ? '1px' : '0px',
-            ...(embedded ? designStyle(state.run.kumiki.design.primary) : {}),
-            ...(customLayout&&(editingLayout??page.layout)?.button?{width:'min(100%, var(--page-button-width))',height:buttonFit.wrap?'auto':'var(--page-button-height)',minHeight:'var(--page-button-height)',fontSize:`${buttonFit.font}px`}:{}),
-            ...(!legacyHome&&has('color')?{backgroundColor:colors.button,color:colors.buttonText}:{}),
-          } as CSSProperties}>
-          {generate === 1 ? i18n.t('seed.generateSingle') : i18n.t('seed.generate', { count: generate })}</button>
-        {Array.from({ length: showCursors }, (_, index) => {
-          const rank = (index - Math.floor(cursorCycle) % showCursors + showCursors) % showCursors;
-          const atButton = cursorPhase > 0.45 && cursorPhase < 0.65;
-          const travel = rank !== 0 || !cursorsWorking ? 0 : motion ? 1 - Math.abs(cursorPhase - 0.5) * 2 : atButton ? 1 : 0;
-          const queueX = fitQueue?(below?0:cursorBox.buttonWidth+18)+rank%queueColumns*18:18+rank%10*18;
-          const queueY = fitQueue?(below?cursorBox.buttonHeight+8:8)+Math.floor(rank/queueColumns)*24:8+Math.floor(rank/10)*24;
-          return <svg className="auto-cursor" key={index} viewBox="0 0 18 24" aria-hidden="true"
-            style={{ insetInlineStart: fitQueue?`${queueX*(1-travel)+(useSecond?secondaryPoint.x:cursorBox.buttonWidth*.35)*travel}px`:useSecond ? `calc(${100 * (1 - travel)}% + ${queueX * (1 - travel) + secondaryPoint.x * travel}px)` : `calc(${100 - 65 * travel}% + ${queueX * (1 - travel)}px)`, insetBlockStart: `${queueY * (1 - travel) + (useSecond ? secondaryPoint.y * travel : 0)}px` }}>
-            <path d="M1 1V20L5.5 15.5L9 23L12 21.5L8.5 14H15Z" fill="#000" stroke="#fff" strokeWidth="1.5" /></svg>;
-        })}
-        {motion && floating.filter(item => item.target === 'primary' && now - item.at < BALANCE.w1.floatMs).map(item => <span key={item.serial} className="pixel-gain" aria-hidden="true"
-          style={{ insetInlineStart: `${item.x}%`, transform: `translate(calc(-50% + ${BALANCE.w1.gainOffsets[(item.serial - 1) % BALANCE.w1.gainOffsets.length]}px), ${(page.motion==='fade'?0:page.motion==='lift'?-52:-36) * Math.max(0, now - item.at) / BALANCE.w1.floatMs}px)`, opacity: Math.max(0, 1 - (now - item.at) / BALANCE.w1.floatMs) }}>
-          {i18n.t('seed.gain', { pixels: i18n.integer(item.pixels) })}</span>)}
-      </span></p>
-      {children}
-      {seed.autoCursors > (state.run.world === 'desktop' ? BALANCE.w3.compactCursors : BALANCE.w1.maxVisibleCursors) && <p className="cursor-summary">{i18n.t('seed.cursors', { count: seed.autoCursors })}</p>}
-</>;
-  const upgradesNode=<>      <hr />
-      {!has('kumiki') && <><p className="available-heading"><span>{i18n.t('seed.available')}</span></p><ul className="build-list">
-        {canSave(state) && purchase('cursor')}{items.map(purchase)}</ul></>}
-      {has('kumiki') && <>{!embedded && <p className="seed-complete" role="status">{i18n.t('seed.complete')}</p>}<ul className="build-list">{purchase('cursor')}{items.map(purchase)}</ul></>}
-</>;
-  return <main data-page-motion={page.motion} style={!legacyHome?{...(has('color')?{'--seed-bg':colors.background,'--seed-surface':page.background??(state.persistent.specs.color===0?'#c0c0c0':'#ffffff'),'--seed-ink':colors.text,'--seed-button':colors.button,backgroundColor:colors.background,color:colors.text}:{}),...(has('font')?{fontFamily:pageFonts[page.bodyFont],'--page-heading-font':pageFonts[page.headingFont]}:{})} as CSSProperties:undefined} className={[className,customLayout&&'page-layout-active',!legacyHome&&(page.text||page.background)&&'page-custom-colors',state.run.restartMs>0&&'is-restarting',preview&&'is-preview'].filter(Boolean).join(' ')}>
-    {settings?<PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={()=>setSettings(false)}/>:<div className={`seed-content ${customLayout?'page-layout-content':''}`}>
-      {layoutUnlocked||era===1?<PageLayoutSurface canvas={customLayout} measureRef={surface} layout={editingLayout??page.layout} i18n={i18n} editing={arranging&&!preview} onChange={layout=>{setEditingLayout(null);runtime.actPage({type:'layout',layout});}} parts={{heading:headingNode,notice:noticeNode,generator:generatorNode,upgrades:upgradesNode}}/>:<>{headingNode}{noticeNode}{generatorNode}{upgradesNode}</>}
-      <div className="page-footer">{era===1&&!customLayout&&<h2 className="seed-menu-heading">{i18n.t('seed.era.menu')}</h2>}      {!embedded && <p className="save-status">{canSave(state) && state.lastSavedAt !== null
-        ? i18n.t('save.saved', { time: i18n.time(state.lastSavedAt) }) : i18n.t('save.unavailableUntilBuilt')}</p>
-      }
-      {!embedded && offline && <p role="status">{i18n.t('offline.notice', { duration: i18n.duration(offline.creditedMs), pixels: i18n.pixels(offline.pixels), count: Math.floor(offline.pixels) })} <button className="text-button" onClick={runtime.dismissOffline}>{i18n.t('guide.close')}</button></p>}
-      {state.run.version !== 'v0.1' && <p><button className="text-button" onClick={() => {setEditingLayout(null);setArranging(false);setSettings(true);}}>{i18n.t('seed.settings')}</button></p>}
-      {skills.includes('history') && <section className="change-history"><h2>{i18n.t('history.title')}</h2>
-        {seed.history.length === 0 ? <p>{i18n.t('history.empty')}</p> : <ul>{seed.history.map((entry, index) => <li key={index}>
-          {i18n.t('history.entry', { date: i18n.date(entry.at), time: i18n.time(entry.at), name: entry.item === 'cursor' ? i18n.t('seed.cursor') : i18n.t(`item.${entry.item}`) })}</li>)}</ul>}
-      </section>}
-      {!embedded && <p className="language-settings"><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} /></p>}
-
-      </div>
-    </div>}
-    {!embedded&&!settings&&!preview&&state.run.play.stray.lifeMs>0&&state.run.seed.built.includes('color')&&<button className="stray-pixel" aria-label={i18n.t('stray.collect')} title={i18n.t('stray.collect')} style={{left:`${state.run.play.stray.x*100}%`,top:`${state.run.play.stray.y*100}%`}} onClick={runtime.collectStray}/>}
-    {!settings&&!preview&&!legacyHome&&<div className="page-tools">
-      {state.run.version==='v0.1'&&<p><button className="text-button" onClick={()=>{setEditingLayout(null);setArranging(false);setSettings(true);}}>{i18n.t('seed.settings')}</button></p>}
-      {layoutUnlocked&&<div className="page-layout-actions"><button onClick={arrange}>{i18n.t(arranging?'page.finish':'page.arrange')}</button><button onClick={()=>restorePage('recommended')}>{i18n.t('builder.recommended')}</button><button onClick={()=>restorePage('reset')}>{i18n.t('page.reset')}</button></div>}
-    </div>}
-  </main>;
+  const heading = <><h1>{page.heading || i18n.t('seed8.goal')}</h1><ContractStatus state={state} runtime={runtime} i18n={i18n}/>{state.run.play.achievement && <p className="achievement-line" role="status">{i18n.t('achievement.notice', { name: i18n.t(`achievement.${state.run.play.achievement.id}`) })}</p>}</>;
+  const guide = seed.guide;
+  const notices = <>{guide.current && !guide.collapsed && <section className="seed-construction-notice"><h2>{i18n.t('guide.title')}</h2><p>{i18n.t(`seed8.guide.${guide.current}`)}</p><p>{i18n.t('guide.signature')}</p><button className="seed-link" onClick={() => runtime.readSeedGuide('close')}>{i18n.t('guide.close')}</button></section>}{guide.collapsed && guide.current && <button className="seed-link" onClick={() => runtime.readSeedGuide(guide.current!)}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>}{snapshot.offline && <p role="status">{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}<button className="seed-link" onClick={runtime.dismissOffline}>{i18n.t('guide.close')}</button></p>}</>;
+  const generator = <><p className="seed-construction-resources"><PixelCounter value={state.resources.pixels} now={now} moving={moving} i18n={i18n}/>{rate > 0 && <small data-seed-rate={rate}>{i18n.t('seed.rate', { pixels: i18n.rate(rate) })}</small>}</p><div className="seed-generator-line"><div className="seed-generator-anchor"><button className="seed-generate" data-part="primary" onPointerDown={event => { if (state.persistent.seedSkills.includes('hold')) { held.current = true; lastHeld.current = runtime.platform.clock.monotonicNow(); event.currentTarget.setPointerCapture(event.pointerId); } }} onPointerUp={() => { held.current = false; }} onPointerCancel={() => { held.current = false; }} style={{ backgroundColor: has('color') ? colors.button : undefined, color: has('color') ? colors.buttonText : undefined, transform: moving && pressed && page.motion !== 'fade' ? `translateY(${page.motion === 'lift' ? -2 : 2}px)` : undefined, filter: moving && pressed && page.motion === 'fade' ? 'brightness(.9)' : undefined }} onClick={event => { const r = event.currentTarget.getBoundingClientRect(); runtime.pressSeed(event.detail ? { x: (event.clientX - r.left) / r.width * 100, y: (event.clientY - r.top) / r.height * 100 } : undefined); }}>{generate === 1 ? i18n.t('seed.generateSingle') : i18n.t('seed.generate', { count: generate })}</button>
+    {Array.from({ length: showCursors }, (_, index) => { const rank = (index - Math.floor(cycle) % showCursors + showCursors) % showCursors; const travel = moving && rank === 0 ? 1 - Math.abs(phase - .5) * 2 : 0; return <svg key={index} className="seed-auto-cursor" viewBox="0 0 18 24" aria-hidden="true" style={{ left: 20 + rank % 10 * 18 - travel * 28, top: 44 + Math.floor(rank / 10) * 24 - travel * 40 }}><path d="M1 1V20L5.5 15.5L9 23L12 21.5L8.5 14H15Z" fill="#000" stroke="#fff"/></svg>; })}
+    {moving && press && now - press.at < BALANCE.w1.floatMs && <span className="seed-gain" style={{ left: `${press.x}%`, top: `${press.y}%`, opacity: 1 - (now - press.at) / BALANCE.w1.floatMs, transform: `translateY(${-36 * (now - press.at) / BALANCE.w1.floatMs}px)` }}>{i18n.t('seed.gain', { pixels: i18n.integer(press.pixels) })}</span>}</div></div>{seed.autoCursors > showCursors && <small>{i18n.t('seed.cursors', { count: seed.autoCursors })}</small>}</>;
+  const upgrades = <><h2>{i18n.t('seed8.upgrades')}</h2><ul className="seed-upgrades">{visibleSeedItems(state).map(purchase)}</ul>{has('save') && <ul className="seed-upgrades seed-cursor-purchase">{purchase('cursor')}</ul>}</>;
+  const palette = has('color') && <div className="seed-construction-palette" aria-label={i18n.t('page.color.button')}>{paletteFor(state.persistent.specs.color).map(color => <button key={color} style={{ background: color }} aria-label={i18n.t('seed8.chooseColor', { color })} title={i18n.t('seed8.chooseColor', { color })} aria-pressed={page.button === color} onClick={() => runtime.actPage({ type: 'color', slot: 'button', color })}/>)}</div>;
+  const top = has('bars') && <div className="seed-editor-bar"><b>{editorName(state, i18n)}</b><span>{i18n.t('seed8.document')}</span><span>{i18n.t('foundation.pixels', { pixels: i18n.pixels(state.resources.pixels) })}</span><small>{i18n.t('seed.rate', { pixels: i18n.rate(rate) })}</small><button onClick={() => setSettings(!settings)}>{i18n.t('seed.settings')}</button></div>;
+  const parts = has('workspace') && <div className="seed-built-parts"><h2>{i18n.t('seed8.parts')}</h2><ul>{seed.built.map(id => <li key={id}>{i18n.t(`item.${id}`)}</li>)}</ul></div>;
+  const tools = has('workspace') && <div className="seed-construction-tool" role="img" aria-label={i18n.t('seed8.pencil')}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L6 14L16 4L20 8L10 18Z M14 6L18 10"/></svg></div>;
+  const bottom = has('bars') && <span>{i18n.t('seed8.progress', { done: seed.built.length, total: BALANCE.w1.items.length })}</span>;
+  const style = { ...(has('color') ? { '--editor-canvas': customization.background, '--seed-background': colors.background, '--seed-text': colors.text, '--seed-button': colors.button } : {}), ...(has('font') ? { '--seed-font': pageFonts[page.bodyFont], '--seed-heading-font': pageFonts[page.headingFont] } : {}) } as CSSProperties;
+  return <EditorShell stage={stage} construction className={`seed-construction ${seed.built.map(id => `has-${id}`).join(' ')} ${moving ? 'has-motion' : ''}`} style={style} top={top} palette={palette} parts={parts} tools={tools} bottom={bottom} layers={stage > 0 && has('workspace') && <div className="seed-construction-layers">{i18n.t('seed8.workbench')}</div>} positions={stage === 2 && customization.panelPositions.palette === 'left' && customization.panelPositions.tools === 'right' && customization.panelPositions.parts === 'right' ? undefined : stage >= 1 ? { palette: customization.panelPositions.palette, tools: customization.panelPositions.tools, parts: customization.panelPositions.parts, bottom: customization.panelPositions.info } : undefined} widths={{ parts: customization.panelWidth }} bandPosition={customization.bandPosition}>
+    {settings ? <PageSettings state={state} runtime={runtime} i18n={i18n} onClose={() => setSettings(false)}/> : <><div className="seed-construction-content">{has('layout') ? <PageLayoutSurface canvas measureRef={surface} layout={editingLayout ?? page.layout} i18n={i18n} editing={arranging} onChange={layout => { setEditingLayout(null); runtime.actPage({ type: 'layout', layout }); }} parts={{ heading, notice: notices, generator, upgrades }}/> : <>{heading}{notices}{generator}{upgrades}</>}</div><div className="seed-construction-footer"><p className="save-status">{canSave(state) && state.lastSavedAt !== null ? i18n.t('save.saved', { time: i18n.time(state.lastSavedAt) }) : i18n.t('save.unavailableUntilBuilt')}</p>{has('color') && <button className="seed-link" onClick={() => setSettings(true)}>{i18n.t('seed.settings')}</button>}{has('layout') && <div className="seed-layout-actions"><button onClick={arrange}>{i18n.t(arranging ? 'page.finish' : 'page.arrange')}</button><button onClick={() => restore('recommended')}>{i18n.t('builder.recommended')}</button><button onClick={() => restore('reset')}>{i18n.t('page.reset')}</button></div>}{state.persistent.seedSkills.includes('history') && <><button className="seed-link" onClick={() => setHistory(!history)}>{i18n.t('history.title')}</button>{history && <ul>{seed.history.map((entry, index) => <li key={index}>{i18n.t('history.entry', { date: i18n.date(entry.at), time: i18n.time(entry.at), name: i18n.t(entry.item === 'cursor' ? 'seed.cursor' : `item.${entry.item}`) })}</li>)}</ul>}</>}<LanguageSelect i18n={i18n} onChange={runtime.changeLanguage}/></div></>}
+  </EditorShell>;
 }

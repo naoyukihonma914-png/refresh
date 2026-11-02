@@ -1,7 +1,7 @@
+
 .release-progress-ring {inline-size:20px;block-size:20px;flex:none;transform:rotate(-90deg);fill:none;stroke:currentColor;stroke-width:2;}
 .release-progress-ring .ring-track {opacity:.25;}
 .release-progress-ring .ring-value {stroke-dasharray:var(--release-progress) 1;}
-.k-menu-end .k-release-progress {display:flex;align-items:center;gap:6px;}
 .desktop .taskbar-progress {display:flex;align-items:center;gap:4px;}
 .desktop-era-0 .release-progress-ring,.desktop-era-1 .release-progress-ring {inline-size:16px;block-size:16px;}
 .release-confirmation {position:absolute;z-index:95;inset-block-start:10%;inset-inline-start:50%;transform:translateX(-50%);inline-size:640px;max-inline-size:calc(100% - 32px);max-block-size:80%;overflow:auto;background:#f4f1ec;color:#24211d;border:1px solid #8d8578;box-shadow:0 6px 14px #0004;font:14px/1.65 'Refresh UI',sans-serif;}
@@ -107,20 +107,16 @@
 .advice-message p {white-space:pre-line;line-height:1.6;}
 .advice-history>ul {padding-inline-start:18px;}
 .advice-history button {font:inherit;text-align:start;}
-
 .shipping-page .next-version {flex-direction:column;align-items:flex-end;gap:4px;}
 .shipping-page .next-version-theme {margin:0 0 10px;max-inline-size:100%;text-align:end;}
 .shipping-page .next-version-voice {margin:0;max-inline-size:100%;text-align:end;}
-
 .release-confirm-layer {position:absolute;inset:0;z-index:2147483647;}
 .release-confirm-backdrop {position:absolute;inset:0;background:#0002;}
 .desktop.desktop-era-3 .achievement-toast {bottom:auto!important;}
-
 .desktop .release-progress-count {font-size:11px;white-space:nowrap;}
 .desktop.desktop-era-2 .taskbar-right>.taskbar-progress {order:0;display:flex;max-width:none;gap:4px;padding:0 6px;color:#fff;}
 .desktop.desktop-era-2 .taskbar-right>.taskbar-progress .progress-caption {display:none;}
 .desktop.desktop-era-3 .taskbar-progress>.release-progress-count {display:none;}
 .store-description,.store-reviews p,.store-reviews h3,.shipping-guide p,.release-confirm-body p,.advice-message p {overflow-wrap:anywhere;}
-
 .desktop .taskbar-progress:has(>.release-progress-ring) .progress-caption {min-inline-size:0;overflow:hidden;text-overflow:ellipsis;}
 .desktop.desktop-era-3 .taskbar-progress>.release-progress-count {display:inline;}

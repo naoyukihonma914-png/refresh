@@ -1,203 +1,160 @@
 import { describe, expect, it } from 'vitest';
 import { BALANCE } from '../config/balance';
-import { creditPixels, manualClickValue, passivePixelsPerSecond } from './economy';
-import { canBuildSeed, buildSeed, visibleSeedItems, cursorPrice, pressSeed, freshMomentum, momentumAt, readGuide, updateSeedGuide, applySeedSkills, createSeedVersion } from './seed';
+import { creditPixels, manualClickValue, cursorPixelsPerSecond, passivePixelsPerSecond, seedPartsPixelsPerSecond } from './economy';
+import { advanceSeedInstaller, applySeedSkills, buildSeed, canBuildSeed, createSeedVersion, cursorPrice, freshMomentum, momentumAt, pressSeed, readGuide, updateSeedGuide, visibleSeedItems } from './seed';
 import { createInitialState, isGameState } from './state';
-import { advanceActiveTime, advanceOfflineTime } from './time';
 import { decodeSave, encodeSave } from './save';
-import { createFixture } from './fixtures';
+import { advanceActiveTime } from './time';
+import { createEditorCustomization } from './workshopState';
 
-const funded = () => creditPixels(createInitialState(1_000), 100_000);
-function saved() { let state = funded(); state = buildSeed(state, 'border', 2_000); return buildSeed(state, 'save', 3_000); }
-function evolved() { let state = saved(); state = buildSeed(state, 'cursor', 4_000); for (const id of ['color', 'font', 'layout', 'motion'] as const) state = buildSeed(state, id, 5_000); return state; }
+const now = 1_800_000_000_000;
+const funded = () => creditPixels(createInitialState(now), 100_000);
+function through(last: 'save' | 'color' | 'font' | 'layout' | 'motion' | 'bars' | 'workspace' | 'export') {
+  let state = funded();
+  for (const item of BALANCE.w1.items) { state = buildSeed(state, item.id, now); if (item.id === last) break; }
+  return state;
+}
 
-describe('素の画面の生成・購入・ガイド', () => {
-  it('次の1つ・保存後の最初のカーソル・配置後の2つ先を順に見せ、飛ばして購入できない', () => {
+describe('世界1は9つの部品を組み立てて工房を起動する', () => {
+  it('カーソルを強制せず本線を進め、配置後の2つ先を表示しても順番を飛ばさない', () => {
     let state = funded();
     expect(visibleSeedItems(state)).toEqual(['border']);
-    expect(buildSeed(state, 'save', 0)).toBe(state);
-    state = saved();
-    expect(visibleSeedItems(state)).toEqual([]);
-    expect(canBuildSeed(state, 'color')).toBe(false);
-    state = buildSeed(state, 'cursor', 4_000);
+    expect(buildSeed(state, 'save', now)).toBe(state);
+    state = through('save');
     expect(visibleSeedItems(state)).toEqual(['color']);
-    for (const id of ['color', 'font', 'layout'] as const) state = buildSeed(state, id, 5_000);
-    expect(visibleSeedItems(state)).toEqual(['motion', 'kumiki']);
-    expect(canBuildSeed(state, 'kumiki')).toBe(false);
-    state = buildSeed(state, 'motion', 6_000);
-    const completed = buildSeed(state, 'kumiki', 7_000);
-    expect(completed.run.world).toBe('kumiki');
-    expect(visibleSeedItems(completed)).toEqual([]);
-    expect(buildSeed(completed, 'kumiki', 8_000)).toBe(completed);
-    expect(completed.resources.tokens).toBe(0);
+    expect(canBuildSeed(state, 'cursor')).toBe(true);
+    expect(buildSeed(state, 'color', now).run.seed.autoCursors).toBe(0);
+    state = through('layout');
+    expect(visibleSeedItems(state)).toEqual(['motion', 'bars']);
+    expect(buildSeed(state, 'bars', now)).toBe(state);
+    state = buildSeed(state, 'motion', now);
+    expect(visibleSeedItems(state)).toEqual(['bars', 'workspace']);
   });
 
-  it('不足・二重購入・不正な購入で財布も累計も減らさない', () => {
-    const empty = createInitialState(0);
-    expect(buildSeed(empty, 'border', 0)).toBe(empty);
-    const state = saved();
-    expect(buildSeed(state, 'border', 0)).toBe(state);
-    expect(state.run.totalPixelsGenerated).toBe(100_000);
+  it('9つの購入が実際の工房へつながり、完成済みの制作物やトークンを勝手に渡さない', () => {
+    const state = through('export');
+    expect(state.run.seed.built).toEqual(['border', 'save', 'color', 'font', 'layout', 'motion', 'bars', 'workspace', 'export']);
+    expect(state.run.world).toBe('kumiki');
+    expect(state.run.workshop.entered).toBe(true);
+    expect(state.run.workshop.enterMs).toBe(BALANCE.workshop.enterMs);
+    expect(state.run.workshop.purchasedSets).toEqual([]);
+    expect(state.run.workshop.parts).toEqual({});
+    expect(state.persistent.setDocuments).toEqual([]);
+    expect(state.resources.tokens).toBe(0);
+    expect(buildSeed(state, 'export', now)).toBe(state);
+    expect(advanceActiveTime(state, BALANCE.workshop.enterMs).state.run.workshop.enterMs).toBe(0);
+    expect(isGameState(state)).toBe(true);
+  });
+
+  it('不足・二重購入・不正IDで資源を失わず、購入支出を生成累計に混ぜない', () => {
+    const empty = createInitialState(now);
+    expect(buildSeed(empty, 'border', now)).toBe(empty);
+    expect(buildSeed(empty, 'missing' as 'border', now)).toBe(empty);
+    const state = through('save');
     expect(state.resources.pixels).toBe(99_950);
+    expect(state.run.totalPixelsGenerated).toBe(100_000);
+    expect(buildSeed(state, 'border', now)).toBe(state);
   });
 
-  it('手動生成と自動生成に枠線・書体・色・性能の倍率を適用し、カーソルを値上げする', () => {
-    const state = evolved();
+  it('完成部品はカーソル0台でも発電し、生成の経過時間だけ財布へ加わる', () => {
+    const state = buildSeed(funded(), 'border', now);
+    expect(state.run.seed.autoCursors).toBe(0);
+    expect(seedPartsPixelsPerSecond(state)).toBe(BALANCE.w1.items[0].perSecond);
+    expect(passivePixelsPerSecond(state)).toBeGreaterThan(0);
+    const next = advanceActiveTime(state, 1_000).state;
+    expect(next.resources.pixels - state.resources.pixels).toBeCloseTo(BALANCE.w1.items[0].perSecond);
+    expect(next.run.totalPixelsGenerated - state.run.totalPixelsGenerated).toBeCloseTo(BALANCE.w1.items[0].perSecond);
+  });
+
+  it('クリックとカーソルの既存倍率・カーソル価格を保ち、旧ホームのボタン倍率は使わない', () => {
+    let state = through('motion');
     expect(manualClickValue(state)).toBe(4);
-    expect(passivePixelsPerSecond(state)).toBe(3);
+    expect(cursorPixelsPerSecond(state)).toBe(3);
+    expect(cursorPrice(state)).toBe(15);
+    state = buildSeed(state, 'cursor', now);
     expect(cursorPrice(state)).toBe(18);
     state.persistent.specs.color = 1; state.persistent.specs.refresh = 1;
     expect(manualClickValue(state)).toBe(6);
-    expect(passivePixelsPerSecond(state)).toBe(9);
-    expect(buildSeed(state, 'cursor', 0).run.seed.autoCursors).toBe(2);
-  });
-
-  it('カーソルの値段は切り上げた整数にし、その額で購入判定して支払う', () => {
-    const state = evolved();
+    expect(cursorPixelsPerSecond(state)).toBe(9);
     state.resources.pixels = 17.99;
     expect(canBuildSeed(state, 'cursor')).toBe(false);
-    expect(buildSeed(state, 'cursor', 0)).toBe(state);
     state.resources.pixels = 18;
-    const next = buildSeed(state, 'cursor', 0);
-    expect(next.resources.pixels).toBe(0);
-    expect(next.run.seed.autoCursors).toBe(2);
-    expect(cursorPrice(next)).toBe(20);
-    expect(next.run.totalPixelsGenerated).toBe(state.run.totalPixelsGenerated);
+    expect(buildSeed(state, 'cursor', now).resources.pixels).toBe(0);
   });
 
-  it('動きの前は勢いも増量もなく、動きの後だけ最大1.6倍・2秒で元に戻る', () => {
-    let state = saved(); let momentum = freshMomentum();
-    for (let now = 0; now < 10; now++) {
-      const result = pressSeed(state, momentum, now);
-      state = result.state; momentum = result.momentum;
-      expect(result.pixels).toBe(2);
+  it('動きの作成前には勢いを付けず、作成後の連打だけ1.6倍になり2秒で戻る', () => {
+    let state = through('save'), momentum = freshMomentum();
+    for (let time = 0; time < 10; time++) {
+      const pressed = pressSeed(state, momentum, time); state = pressed.state; momentum = pressed.momentum;
+      expect(pressed.pixels).toBe(2);
     }
-    state = evolved(); momentum = freshMomentum();
-    for (let now = 0; now < 100; now++) {
-      const result = pressSeed(state, momentum, now);
-      state = result.state; momentum = result.momentum;
+    state = through('motion'); momentum = freshMomentum();
+    for (let time = 0; time < 100; time++) {
+      const pressed = pressSeed(state, momentum, time); state = pressed.state; momentum = pressed.momentum;
     }
     expect(momentum.value).toBe(BALANCE.w1.momentum.max);
-    expect(pressSeed(state, momentum, 1_599).pixels).toBeCloseTo(4.6);
+    expect(pressSeed(state, momentum, 100).pixels).toBeCloseTo(4 * BALANCE.w1.momentum.max);
     expect(momentumAt(momentum, 2_100)).toBe(1);
-    expect(passivePixelsPerSecond(state)).toBe(3);
     expect(pressSeed(state, momentum, 2_100).pixels).toBe(4);
     expect(JSON.parse(encodeSave(state))).not.toHaveProperty('momentum');
   });
 
-  it('色で一度だけ挨拶し、閉じても進み、2つ先に組木が見えた時点で案内する', () => {
-    let state = saved();
-    expect(state.run.seed.guide.seen).toEqual([]);
-    state = buildSeed(state, 'cursor', 4_000);
-    state = buildSeed(state, 'color', 5_000);
+  it('色で一度だけ案内し、エクスポートが見える段階で道具の完成を案内する', () => {
+    let state = through('color');
     expect(state.run.seed.guide.current).toBe('intro');
     state = readGuide(state, 'close');
     expect(updateSeedGuide(state).run.seed.guide.collapsed).toBe(true);
-    state = readGuide(state, 'intro');
     state = readGuide(state, 'listen');
     expect(state.run.seed.guide.current).toBe('instructions');
-    state = buildSeed(state, 'font', 6_000); state = buildSeed(state, 'layout', 7_000);
+    for (const id of ['font', 'layout', 'motion', 'bars'] as const) state = buildSeed(state, id, now);
     expect(state.run.seed.guide.current).toBe('tool');
     expect(decodeSave(encodeSave(state)).run.seed.guide.seen).toEqual(['intro', 'instructions', 'tool']);
-    expect(updateSeedGuide(state).run.seed.guide.seen).toHaveLength(3);
   });
 
-  it('5分手が止まったときだけ助言し、留守の時間では出さない', () => {
-    const quiet = saved();
-    expect(advanceActiveTime(quiet, 300_000).state.run.seed.guide.seen).toEqual([]);
-    const state = buildSeed(buildSeed(quiet, 'cursor', 4_000), 'color', 5_000);
-    expect(advanceActiveTime(state, 299_900).state.run.seed.guide.seen).toEqual(['intro']);
-    const after = advanceActiveTime(state, 300_000).state;
-    expect(after.run.seed.guide.seen).toEqual(['intro', 'hint']);
-    expect(updateSeedGuide(after).run.seed.guide.seen).toHaveLength(2);
-    const offline = advanceOfflineTime(state, 5_000_000).state;
-    expect(advanceActiveTime(offline, 100).state.run.seed.guide.seen).toEqual(['intro']);
-  });
-});
-
-describe('素朴なページ設定と次のバージョンへの入口', () => {
-  it('トークン不足・2周目帯の先取りを拒み、取得済みは再課金しない', () => {
-    const first = evolved(); first.resources.tokens = 3;
-    expect(applySeedSkills(first, ['keyboard', 'history', 'pattern'], 'dots', false)).toBe(first);
-    expect(applySeedSkills(first, ['inherit'], 'none', false)).toBe(first);
-    const next = applySeedSkills(first, ['keyboard', 'history'], 'none', false);
-    expect(next.resources.tokens).toBe(1);
-    expect(next.persistent.seedSkills).toEqual(['keyboard', 'history']);
-    expect(applySeedSkills(next, ['keyboard', 'history'], 'none', false).resources.tokens).toBe(1);
+  it('引き継ぐのは選んだ設定だけで、9部品・カーソル・セットを無料で戻さない', () => {
+    const previous = through('export');
+    previous.persistent.seedSkills = ['inherit'];
+    previous.run.seed.page.button = '#d0523a';
+    previous.persistent.editorCustomization.accent = '#d0523a';
+    previous.persistent.editorCustomization.bandPosition = 'bottom';
+    previous.resources.dollars = 600; previous.resources.tokens = 20;
+    const next = createSeedVersion(previous, 'v1', now + 1_000);
+    expect(next.run.seed.built).toEqual([]); expect(next.run.seed.autoCursors).toBe(0); expect(next.run.seed.installer).toBeNull();
+    expect(next.run.workshop.parts).toEqual({}); expect(next.run.workshop.purchasedSets).toEqual([]);
+    expect(next.run.seed.page).toEqual(previous.run.seed.page);
+    expect(next.persistent.editorCustomization).toEqual(previous.persistent.editorCustomization);
+    expect(next.persistent.editorCustomization).not.toBe(previous.persistent.editorCustomization);
+    expect(next.resources).toEqual({ pixels: 0, dollars: 600, tokens: 20 });
+    expect(advanceSeedInstaller(next, 60_000).run.seed.built).toEqual([]);
+    expect(decodeSave(encodeSave(next))).toEqual(next);
+    previous.persistent.seedSkills = [];
+    const standard = createSeedVersion(previous, 'v1', now + 1_000);
+    expect(standard.persistent.editorCustomization).toEqual(createEditorCustomization());
+    expect(standard.run.seed.page.button).toBeNull();
   });
 
-  it('遊び系だけをオン・オフにでき、取得した機能は外しても残る', () => {
-    const state = evolved(); state.run.version = 'v1'; state.resources.tokens = 40;
-    const next = applySeedSkills(state, ['pattern', 'marquee'], 'grid', true);
-    expect(next.resources.tokens).toBe(28);
-    expect(next.persistent.seedAppearance).toEqual({ pattern: 'grid', marquee: true });
-    const off = applySeedSkills(next, [], 'none', false);
-    expect(off.persistent.seedSkills).toEqual(['pattern', 'marquee']);
-    expect(off.persistent.seedAppearance).toEqual({ pattern: 'none', marquee: false });
-    expect(off.resources.tokens).toBe(28);
+  it('スキルを不正な帯・不足資金で取得できず、正しく取得した設定だけを保つ', () => {
+    const state = through('save');
+    expect(applySeedSkills(state, ['inherit'], 'none', false)).toBe(state);
+    state.run.version = 'v1'; state.resources.tokens = 12;
+    const next = applySeedSkills(state, ['inherit'], 'none', false);
+    expect(next.resources.tokens).toBe(0); expect(next.persistent.seedSkills).toEqual(['inherit']);
+    expect(next.run.seed.built).toEqual(state.run.seed.built);
   });
 
-  it('前回の構成だけを10秒で順に組み立て、保存・再開できる。カーソルと組木は引き継がない', () => {
-    const previous = evolved(); previous.persistent.seedSkills = ['inherit'];
-    let next = createSeedVersion(previous, 'v1', 10_000);
-    expect(next.run.seed.built).toEqual([]);
-    expect(canBuildSeed(next, 'border')).toBe(false);
-    expect(pressSeed(next, freshMomentum(), 0).pixels).toBe(0);
-    next = advanceActiveTime(next, 5_000).state;
-    expect(next.run.seed.built).toEqual(['border', 'save', 'color']);
-    next = decodeSave(encodeSave(next));
-    next = advanceActiveTime(next, 5_000).state;
-    expect(next.run.seed.built).toEqual(['border', 'save', 'color', 'font', 'layout', 'motion']);
-    expect(next.run.seed.installer).toBeNull();
-    expect(next.run.seed.autoCursors).toBe(0);
+  it('カラーなし案件の完了後は、工房で料金を払ってカラーだけを追加できる', () => {
+    let state = funded(); state.run.version = 'v2'; state.run.play.contract = { id: 'no-color', status: 'active' };
+    for (const item of BALANCE.w1.items) if (item.id !== 'color') state = buildSeed(state, item.id, now);
+    expect(state.run.world).toBe('kumiki');
+    state.run.play.contract = { id: 'no-color', status: 'complete' };
+    const before = state.resources.pixels;
+    const next = buildSeed(state, 'color', now);
+    expect(next.run.world).toBe('kumiki');
+    expect(next.run.seed.built).toContain('color');
+    expect(next.resources.pixels).toBe(before - BALANCE.w1.items.find(item => item.id === 'color')!.cost);
+    expect(cursorPixelsPerSecond(next) / cursorPixelsPerSecond(state)).toBe(BALANCE.w1.color_cursor_mult);
+    expect(buildSeed(next, 'color', now)).toBe(next);
+    const blocked = createInitialState(now); blocked.run.world = 'kumiki';
+    expect(canBuildSeed(blocked, 'border')).toBe(false);
   });
-
-  it('段階1の実際の第1版を変換し、元の資源・スペック・進捗を保つ。不正な旧データは拒む', () => {
-    const state = evolved();
-    const old = JSON.parse(encodeSave(state));
-    old.schemaVersion = 1;
-    old.run.seed = { built: state.run.seed.built, autoCursors: state.run.seed.autoCursors };
-    delete old.persistent.seedSkills; delete old.persistent.seedAppearance;
-    const migrated = decodeSave(JSON.stringify(old));
-    expect(migrated.schemaVersion).toBe(13);
-    expect(migrated.resources).toEqual(state.resources);
-    expect(migrated.persistent.specs).toEqual(state.persistent.specs);
-    expect(migrated.run.seed.built).toEqual(state.run.seed.built);
-    expect(migrated.run.seed.history).toEqual([]);
-    delete old.run.seed;
-    expect(() => decodeSave(JSON.stringify(old))).toThrow();
-  });
-
-  it('画面確認の固定状態をすべて保存できる', () => {
-    for (const name of ['seed-start', 'seed-border', 'seed-saved', 'seed-color', 'seed-font', 'seed-layout', 'seed-motion', 'seed-complete', 'seed-return', 'seed-inheriting']) {
-      const state = createFixture(name, 1_800_000_000_000)!;
-      expect(isGameState(state), name).toBe(true);
-    }
-  });
-});
-
-it('付録Eと同じ2.5クリック/秒・買い物判断4秒・ガイド読了15秒で、組木を8〜14分で作れる', () => {
-  let state = createInitialState(0);
-  let momentum = freshMomentum();
-  let time = 0; let nextClick = 0;
-  const pause = (ms: number) => {
-    for (let left = ms; left > 0; left -= 100) { time += 100; state = advanceActiveTime(state, 100).state; }
-  };
-  for (const item of BALANCE.w1.items) {
-    while (!canBuildSeed(state, item.id)) {
-      if (time > 14 * 60_000) throw new Error('進行が14分を超えた');
-      while (canBuildSeed(state, 'cursor') && cursorPrice(state) < item.cost * 0.35) state = buildSeed(state, 'cursor', time);
-      pause(100);
-      if (time >= nextClick) {
-        const result = pressSeed(state, momentum, time); state = result.state; momentum = result.momentum; nextClick = time + 400;
-      }
-    }
-    state = buildSeed(state, item.id, time);
-    pause(4_000);
-    if (item.id === 'color') pause(30_000);
-    if (item.id === 'motion') pause(15_000);
-  }
-  expect(time).toBeGreaterThanOrEqual(8 * 60_000);
-  expect(time).toBeLessThanOrEqual(14 * 60_000);
-  console.info(`段階2の自動プレイ: ${(time / 60_000).toFixed(2)}分 / ${state.run.seed.autoCursors}台`);
 });

@@ -1,0 +1,9 @@
+.desktop-window .window-title.has-produced-chrome {height:auto!important;min-height:calc(var(--produced-title-font) + 8px);background:var(--produced-title-color)!important;color:var(--produced-title-text)!important;}
+.desktop-window .window-title.has-produced-chrome>span {text-align:var(--produced-title-align);font-size:var(--produced-title-font)!important;}
+.desktop-window .window-title .produced-controls-start {order:-1;flex:none;margin-inline-end:6px;}
+.desktop-window .window-title .produced-controls-end {flex:none;}
+.desktop-window .window-title .produced-square .line-icon {border:1px solid currentColor;padding:2px;}
+.desktop-window .window-title.has-produced-chrome .window-controls button {border-radius:var(--produced-title-radius);}
+
+/* Keep the pre-8b installed-app composition editor available in its native window. */
+.app-builder {--k-panel:#d6cfc0;--k-surface:#5d6f7d;--k-inset:#f4f1e8;--k-line:#8f8574;--k-light:#f4efe4;--k-text:#1f1c18;--k-sub:#5e574c;height:100%;min-height:0;}

@@ -1,40 +1,38 @@
-import {ClockFace,ClockTimerContents} from '../components/ClockContents';
-import {previousWorldMultiplier} from '../systems/longPlay';
-import {Records,SoundSettings,BulkControl,CosmeticSelection,ProductionFactors} from '../components/LongPlaySettings';
-import { AppPart } from './AppComposition';
-import { DesktopAppearance } from '../components/AppearanceSelect';
-import { appName,unlockedDesktopStage } from '../systems/appearance';
-import { PhotoSurface } from './PhotoSurface';
-import { useState, useRef, useLayoutEffect, type CSSProperties } from 'react';
-import { BALANCE, type SpecKey } from '../config/balance';
-import { productLabel } from '../content/products';
-import { iconTemplate, paletteFor } from '../content/kumikiArt';
+import { useLayoutEffect,useRef,useState,type CSSProperties } from 'react';
 import coast from '../assets/wallpaper/coast.webp';
-import { JOB_IDS, type AppId, type JobId, type PhotoEdit } from '../systems/desktopState';
-import { activeScreenshots } from '../systems/desktop';
-import { featureCount, hasDesktopSkill, hasUpgrade, jobCursorQuote, jobCursorRate, jobRate, jobUpdateCost } from '../systems/desktopJobs';
-import { homePixelsPerSecond, passivePixelsPerSecond } from '../systems/economy';
-import { LanguageSelect } from '../components/LanguageSelect';
-import { ProductSettings } from '../components/ProductSettings';
+import { DesktopAppearance } from '../components/AppearanceSelect';
+import { ClockFace,ClockTimerContents } from '../components/ClockContents';
 import { Estimate } from '../components/Estimate';
+import { LanguageSelect } from '../components/LanguageSelect';
+import { BulkControl,CosmeticSelection,ProductionFactors,Records,SoundSettings } from '../components/LongPlaySettings';
+import { ProductSettings } from '../components/ProductSettings';
+import { BALANCE,type SpecKey } from '../config/balance';
+import { productLabel } from '../content/products';
+import { appName,unlockedDesktopStage } from '../systems/appearance';
+import { activeScreenshots } from '../systems/desktop';
+import { featureCount,hasDesktopSkill,hasUpgrade,jobCursorQuote,jobCursorRate,jobRate,jobsRate,jobUpdateCost } from '../systems/desktopJobs';
+import { JOB_IDS,type AppId,type JobId,type PhotoEdit } from '../systems/desktopState';
+import { passivePixelsPerSecond } from '../systems/economy';
+import { previousWorldMultiplier } from '../systems/longPlay';
+import { AppPart } from './AppComposition';
 import { ScreenshotPreview } from './Desktop';
-import { LineIcon, PixelArt } from './desktop-icons';
+import { LineIcon } from './desktop-icons';
 import type { DesktopProps as Props } from './desktopTypes';
+import { PhotoSurface } from './PhotoSurface';
 // The second original photo is bundled, like the coast, and is never fetched at runtime.
 import night from '../assets/wallpaper/night.webp';
 export function Photograph({edit,wallpaper=false,...props}:Props&{edit:PhotoEdit;wallpaper?:boolean}) {
  const {snapshot,i18n}=props,s=snapshot.state;
  const shot=edit.source.startsWith('shot:')?(props.catalog??s.persistent.screenshots).find(x=>x.id===Number(edit.source.slice(5))):null;
- const drawing=(wallpaper?s.persistent.artwork.wallpaper:null)??s.persistent.artwork.sketchbook;
  const style={filter:`brightness(${edit.brightness}) sepia(${Math.abs(edit.tone)/100}) hue-rotate(${edit.tone*2}deg)`,transform:`scale(${1/(1-edit.crop/50)})`} as CSSProperties;
  return <div className={`photograph ${wallpaper?'wallpaper-photo':''}`} ><PhotoSurface specs={s.persistent.specs}><div className="photo-transform" style={style}>
- {edit.source==='sketch'?<PixelArt frames={drawing.frames} size={drawing.size} palette={props.capture?.palette??paletteFor(s.persistent.specs.color)}/>:shot?<ScreenshotPreview {...props} shot={shot} catalog={props.catalog??s.persistent.screenshots}/>:<img src={edit.source==='night'?night:coast} alt={wallpaper?'':i18n.t(edit.source==='night'?'photo.night':'photo.coast')} draggable={false}/>}
+ {shot?<ScreenshotPreview {...props} shot={shot} catalog={props.catalog??s.persistent.screenshots}/>:<img src={edit.source==='night'?night:coast} alt={wallpaper?'':i18n.t(edit.source==='night'?'photo.night':'photo.coast')} draggable={false}/>}
  </div></PhotoSurface></div>;
 }
 function JobActivity({app,...props}:Props&{app:JobId}) {
- const s=props.snapshot.state,phase=props.preview||props.runtime.platform.animation.reducedMotion()?0.5:(s.elapsedMs%BALANCE.w3.jobAnimationMs)/BALANCE.w3.jobAnimationMs,palette=props.capture?.palette??paletteFor(s.persistent.specs.color);
+ const s=props.snapshot.state,phase=props.preview||props.runtime.platform.animation.reducedMotion()?0.5:(s.elapsedMs%BALANCE.w3.jobAnimationMs)/BALANCE.w3.jobAnimationMs;
  return <svg className="job-activity" data-job-preview={app} viewBox="0 0 64 24" aria-hidden="true">
- {app==='tessera'?iconTemplate('folder',16).map((color,i)=>color>=0&&i<Math.floor(phase*256)?<rect key={i} x={20+i%16} y={4+Math.floor(i/16)} width="1" height="1" fill={palette[color]}/>:null):app==='files'?Array.from({length:3},(_,i)=><g key={i} transform={`translate(0,${((i+Math.floor(phase*3))%3)*7+2})`}><rect x="2" y="0" width="58" height="6" fill={i===0?'#cce4f7':'#e7e7e7'}/><path d={`M7 3h${16+i*8}`} stroke="#72818b" strokeWidth="1"/></g>):app==='photo'?Array.from({length:3},(_,i)=><g key={i}><path d={`M4 ${5+i*7}h54`} stroke="#aaa"/><circle cx={12+(Math.sin(phase*Math.PI*2+i)+1)*18} cy={5+i*7} r="2.5" fill="#537e9a"/></g>):Array.from({length:4},(_,i)=><path key={i} d={`M4 ${3+i*6}h${12+((i+Math.floor(phase*4))%4)*12}`} stroke="#608d78" strokeWidth="2"/>)}
+ {app==='tessera'?<g><rect x="4" y="4" width="54" height="17" fill="#e3e5dc" stroke="#7d8a83"/><rect x="8" y="8" width={Math.max(4,46*phase)} height="3" fill="#7a947a"/><path d="M8 15h30m-30 3h42" stroke="#9ca79b"/></g>:app==='files'?Array.from({length:3},(_,i)=><g key={i} transform={`translate(0,${((i+Math.floor(phase*3))%3)*7+2})`}><rect x="2" y="0" width="58" height="6" fill={i===0?'#cce4f7':'#e7e7e7'}/><path d={`M7 3h${16+i*8}`} stroke="#72818b" strokeWidth="1"/></g>):app==='photo'?Array.from({length:3},(_,i)=><g key={i}><path d={`M4 ${5+i*7}h54`} stroke="#aaa"/><circle cx={12+(Math.sin(phase*Math.PI*2+i)+1)*18} cy={5+i*7} r="2.5" fill="#537e9a"/></g>):Array.from({length:4},(_,i)=><path key={i} d={`M4 ${3+i*6}h${12+((i+Math.floor(phase*4))%4)*12}`} stroke="#608d78" strokeWidth="2"/>)}
  </svg>;
 }
 export function JobControls({app,...props}:Props&{app:JobId}){
@@ -64,7 +62,7 @@ export function PhotoApp(props:Props){
  const {snapshot,runtime,i18n}=props,s=snapshot.state,d=s.run.desktop,edit=d.photo;
  const change=(patch:Partial<PhotoEdit>)=>runtime.actDesktop({type:'photo',edit:patch});
  return <div className="photo-app"><div className="app-toolbar"><AppPart id="source"><label>{i18n.t('photo.source')}<select aria-label={i18n.t('photo.source')} value={edit.source} onChange={e=>change({source:e.target.value})}>
- {(['coast','night','sketch'] as const).map(id=><option value={id} key={id}>{i18n.t(`photo.${id}`)}</option>)}{activeScreenshots(s).map(shot=><option key={shot.id} value={`shot:${shot.id}`}>{i18n.t('files.shot',{count:shot.id})}</option>)}</select></label></AppPart>
+ {(['coast','night'] as const).map(id=><option value={id} key={id}>{i18n.t(`photo.${id}`)}</option>)}{activeScreenshots(s).map(shot=><option key={shot.id} value={`shot:${shot.id}`}>{i18n.t('files.shot',{count:shot.id})}</option>)}</select></label></AppPart>
  {hasUpgrade(s,'compare')&&<AppPart id="compare"><button className="win-button" aria-pressed={d.compare} onClick={()=>runtime.actDesktop({type:'compare'})}>{i18n.t('photo.compare')}</button></AppPart>}
  <AppPart id="wallpaper"><button className="win-button accent" onClick={()=>runtime.actDesktop({type:'wallpaper'})}>{i18n.t('photo.wallpaper')}</button></AppPart></div>
  <AppPart id="image"><div className="photo-workbench">{d.compare&&hasUpgrade(s,'compare')&&<figure><figcaption>{i18n.t('photo.before')}</figcaption><Photograph {...props} edit={{...edit,brightness:1,tone:0,crop:0}}/></figure>}<figure><figcaption>{i18n.t('photo.after')}</figcaption><Photograph {...props} edit={edit}/></figure></div></AppPart>
@@ -74,7 +72,7 @@ export function PhotoApp(props:Props){
 }
 export function BinApp({snapshot,runtime,i18n}:Props){
  const s=snapshot.state,d=s.run.desktop;
- const name=(id:string)=>id.startsWith('shot:')?i18n.t('bin.itemShot',{count:Number(id.slice(5))}):i18n.t('bin.itemIcon',{name:i18n.t(`k.icon.${id.split(':').at(-1) as 'document'}`)});
+ const name=(id:string)=>id.startsWith('shot:')?i18n.t('bin.itemShot',{count:Number(id.slice(5))}):i18n.t('bin.archivedItem');
  return <div className="bin-app"><div className="app-toolbar"><AppPart id="empty"><button className="win-button" disabled={!d.trash.length} onClick={()=>runtime.actDesktop({type:'empty-trash'})}>{i18n.t('bin.empty')}</button></AppPart></div>
  <AppPart id="trash"><table className="native-table"><thead><tr><th>{i18n.t('files.name')}</th><th>{i18n.t('bin.deleted')}</th><th>{i18n.t('files.size')}</th></tr></thead><tbody>{d.trash.map(t=><tr key={t.id}><td>{name(t.id)}</td><td>{i18n.dateTime(t.at)}</td><td>{i18n.t('bin.reward',{pixels:i18n.pixels(t.reward)})}{hasUpgrade(s,'undo')&&<button className="win-button" title={i18n.t('bin.repay',{pixels:i18n.pixels(t.reward)})} disabled={s.resources.pixels<t.reward} onClick={()=>runtime.actDesktop({type:'undo-trash',id:t.id})}>{i18n.t('bin.restore')}</button>}</td></tr>)}</tbody></table>{!d.trash.length&&<p className="app-empty">{i18n.t('bin.none')}</p>}</AppPart>{hasUpgrade(s,'undo')&&s.run.desktop.projects.bin&&<AppPart id="undo"><button className="win-button" disabled={!d.trash.length||s.resources.pixels<(d.trash[0]?.reward??0)} onClick={()=>d.trash[0]&&runtime.actDesktop({type:'undo-trash',id:d.trash[0].id})}>{i18n.t('bin.restore')}</button></AppPart>}</div>;
 }
@@ -101,14 +99,14 @@ export function ThemeApp({snapshot,runtime,i18n}:Props){
 }
 export function TerminalApp({snapshot,runtime,i18n}:Props){
  const t=snapshot.state.run.desktop.terminal;
- return <div className="terminal-app"><AppPart id="commands"><div className="app-toolbar">{!snapshot.state.legacyGeneration&&<label>{i18n.t('terminal.command')}<select aria-label={i18n.t('terminal.command')} value={snapshot.state.run.play.terminalCommand} onChange={e=>runtime.common({type:'terminal-command',command:e.target.value as 'capture'})}>{(['capture','export',...(snapshot.state.persistent.progress.records['secret-clock']!==undefined?['refresh']:[])] as const).map(command=><option value={command} key={command}>{i18n.t(command==='capture'?'terminal.capture':command==='export'?'terminal.export':'terminal.refresh')}</option>)}</select></label>}<label>{i18n.t('terminal.interval')}<select aria-label={i18n.t('terminal.interval')} value={t.interval} onChange={e=>runtime.actDesktop({type:'terminal',interval:Number(e.target.value),running:t.running})}>{BALANCE.w3.terminalIntervals.map((n,i)=><option key={n} value={n}>{i18n.t(i===0?'terminal.minute':'terminal.hour')}</option>)}</select></label><button className="win-button" onClick={()=>runtime.actDesktop({type:'terminal',interval:t.interval,running:!t.running})}>{i18n.t(t.running?'terminal.stop':'terminal.start')}</button>{!snapshot.state.legacyGeneration&&<button className="win-button terminal-run" onClick={()=>snapshot.state.run.play.terminalCommand==='export'?runtime.terminalExport():snapshot.state.run.play.terminalCommand==='refresh'?runtime.refreshWindows():runtime.takeScreenshot()}>{i18n.t('terminal.run')}</button>}</div></AppPart>
- <AppPart id="output"><div className="terminal-output">{snapshot.state.run.desktop.jobs.terminal.assigned&&snapshot.state.run.desktop.jobs.terminal.cursors>0&&<div className="terminal-job-stream" aria-live="off">{Array.from({length:5},(_,i)=><p key={i}>{i18n.t('jobs.processing',{rate:i18n.rate(jobRate(snapshot.state,'terminal'))})}</p>)}</div>}<p>{i18n.t(snapshot.state.legacyGeneration?(t.running?'terminal.running':'terminal.stopped'):(t.running?'terminal.executing':'terminal.paused'),{count:t.executions})}</p>{!t.log.length&&<p>{i18n.t('terminal.idle')}</p>}{t.log.map((l,i)=><p key={i}>{i18n.t(l.ok?'terminal.log.success':'terminal.log.skipped',{time:i18n.time(l.at)})}</p>)}</div></AppPart></div>;
+ return <div className="terminal-app"><AppPart id="commands"><div className="app-toolbar">{<label>{i18n.t('terminal.command')}<select aria-label={i18n.t('terminal.command')} value={snapshot.state.run.play.terminalCommand} onChange={e=>runtime.common({type:'terminal-command',command:e.target.value as 'capture'})}>{(['capture','export',...(snapshot.state.persistent.progress.records['secret-clock']!==undefined?['refresh']:[])] as const).map(command=><option value={command} key={command}>{i18n.t(command==='capture'?'terminal.capture':command==='export'?'terminal.export':'terminal.refresh')}</option>)}</select></label>}<label>{i18n.t('terminal.interval')}<select aria-label={i18n.t('terminal.interval')} value={t.interval} onChange={e=>runtime.actDesktop({type:'terminal',interval:Number(e.target.value),running:t.running})}>{BALANCE.w3.terminalIntervals.map((n,i)=><option key={n} value={n}>{i18n.t(i===0?'terminal.minute':'terminal.hour')}</option>)}</select></label><button className="win-button" onClick={()=>runtime.actDesktop({type:'terminal',interval:t.interval,running:!t.running})}>{i18n.t(t.running?'terminal.stop':'terminal.start')}</button>{<button className="win-button terminal-run" onClick={()=>snapshot.state.run.play.terminalCommand==='export'?runtime.terminalExport():snapshot.state.run.play.terminalCommand==='refresh'?runtime.refreshWindows():runtime.takeScreenshot()}>{i18n.t('terminal.run')}</button>}</div></AppPart>
+ <AppPart id="output"><div className="terminal-output">{snapshot.state.run.desktop.jobs.terminal.assigned&&snapshot.state.run.desktop.jobs.terminal.cursors>0&&<div className="terminal-job-stream" aria-live="off">{Array.from({length:5},(_,i)=><p key={i}>{i18n.t('jobs.processing',{rate:i18n.rate(jobRate(snapshot.state,'terminal'))})}</p>)}</div>}<p>{i18n.t(t.running?'terminal.executing':'terminal.paused',{count:t.executions})}</p>{!t.log.length&&<p>{i18n.t('terminal.idle')}</p>}{t.log.map((l,i)=><p key={i}>{i18n.t(l.ok?'terminal.log.success':'terminal.log.skipped',{time:i18n.time(l.at)})}</p>)}</div></AppPart></div>;
 }
 export function SettingsApp(props:Props){
  const {snapshot,runtime,i18n}=props,s=snapshot.state,d=s.run.desktop,p=s.persistent.desktopPrefs;
- return <div className="settings-app"><aside>{(['skills','general','records','sound','data','specs'] as const).filter(page=>!s.legacyGeneration||!['records','sound'].includes(page)).map(page=><button className={page===d.settingsPage?'selected':''} key={page} onClick={()=>runtime.actDesktop({type:'settings-page',page})}>{i18n.t(`settings.${page}`)}</button>)}</aside><article><h1>{i18n.t(`settings.${d.settingsPage}`)}</h1>
+ return <div className="settings-app"><aside>{(['skills','general','records','sound','data','specs'] as const).map(page=><button className={page===d.settingsPage?'selected':''} key={page} onClick={()=>runtime.actDesktop({type:'settings-page',page})}>{i18n.t(`settings.${page}`)}</button>)}</aside><article><h1>{i18n.t(`settings.${d.settingsPage}`)}</h1>
  {d.settingsPage==='skills'&&<><p>{i18n.t('desktop.tokens',{count:s.resources.tokens})}</p>{([1,2] as const).filter(band=>band===1||s.run.version!=='v0.1').map(band=><fieldset key={band}><legend>{i18n.t(band===1?'settings.band1':'settings.band2')}</legend>{BALANCE.w3.skills.filter(skill=>skill.band===band&&(skill.id!=='major2'||unlockedDesktopStage(s)>=1)&&(skill.id!=='major3'||unlockedDesktopStage(s)>=2)).map(skill=><div className="desktop-skill" key={skill.id}><div><b>{i18n.t(`desktop.skill.${skill.id}`)}</b><p>{i18n.t(`desktop.skill.${skill.id}.description`)}</p>{skill.id==='major3'&&!d.apps.includes('terminal')&&<p className="appearance-requirement">{i18n.t('desktop.skill.major3.requirement')}</p>}</div><span>{i18n.t('k.skillCost',{count:skill.cost})}</span>{p.skills.includes(skill.id)?skill.playful?<input aria-label={i18n.t(`desktop.skill.${skill.id}`)} type="checkbox" checked={hasDesktopSkill(s,skill.id)} onChange={()=>runtime.actDesktop({type:'toggle-skill',id:skill.id})}/>:<span>{i18n.t('k.acquired')}</span>:<button className="win-button" disabled={s.resources.tokens<skill.cost||skill.id==='major3'&&!d.apps.includes('terminal')} onClick={()=>runtime.actDesktop({type:'skill',id:skill.id})}>{i18n.t('k.acquire')}</button>}</div>)}</fieldset>)}</>}
- {d.settingsPage==='general'&&<><DesktopAppearance state={s} runtime={runtime} i18n={i18n}/><ProductSettings state={s} runtime={runtime} i18n={i18n}/><p><label className="author-name-setting">{i18n.t('settings.playerName')}<input value={s.persistent.playerName??''} maxLength={BALANCE.w2.maxName} onChange={e=>runtime.actKumiki({type:'name',name:e.target.value})}/></label></p><p><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} includeTest={runtime.platform.launch.debug}/></p></>}
+ {d.settingsPage==='general'&&<><DesktopAppearance state={s} runtime={runtime} i18n={i18n}/><ProductSettings state={s} runtime={runtime} i18n={i18n}/><p><label className="author-name-setting">{i18n.t('settings.playerName')}<input value={s.persistent.playerName??''} maxLength={BALANCE.w2.maxName} onChange={e=>runtime.setPlayerName(e.target.value)}/></label></p><p><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} includeTest={runtime.platform.launch.debug}/></p></>}
  {d.settingsPage==='records'&&<Records state={s} i18n={i18n}/>}
  {d.settingsPage==='sound'&&<SoundSettings state={s} runtime={runtime} i18n={i18n}/>}
  {d.settingsPage==='data'&&<div className="data-buttons"><button className="win-button" onClick={runtime.downloadData}>{i18n.t('data.export')}</button><button className="win-button" onClick={()=>void runtime.requestImport()}>{i18n.t('data.import')}</button><button className="win-button" onClick={()=>runtime.requestReset()}>{i18n.t('data.reset')}</button></div>}
@@ -117,7 +115,7 @@ export function SettingsApp(props:Props){
 }
 export function ManagerApp(props:Props){
  const {snapshot,i18n,capture}=props,s=snapshot.state,d=s.run.desktop,tab=d.managerTab,details=d.managerProcess;const setTab=(tab:typeof d.managerTab)=>props.runtime.actDesktop({type:'manager-tab',tab});const setDetails=(process:string)=>props.runtime.actDesktop({type:'manager-process',process});
- const now=capture&&capture.version!==1?capture.display.wallTime:props.runtime.platform.clock.wallNow(),shots=capture&&capture.version!==1?capture.display.managerShotRate:d.shotHistory.filter(h=>h.at>=now-BALANCE.w3.historyMs).reduce((n,h)=>n+h.pixels,0)/(BALANCE.w3.historyMs/1000),home=homePixelsPerSecond(s);
+ const now=capture&&capture.version!==1?capture.display.wallTime:props.runtime.platform.clock.wallNow(),shots=capture&&capture.version!==1?capture.display.managerShotRate:d.shotHistory.filter(h=>h.at>=now-BALANCE.w3.historyMs).reduce((n,h)=>n+h.pixels,0)/(BALANCE.w3.historyMs/1000),home=passivePixelsPerSecond(s)-jobsRate(s);
  const rows=[{id:'home' as const,name:i18n.t('manager.home'),rate:home},...JOB_IDS.filter(id=>d.jobs[id].assigned).map(id=>({id,name:appName(s,id,i18n),rate:jobRate(s,id)})),{id:'shots' as const,name:i18n.t('manager.shots'),rate:shots}];
  const total=rows.reduce((n,r)=>n+r.rate,0),job=JOB_IDS.includes(details as JobId)?details as JobId:null;
  const tokens=capture&&capture.version!==1?capture.display.managerTokenRate:d.feedback.filter(f=>f.completedAt!==null&&f.completedAt>=now-BALANCE.w3.historyMs).reduce((n,f)=>n+(f.reward??BALANCE.w3.feedbackTokens),0)/(BALANCE.w3.historyMs/60000);

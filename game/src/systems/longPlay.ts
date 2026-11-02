@@ -1,5 +1,5 @@
 import {BALANCE} from '../config/balance';
-import {ICON_IDS,PRACTICE_IDS} from '../content/kumikiArt';
+import {completedParts,completedSets} from './workshop';
 import type {GameState} from './state';
 export const ACHIEVEMENTS=['first-pixel','save-created','cursors10','cursors50','kumiki-created','first-export','icons6','practice10','parts-all','repairs10','editor-update','editor-modern','desktop-update','product-name','prototype-released','v1-released','first-shot','shots100','feedback10','feedback50','jobs-full','apps7','wallpaper','terminal','restarts10','secret-button','secret-art','secret-clock'] as const;
 export type AchievementId=typeof ACHIEVEMENTS[number];
@@ -10,35 +10,40 @@ export interface Progress {
  records:Partial<Record<AchievementId,number>>;
  counts:{repairs:number;restarts:number;shots:number;feedback:number;preBorder:number;icons:number};
  completed:Partial<Record<ContractId,number>>;selected:ContractId|null;cosmetic:ContractId|null;
- sound:{enabled:boolean;volume:number};bulk:BulkMode;unknownArt:{size:number;frames:number[][]}|null;noteOverflow:boolean;
+ sound:{enabled:boolean;volume:number};bulk:BulkMode;secretPart:boolean;noteOverflow:boolean;
 }
 export interface PlayState {
  achievement:{id:AchievementId;until:number}|null;contract:{id:ContractId;status:'active'|'complete'|'cancelled'}|null;
  stray:{waitMs:number;lifeMs:number;x:number;y:number;serial:number};
  clock:{count:number;lastAt:number};refreshAt:number;letterOpen:boolean;terminalCommand:'capture'|'export'|'refresh';
 }
-export const createProgress=():Progress=>({records:{},counts:{repairs:0,restarts:0,shots:0,feedback:0,preBorder:0,icons:0},completed:{},selected:null,cosmetic:null,sound:{enabled:true,volume:BALANCE.longPlay.soundVolume},bulk:'one',unknownArt:null,noteOverflow:false});
+export const createProgress=():Progress=>({records:{},counts:{repairs:0,restarts:0,shots:0,feedback:0,preBorder:0,icons:0},completed:{},selected:null,cosmetic:null,sound:{enabled:true,volume:BALANCE.longPlay.soundVolume},bulk:'one',secretPart:false,noteOverflow:false});
 export const createPlay=():PlayState=>({achievement:null,contract:null,stray:{waitMs:BALANCE.longPlay.strayMinMs,lifeMs:0,x:0,y:0,serial:0},clock:{count:0,lastAt:0},refreshAt:0,letterOpen:false,terminalCommand:'capture'});
-export const globalMultiplier=(s:GameState)=>s.legacyGeneration||!s.persistent.progress?1:1+Object.keys(s.persistent.progress.records).length*BALANCE.longPlay.achievementBonus+Object.keys(s.persistent.progress.completed).length*BALANCE.longPlay.contractBonus;
-export function previousWorldMultiplier(s:GameState){if(s.legacyGeneration||!s.persistent.progress)return 1;const icons=new Set([...s.run.kumiki.exports,...s.persistent.products.flatMap(p=>p.exports)].filter(w=>w.kind==='icon').map(w=>`${w.at}:${w.id}`)).size;return (1+Math.min(BALANCE.longPlay.iconCap,Math.max(icons,s.persistent.progress.counts.icons))*BALANCE.longPlay.iconBonus)*(1+s.run.seed.autoCursors*BALANCE.longPlay.cursorBonus);}
+export const globalMultiplier=(s:GameState)=>!s.persistent.progress?1:1+Object.keys(s.persistent.progress.records).length*BALANCE.longPlay.achievementBonus+Object.keys(s.persistent.progress.completed).length*BALANCE.longPlay.contractBonus;
+export function previousWorldMultiplier(s:GameState){
+ if(!s.persistent.progress)return 1;
+ // Desktop economic redesign belongs to 8b; this adapter only replaces its retired source.
+ const parts=completedParts(s).length;
+ return (1+Math.min(BALANCE.longPlay.iconCap,Math.max(parts,s.persistent.progress.counts.icons))*BALANCE.longPlay.iconBonus)*(1+s.run.seed.autoCursors*BALANCE.longPlay.cursorBonus);
+}
 export const activeContract=(s:GameState)=>s.run.play.contract?.status==='active'?s.run.play.contract.id:null;
 export const contractBlocks=(s:GameState,id:string)=>CONTRACTS.some(c=>c.id===activeContract(s)&&c.blocked===id);
 export function reconcileProgress(s:GameState,now:number):GameState {
- const p=s.persistent.progress,k=s.run.kumiki,d=s.run.desktop,archived=s.persistent.products;
- const known=[...k.exports,...archived.flatMap(p=>p.exports)];
+ const p=s.persistent.progress,k=s.run.workshop,d=s.run.desktop,archived=s.persistent.products;
+ const known=completedParts(s);const exported=Object.values(k.parts).some(part=>part.exportedAt!==null);
  const tests:Record<AchievementId,boolean>={
  'first-pixel':s.run.totalPixelsGenerated>0||archived.some(p=>p.generatedPixels>0),'save-created':s.run.seed.built.includes('save')||archived.some(p=>p.screen.built.includes('save')),
  cursors10:s.run.seed.autoCursors>=10||archived.some(p=>p.screen.cursors>=10),cursors50:s.run.seed.autoCursors>=50||archived.some(p=>p.screen.cursors>=50),
- 'kumiki-created':s.run.seed.built.includes('kumiki')||k.entered||archived.length>0,'first-export':known.length>0,
- icons6:ICON_IDS.every(id=>known.some(w=>w.kind==='icon'&&w.id===id)),practice10:PRACTICE_IDS.every(id=>known.some(w=>w.kind==='icon'&&w.id===id)),
- 'parts-all':['button','input','frame','taskbar'].every(id=>k.placed.includes(id as 'input'))||archived.some(p=>['button','input','frame','taskbar'].every(id=>p.screen.placed.includes(id as 'input'))),
- repairs10:p.counts.repairs>=10,'editor-update':s.persistent.artwork.skills.includes('update'),'editor-modern':s.persistent.artwork.skills.includes('modern'),'desktop-update':s.persistent.desktopPrefs.skills.includes('major1'),
+ 'kumiki-created':s.run.seed.built.includes('export')||k.entered||archived.length>0,'first-export':exported||archived.some(p=>p.exports.length>0),
+ icons6:known.length>=BALANCE.workshop.achievementParts[0],practice10:known.length>=BALANCE.workshop.achievementParts[1],
+ 'parts-all':completedSets(s).includes('common'),
+ repairs10:p.counts.repairs>=10,'editor-update':s.persistent.editorSkills.includes('update'),'editor-modern':s.persistent.editorSkills.includes('modern'),'desktop-update':s.persistent.desktopPrefs.skills.includes('major1'),
  'product-name':!!s.persistent.productName||archived.some(p=>!!p.name),'prototype-released':archived.some(p=>p.version==='v0.1'),'v1-released':archived.some(p=>p.version==='v1.0')||s.run.version==='v2',
  'first-shot':p.counts.shots>0||s.persistent.screenshots.length>0,shots100:p.counts.shots>=100||s.persistent.screenshots.length>=100,
  feedback10:p.counts.feedback>=10||d.feedback.filter(f=>f.completedAt!==null).length>=10,feedback50:p.counts.feedback>=50||d.feedback.filter(f=>f.completedAt!==null).length>=50,
  'jobs-full':d.upgrades.includes('jobs')&&Object.values(d.jobs).filter(j=>j.assigned&&j.cursors>0).length>=BALANCE.spec.memory[s.persistent.specs.memory]!.posts+(s.persistent.desktopPrefs.skills.includes('posts')&&!s.persistent.desktopPrefs.disabled.includes('posts')?BALANCE.w3.extraPosts:0),
  apps7:d.entered&&d.apps.length+1>=7,wallpaper:s.persistent.desktopPrefs.wallpaper!==null,terminal:d.terminal.executions>0,restarts10:p.counts.restarts>=10,
- 'secret-button':p.counts.preBorder>=BALANCE.longPlay.secretPresses,'secret-art':p.unknownArt!==null,'secret-clock':p.records['secret-clock']!==undefined,
+ 'secret-button':p.counts.preBorder>=BALANCE.longPlay.secretPresses,'secret-art':p.secretPart,'secret-clock':p.records['secret-clock']!==undefined,
  };
  let records=p.records;for(const id of ACHIEVEMENTS)if(tests[id]&&records[id]===undefined)records={...records,[id]:now};
  let next=records===p.records?s:{...s,persistent:{...s.persistent,progress:{...p,records}}};
@@ -53,7 +58,7 @@ export function reconcileProgress(s:GameState,now:number):GameState {
 }
 export function migrateProgress(s:GameState):GameState {
  const p=s.persistent.progress;
- return reconcileProgress({...s,persistent:{...s.persistent,progress:{...p,counts:{...p.counts,shots:Math.max(s.persistent.screenshots.length,s.persistent.desktopPrefs.lastShotId),icons:new Set([...s.run.kumiki.exports,...s.persistent.products.flatMap(p=>p.exports)].filter(w=>w.kind==='icon').map(w=>`${w.at}:${w.id}`)).size,feedback:s.run.desktop.feedback.filter(f=>f.completedAt!==null).length}}}},s.lastTickAt);
+ return reconcileProgress({...s,persistent:{...s.persistent,progress:{...p,counts:{...p.counts,shots:Math.max(s.persistent.screenshots.length,s.persistent.desktopPrefs.lastShotId),icons:p.counts.icons,feedback:s.run.desktop.feedback.filter(f=>f.completedAt!==null).length}}}},s.lastTickAt);
 }
 export const bulkVisible=(s:GameState)=>s.run.seed.autoCursors>BALANCE.longPlay.bulkUnlock;
 export function advanceStray(s:GameState,ms:number):GameState {
@@ -73,7 +78,7 @@ export function actCommon(s:GameState,a:CommonAction,now:number):GameState {
  if(a.type==='contract-select'){if(s.run.world!=='release'||p.records['v1-released']===undefined||a.id!==null&&(!CONTRACTS.some(c=>c.id===a.id)||p.completed[a.id]!==undefined))return s;p={...p,selected:a.id};}
  if(a.type==='contract-cancel'){if(!activeContract(s))return s;play={...play,contract:{...play.contract!,status:'cancelled'}};}
  if(a.type==='cosmetic'){if(a.id!==null&&p.completed[a.id]===undefined)return s;p={...p,cosmetic:a.id};}
- if(a.type==='letter-open'){if(s.run.world!=='desktop'||!p.unknownArt)return s;play={...play,letterOpen:true};}
+ if(a.type==='letter-open'){if(s.run.world!=='desktop'||!p.secretPart)return s;play={...play,letterOpen:true};}
  if(a.type==='letter-close')play={...play,letterOpen:false};
  if(a.type==='clock-click'){
   if(s.run.world!=='desktop'||!s.run.desktop.apps.includes('clock'))return s;
@@ -84,7 +89,7 @@ export function actCommon(s:GameState,a:CommonAction,now:number):GameState {
 }
 export function isProgress(v:unknown):v is Progress {
  if(!v||typeof v!=='object')return false;const p=v as Progress,amount=(n:unknown)=>typeof n==='number'&&Number.isFinite(n)&&n>=0,table=(v:unknown,ids:readonly string[])=>!!v&&typeof v==='object'&&!Array.isArray(v)&&Object.entries(v).every(([id,at])=>ids.includes(id)&&amount(at));
- return table(p.records,ACHIEVEMENTS)&&table(p.completed,CONTRACTS.map(c=>c.id))&&!!p.counts&&['repairs','restarts','shots','feedback','preBorder','icons'].every(k=>Number.isSafeInteger(p.counts[k as keyof Progress['counts']])&&p.counts[k as keyof Progress['counts']]>=0)&&(p.selected===null||CONTRACTS.some(c=>c.id===p.selected))&&(p.cosmetic===null||CONTRACTS.some(c=>c.id===p.cosmetic))&&!!p.sound&&typeof p.sound.enabled==='boolean'&&amount(p.sound.volume)&&p.sound.volume<=1&&typeof p.noteOverflow==='boolean'&&['one','ten','max'].includes(p.bulk)&&(p.unknownArt===null||!!p.unknownArt&&[16,32,64,128].includes(p.unknownArt.size)&&Array.isArray(p.unknownArt.frames)&&p.unknownArt.frames.length>0&&p.unknownArt.frames.length<=2&&p.unknownArt.frames.every(f=>Array.isArray(f)&&f.length===p.unknownArt!.size**2&&f.every(c=>Number.isInteger(c)&&c>=-1&&c<256)));
+ return table(p.records,ACHIEVEMENTS)&&table(p.completed,CONTRACTS.map(c=>c.id))&&!!p.counts&&['repairs','restarts','shots','feedback','preBorder','icons'].every(k=>Number.isSafeInteger(p.counts[k as keyof Progress['counts']])&&p.counts[k as keyof Progress['counts']]>=0)&&(p.selected===null||CONTRACTS.some(c=>c.id===p.selected))&&(p.cosmetic===null||CONTRACTS.some(c=>c.id===p.cosmetic))&&!!p.sound&&typeof p.sound.enabled==='boolean'&&amount(p.sound.volume)&&p.sound.volume<=1&&typeof p.noteOverflow==='boolean'&&['one','ten','max'].includes(p.bulk)&&typeof p.secretPart==='boolean';
 }
 export function isPlay(v:unknown):v is PlayState {
  if(!v||typeof v!=='object')return false;const p=v as PlayState,n=(x:unknown)=>typeof x==='number'&&Number.isFinite(x)&&x>=0;

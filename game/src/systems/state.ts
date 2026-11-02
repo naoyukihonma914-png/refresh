@@ -5,10 +5,10 @@ import { desktopScreen } from './desktopGeometry';
 import { createAppearance, unlockedEditorStage, unlockedDesktopStage, type Appearance } from './appearance';
 import { createDesktopPreferences, isDesktopPreferences, type DesktopPreferences, createDesktopState, isDesktopState, isScreenshot, type DesktopState, type Screenshot } from './desktopState';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
-import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
+import { createWorkshopState, createEditorCustomization, isWorkshopState, isEditorCustomization, isSetDocument, isEditorSkill, workshopRectOnGrid, type WorkshopState, type EditorCustomization, type SetDocument, type EditorSkill } from './workshopState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 13;
+export const SCHEMA_VERSION = 14;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -25,7 +25,6 @@ export interface SeedState {
 // ここには JSON として保存できるものだけを入れる。
 // 選択中の道具・押しているキー・勢いなど、一時的な表示状態は入れない。
 export interface GameState {
-  legacyGeneration?:boolean;
   schemaVersion: typeof SCHEMA_VERSION;
   createdAt: number;
   lastTickAt: number; // 不在用の端末時計。能動時間には使わない。
@@ -41,7 +40,7 @@ export interface GameState {
     restartMs: number;
     totalPixelsGenerated: number;
     seed: SeedState;
-    kumiki: KumikiState;
+    workshop: WorkshopState;
     desktop: DesktopState;
   };
   persistent: {
@@ -52,16 +51,15 @@ export interface GameState {
     numberNotation: 'compact' | 'scientific';
     seedSkills: SeedSkill[];
     seedAppearance: { pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean; era?:0|1; availableEra?:0|1 };
-    artwork: Artwork;
+    editorSkills: EditorSkill[];
+    editorCustomization: EditorCustomization;
+    setDocuments: SetDocument[];
     products: ProductRecord[];
     guideArchive: GuideRecord[];
-    homeTheme: Record<string, Design>;
     screenshots: Screenshot[];
     desktopPrefs:DesktopPreferences;
     productionNote: string | null;
     noteUpdatedAt: number | null;
-    homeUpdatedAt: number | null;
-    sketchUpdatedAt: number | null;
   };
 }
 
@@ -79,15 +77,15 @@ export function createInitialState(now: number): GameState {
         page:createPageDesign(),built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
       },
-      kumiki: createKumikiState(), desktop: createDesktopState(),
+      workshop: createWorkshopState(), desktop: createDesktopState(),
     },
     persistent: {
       progress:createProgress(),appearance:createAppearance(),
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
       playerName: null, productName: null, numberNotation: 'compact',
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
-      artwork: createArtwork(),
-      products: [], guideArchive: [], homeTheme: {}, screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null,
+      editorSkills: [], editorCustomization: createEditorCustomization(), setDocuments: [],
+      products: [], guideArchive: [], screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null,
     },
   };
 }
@@ -119,7 +117,7 @@ export function isGameState(value: unknown): value is GameState {
   if(!isAdviceState(run.advice))return false;
   if (!isAmount(resources.pixels) || !isAmount(resources.tokens) || !isAmount(resources.dollars)) return false;
   if (!['v0.1', 'v1', 'v2'].includes(run.version as string) || !['seed', 'kumiki', 'release', 'desktop'].includes(run.world as string) || !isAmount(run.totalPixelsGenerated)) return false;
-  if (!isAmount(run.restartMs) || run.restartMs > BALANCE.release.restartMs || !isGuideArchive(persistent.guideArchive) || !isDesignMap(persistent.homeTheme)) return false;
+  if (!isAmount(run.restartMs) || run.restartMs > BALANCE.release.restartMs || !isGuideArchive(persistent.guideArchive)) return false;
   if (!Array.isArray(persistent.products) || !persistent.products.every(isProductRecord)
     || new Set(persistent.products.map(p => p.id)).size !== persistent.products.length) return false;
   if (run.world === 'release' ? !isRecord(run.shipping) || !isCount(run.shipping.productId)
@@ -136,8 +134,13 @@ export function isGameState(value: unknown): value is GameState {
   if (!Array.isArray(persistent.screenshots) || !persistent.screenshots.every(s => isScreenshot(s))
     || persistent.screenshots.some((s, i, shots) => i > 0 && s.id <= shots[i-1]!.id)
     || !(persistent.productionNote === null || typeof persistent.productionNote === 'string' && persistent.productionNote.length <= BALANCE.w3.maxNote)
-    || ![persistent.noteUpdatedAt,persistent.homeUpdatedAt,persistent.sketchUpdatedAt].every(v=>v===null||isAmount(v))) return false;
-  if (!isKumikiState(run.kumiki) || !isArtwork(persistent.artwork)) return false;
+    || ![persistent.noteUpdatedAt].every(v=>v===null||isAmount(v))) return false;
+  if (!isWorkshopState(run.workshop) || run.world === 'kumiki' && !run.workshop.entered
+    || !isEditorCustomization(persistent.editorCustomization)
+    || !Array.isArray(persistent.editorSkills) || !persistent.editorSkills.every(isEditorSkill)
+    || new Set(persistent.editorSkills).size !== persistent.editorSkills.length
+    || !Array.isArray(persistent.setDocuments) || !persistent.setDocuments.every(isSetDocument)
+    || new Set(persistent.setDocuments.map(d=>d.id)).size !== persistent.setDocuments.length) return false;
   if((persistent.appearance as unknown as Appearance).editor>unlockedEditorStage(value as unknown as GameState)||(persistent.appearance as unknown as Appearance).desktop>unlockedDesktopStage(value as unknown as GameState))return false;
   if (run.totalPixelsGenerated < resources.pixels) return false;
   if (!isRecord(run.seed) || !Array.isArray(run.seed.built) || !isCount(run.seed.autoCursors)) return false;
@@ -154,7 +157,7 @@ export function isGameState(value: unknown): value is GameState {
     || (seed.guide.current !== null && !seed.guide.seen.includes(seed.guide.current))
     || typeof seed.guide.collapsed !== 'boolean') return false;
   if (seed.installer !== null && (!isRecord(seed.installer) || !Array.isArray(seed.installer.items)
-    || !seed.installer.items.every(item => itemIds.includes(item) && item !== 'kumiki')
+    || !seed.installer.items.every(item => itemIds.includes(item) && item !== 'export')
     || new Set(seed.installer.items).size !== seed.installer.items.length
     || !isAmount(seed.installer.elapsedMs) || seed.installer.elapsedMs > BALANCE.w1.inheritMs)) return false;
   if (!Array.isArray(persistent.seedSkills) || !persistent.seedSkills.every(id => BALANCE.w1.skills.some(skill => skill.id === id))
@@ -168,7 +171,8 @@ export function isGameState(value: unknown): value is GameState {
   if (persistent.playerName !== null && typeof persistent.playerName !== 'string') return false;
   const specs = persistent.specs;
   if (!isRecord(specs)) return false;
-  return (Object.keys(BALANCE.spec) as SpecKey[]).every(key =>
+  const validSpecs=(Object.keys(BALANCE.spec) as SpecKey[]).every(key =>
     isCount(specs[key]) && specs[key] < BALANCE.spec[key].length,
   );
+  return validSpecs&&Object.values(run.workshop.parts).every(part=>workshopRectOnGrid(part!.rect,Number(specs.resolution)));
 }

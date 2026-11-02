@@ -1,99 +1,51 @@
-import { readFileSync } from 'node:fs';
-import { gunzipSync } from 'node:zlib';
 import { describe,it,expect } from 'vitest';
 import { createI18n } from '../content/i18n';
-import { createFixture } from './fixtures';
-import { buyKumikiSkill,actKumiki,paintDrawing } from './kumiki';
-import { actDesktop,takeScreenshot } from './desktop';
-import { unlockedDesktopStage,canSwitchEditor,editorName,appName,setDesktopStage,setEditorStage } from './appearance';
-import { decodeSave,encodeSave } from './save';
-import { isGameState } from './state';
-import { readCapture,restoreScene,isCaptureScene } from './captureScene';
-import { advanceShipping,beginPrototypeRelease,startNextVersion } from './release';
 import { BALANCE } from '../config/balance';
-const now=1800000000000;
-const fixture=()=>createFixture('desktop-ready',now)!;
-describe('段階6.1：見た目の進化と互換性',()=>{
- it('最初のTesseraをv0.1の間に3トークンで更新し、再購入で払わない',()=>{
-  let s=createFixture('kumiki-wall',now)!;s.resources.tokens=3;
-  s=buyKumikiSkill(s,'update');expect(s.resources.tokens).toBe(0);expect(s.persistent.appearance.editor).toBe(1);expect(s.run.version).toBe('v0.1');
-  expect(buyKumikiSkill(s,'update')).toBe(s);expect(isGameState(s)).toBe(true);
+import { createInitialState, isGameState } from './state';
+import { actWorkshop, advanceWorkshop, enterWorkshop } from './workshop';
+import { canSwitchEditor,editorName,appName,setDesktopStage,setEditorStage,unlockedDesktopStage,unlockedEditorStage } from './appearance';
+const now=1_800_000_000_000;
+function editor(){const s=createInitialState(now);s.resources.tokens=100;return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);}
+
+describe('第3版：工房とデスクトップの見た目の段',()=>{
+ it('Tesseraは初周中に3トークンで更新し、再購入で払わない',()=>{
+  let s=editor();s.resources.tokens=3;s=actWorkshop(s,{type:'skill',id:'update'},now);
+  expect(s.resources.tokens).toBe(0);expect(s.persistent.appearance.editor).toBe(1);expect(s.run.version).toBe('v0.1');
+  expect(s.persistent.editorSkills).toEqual(['update']);expect(actWorkshop(s,{type:'skill',id:'update'},now)).toBe(s);expect(isGameState(s)).toBe(true);
  });
- it('大型アップデートは4・20トークン、順序と周回の帯を守る',()=>{
-  let s=fixture();s.resources.tokens=24;
-  expect(actDesktop(s,{type:'skill',id:'major2'},now)).toBe(s);
-  s=actDesktop(s,{type:'skill',id:'major1'},now);expect(s.resources.tokens).toBe(20);expect(s.persistent.appearance.desktop).toBe(1);
-  s=actDesktop(s,{type:'skill',id:'major2'},now);expect(s.resources.tokens).toBe(0);expect(s.persistent.appearance.desktop).toBe(2);
-  expect(actDesktop(s,{type:'skill',id:'major2'},now)).toBe(s);
-  const early=createFixture('kumiki-wall',now)!;expect(actDesktop(early,{type:'skill',id:'major2'},now)).toBe(early);
- });
- it('GessoはTessera更新と取得済みデスクトップ段2が必要。表示を段0に戻していても乗り換えられる',()=>{
-  let s=fixture();s.resources.tokens=100;s=buyKumikiSkill(s,'update');
-  expect(canSwitchEditor(s)).toBe(false);expect(buyKumikiSkill(s,'modern')).toBe(s);
-  s=actDesktop(s,{type:'skill',id:'major1'},now);expect(buyKumikiSkill(s,'modern')).toBe(s);
-  s=actDesktop(s,{type:'skill',id:'major2'},now);s=setDesktopStage(s,0);expect(unlockedDesktopStage(s)).toBe(2);expect(canSwitchEditor(s)).toBe(true);
-  const before=s.resources.tokens;s=buyKumikiSkill(s,'modern');expect(s.resources.tokens).toBe(before-25);expect(s.persistent.appearance.editor).toBe(2);
+ it('Gessoは更新済みTesseraと取得済みデスクトップ段2が必要',()=>{
+  let s=editor();s.run.version='v1';
+  s.persistent.desktopPrefs.skills=['major1','major2'];expect(canSwitchEditor(s)).toBe(false);expect(actWorkshop(s,{type:'skill',id:'modern'},now)).toBe(s);
+  s=actWorkshop(s,{type:'skill',id:'update'},now);s.persistent.desktopPrefs.skills=['major1'];expect(canSwitchEditor(s)).toBe(false);expect(actWorkshop(s,{type:'skill',id:'modern'},now)).toBe(s);
+  s.persistent.desktopPrefs.skills=['major1','major2'];s=setDesktopStage(s,0);expect(unlockedDesktopStage(s)).toBe(2);expect(canSwitchEditor(s)).toBe(true);
+  const before=s.resources.tokens;s=actWorkshop(s,{type:'skill',id:'modern'},now);
+  expect(s.resources.tokens).toBe(before-25);expect(s.persistent.appearance).toEqual({editor:2,desktop:0});expect(unlockedEditorStage(s)).toBe(2);
+  expect(s.persistent.editorCustomization.panelPositions).toEqual({palette:'right',tools:'left',parts:'left',info:'bottom'});
   for(const lang of ['ja','en']){const i18n=createI18n(lang);expect(editorName(s,i18n)).toBe('Gesso');expect(appName(s,'tessera',i18n)).toBe('Gesso');expect(appName(setEditorStage(s,1),'tessera',i18n)).toBe('Tessera');}
  });
- it('未取得の段・範囲外の段を拒み、戻しても絵・道具・設定・ジョブ・窓の配置を変えない',()=>{
-  let s=fixture();expect(setEditorStage(s,1)).toBe(s);expect(setDesktopStage(s,1)).toBe(s);
-  s=createFixture('desktop-stage2',now)!;s=paintDrawing(s,'free',[0],3);s=actDesktop(s,{type:'theme',radius:3},now);
-  const k=s.run.kumiki,art=s.persistent.artwork,prefs=s.persistent.desktopPrefs,d=s.run.desktop,resources=s.resources;
-  s=actKumiki(s,{type:'editor-stage',stage:0},now);s=actDesktop(s,{type:'desktop-stage',stage:0},now);
-  expect(s.run.kumiki).toBe(k);expect(s.run.desktop.jobs).toBe(d.jobs);expect(s.run.desktop.apps).toBe(d.apps);expect(s.resources).toBe(resources);expect(s.persistent.artwork.skills).toBe(art.skills);expect(s.persistent.artwork.sketchbook).toBe(art.sketchbook);expect(s.persistent.desktopPrefs).toBe(prefs);
-  expect(setEditorStage(s,3 as never)).toBe(s);expect(setDesktopStage(s,-1 as never)).toBe(s);expect(decodeSave(encodeSave(s))).toEqual(s);
+ it('未取得の段と範囲外の値を拒む',()=>{
+  const s=editor();expect(setEditorStage(s,1)).toBe(s);expect(setDesktopStage(s,1)).toBe(s);
+  expect(setEditorStage(s,3 as never)).toBe(s);expect(setDesktopStage(s,-1 as never)).toBe(s);expect(setDesktopStage(s,4 as never)).toBe(s);
  });
- it('選んだ段と取得した動作環境を周回後も引き継ぐ',()=>{
-  let s=createFixture('release-ready',now)!;s.resources.tokens=200;s=buyKumikiSkill(s,'update');s.persistent.desktopPrefs.skills=['major1','major2'];s=buyKumikiSkill({...s,run:{...s.run,version:'v1'}},'modern');s.run.version='v0.1';s=setEditorStage(s,1);s=setDesktopStage(s,0);
-  s=advanceShipping(beginPrototypeRelease(s,now),BALANCE.release.animationMs);s.persistent.specs.color=1;s=startNextVersion(s,now);
-  expect(s.run.version).toBe('v1');expect(s.persistent.appearance).toEqual({editor:1,desktop:0});expect(canSwitchEditor(s)).toBe(true);expect(s.persistent.artwork.skills).toContain('modern');expect(isGameState(s)).toBe(true);
+ it('表示の段を戻しても購入済み道具・制作状態・資源・個人設定を変えない',()=>{
+  let s=editor();s=actWorkshop(s,{type:'skill',id:'update'},now);s.persistent.desktopPrefs.skills=['major1','major2'];s=actWorkshop(s,{type:'skill',id:'modern'},now);
+  s=setDesktopStage(s,2);s=actWorkshop(s,{type:'buySet',set:'clock'},now);
+  const workshop=s.run.workshop,custom=s.persistent.editorCustomization,skills=s.persistent.editorSkills,resources=s.resources,jobs=s.run.desktop.jobs;
+  s=setEditorStage(s,0);s=setDesktopStage(s,0);
+  expect(s.run.workshop).toBe(workshop);expect(s.resources).toBe(resources);expect(s.persistent.editorSkills).toBe(skills);expect(s.persistent.editorCustomization).toBe(custom);expect(s.run.desktop.jobs).toBe(jobs);
+  expect(canSwitchEditor(s)).toBe(true);expect(isGameState(s)).toBe(true);
  });
- it('実際の第8版とV2撮影は書き換えず、旧modern購入者には新しい動作環境を付ける',()=>{
-  const raw=gunzipSync(readFileSync(new URL('./testdata/v8-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(readCapture(s.persistent.screenshots[0]!).version).toBe(2);
-  expect(s.persistent.appearance).toEqual({editor:0,desktop:0});expect(s.persistent.desktopPrefs.radiusCustom).toBe(false);
-  old.persistent.artwork.skills.push('modern');old.persistent.artwork.modern=true;old.persistent.desktopPrefs.radius=3;
-  const modern=decodeSave(JSON.stringify(old));expect(modern.persistent.appearance).toEqual({editor:2,desktop:2});expect(modern.persistent.artwork.skills).toContain('update');expect(canSwitchEditor(modern)).toBe(true);expect(modern.persistent.desktopPrefs.radiusCustom).toBe(true);expect(modern.resources).toEqual(s.resources);
+ it('デスクトップ段3を取得して表示を戻してもGessoの動作環境を満たす',()=>{
+  let s=editor();s.persistent.desktopPrefs.skills=['major1','major2','major3'];s=actWorkshop(s,{type:'skill',id:'update'},now);s=setDesktopStage(s,3);s=setDesktopStage(s,0);
+  expect(unlockedDesktopStage(s)).toBe(3);expect(canSwitchEditor(s)).toBe(true);s=actWorkshop(s,{type:'skill',id:'modern'},now);
+  expect(s.persistent.appearance).toEqual({editor:2,desktop:0});expect(isGameState(s)).toBe(true);
  });
- it('V4撮影は撮影時の段・角の設定を持ち、後の変更を受けない。過去のV1・V2も混在できる',()=>{
-  let s=createFixture('desktop-stage2',now)!;s=actDesktop(s,{type:'theme',radius:3},now);s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!;const scene=readCapture(shot);
-  expect(scene.version).toBe(9);expect(isCaptureScene(scene)).toBe(true);s=setDesktopStage(setEditorStage(s,0),0);s=actDesktop(s,{type:'theme',autoRadius:true},now);
-  const frozen=restoreScene(shot,s.persistent.screenshots);expect(frozen.persistent.appearance).toEqual({editor:2,desktop:2});expect(frozen.persistent.desktopPrefs).toMatchObject({radius:3,radiusCustom:true});
-  const invalid=structuredClone(scene);if(invalid.version===4){invalid.appearance.desktop=9 as never;expect(isCaptureScene(invalid)).toBe(false);}
-  const mixed=decodeSave(gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString());mixed.persistent.screenshots.push({...shot,id:10});mixed.persistent.desktopPrefs.lastShotId=10;expect(decodeSave(encodeSave(mixed))).toEqual(mixed);
- });
- it.each(['editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2'])('%sの状態を往復できる',name=>{const s=createFixture(name,now)!;expect(isGameState(s)).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);});
-});
-
-
-describe('段階7：平らなデスクトップへの進化',()=>{
- it('3回目は2回目とターミナルの導入後だけ買え、同じ購入を繰り返しても払わない',()=>{
-  let s=createFixture('desktop-photo',now)!;s.resources.tokens=200;
-  expect(actDesktop(s,{type:'skill',id:'major3'},now)).toBe(s);
-  s=actDesktop(s,{type:'skill',id:'major1'},now);s=actDesktop(s,{type:'skill',id:'major2'},now);
-  expect(actDesktop(s,{type:'skill',id:'major3'},now)).toBe(s);
-  let ready=createFixture('desktop-stage2',now)!;ready.resources.tokens=40;const projects=ready.run.desktop.projects,jobs=ready.run.desktop.jobs;
-  ready=actDesktop(ready,{type:'skill',id:'major3'},now);
-  expect(ready.resources.tokens).toBe(0);expect(ready.persistent.appearance).toEqual({editor:2,desktop:3});
-  expect(ready.run.desktop.screen).toEqual({width:1366,height:768});expect(ready.run.desktop.projects).toBe(projects);expect(ready.run.desktop.jobs).toBe(jobs);
-  expect(actDesktop(ready,{type:'skill',id:'major3'},now)).toBe(ready);
-  expect(isGameState(ready)).toBe(true);expect(decodeSave(encodeSave(ready))).toEqual(ready);
- });
- it('段3を撮影した記録は段0に戻した後も平らな枠と作品・配置を保持する',()=>{
-  let s=createFixture('desktop-stage2',now)!;const old=s.persistent.screenshots[0]!;const oldData=old.data;
-  s=actDesktop(s,{type:'skill',id:'major3'},now);s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');
-  const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);expect(isCaptureScene(scene)).toBe(true);
-  const frozen=restoreScene(shot,s.persistent.screenshots);expect(frozen.persistent.appearance).toEqual({editor:2,desktop:3});
-  expect(frozen.persistent.desktopPrefs.skills).toContain('major3');
-  const windows=frozen.run.desktop.windows;s=setDesktopStage(s,0);expect(s.persistent.appearance.desktop).toBe(0);
-  expect(restoreScene(shot,s.persistent.screenshots).run.desktop.windows).toEqual(windows);expect(old.data).toBe(oldData);
-  expect(readCapture(old).version).toBe(9);expect(decodeSave(encodeSave(s))).toEqual(s);
- });
- it('段3を持っていると表示を古い段へ戻してもGessoの動作環境を満たす',()=>{
-  let s=createFixture('desktop-stage2',now)!;s=actDesktop(s,{type:'skill',id:'major3'},now);s=setDesktopStage(s,0);
-  s.persistent.artwork.skills=s.persistent.artwork.skills.filter(id=>id!=='modern');s=setEditorStage(s,1);
-  expect(unlockedDesktopStage(s)).toBe(3);expect(canSwitchEditor(s)).toBe(true);
-  const next=buyKumikiSkill(s,'modern');expect(next.persistent.appearance.editor).toBe(2);expect(next.persistent.appearance.desktop).toBe(0);
-  expect(setEditorStage(next,3 as never)).toBe(next);expect(setDesktopStage(next,4 as never)).toBe(next);
+ it('帯2の制作プラグインは2周目v1から購入でき、再購入しない',()=>{
+  let s=editor();for(const id of ['snap','motion','extraParts','efficiency'] as const)expect(actWorkshop(s,{type:'skill',id},now)).toBe(s);
+  s.run.version='v1';s=actWorkshop(s,{type:'skill',id:'extraParts'},now);expect(s.resources.tokens).toBe(100-15);
+  expect(actWorkshop(s,{type:'skill',id:'extraParts'},now)).toBe(s);s=actWorkshop(s,{type:'buySet',set:'extras'},now);
+  expect(Object.keys(s.run.workshop.parts)).toEqual(['plugin-tabs','plugin-table']);
+  for(const id of ['snap','motion','efficiency'] as const){const before=s.resources.tokens;s=actWorkshop(s,{type:'skill',id},now);expect(s.persistent.editorSkills).toContain(id);expect(s.resources.tokens).toBeLessThan(before);expect(actWorkshop(s,{type:'skill',id},now)).toBe(s);}
+  expect(isGameState(s)).toBe(true);
  });
 });

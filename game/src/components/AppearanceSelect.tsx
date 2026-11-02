@@ -5,7 +5,7 @@ import { editorStage,desktopStage,unlockedEditorStage,unlockedDesktopStage,type 
 interface Props {state:GameState;runtime:GameRuntime;i18n:I18n}
 export function EditorAppearance({state,runtime,i18n}:Props){
  const max=unlockedEditorStage(state);if(max===0)return null;
- return <label className="appearance-setting">{i18n.t('appearance.editor')}<select aria-label={i18n.t('appearance.editor')} value={editorStage(state)} onChange={e=>runtime.actKumiki({type:'editor-stage',stage:Number(e.target.value) as VisualStage})}>
+ return <label className="appearance-setting">{i18n.t('appearance.editor')}<select aria-label={i18n.t('appearance.editor')} value={editorStage(state)} onChange={e=>runtime.chooseEditorStage(Number(e.target.value) as VisualStage)}>
  {([0,1,2] as const).filter(stage=>stage<=max).map(stage=><option key={stage} value={stage}>{i18n.t(`appearance.editor.${stage}`)}</option>)}
  </select></label>;
 }

@@ -35,7 +35,7 @@ export function ReportProduct({report,runtime,snapshot,i18n}:ReportPartProps) {
       <tr><th scope="row">{i18n.t('release.name')}</th><td>{title}</td></tr>
       <tr><th scope="row">{i18n.t('release.version')}</th><td>{version}</td></tr>
       {product.author!==null&&<tr><th scope="row">{i18n.t('release.author')}</th><td>{product.author}</td></tr>}
-      <tr><th scope="row">{i18n.t('release.contents')}</th><td>{i18n.t('release.summary',{built:product.builtCount,icons:product.exports.filter(work=>work.kind==='icon').length})}</td></tr>
+      <tr><th scope="row">{i18n.t('release.contents')}</th><td>{i18n.t('release.summary',{built:product.builtCount,icons:product.exports.length})}</td></tr>
     </tbody></table>
   </div>;
 }
