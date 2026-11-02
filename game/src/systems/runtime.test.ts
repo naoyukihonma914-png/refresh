@@ -1,5 +1,7 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 import { BALANCE } from '../config/balance';
+import { readCapture } from './captureScene';
+import type { CaptureGeometry } from './captureEvaluation';
 import { TEST_LANGUAGE } from '../content/i18n';
 import { createMemoryStorage,createSettingsStorage,SETTINGS_KEY } from '../platform/storage';
 import type { Platform } from '../platform/types';
@@ -586,4 +588,25 @@ it('時計を開いた際の自動サイズ調整は連続クリックを途切�
  expect(runtime.getSnapshot().state.run.play.clock.count).toBe(1);
  for(let i=0;i<8;i++)runtime.common({type:'clock-click'});expect(runtime.getSnapshot().state.persistent.progress.records['secret-clock']).toBeUndefined();
  runtime.common({type:'clock-click'});expect(runtime.getSnapshot().state.persistent.progress.records['secret-clock']).toBe(clock.wall);
+});
+
+
+describe('段階8bの実画面撮影',()=>{
+ it('入力直前の時間を進めても、渡された可視領域を凍結しmodel推定へ落とさない',async()=>{
+  const saved=createFixture('stage8b-capture-overlap-era0',clock.wall)!;
+  storage.setItem(SAVE_KEYS.primary,encodeSave(saved));
+  runtime=new GameRuntime(platform);await runtime.start();
+  const geometry:CaptureGeometry={origin:'dom',viewport:{x:0,y:0,width:800,height:600},occluders:[],elements:[{id:'visible-source',type:'files-list',app:'files',sourcePartId:'files-list',layer:10,rects:[{x:10,y:30,width:100,height:50}]}]};
+  clock.mono+=50;clock.wall+=50;
+  expect(runtime.takeScreenshot(geometry)).toBe(true);
+  const shot=runtime.getSnapshot().state.persistent.screenshots.at(-1)!;
+  const scene=readCapture(shot);
+  expect(scene.version).toBe(11);
+  if(scene.version!==11||!scene.evaluation)throw new Error('expected format 11 evaluation');
+  expect(scene.evaluation.origin).toBe('dom');
+  expect(scene.evaluation.visibleCount).toBe(1);
+  expect(scene.evaluation.parts.filter(part=>part.visible).map(part=>part.id)).toEqual(['visible-source']);
+  runtime.actDesktop({type:'close',app:'files'});
+  expect(readCapture(shot)).toEqual(scene);
+ });
 });

@@ -1,13 +1,15 @@
-import{seedPartsPixelsPerSecond,workshopPartsPixelsPerSecond}from'./economy';
 import { describe,expect,it } from 'vitest';
 import type { DesktopUpgrade } from '../config/balance';
 import { BALANCE } from '../config/balance';
 import { createI18n } from '../content/i18n';
 import { captureStore } from '../platform/captures';
-import { actAppBuild } from './appBuild';
+import { actAppBuild,hasAppPart } from './appBuild';
+import { evaluateCapture } from './captureEvaluation';
+import { desktopToolsPixelsPerSecond,productionCreditMultiplier } from './productionModel';
+import { actWorkshop } from './workshop';
 import { featureApp,isBuildable } from './appLayout';
 import { readCapture } from './captureScene';
-import { actDesktop,activeScreenshots,advanceDesktopTime,buyDesktopApp as buyBlueprint,desktopConditions,focusWindow,nextDesktopApp,screenshotParts,screenshotReward,visibleApps } from './desktop';
+import { actDesktop,activeScreenshots,advanceDesktopTime,buyDesktopApp as buyBlueprint,desktopConditions,focusWindow,nextDesktopApp,screenshotReward,visibleApps } from './desktop';
 import { desktopFiles } from './desktopFiles';
 import { hasDesktopSkill,jobCapacity,jobCursorCost,jobCursorRate,jobRate,jobsRate } from './desktopJobs';
 import { JOB_IDS,type Feedback } from './desktopState';
@@ -25,12 +27,18 @@ function request(s:ReturnType<typeof fixture>,kind:Feedback['kind']){
  s.run.desktop.feedback.push({id,kind,sender:'hikari',target:kind==='search'?'note':kind==='timer'?String(now+60000):'',at:now,completedAt:null,baseline:[],baselineColor:'#0067c0'});return s;
 }
 function buyDesktopApp(s:GameState,id:DesktopUpgrade){let next=buyBlueprint(s,id);const app=isBuildable(id)?id:featureApp(id);if(next!==s&&app){next=actAppBuild(next,{type:'app-recommend',app});next=actAppBuild(next,{type:'app-install',app});}return next;}
-describe('段階6：アプリとジョブ',()=>{
- it('21個のアプリ・機能を決めた順に支払い、作った操作だけを保存する',()=>{
-  let s=fixture('desktop-early');s.resources.pixels=s.run.totalPixelsGenerated=1e12;const start=s.resources.pixels;
-  for(const item of BALANCE.w3.apps){expect(nextDesktopApp(s)?.id).toBe(item.id);const before=s.resources.pixels;s=buyDesktopApp(s,item.id);expect(s.resources.pixels).toBe(before-item.cost);expect(buyDesktopApp(s,item.id)).toBe(s);expect(isGameState(s),item.id).toBe(true);}
-  expect(nextDesktopApp(s)).toBeNull();expect(s.run.desktop.apps).toHaveLength(8);expect(s.run.desktop.upgrades).toHaveLength(21);
-  expect(s.resources.pixels).toBe(start-BALANCE.w3.apps.reduce((n,a)=>n+a.cost,0));expect(decodeSave(encodeSave(s))).toEqual(s);
+describe('段階8b：アプリとジョブ',()=>{
+ it('制作済みのセットから無料でアプリを組み、ジョブの開設だけを一度支払う',()=>{
+  let s=fixture('desktop-early');const start=s.resources.pixels;
+  for(const id of BALANCE.w3.offerOrder){
+   const offer=nextDesktopApp(s);expect(offer?.id).toBe(id);expect(offer?.kind).toBe(id==='jobs'?'jobs':'assemble');
+   const before=s.resources.pixels;s=buyDesktopApp(s,id);
+   expect(s.resources.pixels).toBe(before-(id==='jobs'?BALANCE.w3.jobUnlockCost:0));expect(buyDesktopApp(s,id)).toBe(s);
+   expect(isGameState(s),id).toBe(true);
+   if(id!=='jobs')for(const slot of s.run.desktop.projects[id]!.installedAssembly!.slots)expect(s.run.workshop.parts[slot.source]!.step).toBe(4);
+  }
+  expect(nextDesktopApp(s)).toBeNull();expect(s.run.desktop.apps).toHaveLength(8);
+  expect(s.resources.pixels).toBe(start-BALANCE.w3.jobUnlockCost);expect(decodeSave(encodeSave(s))).toEqual(s);
  });
  it('メモリ数まで窓に割り当て、最小化・閉じた窓でも生成。ジョブ追加スキルで1枠増える',()=>{
   let s=fixture();s.run.desktop.jobs.terminal={assigned:false,cursors:1,updates:0};expect(jobCapacity(s)).toBe(3);
@@ -39,15 +47,33 @@ describe('段階6：アプリとジョブ',()=>{
   const rate=passivePixelsPerSecond(s),before=s.run.totalPixelsGenerated;
   for(const app of JOB_IDS)s=action(s,{type:'close',app});
   s=advanceActiveTime(s,1000).state;expect(s.run.totalPixelsGenerated-before).toBeCloseTo(rate,3);
-  expect(jobsRate(s)).toBeGreaterThan(0);expect(passivePixelsPerSecond(s)).toBeCloseTo(homePixelsPerSecond(s)+seedPartsPixelsPerSecond(s)+workshopPartsPixelsPerSecond(s)+jobsRate(s));
+  expect(jobsRate(s)).toBeGreaterThan(0);expect(passivePixelsPerSecond(s)).toBeCloseTo(homePixelsPerSecond(s)+desktopToolsPixelsPerSecond(s)+jobsRate(s));
  });
- it('ジョブの値段は切り上げ。更新×2と小さな機能×1.25、色・Hzを毎秒に掛ける',()=>{
-  let s=fixture('desktop-jobs'),j=s.run.desktop.jobs.files,rate=jobCursorRate(s,'files');
-  const cost=jobCursorCost(s,'files'),pixels=s.resources.pixels;s=action(s,{type:'job-buy',app:'files'});
-  expect(Number.isInteger(cost)).toBe(true);expect(s.resources.pixels).toBe(pixels-cost);expect(s.run.desktop.jobs.files.cursors).toBe(j.cursors+1);
-  s=action(s,{type:'job-update',app:'files'});expect(jobCursorRate(s,'files')).toBeCloseTo(rate*2);
-  const before=jobCursorRate(s,'files');s=buyDesktopApp(s,'manager');s=buyDesktopApp(s,'search');expect(jobCursorRate(s,'files')).toBeCloseTo(before*1.25);
-  s.persistent.specs.refresh=2;expect(jobCursorRate(s,'files')).toBeCloseTo(before*1.25*4);
+ it('ジョブの値段を切り上げ、更新・採用した機能・色・Hzを毎秒に掛ける',()=>{
+  let s=fixture('desktop-jobs');const search=s.run.desktop.projects.files!.installed!.parts.find(part=>part.id==='search')!;
+  s=actAppBuild(s,{type:'app-edit',app:'files'});s=actAppBuild(s,{type:'app-remove',app:'files',part:'search'});s=actAppBuild(s,{type:'app-install',app:'files'});
+  expect(hasAppPart(s,'files','search')).toBe(false);
+  const j=s.run.desktop.jobs.files,rate=jobCursorRate(s,'files'),cost=jobCursorCost(s,'files'),pixels=s.resources.pixels;
+  s=action(s,{type:'job-buy',app:'files'});expect(Number.isInteger(cost)).toBe(true);expect(s.resources.pixels).toBe(pixels-cost);expect(s.run.desktop.jobs.files.cursors).toBe(j.cursors+1);
+  s=action(s,{type:'job-update',app:'files'});expect(jobCursorRate(s,'files')).toBeCloseTo(rate*BALANCE.w3.updateMultiplier);
+  const before=jobCursorRate(s,'files');s=actAppBuild(s,{type:'app-edit',app:'files'});s=actAppBuild(s,{type:'app-place',app:'files',part:'search',rect:search});
+  expect(jobCursorRate(s,'files')).toBe(before);
+  s=actAppBuild(s,{type:'app-install',app:'files'});expect(hasAppPart(s,'files','search')).toBe(true);expect(jobCursorRate(s,'files')).toBeCloseTo(before*BALANCE.w3.featureMultiplier);
+  const previousRefresh=s.persistent.specs.refresh;s.persistent.specs.refresh=2;
+  expect(jobCursorRate(s,'files')).toBeCloseTo(before*BALANCE.w3.featureMultiplier*BALANCE.spec.refresh[2].multiplier/BALANCE.spec.refresh[previousRefresh]!.multiplier);
+  const previousColor=s.persistent.specs.color,beforeColor=jobCursorRate(s,'files');s.persistent.specs.color=2;
+  expect(jobCursorRate(s,'files')).toBeCloseTo(beforeColor*BALANCE.spec.color[2].multiplier/BALANCE.spec.color[previousColor]!.multiplier);
+ });
+ it('受動生成とエディタの有限な工程払いを分け、完成・トークンは手で確かめるまで増やさない',()=>{
+  let s=actWorkshop(fixture('stage8b-economy-before-era2'),{type:'skill',id:'extraParts'},now);s=actWorkshop(s,{type:'selectPart',part:'plugin-tabs'},now);s=action(s,{type:'job-assign',app:'tessera'});s=action(s,{type:'job-buy',app:'tessera'});
+  const part=s.run.workshop.parts['plugin-tabs']!,rate=passivePixelsPerSecond(s),pixels=s.resources.pixels,tokens=s.resources.tokens;
+  expect(part.step).toBe(0);expect(s.run.desktop.jobs.tessera).toMatchObject({assigned:true,cursors:1,updates:0});
+  const result=advanceActiveTime(s,BALANCE.workshop.assistStepMs),passive=rate*BALANCE.workshop.assistStepMs/1000;
+  expect(result.pixels).toBeCloseTo(passive,4);expect(result.state.run.workshop.parts['plugin-tabs']!.step).toBe(1);
+  expect(result.state.resources.pixels-pixels).toBeCloseTo(passive+BALANCE.workshop.categoryStepRewards.small[0]*productionCreditMultiplier(s),4);
+  expect(result.state.resources.tokens).toBe(tokens);expect(result.state.run.workshop.parts['plugin-tabs']!.completedAt).toBeNull();
+  const later=advanceActiveTime(result.state,BALANCE.workshop.assistStepMs*10).state;
+  expect(later.run.workshop.parts['plugin-tabs']!.step).toBe(3);expect(later.run.workshop.parts['plugin-tabs']!.tested).toBe(false);expect(later.resources.tokens).toBe(tokens);
  });
  it('写真・テーマ・書類の表示操作を保存し、日付の並べ替えと日本語・英語の検索を完了する',()=>{
   let s=request(fixture(),'sort');s=action(s,{type:'sort',by:'date'});expect(s.run.desktop.feedback.at(-1)!.completedAt).toBe(now);
@@ -58,9 +84,14 @@ describe('段階6：アプリとジョブ',()=>{
   s=request(s,'dark');s=action(s,{type:'theme',mode:'dark',accent:'#a76628',radius:3,iconSize:64,slideshow:true});expect(s.run.desktop.feedback.at(-1)!.completedAt).toBe(now);
   expect(decodeSave(encodeSave(s))).toEqual(s);
  });
- it('小さな機能はその窓が写るときだけパーツ数に加える',()=>{
-  let s=fixture('desktop-files');const before=screenshotParts(s);s=buyDesktopApp(s,'sort');s=focusWindow(s,'files');expect(screenshotParts(s)).toBe(before+2);
-  s=action(s,{type:'minimize',app:'files'});expect(screenshotParts(s)).toBe(before-3);
+ it('実際に採用して写っている機能だけを写真の部品として数える',()=>{
+  let s=fixture('desktop-files');const sort=s.run.desktop.projects.files!.installed!.parts.find(part=>part.id==='sort')!;
+  s=actAppBuild(s,{type:'app-edit',app:'files'});s=actAppBuild(s,{type:'app-remove',app:'files',part:'sort'});s=actAppBuild(s,{type:'app-install',app:'files'});s=focusWindow(s,'files');
+  const visibleSort=(state:GameState)=>evaluateCapture(state).parts.filter(part=>part.app==='files'&&part.sourcePartId==='files-sort'&&part.visible);
+  expect(visibleSort(s)).toHaveLength(0);
+  s=actAppBuild(s,{type:'app-edit',app:'files'});s=actAppBuild(s,{type:'app-place',app:'files',part:'sort',rect:sort});expect(visibleSort(s)).toHaveLength(0);
+  s=actAppBuild(s,{type:'app-install',app:'files'});s=focusWindow(s,'files');expect(visibleSort(s)).toHaveLength(1);
+  s=action(s,{type:'minimize',app:'files'});expect(evaluateCapture(s).parts.filter(part=>part.app==='files'&&part.visible)).toHaveLength(0);
  });
  it('予約は指定時刻に1度。不在中は半分、時計を戻しても二重に撮らない',()=>{
   let s=fixture();s.persistent.screenshots=[];s.run.desktop.cooldownMs=0;s.run.desktop.terminal.running=false;
@@ -121,13 +152,13 @@ describe('段階6：アプリとジョブ',()=>{
   expect(action(s,{type:'toggle-skill',id:'posts'})).toBe(s);expect(isGameState(s)).toBe(true);
  });
  it('解放済みの10種類だけを順に依頼し、自動応答は半分のトークン',()=>{
-  let s=fixture();const kinds=new Set<string>();
-  // A single completed redraw gives other templates a turn in the rotation.
+  let s=actWorkshop(fixture(),{type:'skill',id:'extraParts'},now);const kinds=new Set<string>();
+  // An unlocked, unfinished material makes the production request eligible.
   for(let i=0;i<20;i++){s=advanceDesktopTime(s,240000,now,true);const f=s.run.desktop.feedback.at(-1)!;kinds.add(f.kind);s.run.desktop.feedback=s.run.desktop.feedback.map(x=>({...x,completedAt:now}));}
-  expect([...kinds].sort()).toEqual(['color','screenshot','sort','search','bright','trash','timer','dark'].sort());
+  expect([...kinds].sort()).toEqual(['part','color','screenshot','sort','search','bright','trash','timer','dark','capture'].sort());
   s=action(s,{type:'skill',id:'autoFeedback'});s=request(s,'sort');const tokens=s.resources.tokens;s=advanceDesktopTime(s,100,now);expect(s.resources.tokens).toBe(tokens+1);expect(s.run.desktop.fileSort).toBe('date');
  });
- it('v1.0の5条件まで到達でき、今回の段階では出荷に進まない',()=>{
+ it('制作済みのセットと採用した操作でv1.0の5条件を満たせる',()=>{
   let s=fixture();for(const app of ['files','mail','clock','bin'] as const)s=focusWindow(s,app);
   for(let i=0;i<10;i++){s=request(s,'sort');s=action(s,{type:'sort',by:'date'});}
   expect(desktopConditions(s)).toEqual([true,true,true,true,true]);expect(s.run.world).toBe('desktop');

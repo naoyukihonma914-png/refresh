@@ -1,0 +1,31 @@
+/* A desktop canvas must not pass its text/font choices into application windows. */
+.desktop[data-shell-part="foundation-desktop"][data-shell-colors="true"] {background-color:var(--shell-part-bg);}
+.desktop [data-shell-part="foundation-wallpaper"][data-shell-colors="true"] {background-color:var(--shell-part-bg);}
+.desktop [data-shell-part="foundation-wallpaper"][data-shell-radius="true"] {border-radius:var(--shell-part-radius);overflow:hidden;}
+.desktop [data-shell-part="foundation-wallpaper"][data-shell-shadow="true"] {box-shadow:var(--shell-part-shadow);}
+/* Each marker is on the surface itself: never on a container around app windows. */
+.desktop :is(.desktop-taskbar,.desktop-resources,.desktop-upgrades,.feedback-toast,.notification-center)[data-shell-part][data-shell-colors="true"] {background:var(--shell-part-bg);color:var(--shell-part-text);}
+.desktop :is(.desktop-taskbar,.desktop-resources,.desktop-upgrades,.feedback-toast,.notification-center)[data-shell-part][data-shell-radius="true"] {border-radius:var(--shell-part-radius);}
+.desktop :is(.desktop-taskbar,.desktop-resources,.desktop-upgrades,.feedback-toast,.notification-center)[data-shell-part][data-shell-shadow="true"] {box-shadow:var(--shell-part-shadow);}
+.desktop :is(.desktop-taskbar,.desktop-resources,.desktop-upgrades,.feedback-toast,.notification-center)[data-shell-part][data-shell-font="true"] {font-size:var(--shell-part-font);}
+.desktop .desktop-upgrades[data-shell-colors="true"] :is(.upgrade-owned>span,.upgrade-owned>small,.purchase-effect,.purchase-estimate) {color:var(--shell-part-text);}
+.desktop .feedback-toast[data-shell-colors="true"]>p {color:var(--shell-part-text);}
+/* Transparent controls use their painted surface's paired foreground. Opaque native
+   buttons keep their own foreground/background and bevels. These rules only opt in
+   after an explicit colour choice. */
+.desktop .desktop-taskbar[data-shell-part][data-shell-colors="true"] .taskbar-right {background:transparent;color:var(--shell-part-text);}
+.desktop :is(.desktop-taskbar,.desktop-resources)[data-shell-part][data-shell-colors="true"] :is(.taskbar-pixels,.taskbar-tokens,.taskbar-progress,.taskbar-clock,.notification-button,.taskbar-job-source) {color:var(--shell-part-text);}
+.desktop :is(.desktop-taskbar,.desktop-resources)[data-shell-part][data-shell-colors="true"] :is(.taskbar-pixels,.taskbar-job-source) small {color:var(--shell-part-text);}
+.desktop .feedback-toast[data-shell-part][data-shell-colors="true"]>header {background:transparent;color:var(--shell-part-text);}
+.desktop .feedback-toast[data-shell-part][data-shell-colors="true"]>header .nav-button {background:transparent;color:var(--shell-part-text);}
+.desktop .feedback-toast[data-shell-part][data-shell-colors="true"] .toast-actions .win-button:not(.accent) {background:transparent;color:var(--shell-part-text);border-color:currentColor;}
+.desktop .feedback-toast[data-shell-part][data-shell-colors="true"]::after {background:var(--shell-part-bg);}
+/* Icon labels have a separate readable backing; icons and their drag targets keep their size. */
+.desktop .desktop-shortcut>[data-shell-part="foundation-icons"] {max-width:100%;}
+.desktop .desktop-shortcut>[data-shell-part="foundation-icons"][data-shell-colors="true"] {background:var(--shell-part-bg);color:var(--shell-part-text);text-shadow:none;}
+.desktop .desktop-shortcut>[data-shell-part="foundation-icons"][data-shell-radius="true"] {border-radius:var(--shell-part-radius);}
+.desktop .desktop-shortcut>[data-shell-part="foundation-icons"][data-shell-shadow="true"] {box-shadow:var(--shell-part-shadow);}
+.desktop .desktop-shortcut>[data-shell-part="foundation-icons"][data-shell-font="true"] {display:block;font-size:var(--shell-part-font);line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;}
+
+/* The selected type size fits the era's existing bar; it cannot cover window controls. */
+.desktop .desktop-taskbar[data-shell-part][data-shell-font="true"],.desktop .desktop-resources[data-shell-part][data-shell-font="true"] {font-size:min(var(--shell-part-font),calc(var(--desktop-taskbar) / 2));line-height:1;}

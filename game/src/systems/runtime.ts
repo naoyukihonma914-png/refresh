@@ -1,3 +1,4 @@
+import { registerCaptureGeometry,type CaptureGeometry } from './captureEvaluation';
 import {setEditorStage,type VisualStage} from './appearance';
 import { advanceAdvice, readAdvice, type AdviceId } from './advice';
 import { setSeedEra, type SeedEra } from './seedAppearance';
@@ -302,18 +303,19 @@ export class GameRuntime {
     if (state === this.snapshot.state) return;
     if(['buy','job-buy','job-update','skill','app-craft','app-install'].includes(action.type))this.sound('build',state);
     const request=action.type==='fix'?state.run.desktop.feedback.find(f=>f.id===action.id):null;
-    this.publish({state,...(request?.kind==='screenshot'?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}),...(request&&hasDesktopSkill(state,'direct')&&request.kind==='color'?{tesseraIntent:{serial:(this.snapshot.tesseraIntent?.serial??0)+1,kind:'color'}}:{})});
+    this.publish({state,...(request&&(request.kind==='screenshot'||request.kind==='capture')?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}),...(request&&hasDesktopSkill(state,'direct')&&request.kind==='color'?{tesseraIntent:{serial:(this.snapshot.tesseraIntent?.serial??0)+1,kind:'color'}}:{})});
     if (action.type !== 'rect' && action.type !== 'icon' && action.type !== 'note') this.persist();
   };
 
   desktopActivity = () => { if(this.canOperate()&&this.snapshot.state.run.world==='desktop'&&this.snapshot.state.run.desktop.idleMs>0)this.publish({state:actDesktop(this.snapshot.state,{type:'activity'},this.platform.clock.wallNow())}); };
 
-  takeScreenshot = () => {
+  takeScreenshot = (geometry?:CaptureGeometry) => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return false;
     this.advanceForeground();
     if (activeScreenshots(this.snapshot.state).length >= screenshotCapacity(this.snapshot.state)) {
       this.publish({ notice: 'desktop.storageFull' }); return false;
     }
+    if(geometry)registerCaptureGeometry(this.snapshot.state,geometry);
     return this.commitReleaseChange(takeScreenshot(this.snapshot.state, this.platform.clock.wallNow(), this.snapshot.language));
   };
 

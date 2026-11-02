@@ -7,6 +7,7 @@ import { normalizeWorkshopRect } from './workshop';
 import { captureStore } from '../platform/captures';
 import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
 import { migrateLegacySave } from './legacySave';
+import { migrateStage8bSave } from './stage8bMigration';
 import type { SaveStorage } from '../platform/storage';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
@@ -106,7 +107,8 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   let version = versionOf(data);
   if (version > SCHEMA_VERSION) throw new Error('新しい版で保存されたデータです');
   if (version < SCHEMA_VERSION) {
-    data = migrateLegacySave(data);
+    if(version<14)data=migrateLegacySave(data);
+    if(versionOf(data)===14)data=migrateStage8bSave(data);
     version = versionOf(data);
     if (version !== SCHEMA_VERSION) throw new Error('保存データの変換に失敗しました');
   }

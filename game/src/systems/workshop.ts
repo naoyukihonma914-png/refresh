@@ -3,7 +3,7 @@ import { paletteFor } from '../content/palette';
 import { WORKSHOP_PARTS, SET_IDS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId, type WorkshopRect, type TestInteraction } from '../content/workshopCatalog';
 import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
-import { globalMultiplier } from './longPlay';
+import { productionCreditMultiplier } from './productionModel';
 import type { GameState } from './state';
 import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId } from './workshopState';
 
@@ -31,7 +31,8 @@ export function canBuyWorkshopSet(s:GameState,set:UiSetId):boolean {
   return w.entered&&['kumiki','desktop'].includes(s.run.world)&&w.enterMs===0&&SET_IDS.includes(set)
     && !w.purchasedSets.includes(set)&&s.resources.pixels>=BALANCE.workshop.setCosts[set]
     && (index<1||setComplete(s,mainline[index-1]!))
-    && (set!=='extras'||s.persistent.editorSkills.includes('extraParts'));
+    && (set!=='extras'||s.persistent.editorSkills.includes('extraParts'))
+    && (set!=='stream'||s.run.world==='desktop'&&s.run.version===BALANCE.world4.minimumVersion);
 }
 export const canExportWorkshop = (s:GameState):boolean => completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt===null);
 export const prototypeConditions = (s:GameState):[boolean,boolean,boolean] => [s.run.workshop.entered,completedParts(s).length>=BALANCE.release.prototypeParts,completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt!==null)];
@@ -39,7 +40,6 @@ export const canInspectDesktopExit = (s:GameState):boolean => s.run.world==='kum
 export const canAssembleDesktop = (s:GameState):boolean => s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0
   &&setComplete(s,'files')&&setComplete(s,'mail')&&s.resources.pixels>=BALANCE.w2.desktopCost
   &&s.persistent.specs.color>=BALANCE.release.prototypeColorLevel;
-export const workshopPixelsPerSecond = (s:GameState):number => s.run.world==='release'?0:completedParts(s).reduce((n,id)=>n+BALANCE.workshop.partRates[id],0);
 export const workshopPlacementGrid=(s:GameState):number=>BALANCE.workshop.canvas.resolutionGrid[s.persistent.specs.resolution]!;
 export function partMinimumSize(s:GameState,id:WorkshopPartId,design?:ComponentDesign):{width:number;height:number} {
   const min=minimumPartSize(id,design??s.run.workshop.parts[id]?.design),grid=workshopPlacementGrid(s);
@@ -77,7 +77,7 @@ function grantExtraMaterials(s:GameState):GameState {
 }
 export function enterWorkshop(s:GameState):GameState {
   if(s.run.workshop.entered)return grantExtraMaterials(s);
-  const next:GameState={...s,run:{...s.run,world:'kumiki',workshop:{...s.run.workshop,entered:true,enteredAt:s.lastTickAt,enterMs:BALANCE.workshop.enterMs,lastActionAt:s.elapsedMs}}};
+  const next:GameState={...s,run:{...s.run,world:'kumiki',workshop:{...s.run.workshop,editorStageAtEntry:editorStage(s),entered:true,enteredAt:s.lastTickAt,enterMs:BALANCE.workshop.enterMs,lastActionAt:s.elapsedMs}}};
   return showGuide(grantExtraMaterials(next),'entered');
 }
 function writePart(s:GameState,id:WorkshopPartId,part:PartProduction):GameState {
@@ -91,6 +91,12 @@ function snapshotSet(s:GameState,set:UiSetId,now:number,preserveDate=false):Game
   const setDocument={id,set,version:s.run.version,at:preserveDate&&previous>=0?documents[previous]!.at:now,parts};
   return {...s,persistent:{...s.persistent,setDocuments:previous<0?[...documents,setDocument]:documents.map((d,i)=>i===previous?setDocument:d)}};
 }
+/** Freeze the complete works of this version before its production state is reset. */
+export function archiveCompletedSets(state:GameState,now:number):GameState {
+  let next=state;
+  for(const set of SET_IDS)if(setComplete(state,set))next=snapshotSet(next,set,now,true);
+  return next;
+}
 const paletteAllows=(s:GameState,color:string):boolean=>/^#[\da-f]{6}$/i.test(color)&&(s.persistent.specs.color>=2||paletteFor(s.persistent.specs.color).includes(color.toLowerCase()));
 function designAllowed(s:GameState,d:ComponentDesign):boolean {
   return isComponentDesign(d)&&paletteAllows(s,d.color)&&paletteAllows(s,d.textColor)
@@ -99,7 +105,7 @@ function designAllowed(s:GameState,d:ComponentDesign):boolean {
 }
 function payStep(s:GameState,id:WorkshopPartId,index:0|1|2|3,finish=false):GameState {
   const category=getWorkshopPart(id).category,efficiency=s.persistent.editorSkills.includes('efficiency')?BALANCE.workshop.efficiencyMultiplier:1;
-  return creditPixels(s,(BALANCE.workshop.categoryStepRewards[category][index]*efficiency+(finish?BALANCE.workshop.finishRewards[category]:0))*BALANCE.spec.color[s.persistent.specs.color]!.multiplier*globalMultiplier(s));
+  return creditPixels(s,(BALANCE.workshop.categoryStepRewards[category][index]*efficiency+(finish?BALANCE.workshop.finishRewards[category]:0))*productionCreditMultiplier(s));
 }
 function buySkill(s:GameState,id:EditorSkill):GameState {
   const skill=BALANCE.workshop.skills.find(p=>p.id===id);
@@ -198,7 +204,45 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     if(s!==state&&p.step===4&&['place','addElement','adjust'].includes(action.type)&&setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now,true);
   }
   if(s===state)return state;
-  return {...s,run:{...s.run,workshop:{...s.run.workshop,lastActionAt:s.elapsedMs}}};
+  const active=s.run.workshop.activePart;
+  const resetAssistance=active!==state.run.workshop.activePart||active!==null&&(s.run.workshop.parts[active]?.step??0)>=3;
+  return {...s,run:{...s.run,workshop:{...s.run.workshop,lastActionAt:s.elapsedMs,
+    ...(resetAssistance?{assistance:{part:active,elapsedMs:0}}:{})}}};
+}
+/** A job may prepare three stages; the fourth remains a real human inspection. */
+export function advanceWorkshopAssistance(state:GameState,ms:number,now:number):GameState {
+  if(!Number.isFinite(ms)||ms<=0||!Number.isFinite(now)||now<0)return state;
+  const w=state.run.workshop,id=w.activePart,part=id?w.parts[id]:undefined,job=state.run.desktop.jobs.tessera;
+  const writeBudget=(s:GameState,elapsedMs:number):GameState=>{
+    const current=s.run.workshop.assistance;
+    if(current?.part===id&&current.elapsedMs===elapsedMs)return s;
+    return {...s,run:{...s.run,workshop:{...s.run.workshop,assistance:{part:id,elapsedMs}}}};
+  };
+  if(state.run.world!=='desktop'||!state.run.desktop.entered||!w.entered||w.enterMs>0
+    ||!state.run.desktop.upgrades.includes('jobs')||!job.assigned||job.cursors<=0||!id||!part||part.step>=3)return writeBudget(state,0);
+  const stepMs=BALANCE.workshop.assistStepMs;
+  const speed=job.cursors*BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier*BALANCE.w3.updateMultiplier**job.updates;
+  if(!Number.isFinite(speed)||speed<=0)return writeBudget(state,0);
+  // More time cannot spill into another component or finish the current one.
+  const available=3-part.step,cappedMs=Math.min(ms,stepMs*available);
+  let budget=Math.min(stepMs*available,(w.assistance?.part===id?w.assistance.elapsedMs:0)+cappedMs*speed),next=state;
+  while(budget>=stepMs){
+    const current=next.run.workshop.parts[id]!;
+    if(current.step>=3)return writeBudget(next,0);
+    const before=next;
+    if(current.step===0){
+      if(!partRectValid(next,id,current.rect))return writeBudget(next,0);
+      next=actWorkshop(next,{type:'place',part:id,rect:current.rect},now);
+    }else if(current.step===1){
+      const missing=getWorkshopPart(id).elements.filter(element=>!current.elements.includes(element));
+      if(missing.length)for(const element of missing)next=actWorkshop(next,{type:'addElement',part:id,element},now);
+      else next=actWorkshop(next,{type:'addElement',part:id,element:current.elements[0]!,index:0},now);
+    }else next=actWorkshop(next,{type:'confirmAdjustment',part:id},now);
+    if(next===before||next.run.workshop.parts[id]!.step<=current.step)return writeBudget(next,0);
+    budget-=stepMs;
+    if(next.run.workshop.parts[id]!.step>=3)return writeBudget(next,0);
+  }
+  return writeBudget(next,budget);
 }
 export function advanceWorkshop(s:GameState,ms:number):GameState {
   if(!Number.isFinite(ms)||ms<0||!s.run.workshop.entered)return s;

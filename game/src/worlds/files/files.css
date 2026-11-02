@@ -1,0 +1,32 @@
+.document-library-tools {display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 8px;}
+.app-layout .document-library-tools {display:contents;}
+.document-library-tools label {display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+.document-library-list table {min-width:100%;table-layout:auto;}
+.document-library-list th:not(:first-child) {width:1%;white-space:nowrap;}
+.document-library-list td:first-child {min-width:12em;}
+.document-library-list td:first-child>button {display:flex;white-space:nowrap;min-width:0;}
+.document-library-list td:first-child>button>span {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.document-library-list td:not(:first-child) {white-space:nowrap;}
+.set-document-view {color:inherit;}
+.set-document-view>header {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;padding-bottom:6px;border-bottom:1px solid #888;}
+.set-document-view h2 {font:inherit;font-weight:bold;margin:0;}
+.set-document-meta {display:flex;flex-wrap:wrap;gap:6px 16px;margin:6px 0;}
+.set-document-readonly {margin:6px 0;}
+.set-document-toolbar {display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0;}
+.set-document-toolbar>span {margin-right:auto;}
+.set-document-viewport {width:100%;overflow:auto;border:1px solid #888;background:#ddd;}
+.set-document-viewport>div {position:relative;}
+.set-document-snapshot {position:absolute;inset:0 auto auto 0;transform-origin:top left;}
+.set-document-snapshot>.capture-workshop {width:100%;height:100%;}
+.set-document-parts {margin-top:8px;}
+.set-document-parts summary {cursor:pointer;}
+.set-document-parts table {width:100%;border-collapse:collapse;}
+.set-document-parts :is(th,td) {padding:4px 6px;text-align:left;border-bottom:1px solid #aaa;vertical-align:top;}
+.set-document-parts th:not(:first-child),.set-document-parts td:not(:first-child) {white-space:nowrap;}
+
+.capture-evaluation {margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid #888;}
+.capture-evaluation h2 {font:inherit;font-weight:bold;margin:0 0 6px;}
+.capture-evaluation dl {margin:0;display:table;}
+.capture-evaluation dl>div {display:table-row;}
+.capture-evaluation dt,.capture-evaluation dd {display:table-cell;padding:2px 12px 2px 0;}
+.capture-evaluation small {display:block;margin-top:4px;}

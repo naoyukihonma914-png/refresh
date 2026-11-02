@@ -4,9 +4,9 @@ import { recommendedPage } from './pageDesign';
 import { BALANCE, type SeedItem, type SeedSkill } from '../config/balance';
 import { creditPixels, manualClickValue } from './economy';
 import { createInitialState, type GameState, type GuideId } from './state';
-import { enterWorkshop } from './workshop';
+import { archiveCompletedSets, enterWorkshop } from './workshop';
 import { createEditorCustomization } from './workshopState';
-import { desktopStage } from './appearance';
+import { desktopStage, editorStage } from './appearance';
 import { createDesktopState } from './desktopState';
 import { desktopScreen, resizeDesktop } from './desktopGeometry';
 
@@ -117,17 +117,25 @@ export function applySeedSkills(state: GameState, selected: readonly SeedSkill[]
 // リリース後の作り直し。永続データを複製し、今の構成だけを初期化する。
 export function createSeedVersion(previous: GameState, version: 'v1' | 'v2', now: number): GameState {
   const next = createInitialState(now);
+  const archived=archiveCompletedSets(previous,now);
   next.run.version = version;
-  next.persistent = {...structuredClone({...previous.persistent,screenshots:[]}),screenshots:[...previous.persistent.screenshots]};
+  next.persistent = {...structuredClone({...archived.persistent,screenshots:[]}),screenshots:[...previous.persistent.screenshots]};
   // Appearance is permanent, but desktop contents and window positions belong to the old version.
   const screen = desktopScreen(desktopStage(next));
   next.run.desktop = resizeDesktop(createDesktopState(screen), screen, next.persistent.desktopPrefs.iconSize);
   next.resources.tokens = previous.resources.tokens;
   next.resources.dollars = previous.resources.dollars;
   if(version==='v2'&&next.persistent.progress.selected&&next.persistent.progress.records['v1-released']!==undefined){next.run.play.contract={id:next.persistent.progress.selected,status:'active'};next.persistent.progress.selected=null;}
+  const stage=editorStage(next),standard=createEditorCustomization(stage),presets=structuredClone(previous.persistent.editorCustomization.presets);
   if (previous.persistent.seedSkills.includes('inherit')) {
     next.run.seed.page=structuredClone(previous.run.seed.page);
-  } else next.persistent.editorCustomization = createEditorCustomization();
+    if((previous.run.workshop.editorStageAtEntry??editorStage(previous))!==stage){
+      next.persistent.editorCustomization={...next.persistent.editorCustomization,
+        bandPosition:standard.bandPosition,panelWidth:standard.panelWidth,docking:standard.docking,
+        panelPositions:standard.panelPositions,panelWidths:standard.panelWidths};
+      next.run.seed.page.layout=null;
+    }
+  } else next.persistent.editorCustomization = {...standard,presets};
   // The skill carries the chosen editor design, never already purchased construction parts.
   next.run.seed.installer = null;
   return next;

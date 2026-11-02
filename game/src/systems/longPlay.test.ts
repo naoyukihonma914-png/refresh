@@ -1,15 +1,16 @@
 import { describe,expect,it } from 'vitest';
 import { BALANCE } from '../config/balance';
 import { BASE_PALETTE, legacyPalette, paletteFor } from '../content/palette';
-import { getWorkshopPart } from '../content/workshopCatalog';
+import { getWorkshopPart,partsForSet,WORKSHOP_PARTS } from '../content/workshopCatalog';
 import { actWorkshop, advanceWorkshop, enterWorkshop } from './workshop';
 import { observeProgress } from './longPlayEvents';
 import { bulkQuote } from './bulk';
 import { actDesktopExtra,refreshDesktop } from './desktopExtras';
 import { jobCursorRate } from './desktopJobs';
 import { creditPixels,manualClickValue,passivePixelsPerSecond } from './economy';
-import { createFixture } from './fixtures';
-import { ACHIEVEMENTS,actCommon,activeContract,advanceStray,bulkVisible,createProgress,globalMultiplier,isPlay,isProgress,reconcileProgress } from './longPlay';
+import { completeWorkshopPartFixture,createFixture } from './fixtures';
+import { advanceDesktopTime,takeScreenshot } from './desktop';
+import { ACHIEVEMENTS,actCommon,activeContract,advanceStray,bulkVisible,createProgress,globalMultiplier,isPlay,isProgress,previousWorldMultiplier,reconcileProgress } from './longPlay';
 import { decodeSave,encodeSave } from './save';
 import { buildSeed,canBuildSeed,createSeedVersion,freshMomentum,pressSeed,seedCursorQuote,visibleSeedItems } from './seed';
 import { createInitialState } from './state';
@@ -82,5 +83,66 @@ describe('第3版：朱色の部品の隠し要素',()=>{
   s=reconcileProgress(s,now);expect(s.persistent.progress.secretPart).toBe(false);expect(s.persistent.progress.records['secret-art']).toBeUndefined();
   before=s;s=observeProgress(before,actWorkshop(before,{type:'adjust',part:'common-button',patch:{color:BALANCE.longPlay.secretPartColor}},now+1));
   expect(s.persistent.progress.secretPart).toBe(false);expect(actWorkshop(s,{type:'export',part:'common-button'},now+2)).toBe(s);
+ });
+});
+
+
+describe('段階8b：現在の制作と写真の永続記録',()=>{
+ it('積み上げは未書出でも完成した現周回の部品だけを数え、旧アイコン数や未完成の工程を数えない',()=>{
+  let s=createFixture('stage8a-part-common-button-step-3-era0',now)!;
+  s.run.seed.autoCursors=7;s.persistent.progress=createProgress();s.persistent.progress.counts.icons=10000;
+  const cursorFactor=1+7*BALANCE.longPlay.cursorBonus;
+  expect(previousWorldMultiplier(s)).toBeCloseTo(cursorFactor);
+  s=actWorkshop(s,{type:'test',part:'common-button',interaction:'press'},now+1);
+  expect(s.run.workshop.parts['common-button']!.exportedAt).toBeNull();
+  expect(previousWorldMultiplier(s)).toBeCloseTo((1+BALANCE.longPlay.partBonus)*cursorFactor);
+  const before=previousWorldMultiplier(s);s=actWorkshop(s,{type:'export',part:'common-button'},now+2);
+  expect(previousWorldMultiplier(s)).toBe(before);s.persistent.progress.counts.icons=0;expect(previousWorldMultiplier(s)).toBe(before);
+ });
+ it('完成部品の上限で積み上げを止め、次の周回では旧版の書類を残して制作分を数え直す',()=>{
+  let s=createFixture('stage8a-catalog',now)!;s.run.version='v2';s.persistent.progress=createProgress();
+  for(const definition of WORKSHOP_PARTS)s=completeWorkshopPartFixture(s,definition.id,now,false);
+  expect(WORKSHOP_PARTS.length).toBeGreaterThan(BALANCE.longPlay.partCap);
+  s.run.seed.autoCursors=0;expect(previousWorldMultiplier(s)).toBeCloseTo(1+BALANCE.longPlay.partCap*BALANCE.longPlay.partBonus);
+  // A previous run's full documents remain a collection, rather than fresh production.
+  const previous=createFixture('stage8a-files-complete',now)!;previous.persistent.progress=createProgress();previous.persistent.progress.counts.icons=500;
+  let next=createSeedVersion(previous,'v1',now+1);expect(next.persistent.setDocuments.some(doc=>doc.version==='v0.1'&&doc.set==='files')).toBe(true);
+  expect(previousWorldMultiplier(next)).toBe(1);
+  next=reconcileProgress(next,now+1);expect(next.persistent.progress.records.icons6).toBeUndefined();expect(next.persistent.progress.records.practice10).toBeUndefined();expect(next.persistent.progress.records['parts-all']).toBeUndefined();
+ });
+ it('互換IDの実績は、初めての完成部品・完成セット・ファイルとメールの完成で順に得る',()=>{
+  let s=createFixture('stage8a-catalog',now)!;s.persistent.progress=createProgress();s.persistent.progress.counts.icons=10000;
+  s=reconcileProgress(s,now);expect(s.persistent.progress.records.icons6).toBeUndefined();expect(s.persistent.progress.records.practice10).toBeUndefined();expect(s.persistent.progress.records['parts-all']).toBeUndefined();
+  s=completeWorkshopPartFixture(s,'common-button',now+1,false);s=reconcileProgress(s,now+1);
+  expect(s.persistent.progress.records.icons6).toBe(now+1);expect(s.persistent.progress.records.practice10).toBeUndefined();expect(s.persistent.progress.records['first-export']).toBeUndefined();
+  for(const definition of partsForSet('common'))if(definition.id!=='common-button')s=completeWorkshopPartFixture(s,definition.id,now+2,false);
+  s=reconcileProgress(s,now+2);expect(s.persistent.progress.records.practice10).toBe(now+2);expect(s.persistent.progress.records['parts-all']).toBeUndefined();
+  for(const definition of partsForSet('files'))s=completeWorkshopPartFixture(s,definition.id,now+3,false);
+  s=reconcileProgress(s,now+3);expect(s.persistent.progress.records['parts-all']).toBeUndefined();
+  for(const definition of partsForSet('mail'))s=completeWorkshopPartFixture(s,definition.id,now+4,false);
+  s=reconcileProgress(s,now+4);expect(s.persistent.progress.records['parts-all']).toBe(now+4);
+  expect(s.persistent.progress.records.icons6).toBe(now+1);expect(s.persistent.progress.records.practice10).toBe(now+2);
+ });
+ it('写真は設定された50枚の直前では実績を出さず、実際の50枚目で記録し、削除後も累計を保つ',()=>{
+  let s=createFixture('desktop-early',now)!;s.persistent.progress=createProgress();
+  expect(BALANCE.longPlay.shotMilestone).toBe(50);
+  for(let n=1;n<=BALANCE.longPlay.shotMilestone;n++){
+   const at=now+n*60000,before=s;
+   s=observeProgress(before,takeScreenshot(before,at,'ja'));s=reconcileProgress(s,at);
+   expect(s.persistent.progress.counts.shots).toBe(n);
+   if(n<BALANCE.longPlay.shotMilestone)expect(s.persistent.progress.records.shots100).toBeUndefined();
+   else expect(s.persistent.progress.records.shots100).toBe(at);
+   s=advanceDesktopTime(s,s.run.desktop.cooldownMs,at);
+  }
+  expect(s.persistent.screenshots).toHaveLength(BALANCE.longPlay.shotMilestone);
+  s={...s,persistent:{...s.persistent,screenshots:[],progress:{...s.persistent.progress,records:{}}}};
+  const restored=decodeSave(encodeSave(s)),next=reconcileProgress(restored,now+4_000_000);
+  expect(next.persistent.progress.counts.shots).toBe(BALANCE.longPlay.shotMilestone);expect(next.persistent.progress.records.shots100).toBe(now+4_000_000);
+ });
+ it('旧条件で保存済みの実績は、新条件をまだ満たさなくても日時と倍率を失わない',()=>{
+  let s=createInitialState(now);const records={icons6:now-4,practice10:now-3,'parts-all':now-2,shots100:now-1};
+  s.persistent.progress.records=records;
+  s=reconcileProgress(decodeSave(encodeSave(s)),now+1);expect(s.persistent.progress.records).toEqual(records);expect(globalMultiplier(s)).toBeCloseTo(1+4*BALANCE.longPlay.achievementBonus);
+  const next=createSeedVersion(s,'v1',now+2);expect(next.persistent.progress.records).toEqual(records);expect(decodeSave(encodeSave(next)).persistent.progress.records).toEqual(records);
  });
 });

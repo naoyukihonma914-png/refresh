@@ -1,6 +1,6 @@
 import { BALANCE } from '../config/balance';
 
-export const SET_IDS = ['common', 'foundation', 'files', 'mail', 'photo', 'bin', 'clock', 'theme', 'terminal', 'manager', 'extras'] as const;
+export const SET_IDS = ['common', 'foundation', 'files', 'mail', 'photo', 'bin', 'clock', 'theme', 'terminal', 'manager', 'extras', 'stream'] as const;
 export type UiSetId = typeof SET_IDS[number];
 export type PartCategory = 'small' | 'medium' | 'large';
 export type TestInteraction = 'press' | 'slide' | 'scroll' | 'select' | 'toggle' | 'input' | 'resize';
@@ -57,6 +57,12 @@ const definitions: Record<UiSetId, readonly PartSeed[]> = {
   terminal: [make('terminal-output','surface',['prompt','output'],'scroll','large'),make('terminal-commands','list',['command','description'],'select','large'),make('terminal-interval','select',['interval','unit'],'select'),make('terminal-run','button',['run','stop'],'press'),make('terminal-history','list',['command','result'],'scroll')],
   manager: [make('manager-processes','table',['process','rate','share'],'scroll'),make('manager-performance','surface',['specs','values'],'select')],
   extras: [make('plugin-tabs','tabs',['tab','page'],'select','small'),make('plugin-table','table',['time','pixels'],'scroll','small')],
+  stream: [
+    make('stream-preview','surface',['source','image'],'select','large'),
+    make('stream-sources','select',['source','selection'],'select'),
+    make('stream-scenes','tabs',['scene','preview'],'select'),
+    make('stream-comments','list',['message','selection'],'scroll'),
+  ],
 };
 
 export const UI_SETS = SET_IDS.map(id => ({ id, labelKey: `ws.set.${id}`, mainline: ['common','foundation','files','mail'].includes(id), parts: definitions[id].map(p => p.id) }));

@@ -1,0 +1,15 @@
+.workshop-root .ws-stream-part {padding:4px;min-height:0;overflow:auto;}
+.workshop-root .ws-stream-preview {position:relative;display:block;width:100%;height:100%;padding:0;overflow:hidden;background:#000;color:#fff;}
+.workshop-root .ws-stream-preview[aria-pressed=true] {outline:2px solid currentColor;outline-offset:-4px;}
+.workshop-root .ws-stream-preview>img {display:block;inline-size:100%;block-size:100%;object-fit:contain;}
+.workshop-root .ws-stream-source-caption {position:absolute;bottom:0;left:0;right:0;padding:3px 5px;background:#000b;color:#fff;text-align:left;}
+.workshop-root .ws-stream-message-preview {display:flex;flex-direction:column;gap:6px;inline-size:100%;block-size:100%;padding:12px;text-align:left;overflow:auto;}
+.workshop-root .ws-stream-part>label {display:flex;flex-direction:column;gap:4px;}
+.workshop-root .ws-stream-part select {width:100%;min-width:0;}
+.workshop-root .ws-stream-scenes {display:flex;align-content:flex-start;gap:4px;flex-wrap:wrap;}
+.workshop-root .ws-stream-scenes [aria-selected=true] {border-style:inset;}
+.workshop-root .ws-stream-scenes output {width:100%;}
+.workshop-root .ws-stream-comments {height:100%;overflow:auto;}
+.workshop-root .ws-stream-comments>button {display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;}
+.workshop-root .ws-stream-comments>button[aria-pressed=true] {outline:1px solid currentColor;outline-offset:-2px;}
+.workshop-root .ws-stream-comments>button>span,.workshop-root .ws-stream-message-preview>span {min-width:0;white-space:normal;overflow-wrap:anywhere;}

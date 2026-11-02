@@ -22,9 +22,8 @@ export const createPlay=():PlayState=>({achievement:null,contract:null,stray:{wa
 export const globalMultiplier=(s:GameState)=>!s.persistent.progress?1:1+Object.keys(s.persistent.progress.records).length*BALANCE.longPlay.achievementBonus+Object.keys(s.persistent.progress.completed).length*BALANCE.longPlay.contractBonus;
 export function previousWorldMultiplier(s:GameState){
  if(!s.persistent.progress)return 1;
- // Desktop economic redesign belongs to 8b; this adapter only replaces its retired source.
  const parts=completedParts(s).length;
- return (1+Math.min(BALANCE.longPlay.iconCap,Math.max(parts,s.persistent.progress.counts.icons))*BALANCE.longPlay.iconBonus)*(1+s.run.seed.autoCursors*BALANCE.longPlay.cursorBonus);
+ return (1+Math.min(BALANCE.longPlay.partCap,parts)*BALANCE.longPlay.partBonus)*(1+s.run.seed.autoCursors*BALANCE.longPlay.cursorBonus);
 }
 export const activeContract=(s:GameState)=>s.run.play.contract?.status==='active'?s.run.play.contract.id:null;
 export const contractBlocks=(s:GameState,id:string)=>CONTRACTS.some(c=>c.id===activeContract(s)&&c.blocked===id);
@@ -35,11 +34,11 @@ export function reconcileProgress(s:GameState,now:number):GameState {
  'first-pixel':s.run.totalPixelsGenerated>0||archived.some(p=>p.generatedPixels>0),'save-created':s.run.seed.built.includes('save')||archived.some(p=>p.screen.built.includes('save')),
  cursors10:s.run.seed.autoCursors>=10||archived.some(p=>p.screen.cursors>=10),cursors50:s.run.seed.autoCursors>=50||archived.some(p=>p.screen.cursors>=50),
  'kumiki-created':s.run.seed.built.includes('export')||k.entered||archived.length>0,'first-export':exported||archived.some(p=>p.exports.length>0),
- icons6:known.length>=BALANCE.workshop.achievementParts[0],practice10:known.length>=BALANCE.workshop.achievementParts[1],
- 'parts-all':completedSets(s).includes('common'),
+ icons6:known.length>0,practice10:completedSets(s).length>0,
+ 'parts-all':completedSets(s).includes('files')&&completedSets(s).includes('mail'),
  repairs10:p.counts.repairs>=10,'editor-update':s.persistent.editorSkills.includes('update'),'editor-modern':s.persistent.editorSkills.includes('modern'),'desktop-update':s.persistent.desktopPrefs.skills.includes('major1'),
  'product-name':!!s.persistent.productName||archived.some(p=>!!p.name),'prototype-released':archived.some(p=>p.version==='v0.1'),'v1-released':archived.some(p=>p.version==='v1.0')||s.run.version==='v2',
- 'first-shot':p.counts.shots>0||s.persistent.screenshots.length>0,shots100:p.counts.shots>=100||s.persistent.screenshots.length>=100,
+ 'first-shot':p.counts.shots>0||s.persistent.screenshots.length>0,shots100:p.counts.shots>=BALANCE.longPlay.shotMilestone||s.persistent.screenshots.length>=BALANCE.longPlay.shotMilestone,
  feedback10:p.counts.feedback>=10||d.feedback.filter(f=>f.completedAt!==null).length>=10,feedback50:p.counts.feedback>=50||d.feedback.filter(f=>f.completedAt!==null).length>=50,
  'jobs-full':d.upgrades.includes('jobs')&&Object.values(d.jobs).filter(j=>j.assigned&&j.cursors>0).length>=BALANCE.spec.memory[s.persistent.specs.memory]!.posts+(s.persistent.desktopPrefs.skills.includes('posts')&&!s.persistent.desktopPrefs.disabled.includes('posts')?BALANCE.w3.extraPosts:0),
  apps7:d.entered&&d.apps.length+1>=7,wallpaper:s.persistent.desktopPrefs.wallpaper!==null,terminal:d.terminal.executions>0,restarts10:p.counts.restarts>=10,

@@ -3,21 +3,28 @@ import { desktopScreen, resizeDesktop, LEGACY_DESKTOP, MIN_WINDOW_WIDTH, MIN_WIN
 import type { LogicalSize } from './viewport';
 import { readCapture } from './captureScene';
 import { BALANCE, type DesktopUpgrade, type DesktopSkill } from '../config/balance';
+import { WORKSHOP_PARTS } from '../content/workshopCatalog';
 export const APP_IDS = ['tessera', 'note', 'files', 'mail', 'manager', 'photo', 'bin', 'clock', 'theme', 'terminal', 'settings'] as const;
 export type AppId = typeof APP_IDS[number];
 export {MIN_WINDOW_WIDTH,MIN_WINDOW_HEIGHT} from './desktopGeometry';
 export type BuiltApp = Exclude<AppId,'tessera'|'note'|'settings'>;
 export const JOB_IDS = ['tessera','files','photo','terminal'] as const;
 export type JobId = typeof JOB_IDS[number];
+/** Process selection is presentation state; retain old IDs while accepting the new producer ledger. */
+export function isManagerProcessId(value:unknown):value is string {
+  return typeof value==='string'&&['home','desktop','shots','feedback',...JOB_IDS,
+    ...APP_IDS.map(id=>`app:${id}`),...JOB_IDS.map(id=>`job:${id}`),
+    ...BALANCE.w1.items.map(item=>`seed:${item.id}`),...WORKSHOP_PARTS.map(part=>part.id)].includes(value);
+}
 export interface Job { assigned:boolean; cursors:number; updates:number }
 export interface PhotoEdit { source:string; brightness:number; tone:number; crop:number }
 export interface DesktopPreferences { skills:DesktopSkill[]; disabled:DesktopSkill[]; mode:'light'|'dark'; accent:string; radius:number;radiusCustom:boolean; iconSize:number; slideshow:boolean; wallpaper:PhotoEdit|null; lastShotId:number }
 export const createDesktopPreferences = ():DesktopPreferences => ({skills:[],disabled:[],mode:'light',accent:'#0067c0',radius:8,radiusCustom:false,iconSize:48,slideshow:false,wallpaper:null,lastShotId:0});
 export interface Rect { x: number; y: number; width: number; height: number }
 export interface WindowState extends Rect { open: boolean; minimized: boolean; maximized: boolean; z: number; restore: Rect | null }
-export type FeedbackKind = 'color' | 'screenshot' | 'sort' | 'search' | 'bright' | 'trash' | 'timer' | 'dark';
+export type FeedbackKind = 'part' | 'capture' | 'color' | 'screenshot' | 'sort' | 'search' | 'bright' | 'trash' | 'timer' | 'dark';
 export interface Feedback {
-  id: number; sender: 'hikari' | 'ren' | 'maki'; kind: FeedbackKind; target: string; baseline: number[]; baselineColor: string;
+  id: number; sender: 'hikari' | 'ren' | 'maki'; kind: FeedbackKind; target: string; baseline: number[]; baselineColor: string; readAt?:number|null;
   at: number; completedAt: number | null; reward?:number;
 }
 export interface DesktopState {
@@ -71,9 +78,9 @@ export function isDesktopState(x: unknown): x is DesktopState {
   if (x.active !== null && !APP_IDS.includes(x.active as AppId)) return false;
   if (!amount(x.feedbackMs) || !count(x.feedbackSerial) || !amount(x.cooldownMs) || !Array.isArray(x.feedback)) return false;
   const requests = x.feedback;
-  if (!requests.every(f => obj(f) && count(f.id) && f.id > 0 && ['color','screenshot','sort','search','bright','trash','timer','dark'].includes(f.kind as string)
-    && (typeof f.target==='string' && (f.kind==='search'?f.target.length<=120:f.kind==='timer'?/^\d{1,16}$/.test(f.target):f.target===(f.kind==='color'?'primary':''))) && Array.isArray(f.baseline) && (f.kind==='trash'?f.baseline.length<=3&&f.baseline.every(c=>count(c)&&c>0):f.baseline.length===0)
-    && ['hikari','ren','maki'].includes(f.sender as string) && typeof f.baselineColor === 'string' && /^#[0-9a-f]{6}$/i.test(f.baselineColor) && (f.reward===undefined||amount(f.reward)) && amount(f.at) && (f.completedAt === null || amount(f.completedAt)))) return false;
+  if (!requests.every(f => obj(f) && count(f.id) && f.id > 0 && ['part','capture','color','screenshot','sort','search','bright','trash','timer','dark'].includes(f.kind as string)
+    && (typeof f.target==='string' && (f.kind==='part'?Object.hasOwn(BALANCE.workshop.partRates,f.target):f.kind==='capture'?['windows','photo','maximized'].includes(f.target):f.kind==='search'?f.target.length<=120:f.kind==='timer'?/^\d{1,16}$/.test(f.target):f.target===(f.kind==='color'?'primary':''))) && Array.isArray(f.baseline) && (f.kind==='trash'?f.baseline.length<=3&&f.baseline.every(c=>count(c)&&c>0):f.baseline.length===0)
+    && ['hikari','ren','maki'].includes(f.sender as string) && typeof f.baselineColor === 'string' && /^#[0-9a-f]{6}$/i.test(f.baselineColor) && (f.reward===undefined||amount(f.reward)) && (f.readAt===undefined||f.readAt===null||amount(f.readAt)) && amount(f.at) && (f.completedAt === null || amount(f.completedAt)))) return false;
   if (new Set(requests.map(f => f.id)).size !== requests.length || requests.some(f => f.id > (x.feedbackSerial as number)) || requests.filter(f => f.completedAt === null).length > 5) return false;
   return isDesktopExtras(x) && [x.notice,x.success,x.mailSelection].every(id => id === null || requests.some(f => f.id === id))
     && ['root','exports','screenshots'].includes(x.fileFolder as string) && (x.fileSelection === null || typeof x.fileSelection === 'string');
@@ -120,5 +127,5 @@ function isDesktopExtras(x:Record<string,unknown>):boolean {
  if(x.reservation!==null&&(!obj(x.reservation)||!amount(x.reservation.at)||typeof x.reservation.done!=='boolean'||x.reservation.result!==undefined&&!['captured','skipped','expired'].includes(x.reservation.result as string)))return false;
  const t=x.terminal;
  if(!obj(t)||!(BALANCE.w3.terminalIntervals as readonly unknown[]).includes(t.interval)||typeof t.running!=='boolean'||!amount(t.elapsedMs)||!count(t.executions)||!Array.isArray(t.log)||t.log.length>BALANCE.w3.maxNoteLog||!t.log.every(v=>obj(v)&&amount(v.at)&&typeof v.ok==='boolean'))return false;
- return ['processes','performance'].includes(x.managerTab as string)&&['home','shots','feedback',...JOB_IDS].includes(x.managerProcess as string)&&(x.calendarMonth===null||amount(x.calendarMonth))&&Array.isArray(x.shotHistory)&&x.shotHistory.length<=BALANCE.w3.maxShotHistory&&x.shotHistory.every(v=>obj(v)&&amount(v.at)&&amount(v.pixels))&&(x.stalled===null||APP_IDS.includes(x.stalled as AppId))&&typeof x.stalledClosed==='boolean'&&amount(x.stallMs)&&count(x.stallSerial)&&amount(x.idleMs)&&['skills','data','specs','general','records','sound'].includes(x.settingsPage as string);
+ return ['processes','performance'].includes(x.managerTab as string)&&isManagerProcessId(x.managerProcess)&&(x.calendarMonth===null||amount(x.calendarMonth))&&Array.isArray(x.shotHistory)&&x.shotHistory.length<=BALANCE.w3.maxShotHistory&&x.shotHistory.every(v=>obj(v)&&amount(v.at)&&amount(v.pixels))&&(x.stalled===null||APP_IDS.includes(x.stalled as AppId))&&typeof x.stalledClosed==='boolean'&&amount(x.stallMs)&&count(x.stallSerial)&&amount(x.idleMs)&&['skills','data','specs','general','records','sound'].includes(x.settingsPage as string);
 }

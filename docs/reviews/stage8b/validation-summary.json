@@ -1,0 +1,5981 @@
+{
+  "date": "2026-11-03 JST",
+  "base": "1f0d72a",
+  "unitTests": {
+    "command": "cd game && npm test",
+    "passed": 545,
+    "failed": 0
+  },
+  "build": {
+    "command": "cd game && npm run build",
+    "files": [
+      "game/dist/index.html"
+    ],
+    "bytes": 6153449,
+    "sha256": "ddf11763dcf24ae77e3f8090d52a17d2a4b52c551131b537263350f82b8cf865"
+  },
+  "fontCodepointsChecked": 3732,
+  "groups": {
+    "stage8b-economy": {
+      "passed": 24,
+      "failed": 0
+    },
+    "stage8b-capture": {
+      "passed": 24,
+      "failed": 0
+    },
+    "stage8b-roundtrip": {
+      "passed": 24,
+      "failed": 0
+    },
+    "stage8b-migration": {
+      "passed": 6,
+      "failed": 0
+    },
+    "stage8b-release": {
+      "passed": 6,
+      "failed": 0
+    },
+    "stage8b-custom": {
+      "passed": 24,
+      "failed": 0
+    },
+    "stage8b-photo": {
+      "passed": 12,
+      "failed": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "8b1-era0-ja-1920",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2129.27325,
+          "ledgerTotal": 2129.27325,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 829.7850000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era0-ja-1366",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2129.27325,
+          "ledgerTotal": 2129.27325,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 829.7850000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era0-en-1920",
+      "step": "8b1",
+      "language": "en",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2129.27325,
+          "ledgerTotal": 2129.27325,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 829.7850000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era0-en-1366",
+      "step": "8b1",
+      "language": "en",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2129.27325,
+          "ledgerTotal": 2129.27325,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 829.7850000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era0-en-XA-1920",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2129.27325,
+          "ledgerTotal": 2129.27325,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 829.7850000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era0-en-XA-1366",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 1992.84825,
+          "ledgerTotal": 1992.84825,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 693.36,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2129.27325,
+          "ledgerTotal": 2129.27325,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 829.7850000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era1-ja-1920",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2169.0727500000003,
+          "ledgerTotal": 2169.0727500000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 845.2950000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era1-ja-1366",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2169.0727500000003,
+          "ledgerTotal": 2169.0727500000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 845.2950000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era1-en-1920",
+      "step": "8b1",
+      "language": "en",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2169.0727500000003,
+          "ledgerTotal": 2169.0727500000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 845.2950000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era1-en-1366",
+      "step": "8b1",
+      "language": "en",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2169.0727500000003,
+          "ledgerTotal": 2169.0727500000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 845.2950000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era1-en-XA-1920",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2169.0727500000003,
+          "ledgerTotal": 2169.0727500000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 845.2950000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era1-en-XA-1366",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2030.0977500000004,
+          "ledgerTotal": 2030.0977500000001,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 706.32,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2169.0727500000003,
+          "ledgerTotal": 2169.0727500000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 845.2950000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era2-ja-1920",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era2-ja-1366",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era2-en-1920",
+      "step": "8b1",
+      "language": "en",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era2-en-1366",
+      "step": "8b1",
+      "language": "en",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era2-en-XA-1920",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era3-ja-1920",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era3-ja-1366",
+      "step": "8b1",
+      "language": "ja",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era3-en-1920",
+      "step": "8b1",
+      "language": "en",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era3-en-1366",
+      "step": "8b1",
+      "language": "en",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era3-en-XA-1920",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era3-en-XA-1366",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b1-era2-en-XA-1366",
+      "step": "8b1",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "economy": {
+        "before": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "unadopted": {
+          "total": 2048.7225000000003,
+          "ledgerTotal": 2048.7225000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 432,
+            "rate": 712.8000000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "after": {
+          "total": 2188.9725000000003,
+          "ledgerTotal": 2188.9725000000003,
+          "producerCount": 6,
+          "photo": {
+            "id": "app:photo",
+            "base": 517,
+            "rate": 853.0500000000001,
+            "sources": [
+              "common-frame",
+              "common-scrollbar",
+              "common-button",
+              "common-heading",
+              "common-progress",
+              "photo-switch",
+              "photo-brightness",
+              "photo-tone",
+              "photo-wallpaper",
+              "photo-crop",
+              "photo-compare",
+              "photo-display"
+            ]
+          }
+        },
+        "windowLifecycleInvariant": true
+      }
+    },
+    {
+      "id": "8b2-era0-ja-1366",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era0-en-1920",
+      "step": "8b2",
+      "language": "en",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era0-en-1366",
+      "step": "8b2",
+      "language": "en",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era0-en-XA-1920",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era0-en-XA-1366",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era1-ja-1920",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era1-ja-1366",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era1-en-1920",
+      "step": "8b2",
+      "language": "en",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era1-en-1366",
+      "step": "8b2",
+      "language": "en",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era1-en-XA-1920",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era1-en-XA-1366",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era2-ja-1920",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 35,
+          "kinds": 21,
+          "fullyHidden": 2,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 15,
+          "kinds": 9,
+          "fullyHidden": 22,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 30,
+          "kinds": 20,
+          "fullyHidden": 2,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era2-ja-1366",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 35,
+          "kinds": 21,
+          "fullyHidden": 2,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 15,
+          "kinds": 9,
+          "fullyHidden": 22,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 30,
+          "kinds": 20,
+          "fullyHidden": 2,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era2-en-1920",
+      "step": "8b2",
+      "language": "en",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 37,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 15,
+          "kinds": 9,
+          "fullyHidden": 22,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 32,
+          "kinds": 22,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era2-en-1366",
+      "step": "8b2",
+      "language": "en",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 37,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 15,
+          "kinds": 9,
+          "fullyHidden": 22,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 32,
+          "kinds": 22,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era2-en-XA-1920",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 36,
+          "kinds": 22,
+          "fullyHidden": 1,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 15,
+          "kinds": 9,
+          "fullyHidden": 22,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 31,
+          "kinds": 21,
+          "fullyHidden": 1,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era2-en-XA-1366",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 36,
+          "kinds": 22,
+          "fullyHidden": 1,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 15,
+          "kinds": 9,
+          "fullyHidden": 22,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 31,
+          "kinds": 21,
+          "fullyHidden": 1,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era3-ja-1920",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era3-ja-1366",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era3-en-1920",
+      "step": "8b2",
+      "language": "en",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era3-en-1366",
+      "step": "8b2",
+      "language": "en",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era3-en-XA-1920",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era3-en-XA-1366",
+      "step": "8b2",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 33,
+          "kinds": 24,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b2-era0-ja-1920",
+      "step": "8b2",
+      "language": "ja",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "capture": {
+        "overlap": {
+          "visibleCount": 30,
+          "kinds": 21,
+          "fullyHidden": 3,
+          "visibleWindows": [
+            "note",
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": [
+            "files-search",
+            "files-sort",
+            "files-large"
+          ]
+        },
+        "covered": {
+          "visibleCount": 16,
+          "kinds": 15,
+          "fullyHidden": 17,
+          "visibleWindows": [
+            "note"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [],
+          "hiddenFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ]
+        },
+        "uncovered": {
+          "visibleCount": 28,
+          "kinds": 23,
+          "fullyHidden": 0,
+          "visibleWindows": [
+            "files"
+          ],
+          "origin": "dom",
+          "visibleFileSources": [
+            "common-frame",
+            "common-frame",
+            "common-frame",
+            "files-back",
+            "files-search",
+            "files-sort",
+            "files-large",
+            "files-list",
+            "files-storage",
+            "common-button"
+          ],
+          "hiddenFileSources": []
+        },
+        "frozenAlbum": true,
+        "visibleOnly": true
+      }
+    },
+    {
+      "id": "8b3-era0-ja-1920",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era0-ja-1366",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era0-en-1920",
+      "step": "8b3",
+      "language": "en",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era0-en-1366",
+      "step": "8b3",
+      "language": "en",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era0-en-XA-1920",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era0-en-XA-1366",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era1-ja-1920",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era1-ja-1366",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era1-en-1920",
+      "step": "8b3",
+      "language": "en",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era1-en-1366",
+      "step": "8b3",
+      "language": "en",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era1-en-XA-1920",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era1-en-XA-1366",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era2-en-1920",
+      "step": "8b3",
+      "language": "en",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era2-en-1366",
+      "step": "8b3",
+      "language": "en",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era3-ja-1920",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era3-ja-1366",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era3-en-1920",
+      "step": "8b3",
+      "language": "en",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era3-en-1366",
+      "step": "8b3",
+      "language": "en",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era3-en-XA-1366",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era3-en-XA-1920",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era2-ja-1920",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era2-ja-1366",
+      "step": "8b3",
+      "language": "ja",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era2-en-XA-1920",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b3-era2-en-XA-1366",
+      "step": "8b3",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "roundtrip": {
+        "currentDocuments": 6,
+        "archivedDocuments": 4,
+        "frozenArchive": true,
+        "realImportReload": true,
+        "customization": {
+          "nativeBackground": false,
+          "accent": "#7cc4f2",
+          "bandPosition": "top",
+          "panelWidth": 383,
+          "background": "#101018",
+          "grid": true,
+          "gridSpacing": 8,
+          "fontSize": 14,
+          "docking": "standard",
+          "presets": [],
+          "panelPositions": {
+            "palette": "left",
+            "tools": "right",
+            "parts": "right",
+            "info": "bottom"
+          },
+          "panelWidths": {
+            "palette": 256,
+            "tools": 256,
+            "parts": 256
+          }
+        },
+        "streamSourceInteractive": true,
+        "streamSceneInteractive": true,
+        "streamStored": true,
+        "refreshGate": true,
+        "secondRunGate": true,
+        "closedEditorEntry": true
+      }
+    },
+    {
+      "id": "8b-migration-era0-ja-1920",
+      "step": "8b-migration",
+      "language": "ja",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "migration": [
+        {
+          "source": "v14-stage8a-workshop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-desktop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-release.json.gz",
+          "format": 15,
+          "noLoss": true
+        }
+      ]
+    },
+    {
+      "id": "8b-migration-era0-ja-1366",
+      "step": "8b-migration",
+      "language": "ja",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "migration": [
+        {
+          "source": "v14-stage8a-workshop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-desktop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-release.json.gz",
+          "format": 15,
+          "noLoss": true
+        }
+      ]
+    },
+    {
+      "id": "8b-migration-era0-en-1920",
+      "step": "8b-migration",
+      "language": "en",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "migration": [
+        {
+          "source": "v14-stage8a-workshop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-desktop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-release.json.gz",
+          "format": 15,
+          "noLoss": true
+        }
+      ]
+    },
+    {
+      "id": "8b-migration-era0-en-1366",
+      "step": "8b-migration",
+      "language": "en",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "migration": [
+        {
+          "source": "v14-stage8a-workshop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-desktop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-release.json.gz",
+          "format": 15,
+          "noLoss": true
+        }
+      ]
+    },
+    {
+      "id": "8b-migration-era0-en-XA-1920",
+      "step": "8b-migration",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "migration": [
+        {
+          "source": "v14-stage8a-workshop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-desktop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-release.json.gz",
+          "format": 15,
+          "noLoss": true
+        }
+      ]
+    },
+    {
+      "id": "8b-migration-era0-en-XA-1366",
+      "step": "8b-migration",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "migration": [
+        {
+          "source": "v14-stage8a-workshop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-desktop.json.gz",
+          "format": 15,
+          "noLoss": true
+        },
+        {
+          "source": "v14-stage8a-release.json.gz",
+          "format": 15,
+          "noLoss": true
+        }
+      ]
+    },
+    {
+      "id": "8b-release-era2-ja-1920",
+      "step": "8b-release",
+      "language": "ja",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "release": {
+        "revenue": 205709,
+        "fiveConditions": true,
+        "normalUiCycle": true,
+        "newVersion": "v2",
+        "mandatorySetsReset": true,
+        "archivePreserved": true
+      }
+    },
+    {
+      "id": "8b-release-era2-ja-1366",
+      "step": "8b-release",
+      "language": "ja",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "release": {
+        "revenue": 205709,
+        "fiveConditions": true,
+        "normalUiCycle": true,
+        "newVersion": "v2",
+        "mandatorySetsReset": true,
+        "archivePreserved": true
+      }
+    },
+    {
+      "id": "8b-release-era2-en-1920",
+      "step": "8b-release",
+      "language": "en",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "release": {
+        "revenue": 205709,
+        "fiveConditions": true,
+        "normalUiCycle": true,
+        "newVersion": "v2",
+        "mandatorySetsReset": true,
+        "archivePreserved": true
+      }
+    },
+    {
+      "id": "8b-release-era2-en-1366",
+      "step": "8b-release",
+      "language": "en",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "release": {
+        "revenue": 205709,
+        "fiveConditions": true,
+        "normalUiCycle": true,
+        "newVersion": "v2",
+        "mandatorySetsReset": true,
+        "archivePreserved": true
+      }
+    },
+    {
+      "id": "8b-release-era2-en-XA-1920",
+      "step": "8b-release",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "release": {
+        "revenue": 205709,
+        "fiveConditions": true,
+        "normalUiCycle": true,
+        "newVersion": "v2",
+        "mandatorySetsReset": true,
+        "archivePreserved": true
+      }
+    },
+    {
+      "id": "8b-release-era2-en-XA-1366",
+      "step": "8b-release",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "release": {
+        "revenue": 205709,
+        "fiveConditions": true,
+        "normalUiCycle": true,
+        "newVersion": "v2",
+        "mandatorySetsReset": true,
+        "archivePreserved": true
+      }
+    },
+    {
+      "id": "8b-custom-era0-ja-1920",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era0-ja-1366",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era0-en-1920",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era0-en-1366",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era0-en-XA-1366",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era1-ja-1920",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era1-ja-1366",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era1-en-1920",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era1-en-1366",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era1-en-XA-1920",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 1,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era1-en-XA-1366",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 1,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era2-ja-1920",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era2-ja-1366",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era2-en-1920",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era2-en-1366",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era2-en-XA-1920",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era2-en-XA-1366",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era3-ja-1920",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era3-ja-1366",
+      "step": "8b-custom",
+      "language": "ja",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era3-en-1920",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era3-en-1366",
+      "step": "8b-custom",
+      "language": "en",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era3-en-XA-1920",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 3,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era3-en-XA-1366",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 3,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-custom-era0-en-XA-1920",
+      "step": "8b-custom",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "customization": {
+        "sourceChangesFrozenUntilInstall": true,
+        "newSourceInstalled": true,
+        "readableWindowSymbols": true,
+        "shellForegroundApplied": true
+      }
+    },
+    {
+      "id": "8b-photo-era0-ja-1920",
+      "step": "8b-photo",
+      "language": "ja",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era0-ja-1366",
+      "step": "8b-photo",
+      "language": "ja",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era0-en-1920",
+      "step": "8b-photo",
+      "language": "en",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era0-en-1366",
+      "step": "8b-photo",
+      "language": "en",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era0-en-XA-1920",
+      "step": "8b-photo",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 0,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "[1%~]"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era0-en-XA-1366",
+      "step": "8b-photo",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 0,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "[1%~]"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era2-ja-1920",
+      "step": "8b-photo",
+      "language": "ja",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era2-ja-1366",
+      "step": "8b-photo",
+      "language": "ja",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era2-en-1920",
+      "step": "8b-photo",
+      "language": "en",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era2-en-1366",
+      "step": "8b-photo",
+      "language": "en",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "1%"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era2-en-XA-1920",
+      "step": "8b-photo",
+      "language": "en-XA",
+      "width": 1920,
+      "era": 2,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "[1%~]"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    },
+    {
+      "id": "8b-photo-era2-en-XA-1366",
+      "step": "8b-photo",
+      "language": "en-XA",
+      "width": 1366,
+      "era": 2,
+      "status": "passed",
+      "photoAlbum": {
+        "values": {
+          "brightness": {
+            "value": "1.05",
+            "output": "1.05"
+          },
+          "tone": {
+            "value": "1",
+            "output": "1"
+          },
+          "crop": {
+            "value": "1",
+            "output": "[1%~]"
+          }
+        },
+        "threeRangesAndReadouts": true,
+        "frozenAfterLiveEdit": true,
+        "capturedSpecs": {
+          "color": 1,
+          "resolution": 0,
+          "refresh": 0,
+          "memory": 0,
+          "storage": 0,
+          "network": 0,
+          "graphics": 0
+        },
+        "frozenColorSteps": 6,
+        "liveColorSteps": "full",
+        "resolutionUsesCapturedSpecs": true,
+        "captureDataFrozen": true
+      }
+    }
+  ],
+  "browser": {
+    "passed": 120,
+    "failed": 0,
+    "screenshots": 534,
+    "pageErrors": 0,
+    "consoleWarningsOrErrors": 0,
+    "externalRequests": 0
+  }
+}

@@ -3,16 +3,20 @@ import { reconcileProgress } from './longPlay';
 import { actAppBuild } from './appBuild';
 import { featureApp, isBuildable } from './appLayout';
 import { BALANCE, type DesktopUpgrade } from '../config/balance';
-import { desktopScreen, resizeDesktop } from './desktopGeometry';
+import { desktopScreen, resizeDesktop, fitWindow, workHeight } from './desktopGeometry';
 import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, takeScreenshot } from './desktop';
 import { createInitialState, type GameState } from './state';
-import { createSeedVersion, updateSeedGuide } from './seed';
+import { buildSeed, createSeedVersion, updateSeedGuide } from './seed';
 import { UI_SETS, WORKSHOP_PARTS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
 import { BASE_PALETTE } from '../content/palette';
 import { createComponentDesign, type PartProduction } from './workshopState';
 import { actWorkshop, enterWorkshop } from './workshop';
 import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion, releaseEstimate } from './release';
 import { softwarePresentation, type SoftwareStage } from './releasePresentation';
+
+// Freeze historical stage8a URLs to the first 49 parts; future sets get their own fixtures.
+const STAGE8A_PARTS=WORKSHOP_PARTS.filter(part=>part.set!=='stream');
+const STAGE8A_SETS=UI_SETS.filter(set=>set.id!=='stream');
 
 // Public regression URLs now construct workshop state, never removed drawings.
 const LEGACY_FIXTURES = [
@@ -28,15 +32,18 @@ const LEGACY_FIXTURES = [
   'kumiki-early', 'kumiki-mature', 'kumiki-wall', 'kumiki-modern', 'kumiki-drift',
   'release-ready', 'release-counting', 'release-complete', 'release-rich', 'release-restarting', 'release-rebuilt', 'release-v1-tessera',
 ] as const;
+const STAGE8B_DESKTOP_VIEWS=['economy-before','economy-after','rates','capture-uncovered','capture-overlap','capture-covered','files-archive','note','editor','stream-draft','stream-ready','stream-spec-blocked','stream-gate'] as const;
 const STAGE8A_VIEWS = ['entry','set-shop','main','catalog','files-complete','required-complete-16color','common-custom','editor-custom'] as const;
 export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
+  ...STAGE8B_DESKTOP_VIEWS.flatMap(view=>[0,1,2,3].map(era=>`stage8b-${view}-era${era}`)),
+  ...[0,1,2].map(era=>`stage8b-second-workshop-era${era}`),
   ...['stage8a-seed-ready','stage8a-seed-layout-before','stage8a-seed-workspace-before','stage8a-seed-export-before'].flatMap(name=>[name,`${name}-era1`,`${name}-era2`]),
   ...STAGE8A_VIEWS.flatMap(view=>[`stage8a-${view}`,...[0,1,2].map(era=>`stage8a-${view}-era${era}`)]),
   ...[0,1,2,3].map(era=>`stage8a-desktop-common-custom-era${era}`),
-  ...WORKSHOP_PARTS.flatMap(part=>[0,1,2,3,4].flatMap(step=>[0,1,2].map(era=>`stage8a-part-${part.id}-step-${step}-era${era}`))),
+  ...STAGE8A_PARTS.flatMap(part=>[0,1,2,3,4].flatMap(step=>[0,1,2].map(era=>`stage8a-part-${part.id}-step-${step}-era${era}`))),
 ];
 const MAIN_SETS:readonly UiSetId[]=['common','foundation','files','mail'];
-const BASE_SETS=UI_SETS.filter(set=>set.id!=='extras').map(set=>set.id);
+const BASE_SETS=STAGE8A_SETS.filter(set=>set.id!=='extras').map(set=>set.id);
 
 function seedState(now:number,count:number):GameState {
  const s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.slice(0,count).map(item=>item.id);
@@ -104,6 +111,8 @@ function prototypeReady(now:number):GameState {
 export function createFixture(name:string|null,now:number):GameState|null {
  if(!name||!FIXTURE_NAMES.includes(name))return null;
  if(name==='intro')return createInitialState(now);
+ const stage8b=/^stage8b-(.+)-era([0-3])$/.exec(name);
+ if(stage8b)return stage8bFixture(stage8b[1]!,Number(stage8b[2]),now);
  const native=/^stage8a-desktop-common-custom-era([0-3])$/.exec(name);
  if(native){let s=desktopState(now,Number(native[1]),'all',true);for(const nativeWindow of Object.values(s.run.desktop.windows)){nativeWindow.open=false;nativeWindow.minimized=false;}s=focusWindow(s,'files');return s;}
  if(name.startsWith('stage8a-seed-')){
@@ -114,12 +123,12 @@ export function createFixture(name:string|null,now:number):GameState|null {
   return s;
  }
  const part=/^stage8a-part-(.+)-step-([0-4])-era([0-2])$/.exec(name);
- if(part){let s=addSets(workshopState(now,Number(part[3])),UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);const id=part[1] as WorkshopPartId;s.run.workshop.parts[id]=production(id,Number(part[2]) as PartProduction['step'],now);if(id==='bin-undo'||id==='bin-empty')s.run.workshop.parts['bin-list']=production('bin-list',4,now);s.run.workshop.activePart=id;return s;}
+ if(part){let s=addSets(workshopState(now,Number(part[3])),STAGE8A_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);const id=part[1] as WorkshopPartId;s.run.workshop.parts[id]=production(id,Number(part[2]) as PartProduction['step'],now);if(id==='bin-undo'||id==='bin-empty')s.run.workshop.parts['bin-list']=production('bin-list',4,now);s.run.workshop.activePart=id;return s;}
  const view=/^stage8a-(entry|set-shop|main|catalog|files-complete|required-complete-16color|common-custom|editor-custom)(?:-era([0-2]))?$/.exec(name);
  if(view){const mode=view[1]!,era=Number(view[2]??0);let s=workshopState(now,era);
   if(mode==='entry'||mode==='set-shop')return s;
   if(mode==='main')return addSets(s,[...MAIN_SETS,'photo'],0,now);
-  if(mode==='catalog'){s=addSets(s,UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);return s;}
+  if(mode==='catalog'){s=addSets(s,STAGE8A_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);return s;}
   if(mode==='files-complete'){
    s=addSets(addSets(s,['common','foundation'],4,now,true),['files'],0,now);
    for(const descriptor of partsForSet('files'))s=completeWorkshopPartFixture(s,descriptor.id,now,false);
@@ -189,4 +198,105 @@ export function createFixture(name:string|null,now:number):GameState|null {
  }
  if(name==='foundation-start')return createInitialState(now);const s=seedState(now,2);s.run.seed.autoCursors=1;
  if(name==='foundation-offline-capped'){s.lastTickAt-=BALANCE.debug.offlineFixtureHours*BALANCE.time.millisecondsPerHour;s.createdAt=s.lastSavedAt=s.lastTickAt;}return s;
+}
+
+const fixtureBudget=(s:GameState):GameState=>({...s,resources:{...s.resources,pixels:1e12,tokens:200},run:{...s.run,totalPixelsGenerated:Math.max(s.run.totalPixelsGenerated,1e12)}});
+function stage8bWorkshop(now:number,version:GameState['run']['version'],era=0,previous?:GameState):GameState {
+ let s=previous?createSeedVersion(previous,version==='v2'?'v2':'v1',now):createInitialState(now);
+ s.run.version=version;
+ s.persistent.specs.color=version==='v0.1'?0:1;
+ s.persistent.editorSkills=era===0?[]:era===1?['update']:['update','modern'];
+ s.persistent.appearance.editor=Math.min(era,2) as 0|1|2;
+ s.persistent.desktopPrefs.skills=era===0?[]:era===1?['major1']:era===2?['major1','major2']:['major1','major2','major3'];
+ s.persistent.appearance.desktop=Math.min(era,3) as 0|1|2|3;
+ s.run.desktop=resizeDesktop(s.run.desktop,desktopScreen(Math.min(era,3) as 0|1|2|3),s.persistent.desktopPrefs.iconSize);
+ s=fixtureBudget(s);
+ for(const item of BALANCE.w1.items)if(!s.run.seed.built.includes(item.id))s=buildSeed(s,item.id,now);
+ s.run.workshop.enterMs=0;s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;
+ return s;
+}
+function stage8bSet(s:GameState,set:UiSetId,now:number,unfinished?:WorkshopPartId):GameState {
+ if(!s.run.workshop.purchasedSets.includes(set))s=actWorkshop(s,{type:'buySet',set},now);
+ if(!s.run.workshop.purchasedSets.includes(set))throw new Error(`Stage8b fixture cannot purchase ${set}`);
+ for(const definition of partsForSet(set)){
+  if(definition.id!==unfinished){s=completeWorkshopPartFixture(s,definition.id,now);continue;}
+  s=actWorkshop(s,{type:'selectPart',part:definition.id},now);
+  s=actWorkshop(s,{type:'place',part:definition.id,rect:{...definition.defaultRect}},now);
+  for(const element of definition.elements)s=actWorkshop(s,{type:'addElement',part:definition.id,element},now);
+  s=actWorkshop(s,{type:'confirmAdjustment',part:definition.id},now);
+ }
+ return s;
+}
+function stage8bMain(s:GameState,now:number):GameState {
+ for(const set of MAIN_SETS)s=stage8bSet(s,set,now);
+ return s;
+}
+function stage8bPrevious(now:number,era=0):GameState {
+ let previous=stage8bMain(stage8bWorkshop(now,'v0.1',era),now);
+ previous.persistent.seedSkills=['inherit'];
+ previous=actWorkshop(previous,{type:'customize',patch:{accent:BASE_PALETTE[13]!,background:BASE_PALETTE[0]!,panelWidth:BALANCE.workshop.customization.panelMax}},now);
+ return reconcileProgress(previous,now);
+}
+function stage8bDesktop(now:number,era=0,version:'v1'|'v2'='v1',unfinishedCrop=false,archive=false):GameState {
+ const previous=archive?stage8bPrevious(now-86_400_000,Math.min(era,2)):undefined;
+ let s=stage8bMain(stage8bWorkshop(now,version,era,previous),now);
+ s=stage8bSet(s,'manager',now);
+ s=stage8bSet(s,'photo',now,unfinishedCrop?'photo-crop':undefined);
+ if(version==='v2')s.persistent.specs.refresh=BALANCE.world4.requiredRefreshLevel;
+ s=enterDesktop(s);s.elapsedMs+=BALANCE.w3.enterMs;
+ if(s.run.world!=='desktop')throw new Error('Stage8b fixture could not assemble desktop');
+ for(const app of BALANCE.w3.offerOrder){
+  s=buyDesktopApp(s,app);
+  if(app==='photo')break;
+ }
+ s.run.desktop.editingApp=null;s.run.desktop.notice=null;s.run.desktop.success=null;s.run.desktop.feedback=[];s.run.desktop.feedbackSerial=0;
+ for(const nativeWindow of Object.values(s.run.desktop.windows)){nativeWindow.open=false;nativeWindow.minimized=false;}
+ s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;
+ s=reconcileProgress(s,now);s.run.play.achievement=null;
+ return fixtureBudget(s);
+}
+function stage8bFixture(mode:string,era:number,now:number):GameState {
+ if(mode==='second-workshop'){
+  const previous=stage8bMain(stage8bWorkshop(now-86_400_000,'v1',era,stage8bPrevious(now-172_800_000,era)),now-86_400_000);
+  previous.persistent.seedSkills=['inherit'];
+  let s=stage8bWorkshop(now,'v2',era,previous);
+  s.persistent.specs.refresh=BALANCE.world4.requiredRefreshLevel;
+  s=actWorkshop(s,{type:'buySet',set:'common'},now);
+  s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;
+  return reconcileProgress(s,now);
+ }
+ if(mode==='stream-draft'||mode==='stream-ready'||mode==='stream-spec-blocked'||mode==='stream-gate'){
+  let s=stage8bDesktop(now,era,'v2',false,true);
+  s=actWorkshop(s,{type:'buySet',set:'stream'},now);
+  if(mode==='stream-ready'||mode==='stream-spec-blocked')s=stage8bSet(s,'stream',now);
+  else{
+   const descriptor=getWorkshopPart('stream-preview');
+   s=actWorkshop(s,{type:'selectPart',part:descriptor.id},now);
+   s=actWorkshop(s,{type:'place',part:descriptor.id,rect:{...descriptor.defaultRect}},now);
+   for(const element of descriptor.elements)s=actWorkshop(s,{type:'addElement',part:descriptor.id,element},now);
+   s=actWorkshop(s,{type:'confirmAdjustment',part:descriptor.id},now);
+  }
+  if(mode==='stream-spec-blocked')s.persistent.specs.refresh=0;
+  s.run.workshop.activePart='stream-preview';s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;
+  return focusWindow(s,'tessera');
+ }
+ let s=stage8bDesktop(now,era,'v1',mode==='economy-before',mode==='files-archive'||mode==='note'||mode==='editor');
+ if(mode==='economy-before')s.run.workshop.activePart='photo-crop';
+ if(mode==='economy-after'){
+  s=actAppBuild(s,{type:'app-edit',app:'photo'});s=actAppBuild(s,{type:'app-recommend',app:'photo'});s=actAppBuild(s,{type:'app-install',app:'photo'});
+ }
+ if(mode.startsWith('capture-')){
+  s=focusWindow(s,'files');
+  if(mode!=='capture-uncovered'){
+   s=focusWindow(s,'note');
+   const file=s.run.desktop.windows.files,screen=s.run.desktop.screen;
+   const rect=mode==='capture-covered'?{x:0,y:0,width:screen.width,height:workHeight(screen)}:{x:Math.min(file.x+file.width*.25,screen.width-300),y:file.y+40,width:Math.max(300,file.width*.6),height:Math.max(240,file.height-40)};
+   s.run.desktop.windows.note={...s.run.desktop.windows.note,...fitWindow('note',rect,screen),maximized:mode==='capture-covered',restore:mode==='capture-covered'?{x:file.x,y:file.y,width:300,height:240}:null};
+  }
+  return s;
+ }
+ if(mode==='rates')return focusWindow(s,'manager');
+ if(mode==='note')return focusWindow(s,'note');
+ if(mode==='editor')return focusWindow(s,'tessera');
+ return focusWindow(s,mode==='files-archive'?'files':'photo');
 }

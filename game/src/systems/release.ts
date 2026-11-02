@@ -8,7 +8,9 @@ import { presentationAtRelease } from './releasePresentation';
 import type { GuideRecord,ProductRecord,ProductScreen } from './releaseState';
 import { createSeedVersion } from './seed';
 import { createInitialState,type GameState } from './state';
-import { completedParts,prototypeConditions,setComplete } from './workshop';
+import { completedParts,completedSets,prototypeConditions,setComplete } from './workshop';
+import { appIsOperational } from './appAssembly';
+import { photoContentQuality } from './capturePhoto';
 
 export const SPEC_ORDER: readonly SpecKey[] = ['color', 'storage', 'memory', 'resolution', 'network', 'refresh', 'graphics'];
 const uniqueExports = (state:GameState) => Object.entries(state.run.workshop.parts).flatMap(([id,part])=>part.exportedAt===null?[]:[{kind:'part' as const,id,name:null,at:part.exportedAt}]);
@@ -35,22 +37,23 @@ function captureDependencies(roots: Screenshot[], catalog: Screenshot[]): Screen
   for (const shot of roots) visit(shot);
   return structuredClone([...dependencies.values()].sort((a, b) => a.id - b.id));
 }
-export function releaseScreenshotBonus(state: GameState, selectedIds?: readonly number[]): number {
-  const r = BALANCE.release;
-  return selectedReleaseScreenshots(state, selectedIds).reduce((best, shot) => {
-    const scene = readCapture(shot), windows = Object.values(scene.desktop.windows).filter(w => w.open && !w.minimized);
-    const screen = 'screen' in scene ? scene.screen : { width: 1920, height: 1080 };
-    const fits = windows.length ? windows.filter(w => w.x >= 0 && w.y >= 0 && w.x + w.width <= screen.width && w.y + w.height <= screen.height).length / windows.length : 0;
-    const quality = Math.min(1, scene.display.parts / r.screenshotQualityParts) * r.screenshotQualityWeights.parts
-      + Math.min(1, windows.length / r.screenshotQualityApps) * r.screenshotQualityWeights.apps + fits * r.screenshotQualityWeights.placement;
-    return Math.max(best, Math.min(r.screenshotBonusMax, quality * r.screenshotBonusMax));
-  }, 0);
+/** Product photographs describe visible content; positioning is never a quality input. */
+export function releaseScreenshotBonus(state:GameState,selectedIds?:readonly number[]):number {
+  return selectedReleaseScreenshots(state,selectedIds).reduce((best,shot)=>Math.max(best,photoContentQuality(shot)*BALANCE.release.screenshotBonusMax),0);
 }
-export function releaseEstimate(state: GameState, selectedIds?: readonly number[]): number {
-  const r = BALANCE.release;
-  const elements = state.run.seed.built.length + completedParts(state).length
-    + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length);
-  return Math.floor(r.base * (state.run.totalPixelsGenerated / r.pixelUnit) ** r.exponent * (1 + r.perElement * elements) * (1 + releaseScreenshotBonus(state, selectedIds)));
+export interface MadeContentCounts {seedParts:number;parts:number;apps:number;sets:number;total:number}
+export function madeContentCounts(state:GameState):MadeContentCounts {
+  const seedParts=state.run.seed.built.filter(id=>BALANCE.w1.items.some(item=>item.id===id)).length;
+  const parts=completedParts(state).length;
+  const editor=state.run.workshop.entered||state.run.seed.built.includes('export');
+  const apps=(editor?1:0)+state.run.desktop.apps.filter(app=>appIsOperational(state,app)).length;
+  const sets=completedSets(state).length;
+  const weights=BALANCE.release.contentWeights;
+  return {seedParts,parts,apps,sets,total:seedParts*weights.seedParts+parts*weights.parts+apps*weights.apps+sets*weights.sets};
+}
+export function releaseEstimate(state:GameState,selectedIds?:readonly number[]):number {
+  const r=BALANCE.release,content=madeContentCounts(state);
+  return Math.floor(r.base*(state.run.totalPixelsGenerated/r.pixelUnit)**r.exponent*(1+r.perElement*content.total)*(1+releaseScreenshotBonus(state,selectedIds)));
 }
 export function canReleasePrototype(state: GameState): boolean {
   return state.run.world === 'kumiki' && state.run.version === 'v0.1' && state.run.workshop.exitInspected
@@ -95,7 +98,7 @@ function createReleasedProduct(original: GameState, now: number, reducedMotion: 
     workshop:k,editorCustomization:p.editorCustomization,editorStage:editorStage(state),
   });
   const product: ProductRecord = { presentation: presentationAtRelease(state), id: Math.max(0, ...p.products.map(p => p.id)) + 1, name: p.productName, version: state.run.version === 'v0.1' ? 'v0.1' : 'v1.0', releasedAt: now, author: p.playerName,
-    generatedPixels: state.run.totalPixelsGenerated, builtCount: screen.built.length + completedParts(state).length + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length),
+    generatedPixels: state.run.totalPixelsGenerated, builtCount: madeContentCounts(state).total,
     revenue: releaseEstimate(state, selectedIds), screen, exports: structuredClone(uniqueExports(state)),
     ...(store ? { screenshots: structuredClone(selectedReleaseScreenshots(state, selectedIds)), screenshotBonus: releaseScreenshotBonus(state, selectedIds) } : {}),
     ...(store && state.run.world === 'desktop' ? { capture: { id: Math.max(p.desktopPrefs.lastShotId, p.screenshots.at(-1)?.id ?? 0) + 1, at: now, language, data: encodeScene(projectCapture(state, language)) } } : {}),

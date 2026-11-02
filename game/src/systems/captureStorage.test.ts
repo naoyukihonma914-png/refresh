@@ -13,6 +13,7 @@ import { createFixture } from './fixtures';
 import { actDesktop,focusWindow,takeScreenshot } from './desktop';
 import { decodeCapture,encodeCapture } from './desktopState';
 import { isCaptureScene,projectCapture,readCapture } from './captureScene';
+import { registerCaptureGeometry } from './captureEvaluation';
 import { clearGame,decodeSave,encodeSave,loadGame,SAVE_KEYS,saveGame } from './save';
 import { isGameState } from './state';
 import { actWorkshop } from './workshop';
@@ -23,12 +24,66 @@ function disk(limit=Infinity){
  return {entries,writes,reads,storage};
 }
 const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now)!,'note'),now,'ja');
+describe('新しい撮影は採用した部品と表示された位置を読み取り専用で残す',()=>{
+ it('新形式の写真表示は撮影時の色深度と解像度を使い、その後のスペック変更や旧形式へ波及しない',()=>{
+  const s=createFixture('stage8b-economy-after-era0',now)!;s.persistent.specs.color=1;s.persistent.specs.resolution=2;
+  const scene=projectCapture(s,'ja'),shot={id:1,at:now,language:'ja',data:encodeCapture(scene)},i18n=createI18n('ja');
+  const render=()=>renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n})),before=render();
+  expect(before).toContain('data-color-steps="6"');expect(before).toContain('data-photo-resolution="2"');expect(before).toContain('type="discrete" tableValues="0 .2 .4 .6 .8 1"');
+  s.persistent.specs.color=3;s.persistent.specs.resolution=3;expect(render()).toBe(before);
+  const older={...scene,version:10 as const};delete (older as {evaluation?:unknown}).evaluation;
+  const legacyShot={...shot,data:encodeCapture(older)},legacy=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot:legacyShot,catalog:[legacyShot],i18n}));
+  expect(legacy).not.toContain('data-color-steps');expect(legacy).not.toContain('data-photo-resolution');
+ });
+ it('入れ子の写真でも窓の記号は撮影時の黒字・灰色地を明示し、外側アプリの色を継承しない',()=>{
+  const s=createFixture('stage8b-capture-overlap-era0',now)!,nativeWindow=s.run.desktop.windows.note,client={x:nativeWindow.x+5,y:nativeWindow.y+23,width:nativeWindow.width-10,height:nativeWindow.height-28};
+  const placements=(['minimize','maximize','close'] as const).map((symbol,index)=>({app:'note',role:`chrome:${symbol}`,rect:{x:nativeWindow.x+nativeWindow.width-54+index*18,y:nativeWindow.y+3,width:16,height:14},paint:{color:'rgb(0, 0, 0)',backgroundColor:'rgb(192, 192, 192)'}}));
+  registerCaptureGeometry(s,{origin:'dom',viewport:{x:0,y:0,...s.run.desktop.screen},elements:[],occluders:[],windowClients:{note:client},placements});
+  const shot={id:1,at:now,language:'ja',data:encodeCapture(projectCapture(s,'ja'))},i18n=createI18n('ja');
+  const markup=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n}));
+  for(const symbol of ['minimize','maximize','close']){const control=markup.match(new RegExp(`<button[^>]*data-recorded-symbol="${symbol}"[^>]*>`))![0];expect(control).toContain('color:rgb(0, 0, 0)');expect(control).toContain('background-color:rgb(192, 192, 192)');}
+ });
+ it('DOMの実client・slot・タイトルを凍結し、現在の工房や配置へ戻さず再生する',()=>{
+  const s=createFixture('stage8b-capture-uncovered-era0',now)!,nativeWindow=s.run.desktop.windows.files;
+  const source=s.run.desktop.projects.files!.installedAssembly!.slots.find(slot=>slot.role==='list')!;
+  source.design={...source.design,nativeColors:false,color:'#7a2e2a',textColor:'#f4efe4',fontSize:16};
+  const client={x:nativeWindow.x+5,y:nativeWindow.y+23,width:450,height:300},rectangle={x:client.x+12,y:client.y+20,width:320,height:170};
+  registerCaptureGeometry(s,{origin:'dom',viewport:{x:0,y:0,...s.run.desktop.screen},occluders:[],windowClients:{files:client},windowTitles:{files:'recorded title'},placements:[{app:'files',role:'list',sourcePartId:'files-list',rect:rectangle}],elements:[{id:'files:part:files-list',type:'files-list',app:'files',sourcePartId:'files-list',rects:[rectangle],layer:10}]});
+  const shot={id:1,at:now,language:'ja',data:encodeCapture(projectCapture(s,'ja'))},i18n=createI18n('en');
+  const html=()=>renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n}));
+  const before=html(),slot=before.match(/<div[^>]*data-recorded-role="list"[^>]*>/)![0];
+  expect(before).toContain('recorded title');expect(slot).toContain('left:12px');expect(slot).toContain('top:20px');expect(slot).toContain('width:320px');expect(slot).toContain('height:170px');expect(slot).toContain('background:#7a2e2a');expect(slot).toContain('font-size:16px');
+  source.design.color='#111111';s.run.desktop.windows.files.x=0;s.run.workshop.parts['files-list']!.rect.width=100;
+  expect(html()).toBe(before);
+ });
+ it('選んだセット書類だけを保存し、旧版と現行版の印と保存済み材質を見返せる',()=>{
+  const s=createFixture('stage8b-files-archive-era0',now)!;s.run.desktop.fileFolder='exports';
+  const document=s.persistent.setDocuments.find(row=>row.version!==s.run.version)!;
+  s.run.desktop.fileSelection=`set:${document.id}`;
+  const scene=projectCapture(s,'ja');expect(scene.selectedSetDocument).toEqual(document);
+  expect(scene.files.find(file=>file.id===`set:${document.id}`)?.edition).toBe('archive');
+  expect(scene).not.toHaveProperty('setDocuments');
+  const shot={id:1,at:now,language:'ja',data:encodeCapture(scene)},i18n=createI18n('ja');
+  const markup=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n}));
+  expect(markup).toContain('recorded-set-document');expect(markup).toContain(document.version);
+ });
+ it('タスクマネージャーは撮影時の生産台帳を保存し、過去の毎秒を現在の式で計算し直さない',()=>{
+  const s=createFixture('stage8b-rates-era0',now)!,scene=projectCapture(s,'ja');
+  expect(scene.production?.length).toBeGreaterThan(0);
+  const shot={id:1,at:now,language:'ja',data:encodeCapture(scene)},i18n=createI18n('ja');
+  const first=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n}));
+  expect(first).toContain('data-recorded-producer=');
+  s.run.seed.autoCursors=100000;s.run.desktop.jobs.tessera.cursors=100000;
+  expect(renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n}))).toBe(first);
+ });
+});
 describe('場面の保存形式と独立した記録',()=>{
  it('表示に必要な場面だけを持ち、製品・報酬台帳・過去の会話・全生成履歴をコピーしない',()=>{
   const s=shotState(),scene=readCapture(s.persistent.screenshots[0]!);
-  expect(scene.version).toBe(10);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(11);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
   expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene).not.toHaveProperty('editor');expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('wallpaper');
-  expect(scene.workshop).toEqual(s.run.workshop);expect(JSON.stringify(scene)).not.toContain('frames');
+  const {assistance:_budget,...workshopPresentation}=s.run.workshop;
+  expect(scene.workshop).toEqual(workshopPresentation);expect(JSON.stringify(scene)).not.toContain('frames');
   const source=structuredClone(s);source.persistent.screenshots=[];
   const before=projectCapture(source,'ja');source.persistent.products.push(...Array(40).fill(source.persistent.products[0]!));source.persistent.guideArchive.push(...Array(100).fill({kind:'seed',id:'intro',version:'v0.1'}));
   expect(projectCapture(source,'ja')).toEqual(before);
@@ -48,7 +103,7 @@ describe('場面の保存形式と独立した記録',()=>{
  it('実際の第6版の2枚入りセーブを移行し、資源・製品・窓・撮影時の本文とパレットを保つ',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString();
   const old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(14);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products.map(p=>[p.id,p.revenue,p.generatedPixels])).toEqual(old.persistent.products.map((p:{id:number;revenue:number;generatedPixels:number})=>[p.id,p.revenue,p.generatedPixels]));expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
+  expect(s.schemaVersion).toBe(15);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products.map(p=>[p.id,p.revenue,p.generatedPixels])).toEqual(old.persistent.products.map((p:{id:number;revenue:number;generatedPixels:number})=>[p.id,p.revenue,p.generatedPixels]));expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
   expect(s.persistent.screenshots).toHaveLength(2);
   const oldFrame=decodeCapture(old.persistent.screenshots[0].data) as typeof s;
   const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('editor');
@@ -82,7 +137,9 @@ describe('場面の保存形式と独立した記録',()=>{
   let s=createFixture('desktop-files',now)!;s.persistent.specs.storage=3;
   for(let i=0;i<400;i++){s.run.desktop.cooldownMs=0;s.persistent.progress.counts.shots=i;s=takeScreenshot(s,now+i,'ja');}
   const target=disk(5*1024*1024);expect(saveGame(target.storage,s,now).kind).toBe('saved');
-  const loaded=loadGame(target.storage);expect(loaded.kind).toBe('loaded');if(loaded.kind==='loaded')expect(readCapture(loaded.state.persistent.screenshots[399]!).workshop).toEqual(s.run.workshop);
+  const loaded=loadGame(target.storage);expect(loaded.kind).toBe('loaded');
+  const {assistance:unusedAssistance,...presentation}=s.run.workshop;void unusedAssistance;
+  if(loaded.kind==='loaded')expect(readCapture(loaded.state.persistent.screenshots[399]!).workshop).toEqual(presentation);
  },45000);
  it('新しい画像の書き込みが途中で失敗しても元の記録を保ち、追加した未参照データだけを片付けて再試行できる',()=>{
   const target=disk(),s=shotState();saveGame(target.storage,s,now);const before=new Map(target.entries);
@@ -117,7 +174,7 @@ describe('場面の保存形式と独立した記録',()=>{
    const imported=decodeSave(encodeSave(s)),other=disk(5*1024*1024);expect(saveGame(other.storage,imported,now).kind).toBe('saved');expect(loadGame(other.storage).kind).toBe('loaded');
    expect(target.entries.size).toBeLessThan(count*4+40);
   }
- },15000);
+ },45000);
 });
 
 describe('凍結した旧撮影の読み取り境界',()=>{
@@ -196,7 +253,8 @@ describe('保存した部品工房の静的な配置と材質',()=>{
   w.parts['common-frame']!.design.controlColors.close='#f6d27a';
   const symbolOnly=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
   expect(openTag(symbolOnly,'data-static-control','close')).toContain('color:#f6d27a');
-  expect(symbolOnly).not.toContain('background-color:#3a3450');
+  expect(openTag(symbolOnly,'data-static-control','close')).toContain('background-color:#3a3450');
+  expect(symbolOnly.match(/<div class="ws-target-title"[^>]*>/)![0]).not.toContain('background-color:#3a3450');
   w.parts['common-button']!.design={...w.parts['common-button']!.design,nativeColors:false,color:'#7a2e2a',textColor:'#f4efe4',radius:8,fontSize:16};
   markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));button=openTag(markup,'data-static-part-content','common-button');
   expect(button).toContain('background:#7a2e2a');expect(button).toContain('color:#f4efe4');expect(button).toContain('border-radius:8px');expect(button).toContain('font-size:16px');
