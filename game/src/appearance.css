@@ -606,4 +606,5 @@
 .desktop.desktop-era-3.desktop-dark .ribbon-command:hover,.desktop.desktop-era-3.desktop-dark .ribbon-command[aria-pressed=true] {background:#4b6170;}
 
 .kumiki.editor-era-2 .mirror-option {flex-wrap:wrap;align-items:center;white-space:normal;overflow-wrap:anywhere;}
+.desktop.desktop-era-3 .app-layout .app-layout-part .win-button.accent {background:var(--flat-accent);color:#fff;border-color:#16507d;}
 .desktop.desktop-era-3 .app-layout .app-layout-part .win-button.accent:disabled {background:#e5e5e5;color:#666;border-color:#b0b0b0;opacity:1;}

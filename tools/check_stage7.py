@@ -436,10 +436,20 @@ def main():
                             timer = app_window.locator('[data-app-part=timer]')
                             whole(page, timer.locator('.clock-timer > button'))
                             timer.locator('input').fill('09:30')
+                            def readable(locator):
+                                contrast = locator.evaluate(r'''e=>{const s=getComputedStyle(e),lum=c=>{const a=c.match(/[\d.]+/g).slice(0,3).map(Number).map(n=>{n/=255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4});return a[0]*.2126+a[1]*.7152+a[2]*.0722};const a=lum(s.color),b=lum(s.backgroundColor);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)}''')
+                                assert contrast >= 4.5, contrast
+                            readable(timer.locator('.clock-timer > button'))
                             timer.locator('.clock-timer > button').click()
                             assert export(page)['run']['desktop']['reservation']['done'] is False
                             clipping(timer)
                             whole(page, timer.locator('.clock-timer > button'))
+                            readable(timer.locator('.clock-timer > button'))
+                            timer.locator('input').fill('')
+                            expect(timer.locator('.clock-timer > button')).to_be_disabled()
+                            readable(timer.locator('.clock-timer > button'))
+                            snap(page, f'flat-app-clock-disabled-{lang}-{size[0]}')
+                            timer.locator('input').fill('09:30')
                         if app == 'photo':
                             ranges = app_window.locator('input[type=range]')
                             assert ranges.count() >= 1
