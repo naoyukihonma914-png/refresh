@@ -5,12 +5,45 @@ import{ACHIEVEMENTS,actCommon,activeContract,advanceStray,bulkVisible,createProg
 import{observeProgress}from'./longPlayEvents';import{bulkQuote}from'./bulk';
 import{createInitialState,isGameState}from'./state';import{createFixture}from'./fixtures';import{decodeSave,encodeSave}from'./save';
 import{buildSeed,canBuildSeed,createSeedVersion,pressSeed,freshMomentum,seedCursorQuote,visibleSeedItems}from'./seed';
-import{manualClickValue,passivePixelsPerSecond}from'./economy';import{jobCursorRate}from'./desktopJobs';
+import{manualClickValue,passivePixelsPerSecond,homePixelsPerSecond,advanceHomeGeneration}from'./economy';import{jobCursorRate,jobRate}from'./desktopJobs';
+import{blankDrawing}from'./kumikiState';
 import{exportKumiki,paintDrawing,targetFor}from'./kumiki';import{actDesktopExtra,refreshDesktop}from'./desktopExtras';
 import{advanceActiveTime,advanceOfflineTime}from'./time';import{readCapture,restoreScene}from'./captureScene';import{takeScreenshot,advanceDesktopTime}from'./desktop';
 const now=1800000000000;
 const oldSave=()=>gunzipSync(readFileSync(new URL('./testdata/v12-progress.json.gz',import.meta.url))).toString();
+function multiplierFixture(){
+ const s=createFixture('desktop-ready',now)!;
+ s.resources.pixels=0;s.run.totalPixelsGenerated=0;
+ s.persistent.specs.color=1;s.persistent.specs.refresh=1;
+ s.persistent.progress=createProgress();s.persistent.progress.records={'first-pixel':now,'save-created':now};s.persistent.progress.completed={'no-cursors':now};s.persistent.progress.counts.icons=20;
+ s.run.seed.autoCursors=10;s.run.kumiki.placed=['button'];s.run.kumiki.legacyBonus=undefined;s.run.kumiki.exports=[];s.persistent.products=[];
+ // Remove the file features from the installed app, while keeping their ownership.
+ s.run.desktop.projects.files!.installed!.parts=s.run.desktop.projects.files!.installed!.parts.filter(p=>!['sort','search','large'].includes(p.id));
+ for(const job of Object.values(s.run.desktop.jobs)){job.assigned=false;job.cursors=0;job.updates=0;}
+ s.run.desktop.jobs.files={assigned:true,cursors:2,updates:1};
+ return s;
+}
 describe('段階6.5：永続の記録と生成量',()=>{
+ it('実績2件と案件1件の1.07倍をクリック・描画・ホーム・ジョブへ各1回だけ掛ける',()=>{
+  const s=multiplierFixture();
+  // Base click 4 × 256 colors 1.5 × permanent bonus 1.07.
+  expect(pressSeed(s,freshMomentum(),0).pixels).toBeCloseTo(6.42,8);
+  s.run.kumiki.drawings.folder=blankDrawing(16);const target=targetFor(s,'folder',16),cell=target.findIndex(c=>c>=0);
+  expect(paintDrawing(s,'folder',[cell],target[cell]!).resources.pixels).toBeCloseTo(16.05,8);
+  // Home: 10 × .5 × Color 1.5 × button 1.5 × click 4 × colors 1.5 × Hz 2 × bonus 1.07.
+  expect(homePixelsPerSecond(s)).toBeCloseTo(144.45,8);
+  // Files: 2 × base 150 × update 2 × colors 1.5 × Hz 2 × bonus 1.07 × icons 1.1 × cursors 1.01.
+  expect(jobRate(s,'files')).toBeCloseTo(2139.786,8);
+  const next=advanceHomeGeneration(s,1000);expect(next.resources.pixels).toBeCloseTo(2284.236,8);
+  expect(next.resources.tokens).toBe(s.resources.tokens);expect(next.resources.dollars).toBe(s.resources.dollars);
+ });
+ it('アイコンの50個上限はジョブだけへ効き、ホーム・クリック・描画を増やさない',()=>{
+  const s=multiplierFixture();s.persistent.progress.counts.icons=100;
+  expect(jobRate(s,'files')).toBeCloseTo(2431.575,8);
+  expect(homePixelsPerSecond(s)).toBeCloseTo(144.45,8);expect(pressSeed(s,freshMomentum(),0).pixels).toBeCloseTo(6.42,8);
+  s.run.kumiki.drawings.folder=blankDrawing(16);const target=targetFor(s,'folder',16),cell=target.findIndex(c=>c>=0);
+  expect(paintDrawing(s,'folder',[cell],target[cell]!).resources.pixels).toBeCloseTo(16.05,8);
+ });
  it('28件を同じ表で扱い、初期状態の隠し要素や未達の実績は獲得しない',()=>{const s=reconcileProgress(createInitialState(now),now);expect(ACHIEVEMENTS.length).toBeGreaterThanOrEqual(25);expect(s.persistent.progress.records).toEqual({});expect(globalMultiplier(s)).toBe(1);expect(isProgress(createProgress())).toBe(true);});
  it('達成の日時と+1%を一度だけ記録し、リリース後も保持する',()=>{let s=createInitialState(now);s=pressSeed(s,freshMomentum(),0).state;s=reconcileProgress(s,now);expect(s.persistent.progress.records).toEqual({'first-pixel':now});expect(manualClickValue(s)).toBe(1.01);expect(reconcileProgress(s,now+1000)).toBe(s);const next=createSeedVersion(s,'v1',now+1000);expect(next.persistent.progress.records).toEqual(s.persistent.progress.records);expect(decodeSave(encodeSave(next)).persistent.progress.records).toEqual(s.persistent.progress.records);});
  it('実績は足し算、案件2件は各5%。クリック・ドット・自動生成・ジョブへ二重に掛けない',()=>{const s=createFixture('desktop-ready',now)!;s.persistent.progress.records={'first-pixel':now,'save-created':now};s.persistent.progress.completed={'no-color':now,'no-cursors':now};const factor=globalMultiplier(s);expect(factor).toBeCloseTo(1.12);const base=structuredClone(s);base.persistent.progress=createProgress();expect(manualClickValue(s)/manualClickValue(base)).toBeCloseTo(factor);expect(passivePixelsPerSecond(s)/passivePixelsPerSecond(base)).toBeCloseTo(factor);expect(jobCursorRate(s,'files')/jobCursorRate(base,'files')).toBeCloseTo(factor);});
