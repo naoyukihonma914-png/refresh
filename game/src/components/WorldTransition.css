@@ -1,0 +1,13 @@
+.version-transition {position:absolute;inset:0;z-index:10000;background:#fff;pointer-events:none;animation:version-white-opening var(--version-opening-ms) linear both;}
+@keyframes version-white-opening {0%,30%{opacity:1}100%{opacity:0}}
+.version-transition.reduced-motion {animation-timing-function:ease-out;}
+/* Page-layout documents wrap each line; reveal those same parts after a restart too. */
+main.seed-page.is-restarting [data-page-part]>.page-part-content {animation:world-soft-arrival .6s ease-out both;}
+main.seed-page.is-restarting [data-page-part="notice"]>.page-part-content {animation-delay:.12s;}
+main.seed-page.is-restarting [data-page-part="generator"]>.page-part-content {animation-delay:.24s;}
+main.seed-page.is-restarting [data-page-part="upgrades"]>.page-part-content {animation-delay:.36s;}
+/* The windows remain recognizable, while the reduced-motion path uses opacity only. */
+@media(prefers-reduced-motion:reduce) {
+ .desktop.desktop-entering .desktop-window.app-tessera,.desktop.desktop-entering .desktop-taskbar,.desktop.desktop-entering .screenshot-toolbar,.desktop.desktop-entering .desktop-shortcut {animation:world-soft-arrival 2s ease-out both;transform:none;}
+}
+@keyframes world-soft-arrival {from{opacity:0}to{opacity:1}}

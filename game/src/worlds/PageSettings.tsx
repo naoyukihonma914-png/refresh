@@ -1,3 +1,4 @@
+import { SeedAppearanceSelect } from '../components/SeedAppearanceSelect';
 import {Records,SoundSettings} from '../components/LongPlaySettings';
 import { PAGE_FONTS,PAGE_MOTIONS,pageColors,contrast } from '../systems/pageDesign';
 import { paletteFor } from '../content/kumikiArt';
@@ -54,8 +55,8 @@ export function PageSettings({ state, runtime, i18n, onClose }: {
       <p>{i18n.t('settings.total', { count: cost })}</p>
       <button type="submit" disabled={cost > state.resources.tokens}>{i18n.t('settings.apply')}</button>
     </form></>}
-    <ProductSettings state={state} runtime={runtime} i18n={i18n}/><p><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} /></p>
-    {state.persistent.products.length > 0 && <section className="product-history"><h2>{i18n.t('release.history')}</h2><table><thead><tr><th>{i18n.t('release.version')}</th><th>{i18n.t('release.releasedAt')}</th><th>{i18n.t('release.contents')}</th></tr></thead><tbody>{state.persistent.products.map(product => <tr key={product.id}><td>{productLabel(i18n,product.name,i18n.t('release.prototype'))}</td><td>{i18n.date(product.releasedAt)}</td><td>{i18n.t('release.summary', { built: product.builtCount, icons: product.exports.filter(work => work.kind === 'icon').length })}</td></tr>)}</tbody></table></section>}
+    <ProductSettings state={state} runtime={runtime} i18n={i18n}/><div><SeedAppearanceSelect state={state} i18n={i18n} onChange={runtime.setSeedEra}/><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} /></div>
+    {state.persistent.products.length > 0 && <section className="product-history"><h2>{i18n.t('release.history')}</h2><table><thead><tr><th>{i18n.t('release.version')}</th><th>{i18n.t('release.releasedAt')}</th><th>{i18n.t('release.contents')}</th></tr></thead><tbody>{state.persistent.products.map(product => <tr key={product.id}><td>{productLabel(i18n,product.name,product.version==='v0.1'?i18n.t('release.prototype'):i18n.t('release.version.v1'))}</td><td>{i18n.date(product.releasedAt)}</td><td>{i18n.t('release.summary', { built: product.builtCount, icons: product.exports.filter(work => work.kind === 'icon').length })}</td></tr>)}</tbody></table></section>}
     <details className="longplay-settings"><summary>{i18n.t('settings.records')}</summary><Records state={state} i18n={i18n}/></details><details className="longplay-settings"><summary>{i18n.t('settings.sound')}</summary><SoundSettings state={state} runtime={runtime} i18n={i18n}/></details>
     <section className="data-settings">
       <h2>{i18n.t('data.title')}</h2>

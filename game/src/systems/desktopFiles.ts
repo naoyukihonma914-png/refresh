@@ -27,7 +27,7 @@ export function rawDesktopFiles(state: GameState, i18n: I18n, folder = state.run
     if (version) name = i18n.t('files.archived',{name,version});
     return { id:`${prefix}:${work.kind}:${work.id}`,kind:work.kind,name,at:work.at,bytes:byteSize(work),work };
   });
-  if (folder === 'exports') return [...exports(state.run.kumiki.exports,'current'),...state.persistent.products.flatMap(p => exports(p.exports,`product:${p.id}`,productLabel(i18n,p.name,i18n.t('release.prototype'))))];
+  if (folder === 'exports') return [...exports(state.run.kumiki.exports,'current'),...state.persistent.products.flatMap(p => exports(p.exports,`product:${p.id}`,productLabel(i18n,p.name,p.version==='v0.1'?i18n.t('release.prototype'):i18n.t('release.version.v1'))))];
   const latest=(times:(number|null)[])=>times.reduce<number|null>((result,value)=>value===null?result:Math.max(result??0,value),null);
   const exportDate=latest([...state.run.kumiki.exports,...state.persistent.products.flatMap(p=>p.exports)].map(w=>w.at));
   const screenshotDate=latest(state.persistent.screenshots.map(s=>s.at));

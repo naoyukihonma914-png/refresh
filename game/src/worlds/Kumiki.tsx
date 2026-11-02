@@ -1,9 +1,11 @@
+import { AdviceMessage, AdviceHistory } from '../components/WorldAdvice';
 import { pageColors } from '../systems/pageDesign';
 import { AppBuilder } from './AppBuilder';
 import { StatusBar } from '../components/StatusBar';
 import { PixelArt } from './desktop-icons';
 import { editorStage,editorName } from '../systems/appearance';
-import { ProductNameInput } from '../components/ProductSettings';
+import { ReleaseProgress } from '../components/ReleaseProgress';
+import { ReleaseConfirmation } from './release/ReleaseConfirmation';
 import { Estimate } from '../components/Estimate';
 import { productLabel } from '../content/products';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -17,7 +19,7 @@ import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
 import { DrawingCanvas, type DrawingTool } from './kumiki/DrawingCanvas';
 import { HomeDocument } from './kumiki/HomeDocument';
 import { Extensions } from './kumiki/Extensions';
-import { canFundNextVersion, canReleasePrototype, releaseEstimate } from '../systems/release';
+import { canRelease, v1Conditions } from '../systems/release';
 import { GuideHistory } from '../components/GuideHistory';
 
 const TOOL_PATHS = {
@@ -75,7 +77,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
   const entered = !preview && state.elapsedMs - k.enteredAt < BALANCE.w2.enterMs;
   const tokensVisible = k.tokenDiscovered || state.resources.tokens > 0;
   const prototype = k.exitInspected && state.persistent.specs.color === 0;
-  const releaseChecks = prototypeConditions(state);
+  const releaseChecks = prototype ? prototypeConditions(state) : v1Conditions(state);
   const defaultDesign: Design = { color: selected === 'primary' || selected === 'button' ? homeButtonColor(state.persistent.specs.color) : BASE_PALETTE[11]!, radius: 0, textSize: 'medium', shadow: false };
   const storedDesign = selected ? k.design[selected] ?? defaultDesign : defaultDesign;
   const design = selected==='primary'&&!legacyHome?{...storedDesign,color:pageColors(state.run.seed.page,state.persistent.specs.color).button}:storedDesign;
@@ -188,12 +190,14 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         </section>
         {legacyAppearance&&propertyPanel}
         {legacyAppearance&&state.persistent.artwork.modern&&layers}
-        {k.guide.current && !k.guide.collapsed && <section className="k-comment"><h3>{i18n.t(`k.guide.${k.guide.current}.title`)}</h3><p>{i18n.t(`k.guide.${k.guide.current}`)}</p><p>{i18n.t('guide.signature')}</p>
+        {k.guide.current && !k.guide.collapsed && !(state.run.advice.current && k.guide.current==='hint') && <section className="k-comment"><h3>{i18n.t(`k.guide.${k.guide.current}.title`)}</h3><p>{i18n.t(`k.guide.${k.guide.current}`)}</p><p>{i18n.t('guide.signature')}</p>
           {k.guide.current === 'name' && <form onSubmit={event => { event.preventDefault(); act({ type: 'name', name }); readGuide('close'); }}><label>{i18n.t('k.playerName')}<input value={name} maxLength={BALANCE.w2.maxName} onChange={event => setName(event.target.value)} /></label><button type="submit">{i18n.t('k.answer')}</button></form>}
           <button onClick={() => readGuide('close')}>{i18n.t('guide.close')}</button>
         </section>}
         {archive && <section className="comment-archive"><h2>{i18n.t('k.comments')}</h2>{k.guide.seen.map(id => <button key={id} onClick={() => readGuide(id)}>{i18n.t(`k.guide.${id}.title`)}</button>)}<GuideHistory state={state} i18n={i18n} /></section>}
-        {snapshot.offline && <section className="k-comment" role="status"><p>{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}</p></section>}
+        {!preview&&!embedded&&state.run.advice.current&&<section className="k-comment"><AdviceMessage memory={state.run.advice} i18n={i18n} app={editorName(state,i18n)} onRead={runtime.readAdvice}/></section>}
+        {archive&&<AdviceHistory memory={state.run.advice} i18n={i18n} app={editorName(state,i18n)} onRead={runtime.readAdvice}/>}
+        {snapshot.offline && !embedded && <section className="k-comment" role="status"><p>{i18n.t('offline.notice', { duration: i18n.duration(snapshot.offline.creditedMs), pixels: i18n.pixels(snapshot.offline.pixels), count: Math.floor(snapshot.offline.pixels) })}</p><button onClick={runtime.dismissOffline}>{i18n.t('guide.close')}</button></section>}
       </aside>;
   return <main ref={host} className={['kumiki', embedded && 'k-embedded', preview && 'k-preview', mature && 'is-mature', editingApp && 'app-building', legacyAppearance&&state.persistent.artwork.modern&&'is-modern',!legacyAppearance&&`editor-era-${stage}`, entered && 'is-entering', renewing && 'is-renewing'].filter(Boolean).join(' ')}
     data-workspace={stage===2&&!legacyAppearance?workspace:undefined} data-document={activeDocument}
@@ -225,8 +229,8 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
       {Object.keys(state.run.desktop.projects).length>0&&<button onClick={()=>runtime.actDesktop({type:'app-edit',app:Object.keys(state.run.desktop.projects)[0] as import('../systems/desktopState').BuiltApp})}>{i18n.t('builder.documents')}</button>}
       {!state.legacyGeneration&&<button className="common-settings-button" onClick={()=>setExtensions(!extensions)}>{i18n.t('settings.open')}</button>}
       <div className="k-menu-end">
-        {!embedded && (tokensVisible || k.exitInspected) && <button onClick={() => setConditions(!conditions)}>{i18n.t('k.releaseProgress', { version: productLabel(i18n,state.persistent.productName,prototype ? 'v0.1' : 'v1.0'), done: prototype ? releaseChecks.filter(Boolean).length : 0, total: prototype ? releaseChecks.length : 5 })}</button>}
-        {canReleasePrototype(state) && !snapshot.releaseConfirmation && <button className="prototype-release" onClick={runtime.requestPrototypeRelease}>{i18n.t('release.action')}</button>}
+        {!embedded && (tokensVisible || k.exitInspected) && <button className="k-release-progress" aria-expanded={conditions} onClick={() => setConditions(!conditions)}><ReleaseProgress done={releaseChecks.filter(Boolean).length} total={releaseChecks.length}/>{i18n.t('k.releaseProgress', { version: productLabel(i18n,state.persistent.productName,prototype ? 'v0.1' : 'v1.0'), done: releaseChecks.filter(Boolean).length, total: releaseChecks.length })}</button>}
+        {canRelease(state) && !snapshot.releaseConfirmation && <button className="prototype-release" onClick={runtime.requestPrototypeRelease}>{i18n.t('release.action')}</button>}
         <button aria-expanded={archive} onClick={() => setArchive(!archive)}>{i18n.t('k.comments')}</button>
       </div>
     </nav>
@@ -242,14 +246,9 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
       }}>{readyCount ? i18n.t('k.exportReady', { count: readyCount }) : i18n.t('k.export')}</button>
     </header>
     {conditions && <section className="k-condition-popover"><h2>{i18n.t('k.conditions')}</h2>
-      {(prototype ? ['parts', 'icons', 'buttons'] as const : ['apps', 'requests', 'icons', 'wallpaper', 'automation'] as const).map((id, index) => <p key={id}><input type="checkbox" readOnly checked={prototype && !!releaseChecks[index]} />{i18n.t(prototype ? `k.condition.${id as 'parts' | 'icons' | 'buttons'}` : `seed.condition.${id as 'apps' | 'requests' | 'icons' | 'wallpaper' | 'automation'}`)}</p>)}
+      {(prototype ? ['parts', 'icons', 'buttons'] as const : ['apps', 'requests', 'icons', 'wallpaper', 'automation'] as const).map((id, index) => <p key={id}><input type="checkbox" readOnly checked={!!releaseChecks[index]} />{i18n.t(prototype ? `k.condition.${id as 'parts' | 'icons' | 'buttons'}` : `seed.condition.${id as 'apps' | 'requests' | 'icons' | 'wallpaper' | 'automation'}`)}</p>)}
     </section>}
-    {snapshot.releaseConfirmation && <section className="k-release-confirm k-comment" role="dialog" aria-label={i18n.t('release.confirm.title')}>
-      <h3>{i18n.t('release.confirm.title')}</h3><p>{i18n.t('release.confirm')}</p><ProductNameInput state={state} runtime={runtime} i18n={i18n}/><p>{i18n.t('guide.signature')}</p>
-      <p>{i18n.t('release.estimate', { dollars: i18n.integer(releaseEstimate(state)) })}</p>
-      {!canFundNextVersion(state) && <p>{i18n.t('release.needRevenue', { dollars: BALANCE.spec.color[BALANCE.release.prototypeColorLevel]!.price })}</p>}
-      <div className="release-confirm-actions"><button disabled={!canFundNextVersion(state)} onClick={runtime.confirmPrototypeRelease}>{i18n.t('release.action')}</button><button onClick={runtime.cancelPrototypeRelease}>{i18n.t('release.keepWorking')}</button></div>
-    </section>}
+    {snapshot.releaseConfirmation && !embedded && !preview && <ReleaseConfirmation runtime={runtime} snapshot={snapshot} i18n={i18n}/>}
     <div className="k-body">
       <aside className="k-tools">
         {(['pencil', ...(mature ? ['eraser', 'select'] : []), ...(hasKSkill(state, 'fill') ? ['fill'] : []), ...(hasKSkill(state, 'eyedropper') ? ['eyedropper'] : [])] as DrawingTool[]).map(id => <button key={id} className={tool === id ? 'active' : ''} title={i18n.t(`k.tool.${id}`)} aria-label={i18n.t(`k.tool.${id}`)} onClick={() => { setTool(id); setExtensions(false); }}>
@@ -298,7 +297,7 @@ export function Kumiki({ runtime, snapshot, i18n, embedded = false, preview = fa
         </div>{!legacyAppearance&&iconEditor}</div>}
         {(exportsOpen||!legacyAppearance&&stage===2&&workspace==='export'&&!extensions)&&<section className="exports-list"><h2>{i18n.t('k.exports')}</h2><label>{i18n.t('k.exportName')}<input aria-label={i18n.t('k.exportName')} value={k.exportName} maxLength={BALANCE.w2.maxName} onChange={e=>act({type:'configure',change:{exportName:e.target.value}})}/></label>{!k.exports.length && <p>{i18n.t('k.emptyExports')}</p>}
           {k.exports.map(work => <button key={work.kind + work.id} onClick={() => { setExportsOpen(false);setWorkspace(work.kind==='icon'?'draw':'compose');setActiveDocument(work.kind==='icon'?'drawing':'home'); if (work.kind === 'icon') openDrawing(work.id); else if (k.placed.includes(work.id as PartId)) { setTool('select'); selectPart(work.id); } else { dragRef.current = work.id as PartId; setDragPart(work.id as PartId); } }}>{work.name || (work.kind === 'icon' ? i18n.t(`k.icon.${work.id as 'folder'}`) : i18n.t(`k.part.${work.id as PartId}`))}</button>)}
-          {state.persistent.products.length > 0 && <><h2>{i18n.t('release.pastExports')}</h2><ul>{state.persistent.products.flatMap(product => product.exports.map(work => <li key={`${product.id}:${work.kind}:${work.id}`}>{i18n.t('release.guideRead', { version: productLabel(i18n,product.name,i18n.t('release.prototype')), title: work.name || i18n.t(work.kind === 'icon' ? `k.icon.${work.id as 'folder'}` : `k.part.${work.id as PartId}`) })}</li>))}</ul></>}
+          {state.persistent.products.length > 0 && <><h2>{i18n.t('release.pastExports')}</h2><ul>{state.persistent.products.flatMap(product => product.exports.map(work => <li key={`${product.id}:${work.kind}:${work.id}`}>{i18n.t('release.guideRead', { version: productLabel(i18n,product.name,product.version==='v0.1'?i18n.t('release.prototype'):i18n.t('release.version.v1')), title: work.name || i18n.t(work.kind === 'icon' ? `k.icon.${work.id as 'folder'}` : `k.part.${work.id as PartId}`) })}</li>))}</ul></>}
         </section>}
       </section>
       {legacyAppearance&&iconEditor}

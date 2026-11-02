@@ -1,5 +1,5 @@
 import {seedCursorQuote} from './seed';
-import {passivePixelsPerSecond} from './economy';
+import {manualClickValue,passivePixelsPerSecond} from './economy';
 import {globalMultiplier} from './longPlay';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameRuntime } from './runtime';
@@ -355,8 +355,13 @@ describe('出荷の保存と再開', () => {
     expect(runtime.getSnapshot().state.resources).toEqual(before);
     runtime.requestPrototypeRelease(); runtime.confirmPrototypeRelease(); runtime.confirmPrototypeRelease();
     expect(runtime.getSnapshot().state.run.world).toBe('release');
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
     expect(runtime.getSnapshot().state.resources.dollars).toBe(303);
     expect(platform.unlockAchievement).toHaveBeenCalledExactlyOnceWith('prototype-released');
+    runtime.showShipping();
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
+    step(BALANCE.release.storeAnimationMs); runtime.showShipping();
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('shipping');
     step(2_400); runtime.leave();
     runtime.dispose(); clock.wall += 3 * hour;
     await start();
@@ -395,7 +400,7 @@ describe('出荷の保存と再開', () => {
 
   it('リセット直後の保存が失敗したら出荷画面を保ち、再試行後はセーブ未作成でもv1の記録が残る', async () => {
     await prepare(); runtime.requestPrototypeRelease(); runtime.confirmPrototypeRelease();
-    step(8_000); runtime.purchaseSpec('color');
+    step(BALANCE.release.storeAnimationMs); runtime.showShipping(); step(BALANCE.release.animationMs); runtime.purchaseSpec('color');
     const write = storage.setItem;
     storage.setItem = (key, value) => { if (key === SAVE_KEYS.primary) throw new Error('Quota exceeded'); write(key, value); };
     runtime.startNextVersion();
@@ -421,9 +426,142 @@ describe('出荷の保存と再開', () => {
 
   it('動きを減らす設定では集計の演出を省略して購入できる', async () => {
     platform.animation.reducedMotion = () => true;
-    await prepare(); runtime.requestPrototypeRelease(); runtime.confirmPrototypeRelease(); runtime.purchaseSpec('color');
+    await prepare(); runtime.requestPrototypeRelease(); runtime.confirmPrototypeRelease();
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
+    runtime.purchaseSpec('color');
+    expect(runtime.getSnapshot().state.persistent.specs.color).toBe(0);
+    runtime.showShipping(); runtime.purchaseSpec('color');
     expect(runtime.getSnapshot().state.persistent.specs.color).toBe(1);
     expect(runtime.getSnapshot().state.resources.dollars).toBe(103);
+  });
+});
+
+describe('段階7：v1.0の通常の出荷からv2へ', () => {
+  const prepare = async () => {
+    const state = createFixture('stage7-ready3', clock.wall)!;
+    storage.setItem(SAVE_KEYS.primary, encodeSave(state));
+    await start();
+    vi.mocked(platform.unlockAchievement).mockClear();
+  };
+
+  it.each([null, 'no-cursors', 'no-color'] as const)('案件%sを任意に選び、製品ページ・出荷・60Hz購入・v2開始と保存再開まで通る', async contract => {
+    await prepare();
+    const before = runtime.getSnapshot().state;
+    const shots = before.persistent.screenshots;
+    const selected = [shots.at(-1)!.id, shots[0]!.id];
+    expect(before.persistent.progress.records['v1-released']).toBeUndefined();
+    runtime.requestPrototypeRelease();
+    expect(runtime.getSnapshot().releaseConfirmation).toBe(true);
+    runtime.confirmProductRelease(selected); runtime.confirmProductRelease(selected);
+    let state = runtime.getSnapshot().state;
+    const product = state.persistent.products.at(-1)!;
+    expect(product.version).toBe('v1.0');
+    expect(product.screenshots!.map(shot => shot.id)).toEqual(selected);
+    expect(state.persistent.products).toHaveLength(before.persistent.products.length + 1);
+    expect(state.resources.dollars).toBe(before.resources.dollars + product.revenue);
+    expect(state.persistent.progress.records['v1-released']).toBe(clock.wall);
+    expect(vi.mocked(platform.unlockAchievement).mock.calls.filter(([id]) => id === 'v1-released')).toHaveLength(1);
+    expect(state.run.shipping?.phase).toBe('store');
+    runtime.purchaseSpec('refresh'); runtime.showShipping();
+    expect(runtime.getSnapshot().state.persistent.specs.refresh).toBe(0);
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
+
+    step(1_000); runtime.leave(); runtime.dispose(); clock.wall += 3 * hour; await start();
+    state = runtime.getSnapshot().state;
+    expect(state.run.shipping?.storeElapsedMs).toBe(1_000);
+    expect(state.resources.dollars).toBe(before.resources.dollars + product.revenue);
+    expect(state.persistent.products.at(-1)!.screenshots).toEqual(product.screenshots);
+    expect(runtime.getSnapshot().offline).toBeNull();
+    step(BALANCE.release.storeAnimationMs - 1_000); runtime.showShipping();
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('shipping');
+    step(BALANCE.release.animationMs);
+    runtime.common({ type: 'contract-select', id: contract });
+    expect(runtime.getSnapshot().state.persistent.progress.selected).toBe(contract);
+    runtime.startNextVersion();
+    expect(runtime.getSnapshot().state.run.world).toBe('release');
+    const dollars = runtime.getSnapshot().state.resources.dollars;
+    runtime.purchaseSpec('refresh');
+    expect(runtime.getSnapshot().state.persistent.specs.refresh).toBe(1);
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(dollars - BALANCE.spec.refresh[1]!.price);
+    runtime.startNextVersion(); runtime.startNextVersion();
+    state = runtime.getSnapshot().state;
+    expect(state.run.world).toBe('seed'); expect(state.run.version).toBe('v2');
+    expect(state.resources.pixels).toBe(0); expect(state.resources.tokens).toBe(before.resources.tokens);
+    expect(state.run.seed.autoCursors).toBe(0); expect(state.run.desktop.upgrades).toEqual([]);
+    expect(state.run.desktop.feedback).toEqual([]); expect(state.run.shipping).toBeNull();
+    expect(state.persistent.progress.selected).toBeNull();
+    expect(state.run.play.contract).toEqual(contract ? { id: contract, status: 'active' } : null);
+    expect(state.persistent.screenshots).toEqual(before.persistent.screenshots);
+    expect(state.persistent.artwork.icons).toEqual(before.persistent.artwork.icons);
+    if (contract === 'no-color') expect(state.run.seed.installer?.items).not.toContain('color');
+    const saved = loadGame(storage);
+    expect(saved.kind === 'loaded' && saved.state.run.version).toBe('v2');
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().introVisible).toBe(false);
+    expect(runtime.getSnapshot().state.persistent.specs.refresh).toBe(1);
+    expect(runtime.getSnapshot().state.run.play.contract).toEqual(state.run.play.contract);
+    expect(vi.mocked(platform.unlockAchievement).mock.calls.filter(([id]) => id === 'v1-released')).toHaveLength(1);
+    step(BALANCE.release.restartMs + BALANCE.w1.inheritMs);
+    const resumed = runtime.getSnapshot().state;
+    runtime.pressSeed();
+    expect(runtime.getSnapshot().state.resources.pixels - resumed.resources.pixels).toBeCloseTo(manualClickValue(resumed));
+    expect(runtime.getSnapshot().state.persistent.products.at(-1)!.screen.specs.refresh).toBe(0);
+  });
+
+  it('製品の画像保存と売上画面への移行が失敗しても元の段階へ残り、再試行で一度だけ出荷する', async () => {
+    await prepare(); runtime.requestPrototypeRelease();
+    const before = runtime.getSnapshot().state, write = storage.setItem;
+    storage.setItem = (key, value) => { if (key.startsWith('refresh.capture.')) throw new Error('Quota'); write(key, value); };
+    runtime.confirmProductRelease();
+    expect(runtime.getSnapshot().notice).toBe('save.failed');
+    expect(runtime.getSnapshot().state.run.world).toBe('desktop');
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(before.resources.dollars);
+    expect(runtime.getSnapshot().state.persistent.products).toEqual(before.persistent.products);
+    expect(vi.mocked(platform.unlockAchievement).mock.calls.filter(([id]) => id === 'v1-released')).toHaveLength(0);
+    storage.setItem = write; runtime.confirmProductRelease();
+    const product = runtime.getSnapshot().state.persistent.products.at(-1)!;
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
+    step(BALANCE.release.storeAnimationMs);
+    storage.setItem = (key, value) => { if (key === SAVE_KEYS.primary) throw new Error('Quota'); write(key, value); };
+    runtime.showShipping();
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
+    expect(runtime.getSnapshot().notice).toBe('save.failed');
+    storage.setItem = write; runtime.showShipping(); runtime.showShipping();
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('shipping');
+    expect(runtime.getSnapshot().state.resources.dollars).toBe(before.resources.dollars + product.revenue);
+    expect(runtime.getSnapshot().state.persistent.products).toHaveLength(before.persistent.products.length + 1);
+    expect(vi.mocked(platform.unlockAchievement).mock.calls.filter(([id]) => id === 'v1-released')).toHaveLength(1);
+  });
+
+  it('製品ページでタブ所有権を失ったら売上への移行も停止する', async () => {
+    await prepare(); runtime.requestPrototypeRelease(); runtime.confirmProductRelease();
+    step(BALANCE.release.storeAnimationMs);
+    const before = runtime.getSnapshot().state;
+    clock.owned = false; runtime.showShipping();
+    expect(runtime.getSnapshot().status).toBe('blocked');
+    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
+    expect(runtime.getSnapshot().state.resources).toEqual(before.resources);
+    expect(runtime.getSnapshot().state.persistent.products).toEqual(before.persistent.products);
+  });
+
+  it('留守の知らせを閉じても得た量を変えず、助言は閉じてから保存した履歴を読み返せる', async () => {
+    const offline = createFixture('foundation-saved', clock.wall - hour)!;
+    storage.setItem(SAVE_KEYS.primary, encodeSave(offline)); await start();
+    expect(runtime.getSnapshot().offline).not.toBeNull();
+    const pixels = runtime.getSnapshot().state.resources.pixels;
+    runtime.dismissOffline();
+    expect(runtime.getSnapshot().offline).toBeNull();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(pixels);
+    const advice = createFixture('stage7-advice', clock.wall)!;
+    expect(runtime.importData(encodeSave(advice))).toBe(true);
+    runtime.readAdvice(null);
+    expect(runtime.getSnapshot().state.run.advice.current).toBeNull();
+    runtime.dispose(); await start();
+    expect(runtime.getSnapshot().state.run.advice.seen).toContain('desktop-release');
+    runtime.readAdvice('desktop-release');
+    expect(runtime.getSnapshot().state.run.advice.current).toBe('desktop-release');
+    runtime.readAdvice('seed-cursor');
+    expect(runtime.getSnapshot().state.run.advice.current).toBe('desktop-release');
   });
 });
 
@@ -465,7 +603,7 @@ describe('段階5の保存と製品名',()=>{
     storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('release-ready',clock.wall)!));await start();
     runtime.requestPrototypeRelease();runtime.setProductName('星'.repeat(21));expect([...runtime.getSnapshot().state.persistent.productName!]).toHaveLength(20);
     runtime.setProductName('  私の画面  ');runtime.confirmPrototypeRelease();expect(runtime.getSnapshot().state.persistent.products[0]!.name).toBe('私の画面');expect(runtime.getSnapshot().state.persistent.products[0]!.author).toBe('Aoi');
-    step(8000);runtime.purchaseSpec('color');runtime.startNextVersion();runtime.setProductName('次の名前');runtime.persist();
+    step(BALANCE.release.storeAnimationMs);runtime.showShipping();step(BALANCE.release.animationMs);runtime.purchaseSpec('color');runtime.startNextVersion();runtime.setProductName('次の名前');runtime.persist();
     expect(runtime.getSnapshot().state.persistent.productName).toBe('次の名前');expect(runtime.getSnapshot().state.persistent.products[0]!.name).toBe('私の画面');
     runtime.setNumberNotation('scientific');runtime.dispose();await start();expect(runtime.getSnapshot().state.persistent.numberNotation).toBe('scientific');
   });

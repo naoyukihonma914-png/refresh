@@ -1,3 +1,4 @@
+import {advanceAdvice,createAdviceState} from './advice';
 import {reconcileProgress} from './longPlay';
 import { actAppBuild } from './appBuild';
 import { featureApp, isBuildable } from './appLayout';
@@ -9,7 +10,7 @@ import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
 import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, targetFor } from './kumiki';
 import { blankDrawing } from './kumikiState';
-import { advanceShipping, beginPrototypeRelease, buySpec, startNextVersion } from './release';
+import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion } from './release';
 
 function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
  let next=buyBlueprint(state,id);const app=isBuildable(id)?id:featureApp(id);
@@ -18,6 +19,7 @@ function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
 }
 
 export const FIXTURE_NAMES = [
+  'stage7-ready0','stage7-ready1','stage7-ready2','stage7-ready3','stage7-no-photos','stage7-store','stage7-shipping','stage7-complete','stage7-v2','stage7-v2-inherit','stage7-advice','stage7-advice0','stage7-advice1','stage7-advice2','stage7-advice3','stage7-offline','stage7-offline0','stage7-offline1','stage7-offline2','stage7-offline3','desktop-stage3',
   'longplay-seed','stray-seed','secret-art','contract-no-cursors','contract-no-color','contracts-offer','longplay-editor0','longplay-editor1','longplay-editor2','longplay-desktop0','longplay-desktop1','longplay-desktop2',
   'app-build-missing','app-build-empty','app-build-files','intro', 'editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2',
   'desktop-jobs','desktop-photo','desktop-ready','desktop-stalled',
@@ -34,10 +36,38 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
   if (name === 'intro') return state;
+  if(name?.startsWith('stage7-')){
+    const era=/[0-3]$/.test(name)?Number(name.at(-1)):3;
+    let next=createFixture('desktop-stage'+era,now)!;
+    for(const app of ['tessera','files','mail','photo','bin','clock'] as const)next=focusWindow(next,app);
+    next.run.desktop.feedback=Array.from({length:10},(_,index)=>({id:index+1,sender:'hikari' as const,kind:'screenshot' as const,target:'',baseline:[],baselineColor:'#000000',at:now-60000,completedAt:now-30000}));
+    next.run.desktop.feedbackSerial=10;next.run.desktop.notice=null;next.run.desktop.success=null;next.run.desktop.mailSelection=null;
+    next.run.desktop.terminal.running=false;next.run.desktop.idleMs=0;next.run.desktop.stalled=null;
+    next.persistent.productName='あおぞら';next.persistent.playerName='ゆう';next.persistent.seedSkills=[...new Set([...next.persistent.seedSkills,'inherit' as const])];
+    next.run.kumiki.guide.collapsed=true;next.run.desktop.windows.tessera.minimized=true;
+    next=reconcileProgress(next,now);
+    next.run.play.achievement=null;
+    if(name==='stage7-no-photos')next.persistent.screenshots=[];
+    else{next.run.desktop.cooldownMs=0;next=takeScreenshot(next,now,'ja');next.run.desktop.cooldownMs=0;}
+    if(name.startsWith('stage7-advice')){next.run.advice=advanceAdvice(advanceAdvice(createAdviceState(),next,0),next,BALANCE.w2.hintMs);return next;}
+    if(name.startsWith('stage7-offline')){next.lastTickAt=now-3600000;return next;}
+    if(name.startsWith('stage7-ready')||name==='stage7-no-photos')return next;
+    next=beginProductRelease(next,now,{language:'ja'});
+    if(name==='stage7-store')return advanceShipping(next,BALANCE.release.storeAnimationMs);
+    next=showShipping(advanceShipping(next,BALANCE.release.storeAnimationMs));
+    if(name==='stage7-shipping')return advanceShipping(next,2400);
+    next=advanceShipping(next,BALANCE.release.animationMs);
+    if(name==='stage7-complete')return next;
+    next=buySpec(next,'refresh');next=startNextVersion(next,now);
+    if(name==='stage7-v2-inherit')return next;
+    next.run.seed.installer=null;next.run.seed.built=[];next.run.restartMs=0;
+    return next;
+  }
+
   if(name?.startsWith('longplay-')||name==='stray-seed'||name==='secret-art'||name?.startsWith('contract')){
     let next=name==='contracts-offer'?createFixture('release-rich',now)!:name?.startsWith('contract-')?state:name==='secret-art'?createFixture('kumiki-mature',now)!:name?.startsWith('longplay-editor')?createFixture('editor-stage'+name.at(-1),now)!:name?.startsWith('longplay-desktop')?createFixture('desktop-stage'+name.at(-1),now)!:createFixture('seed-motion',now)!;
     if(name?.startsWith('contract-')){next.run.version='v2';next.run.play.contract={id:name==='contract-no-color'?'no-color':'no-cursors',status:'active'};next.resources.pixels=next.run.totalPixelsGenerated=100000;}
-    if(name==='contracts-offer'){next.run.version='v1';next.persistent.specs.color=1;next.persistent.seedSkills=['inherit'];next.persistent.progress.records['v1-released']=now;}
+    if(name==='contracts-offer'){next.run.version='v1';next.persistent.specs.color=1;next.persistent.seedSkills=['inherit'];next.persistent.progress.records['v1-released']=now;next.persistent.specs.refresh=1;}
     if(name==='stray-seed')next.run.play.stray={waitMs:120000,lifeMs:30000,x:.2,y:.7,serial:1};
     if(name==='secret-art'){const d=next.run.kumiki.drawings.folder!,target=targetFor(next,'folder',d.size);let count=0;for(let i=0;i<target.length&&count<16;i++)if(target[i]===-1){d.frames[0]![i]=0;count++;}d.exported=false;d.dirty=true;next.run.kumiki.exports=next.run.kumiki.exports.filter(w=>!(w.kind==='icon'&&w.id==='folder'));}
     return reconcileProgress(next,now);
@@ -46,10 +76,10 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if(name==='app-build-missing'){const next=createFixture('desktop-stage2',now)!;next.run.desktop.projects.files!.draft.parts=next.run.desktop.projects.files!.draft.parts.filter(p=>p.id!=='sort');next.run.desktop.projects.files!.installed=structuredClone(next.run.desktop.projects.files!.draft);next.run.desktop.feedback=[{id:1,kind:'sort',sender:'hikari',target:'',baseline:[],baselineColor:'#000000',at:now,completedAt:null}];next.run.desktop.feedbackSerial=1;next.run.desktop.notice=1;next.run.desktop.success=null;return next;}
   if(name==='app-build-empty'||name==='app-build-files'){let next=createFixture('desktop-early',now)!;next.resources.pixels=next.run.totalPixelsGenerated=1e9;next=buyBlueprint(next,'files');if(name==='app-build-files'){next=actAppBuild(next,{type:'app-recommend',app:'files'});next=buyBlueprint(next,'sort');}next.persistent.artwork.skills.push('update');next.persistent.appearance.editor=1;next.run.desktop.windows.tessera={...next.run.desktop.windows.tessera,x:0,y:0,width:800,height:572,maximized:true,restore:{x:40,y:40,width:600,height:400}};return next;}
   if(name?.startsWith('editor-stage')||name?.startsWith('desktop-stage')){
-    const index=Number(name.at(-1)) as 0|1|2;
+    const index=Number(name.at(-1)) as 0|1|2|3;
     let next=createFixture(name.startsWith('editor')?'kumiki-modern':'desktop-ready',now)!;
     next.persistent.artwork.skills=['fill','mirror','layers','eyedropper','expand','snap','outline','animation','extraParts','wallpaper','update','modern'];
-    next.persistent.desktopPrefs.skills=['major1','major2'];next.persistent.appearance={editor:index,desktop:index};next.persistent.artwork.modern=index===2;
+    next.persistent.desktopPrefs.skills=index===3?['major1','major2','major3']:['major1','major2'];next.persistent.appearance={editor:Math.min(index,2) as 0|1|2,desktop:index};next.persistent.artwork.modern=index>=2;
     next.run.desktop=resizeDesktop(next.run.desktop,desktopScreen(index));
     if(name.startsWith('desktop'))next=advanceDesktopTime(next,720_000,now,true);
     next.run.kumiki.guide.collapsed=true;next.resources.tokens=200;return next;

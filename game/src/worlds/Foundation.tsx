@@ -1,7 +1,10 @@
+import { AdviceMessage, AdviceHistory } from '../components/WorldAdvice';
+import { seedEra } from '../systems/seedAppearance';
 import {BulkControl,ContractStatus} from '../components/LongPlaySettings';
 import { PageLayoutSurface,type PageLayoutHandle } from './PageLayoutSurface';
 import { pageColors,pageFonts,isRecommendedPage,type PageLayout } from '../systems/pageDesign';
 import { Estimate } from '../components/Estimate';
+import { v1Conditions } from '../systems/release';
 import { productLabel } from '../content/products';
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { BALANCE, type SeedItem } from '../config/balance';
@@ -40,6 +43,7 @@ function RollingPixels({ value, now, enabled, i18n }: { value: number; now: numb
 export function Foundation({ snapshot, i18n, runtime, embedded = false, preview = false, interactive = true, legacyHome = false, children }: { snapshot: RuntimeSnapshot; i18n: I18n; runtime: GameRuntime; embedded?: boolean; preview?: boolean; interactive?: boolean; legacyHome?:boolean; children?: ReactNode }) {
   const { state, offline, press } = snapshot;
   const { seed } = state.run;
+  const era = legacyHome ? 0 : seedEra(state);
   const has = (id: SeedItem) => seed.built.includes(id);
   const [settings, setSettings] = useState(false);
   const [arranging,setArranging]=useState(false);
@@ -65,23 +69,23 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
   useEffect(() => runtime.platform.keyboard.subscribe(key => {
     if (key.code !== 'Space') return;
     if (!key.pressed) { held.current = false; return; }
-    if (preview || !interactive || key.editable || settings) return;
+    if (preview || !interactive || key.editable || settings || snapshot.releaseConfirmation) return;
     key.preventDefault();
     if (!skills.includes('keyboard') && !skills.includes('hold')) return;
     if (key.repeat || held.current) return;
     held.current = true;
     lastHeld.current = runtime.platform.clock.monotonicNow();
     runtime.pressSeed();
-  }), [runtime, skills, settings, preview, interactive]);
+  }), [runtime, skills, settings, preview, interactive, snapshot.releaseConfirmation]);
   useEffect(() => {
-    if (preview || !interactive || !skills.includes('hold') || settings) return;
+    if (preview || !interactive || !skills.includes('hold') || settings || snapshot.releaseConfirmation) return;
     const interval = 1_000 / (BALANCE.w1.holdPressesPerSecond * BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier);
     return runtime.platform.every(interval, () => {
       const time = runtime.platform.clock.monotonicNow();
       if (held.current && time - lastHeld.current >= interval) { lastHeld.current = time; runtime.pressSeed(); }
     });
-  }, [runtime, skills, settings, state.persistent.specs.refresh, preview, interactive]);
-  useEffect(() => { if (!interactive) held.current = false; }, [interactive]);
+  }, [runtime, skills, settings, state.persistent.specs.refresh, preview, interactive, snapshot.releaseConfirmation]);
+  useEffect(() => { if (!interactive || snapshot.releaseConfirmation) held.current = false; }, [interactive,snapshot.releaseConfirmation]);
   const items = visibleSeedItems(state);
   const guide = seed.guide;
   const showCursors = Math.min(state.run.world === 'desktop' ? BALANCE.w3.compactCursors : BALANCE.w1.maxVisibleCursors, seed.autoCursors);
@@ -115,7 +119,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
   const useSecond = !!secondaryNode && Math.floor(cursorCycle) % 2 === 1;
   const autoPressed = motion && cursorsWorking && !useSecond && showCursors > 0 && cursorPhase > 0.45 && cursorPhase < 0.65;
   const appearance = state.persistent.seedAppearance;
-  const className = ['foundation', 'seed-page', embedded && 'is-embedded', has('border') && 'has-border', has('color') && 'has-color',
+  const className = ['foundation', 'seed-page', era === 1 && 'seed-era-1', page.button && 'page-custom-button', embedded && 'is-embedded', has('border') && 'has-border', has('color') && 'has-color',
     has('font') && 'has-font', has('layout') && 'has-layout', motion && 'has-motion',
     state.persistent.specs.color > 0 && 'modern-colors', skills.includes('pattern') && `pattern-${appearance.pattern}`,
     skills.includes('marquee') && appearance.marquee && 'has-marquee'].filter(Boolean).join(' ');
@@ -134,15 +138,15 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
         {has('layout') ? i18n.t('seed.buildPrice', { cost: i18n.integer(cost) }) : <>{label}{effect && <small className="purchase-effect">{effect}</small>}</>}
       </button><Estimate cost={cost} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} i18n={i18n} runtime={runtime} preview={preview}/>{id==='cursor'&&!has('layout')&&<BulkControl state={state} runtime={runtime} i18n={i18n}/>}</li>;
   };
-  const headingNode=<><ContractStatus state={state} runtime={runtime} i18n={i18n}/>{!embedded&&state.run.play.achievement&&<p className="achievement-line" role="status">{i18n.t('achievement.notice',{name:i18n.t(`achievement.${state.run.play.achievement.id}`)})}</p>}{!legacyHome&&page.heading&&<h1 className="home-heading">{page.heading}</h1>}      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{(state.run.version!=='v0.1'||state.persistent.products.length)?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName)}):i18n.t('foundation.goal')}
-        {!embedded && <button className="text-button goal-progress" onClick={() => setConditions(!conditions)} aria-expanded={conditions}>{i18n.t('seed.goalProgress', { done: 0, total: 5 })}</button>}
+  const headingNode=<>{era===1&&!page.heading&&<h1 className="seed-era-title">{i18n.t('seed.era.title',{product:productLabel(i18n,state.persistent.productName,state.run.version==='v2'?'v2.0':'v1.0')})}</h1>}<ContractStatus state={state} runtime={runtime} i18n={i18n}/>{!embedded&&state.run.play.achievement&&<p className="achievement-line" role="status">{i18n.t('achievement.notice',{name:i18n.t(`achievement.${state.run.play.achievement.id}`)})}</p>}{!legacyHome&&page.heading&&<h1 className="home-heading">{page.heading}</h1>}      <p className="goal"><b>{i18n.t('foundation.goalLabel')}</b>{(state.run.version!=='v0.1'||state.persistent.products.length)?i18n.t('foundation.goalNamed',{product:productLabel(i18n,state.persistent.productName,state.run.version==='v2'?'v2.0':'v1.0')}):i18n.t('foundation.goal')}
+        {!embedded && <button className="text-button goal-progress" onClick={() => setConditions(!conditions)} aria-expanded={conditions}>{i18n.t('seed.goalProgress', { done: v1Conditions(state).filter(Boolean).length, total: 5 })}</button>}
       </p>
       {conditions && <section className="release-conditions"><h2>{i18n.t('seed.conditions')}</h2><ul>
-        {(['apps', 'requests', 'icons', 'wallpaper', 'automation'] as const).map(id => <li key={id}>{i18n.t(`seed.condition.${id}`)}</li>)}
+        {(['apps', 'requests', 'icons', 'wallpaper', 'automation'] as const).map((id,index) => <li key={id}><input type="checkbox" readOnly checked={v1Conditions(state)[index]}/>{i18n.t(`seed.condition.${id}`)}</li>)}
       </ul></section>}
 </>;
-  const noticeNode=<>      {!embedded && guide.seen.length > 0 && <section className="guide-notices">
-        {guide.collapsed ? <button className="text-button" onClick={() => { runtime.readSeedGuide(guide.current!); setArchive(true); }}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>
+  const noticeNode=<>      {!embedded && (guide.seen.length > 0 || state.run.advice.current) && <section className="guide-notices">
+        {state.run.advice.current ? <AdviceMessage memory={state.run.advice} i18n={i18n} app={i18n.t('k.app')} onRead={runtime.readAdvice}/> : guide.collapsed ? <button className="text-button" onClick={() => { runtime.readSeedGuide(guide.current!); setArchive(true); }}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>
           : <><h2>{i18n.t('guide.title')}</h2>
             <p className="guide-body">{guide.current && i18n.t(`guide.${guide.current}`)}</p>
             <p className="guide-signature">{i18n.t('guide.signature')}</p>
@@ -152,7 +156,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
               {guide.seen.length > 1 && <button className="text-button" onClick={() => setArchive(!archive)}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>}
             </div></>}
         {archive && <ul className="notice-archive">{guide.seen.map(id => <li key={id}><button className="text-button" onClick={() => runtime.readSeedGuide(id)}>{i18n.t('guide.read', { title: i18n.t(`guide.${id}.title`) })}</button></li>)}</ul>}
-        {archive && <GuideHistory state={state} i18n={i18n} />}
+        {archive && <GuideHistory state={state} i18n={i18n} />}<AdviceHistory memory={state.run.advice} i18n={i18n} app={i18n.t('k.app')} onRead={runtime.readAdvice}/>
       </section>}
 </>;
   const generatorNode=<>      {seed.installer && <section className="installer" role="status"><p>{i18n.t('installer.title')}</p>
@@ -196,11 +200,11 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
 </>;
   return <main data-page-motion={page.motion} style={!legacyHome?{...(has('color')?{'--seed-bg':colors.background,'--seed-surface':page.background??(state.persistent.specs.color===0?'#c0c0c0':'#ffffff'),'--seed-ink':colors.text,'--seed-button':colors.button,backgroundColor:colors.background,color:colors.text}:{}),...(has('font')?{fontFamily:pageFonts[page.bodyFont],'--page-heading-font':pageFonts[page.headingFont]}:{})} as CSSProperties:undefined} className={[className,customLayout&&'page-layout-active',!legacyHome&&(page.text||page.background)&&'page-custom-colors',state.run.restartMs>0&&'is-restarting',preview&&'is-preview'].filter(Boolean).join(' ')}>
     {settings?<PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={()=>setSettings(false)}/>:<div className={`seed-content ${customLayout?'page-layout-content':''}`}>
-      {layoutUnlocked?<PageLayoutSurface canvas={customLayout} measureRef={surface} layout={editingLayout??page.layout} i18n={i18n} editing={arranging&&!preview} onChange={layout=>{setEditingLayout(null);runtime.actPage({type:'layout',layout});}} parts={{heading:headingNode,notice:noticeNode,generator:generatorNode,upgrades:upgradesNode}}/>:<>{headingNode}{noticeNode}{generatorNode}{upgradesNode}</>}
-      <div className="page-footer">      {!embedded && <p className="save-status">{canSave(state) && state.lastSavedAt !== null
+      {layoutUnlocked||era===1?<PageLayoutSurface canvas={customLayout} measureRef={surface} layout={editingLayout??page.layout} i18n={i18n} editing={arranging&&!preview} onChange={layout=>{setEditingLayout(null);runtime.actPage({type:'layout',layout});}} parts={{heading:headingNode,notice:noticeNode,generator:generatorNode,upgrades:upgradesNode}}/>:<>{headingNode}{noticeNode}{generatorNode}{upgradesNode}</>}
+      <div className="page-footer">{era===1&&!customLayout&&<h2 className="seed-menu-heading">{i18n.t('seed.era.menu')}</h2>}      {!embedded && <p className="save-status">{canSave(state) && state.lastSavedAt !== null
         ? i18n.t('save.saved', { time: i18n.time(state.lastSavedAt) }) : i18n.t('save.unavailableUntilBuilt')}</p>
       }
-      {!embedded && offline && <p role="status">{i18n.t('offline.notice', { duration: i18n.duration(offline.creditedMs), pixels: i18n.pixels(offline.pixels), count: Math.floor(offline.pixels) })}</p>}
+      {!embedded && offline && <p role="status">{i18n.t('offline.notice', { duration: i18n.duration(offline.creditedMs), pixels: i18n.pixels(offline.pixels), count: Math.floor(offline.pixels) })} <button className="text-button" onClick={runtime.dismissOffline}>{i18n.t('guide.close')}</button></p>}
       {state.run.version !== 'v0.1' && <p><button className="text-button" onClick={() => {setEditingLayout(null);setArranging(false);setSettings(true);}}>{i18n.t('seed.settings')}</button></p>}
       {skills.includes('history') && <section className="change-history"><h2>{i18n.t('history.title')}</h2>
         {seed.history.length === 0 ? <p>{i18n.t('history.empty')}</p> : <ul>{seed.history.map((entry, index) => <li key={index}>
