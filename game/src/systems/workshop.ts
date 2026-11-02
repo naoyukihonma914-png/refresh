@@ -5,7 +5,7 @@ import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
 import { globalMultiplier } from './longPlay';
 import type { GameState } from './state';
-import { createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId } from './workshopState';
+import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId } from './workshopState';
 
 export type WorkshopAction =
   | {type:'buySet';set:UiSetId} | {type:'selectPart';part:WorkshopPartId}
@@ -116,7 +116,7 @@ function buySkill(s:GameState,id:EditorSkill):GameState {
 }
 function customize(s:GameState,patch:Partial<EditorCustomization>):GameState {
   const original=s.persistent.editorCustomization;
-  const next={...original,...patch,panelPositions:{...original.panelPositions,...patch.panelPositions},panelWidths:{...original.panelWidths,...patch.panelWidths}};
+  const next={...original,...patch,...(patch.nativeBackground===true?{background:patch.background??BALANCE.workshop.customization.background}:Object.hasOwn(patch,'background')?{nativeBackground:false}:{}),panelPositions:{...original.panelPositions,...patch.panelPositions},panelWidths:{...original.panelWidths,...patch.panelWidths}};
   if(!isEditorCustomization(next)||!paletteAllows(s,next.accent)||!paletteAllows(s,next.background))return s;
   if(editorStage(s)===0){
     const advanced: (keyof EditorCustomization)[]=['docking','panelPositions'];
@@ -182,8 +182,8 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
       if(p.step===1&&ready)s=showGuide(payStep(s,id,1),'adjust');
     }else if(action.type==='adjust'){
       if(p.step<2)return s;
-      const design={...p.design,...action.patch,controlColors:{...p.design.controlColors,...action.patch.controlColors},controlSides:{...p.design.controlSides,...action.patch.controlSides}};
-      if(!designAllowed(s,design)||!partRectValid(s,id,p.rect,design))return s;
+      const design=adjustComponentDesign(p.design,action.patch,paletteFor(s.persistent.specs.color));
+      if(!design||!designAllowed(s,design)||!partRectValid(s,id,p.rect,design))return s;
       s=writePart(s,id,{...p,design:structuredClone(design)});
     }else if(action.type==='confirmAdjustment'){
       if(p.step!==2)return s;

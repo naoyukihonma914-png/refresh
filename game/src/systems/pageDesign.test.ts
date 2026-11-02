@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { BASE_PALETTE } from '../content/palette';
 import { creditPixels, passivePixelsPerSecond } from './economy';
-import { buildSeed } from './seed';
+import { buildSeed, createSeedVersion } from './seed';
+import { actWorkshop } from './workshop';
 import { createInitialState, isGameState } from './state';
 import { actPageDesign, contrast, createPageDesign, fitPageLayout, isPageDesign, isRecommendedPage, pageColors, PAGE_PARTS, recommendedPage, validPagePlacement } from './pageDesign';
 import { decodeSave, encodeSave } from './save';
@@ -23,10 +24,28 @@ describe('組み立て中のエディタを安全に設計する',()=>{
   let s=creditPixels(createInitialState(now),100_000);
   for(const id of ['border','save','color','font','layout','motion','bars','workspace'] as const){
    s=buildSeed(s,id,now);
-   if(s.run.seed.built.includes('color')){const c=pageColors(s.run.seed.page,s.persistent.specs.color,s.persistent.editorCustomization);expect(c.background).toBe(s.persistent.editorCustomization.background);expect(contrast(c.background,c.text)).toBeGreaterThanOrEqual(4.5);}
+   if(s.run.seed.built.includes('color')){const c=pageColors(s.run.seed.page,s.persistent.specs.color,s.persistent.editorCustomization);expect(c.background).toBe('#5d6f7d');expect(contrast(c.background,c.text)).toBeGreaterThanOrEqual(4.5);}
   }
-  s=actPageDesign(s,{type:'color',slot:'text',color:BASE_PALETTE[4]!});expect(s.run.seed.page.text).toBe(BASE_PALETTE[4]);
+  s=actPageDesign(s,{type:'color',slot:'background',color:BASE_PALETTE[0]!});s=actPageDesign(s,{type:'color',slot:'text',color:BASE_PALETTE[4]!});expect(s.run.seed.page.text).toBe(BASE_PALETTE[4]);
   s=actPageDesign(s,{type:'color',slot:'background',color:BASE_PALETTE[4]!});const c=pageColors(s.run.seed.page,s.persistent.specs.color,s.persistent.editorCustomization);expect(c.text).not.toBe(BASE_PALETTE[4]);expect(contrast(c.background,c.text)).toBeGreaterThanOrEqual(4.5);expect(decodeSave(encodeSave(s)).run.seed.page).toEqual(s.run.seed.page);
+ });
+ it.each([[0,'#5d6f7d'],[1,'#29292f'],[2,'#2b2b2b']] as const)('段%iの素の画面と工房が標準背景を共有し、明示した紫と標準を区別する',(stage,expected)=>{
+  let s=ready();s.persistent.editorSkills=['update','modern'];s.persistent.desktopPrefs.skills=['major1','major2','major3'];s.persistent.appearance.editor=stage;s.run.seed.page.background=BASE_PALETTE[0]!;
+  const current=()=>pageColors(s.run.seed.page,s.persistent.specs.color,s.persistent.editorCustomization,stage);
+  expect(current().background).toBe(expected);expect(contrast(current().background,current().text)).toBeGreaterThanOrEqual(4.5);
+  s=actPageDesign(s,{type:'color',slot:'background',color:'#3a3450'});expect(s.persistent.editorCustomization.nativeBackground).toBe(false);expect(current().background).toBe('#3a3450');
+  s=actPageDesign(s,{type:'color',slot:'background',color:null});expect(s.persistent.editorCustomization.nativeBackground).toBe(true);expect(current().background).toBe(expected);
+  s=actPageDesign(s,{type:'color',slot:'background',color:'#3a3450'});s=decodeSave(encodeSave(s));expect(current().background).toBe('#3a3450');
+  s=actPageDesign(s,{type:'reset'});expect(current().background).toBe(expected);expect(s.persistent.editorCustomization.nativeBackground).toBe(true);
+  delete s.persistent.editorCustomization.nativeBackground;expect(current().background).toBe(expected);
+ });
+ it('工房で背景を変えて次の版へ戻った後も、書体を変えて読める設定を保存できる',()=>{
+  let s=actPageDesign(ready(),{type:'color',slot:'background',color:BASE_PALETTE[1]!});s=actPageDesign(s,{type:'color',slot:'text',color:BASE_PALETTE[4]!});
+  for(const id of ['bars','workspace','export'] as const)s=buildSeed(s,id,now);s.run.workshop.enterMs=0;
+  s=actWorkshop(s,{type:'customize',patch:{background:BASE_PALETTE[4]!}},now);s.persistent.seedSkills.push('inherit');
+  s=creditPixels(createSeedVersion(s,'v1',now),100_000);for(const id of ['border','save','color','font'] as const)s=buildSeed(s,id,now);
+  expect(s.run.seed.page.background).toBe(BASE_PALETTE[1]);const current=pageColors(s.run.seed.page,0,s.persistent.editorCustomization);expect(current.background).toBe(BASE_PALETTE[4]);expect(contrast(current.background,current.text)).toBeGreaterThanOrEqual(4.5);
+  s=actPageDesign(s,{type:'font',slot:'bodyFont',font:'mono'});expect(s.run.seed.page.background).toBe(BASE_PALETTE[4]);expect(s.run.seed.page.text).not.toBe(BASE_PALETTE[4]);expect(decodeSave(encodeSave(s)).run.seed.page).toEqual(s.run.seed.page);
  });
  it('生成の領域だけを動かしても、財布・毎秒・ほかの領域は変わらない',()=>{
   const s=ready(),l=structuredClone(s.run.seed.page.layout!);l.parts.generator.x+=8;l.parts.generator.width-=8;const n=actPageDesign(s,{type:'layout',layout:l});expect(n.run.seed.page.layout).toEqual(l);expect(n.run.seed.page.layout!.parts.heading).toEqual(s.run.seed.page.layout!.parts.heading);expect(n.resources).toEqual(s.resources);expect(passivePixelsPerSecond(n)).toBe(passivePixelsPerSecond(s));expect(isRecommendedPage(l)).toBe(false);

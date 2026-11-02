@@ -3,7 +3,7 @@ import { gunzipSync } from 'node:zlib';
 import { describe,expect,it } from 'vitest';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { LegacyCapturePreview } from '../worlds/LegacyCapturePreview';
+import { LegacyCapturePreview, WorkshopSnapshot } from '../worlds/LegacyCapturePreview';
 import { createI18n } from '../content/i18n';
 import { isProductRecord, normalizeArchivedProduct } from './releaseState';
 import { BALANCE } from '../config/balance';
@@ -174,5 +174,37 @@ describe('製品と入れ子の撮影の静的表示',()=>{
   const before=catalog.map(shot=>shot.data),markup=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot:catalog.at(-1)!,catalog,i18n:createI18n('ja')}));
   expect(markup.match(/data-preview-shot=/g)?.length).toBeLessThanOrEqual(2**BALANCE.w3.capturePreviewDepth-1);
   expect(markup).toContain('data-capture-reference=');expect(catalog.map(shot=>shot.data)).toEqual(before);
+ });
+});
+
+
+describe('保存した部品工房の静的な配置と材質',()=>{
+ const props=()=>{const state=createFixture('stage8a-required-complete-16color',now)!;return {workshop:state.run.workshop,customization:state.persistent.editorCustomization,stage:0,i18n:createI18n('ja'),now,pixels:state.resources.pixels};};
+ const openTag=(markup:string,attribute:string,value:string)=>{const match=markup.match(new RegExp(`<[^>]+${attribute}="${value}"[^>]*>`));expect(match).not.toBeNull();return match![0];};
+ it('共通の枠を唯一の外枠とし、その原点から子パーツを同じ寸法で配置する',()=>{
+  const snapshot=props(),w=snapshot.workshop;w.activePart='common-button';w.parts['common-frame']!.rect={x:16,y:24,width:608,height:368};w.parts['common-button']!.rect={x:64,y:128,width:160,height:56};
+  const before=structuredClone(w),markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  expect(markup.match(/data-static-common-frame=/g)).toHaveLength(1);expect(markup).not.toContain('data-static-part="common-frame"');
+  const frame=openTag(markup,'data-static-common-frame','true');expect(frame).toContain('left:16px');expect(frame).toContain('top:24px');expect(frame).toContain('width:616px');expect(frame).not.toContain('height:');const client=openTag(markup,'data-static-client','true');expect(client).toContain('width:608px');expect(client).toContain('height:368px');
+  const button=openTag(markup,'data-static-part','common-button');expect(button).toContain('left:48px');expect(button).toContain('top:104px');expect(button).toContain('width:160px');expect(button).toContain('height:56px');expect(w).toEqual(before);
+ });
+ it('未変更の材質は現在の宛先と同じ95風になり、明示した色の組と寸法はそのまま残る',()=>{
+  const snapshot=props(),w=snapshot.workshop;w.activePart='common-button';
+  let markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot)),button=openTag(markup,'data-static-part-content','common-button');
+  expect(button).toContain('background:#c0c0c0');expect(button).toContain('color:#000000');
+  expect(markup).toContain('background:#5d6f7d');
+  w.parts['common-button']!.design={...w.parts['common-button']!.design,nativeColors:false,color:'#7a2e2a',textColor:'#f4efe4',radius:8,fontSize:16};
+  markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));button=openTag(markup,'data-static-part-content','common-button');
+  expect(button).toContain('background:#7a2e2a');expect(button).toContain('color:#f4efe4');expect(button).toContain('border-radius:8px');expect(button).toContain('font-size:16px');
+  w.parts['common-frame']!.design.fontSize=28;markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));expect(openTag(markup,'data-static-common-frame','true')).not.toContain('height:');expect(markup).toContain('font-size:28px');
+ });
+ it('現在の完成数を使い、まだ追加していない要素や架空の半分完成・架空の行を描かない',()=>{
+  const snapshot=props(),w=snapshot.workshop;w.activePart='common-progress';
+  const markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  expect(markup).toContain(snapshot.i18n.t('ws.productionProgress',{count:'22',total:'22'}));expect(markup).not.toContain('width:50%');expect(markup).not.toContain(snapshot.i18n.t('ws.preview.line',{count:1}));
+  w.parts['common-button']!.step=1;w.parts['common-button']!.elements=[];
+  const partial=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  const content=partial.match(/<div [^>]*data-static-part-content="common-button"[^>]*>(.*?)<\/div>/s)!;
+  expect(content[1]).toBe('');
  });
 });

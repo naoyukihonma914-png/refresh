@@ -2,6 +2,8 @@ import { BALANCE } from '../config/balance';
 import { homeButtonColor, paletteFor } from '../content/palette';
 import { readableText } from './appLayout';
 import type { GameState } from './state';
+import { editorStage, type VisualStage } from './appearance';
+import { effectiveEditorBackground, usesNativeEditorBackground, type EditorCustomization } from './workshopState';
 export const PAGE_PARTS=['heading','notice','generator','upgrades'] as const;
 export type PagePart=typeof PAGE_PARTS[number];
 export const PAGE_FONTS=['sans','serif','pixel','mono'] as const;
@@ -13,7 +15,7 @@ export interface PageDesign{background:string|null;text:string|null;button:strin
 export const createPageDesign=():PageDesign=>({background:null,text:null,button:null,headingFont:'sans',bodyFont:'sans',motion:'push',heading:'',layout:null});
 export const pageFonts:Record<PageFont,string>={sans:"'Refresh Sans',sans-serif",serif:"'Refresh Serif',serif",pixel:"'Refresh Pixel',monospace",mono:"'Refresh Mono',monospace"};
 export function contrast(a:string,b:string){const l=(c:string)=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i]!,0);const x=l(a),y=l(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
-export function pageColors(page:PageDesign,color:number,editor?:{background:string;accent:string}){const background=page.background??editor?.background??(color===0?'#c0c0c0':'#e8edf1'),button=page.button??editor?.accent??homeButtonColor(color),requested=page.text??readableText(background),text=contrast(background,requested)>=4.5?requested:readableText(background);return {background,button,text,buttonText:readableText(button)};}
+export function pageColors(page:PageDesign,color:number,editor?:Pick<EditorCustomization,'background'|'accent'|'nativeBackground'>,stage:VisualStage=0){const background=editor?effectiveEditorBackground(editor,stage):page.background??(color===0?'#c0c0c0':'#e8edf1'),button=page.button??editor?.accent??homeButtonColor(color),requested=page.text??readableText(background),text=contrast(background,requested)>=4.5?requested:readableText(background);return {background,button,text,buttonText:readableText(button)};}
 const snap=(n:number)=>Math.round(n/BALANCE.pageDesign.grid)*BALANCE.pageDesign.grid;
 const up=(n:number)=>Math.ceil(n/BALANCE.pageDesign.grid)*BALANCE.pageDesign.grid;
 export const pageMinimum=(id:PagePart)=>({width:BALANCE.pageDesign.minWidth,height:BALANCE.pageDesign.minHeights[id]});
@@ -55,17 +57,15 @@ export function isPageDesign(v:unknown):v is PageDesign{
 }
 export type PageAction={type:'color';slot:'background'|'button'|'text';color:string|null}|{type:'font';slot:'headingFont'|'bodyFont';font:PageFont}|{type:'motion';motion:PageDesign['motion']}|{type:'layout';layout:PageLayout}|{type:'recommended'|'reset'}|{type:'heading';heading:string};
 export function actPageDesign(s:GameState,a:PageAction):GameState{
- const p=s.run.seed.page,b=s.run.seed.built;let page={...p};
- if(a.type==='color'){if(!b.includes('color')||a.color!==null&&!paletteFor(s.persistent.specs.color).includes(a.color))return s;page[a.slot]=a.color;const colors=pageColors(page,s.persistent.specs.color,s.persistent.editorCustomization);if(a.slot==='text'&&page.text&&contrast(colors.background,page.text)<4.5)return s;if(a.slot==='background'&&page.text&&contrast(colors.background,page.text)<4.5)page.text=readableText(colors.background);}
+ const p=s.run.seed.page,b=s.run.seed.built,editorCustomization={...s.persistent.editorCustomization},background=effectiveEditorBackground(editorCustomization,editorStage(s));let page={...p,background:usesNativeEditorBackground(editorCustomization)?null:background,text:p.text&&contrast(background,p.text)<4.5?readableText(background):p.text};
+ if(a.type==='color'){if(!b.includes('color')||a.color!==null&&!paletteFor(s.persistent.specs.color).includes(a.color))return s;page[a.slot]=a.color;if(a.slot==='background'){editorCustomization.background=a.color??BALANCE.workshop.customization.background;editorCustomization.nativeBackground=a.color===null;}const colors=pageColors(page,s.persistent.specs.color,editorCustomization,editorStage(s));if(a.slot==='text'&&page.text&&contrast(colors.background,page.text)<4.5)return s;if(a.slot==='background'&&page.text&&contrast(colors.background,page.text)<4.5)page.text=readableText(colors.background);}
  if(a.type==='font'){if(!b.includes('font')||!PAGE_FONTS.includes(a.font))return s;page[a.slot]=a.font;}
  if(a.type==='motion'){if(!b.includes('motion')||!PAGE_MOTIONS.includes(a.motion))return s;page.motion=a.motion;}
  if(a.type==='layout'){if(a.layout.button&&(a.layout.button.width<BALANCE.pageDesign.buttonMinWidth||a.layout.button.height<BALANCE.pageDesign.buttonMinHeight||a.layout.button.width>a.layout.parts.generator.width-24||a.layout.button.height>a.layout.parts.generator.height-120))return s;if(!b.includes('layout')||!isPageDesign({...p,layout:a.layout})||!PAGE_PARTS.every(id=>validPagePlacement(a.layout,id,a.layout.parts[id])))return s;page.layout=a.layout;}
  if(a.type==='recommended'){if(!b.includes('layout'))return s;page.layout=recommendedPage();}
  if(a.type==='reset')page={...createPageDesign(),heading:p.heading,layout:b.includes('layout')?recommendedPage():null};
  if(a.type==='heading'){if(!b.includes('font'))return s;page.heading=[...a.heading].slice(0,80).join('');}
- const editorCustomization={...s.persistent.editorCustomization};
  if(a.type==='color'&&a.slot==='button')editorCustomization.accent=a.color??BALANCE.workshop.customization.accent;
- if(a.type==='color'&&a.slot==='background')editorCustomization.background=a.color??BALANCE.workshop.customization.background;
- if(a.type==='reset'){editorCustomization.accent=BALANCE.workshop.customization.accent;editorCustomization.background=BALANCE.workshop.customization.background;}
+ if(a.type==='reset'){editorCustomization.accent=BALANCE.workshop.customization.accent;editorCustomization.background=BALANCE.workshop.customization.background;editorCustomization.nativeBackground=true;}
  return {...s,persistent:{...s.persistent,editorCustomization},run:{...s.run,seed:{...s.run.seed,page}}};
 }

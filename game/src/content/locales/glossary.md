@@ -27,12 +27,12 @@
 | パーツ | Parts |
 | プラグイン | Plugins |
 | テンプレート | Template |
-| スケッチ | Sketch |
+| UIセット | UI Sets |
+| 作業台 | Workbench |
 | エクスポート | Export |
-| ボーダー・セーブ・カラー・フォント・レイアウト・アニメーション | Border, Save, Color, Font, Layout, Animation |
+| ボーダー・セーブ・カラー・フォント・レイアウト・アニメーション・帯・作業台まわり・エクスポート | Border, Save, Color, Font, Layout, Animation, Bars, Workspace, Export |
 | アップグレード | Upgrades |
 | ジョブ | Job |
 | フィードバック | Feedback |
 | スクリーンショット | Screenshot |
-| フォーカスモード | Focus mode |
 | 制作ノート.txt | Production notes.txt |

@@ -1,3 +1,4 @@
+import { editorName } from './appearance';
 import { describe, expect, it } from 'vitest';
 import { createI18n } from '../content/i18n';
 import { createWorkshopTargetState, targetFileEntries, targetMailMessages, targetPhotoFilter, workshopTargetReducer } from '../worlds/workshop/WorkshopTargetContext';
@@ -5,7 +6,9 @@ import { BALANCE } from '../config/balance';
 import { UI_SETS, WORKSHOP_PARTS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
 import { createInitialState, isGameState, type GameState } from './state';
 import { actWorkshop, advanceWorkshop, canAssembleDesktop, canBuyWorkshopSet, completedParts, completedSets, defaultComponentDesign, enterWorkshop, normalizeWorkshopRect, partRectValid, partMinimumSize, prototypeConditions, workshopPlacementGrid } from './workshop';
-import { createEditorCustomization, isEditorCustomization, isWorkshopState } from './workshopState';
+import { adjustComponentDesign, colorContrast, createComponentDesign, createEditorCustomization, effectiveEditorBackground, isComponentDesign, isEditorCustomization, isWorkshopState, usesNativeComponentColors, usesNativeEditorBackground } from './workshopState';
+import { decodeSave, encodeSave } from './save';
+import { paletteFor } from '../content/palette';
 import { creditPixels, cursorPixelsPerSecond, manualClickValue, passivePixelsPerSecond, seedPartsPixelsPerSecond, workshopPartsPixelsPerSecond } from './economy';
 
 const now=1_800_000_000_000;
@@ -108,9 +111,9 @@ describe('第3版：工房の制作と経済',()=>{
     s=actWorkshop(s,{type:'buySet',set:'clock'},now);expect(partRectValid(s,'clock-time',{...rect,height:80})).toBe(true);
     const invalid=structuredClone(s);invalid.run.workshop.parts['common-heading']!.step=1;invalid.run.workshop.parts['common-heading']!.rect=rect;expect(isWorkshopState(invalid.run.workshop)).toBe(false);
   });
-  it('読めない配色・現在のパレット外の色・未解放の動きを拒む',()=>{
+  it('文字だけを読めない色へ変えること・パレット外の色・未解放の動きを拒む',()=>{
     let s=complete(actWorkshop(workshop(),{type:'buySet',set:'common'},now),'common-button');
-    expect(actWorkshop(s,{type:'adjust',part:'common-button',patch:{color:'#f4efe4'}},now)).toBe(s);
+    expect(actWorkshop(s,{type:'adjust',part:'common-button',patch:{textColor:s.run.workshop.parts['common-button']!.design.color}},now)).toBe(s);
     expect(actWorkshop(s,{type:'adjust',part:'common-button',patch:{color:'#112233'}},now)).toBe(s);
     expect(actWorkshop(s,{type:'adjust',part:'common-button',patch:{motion:'smooth'}},now)).toBe(s);
     s.persistent.specs.color=2;expect(actWorkshop(s,{type:'adjust',part:'common-button',patch:{color:'#112233'}},now)).not.toBe(s);
@@ -265,7 +268,7 @@ describe('工房：同じ行き先の部品が共有する操作状態',()=>{
   });
   it('メールは実ガイドの同じ一覧・本文・既読・フォルダ・返信下書きを使う',()=>{
     const s=workshop(),messages=targetMailMessages(s,createI18n('ja'));expect(messages[0]!.id).toBe('guide:entered');
-    expect(messages[0]!.body).toBe(createI18n('ja').t('ws.guide.entered'));
+    expect(messages[0]!.body).toBe(createI18n('ja').t('ws.guide.entered',{app:editorName(s,createI18n('ja'))}));
     let target=createWorkshopTargetState();target=workshopTargetReducer(target,{type:'mail-select',id:messages[0]!.id});
     target=workshopTargetReducer(target,{type:'mail-reply',open:true});target=workshopTargetReducer(target,{type:'mail-draft',draft:'返信文'});
     expect(target.mail).toMatchObject({selectedId:messages[0]!.id,readIds:[messages[0]!.id],replyOpen:true,draft:'返信文'});
@@ -280,4 +283,51 @@ it('工房のごみ箱は同じファイル行を移し、復元・空にする�
  target=workshopTargetReducer(target,{type:'trash-empty'});expect(target.trash.deletedIds).toEqual([entry.id]);expect(target.trash.ids).toEqual([]);
  target=workshopTargetReducer(target,{type:'trash-undo-empty'});expect(target.trash.ids).toEqual([entry.id]);expect(target.trash.deletedIds).toEqual([]);
  target=workshopTargetReducer(target,{type:'trash-restore',id:entry.id});expect(target.trash.ids).toEqual([]);expect(target.files.selectedId).toBe(entry.id);
+});
+
+
+describe('工房：標準材質と明示的な配色',()=>{
+ it('標準色フラグは明示値を優先し、旧schema14の省略時は以前の色差推定を保つ',()=>{
+  const design=createComponentDesign();expect(design.nativeColors).toBe(true);expect(usesNativeComponentColors(design)).toBe(true);
+  const legacy={...design};delete legacy.nativeColors;expect(usesNativeComponentColors(legacy)).toBe(true);
+  expect(usesNativeComponentColors({...legacy,color:'#101018'})).toBe(false);
+  expect(usesNativeComponentColors({...design,nativeColors:false})).toBe(false);
+  const custom=createEditorCustomization();expect(custom.nativeBackground).toBe(true);expect(usesNativeEditorBackground(custom)).toBe(true);
+  const old={...custom};delete old.nativeBackground;expect(usesNativeEditorBackground(old)).toBe(true);expect(usesNativeEditorBackground({...old,background:'#101018'})).toBe(false);
+  for(const stage of [0,1,2] as const)expect(effectiveEditorBackground(custom,stage)).toBe(BALANCE.workshop.customization.nativeBackgrounds[stage]);
+  expect(effectiveEditorBackground({...custom,nativeBackground:false},0)).toBe(custom.background);
+ });
+ it('背景色変更は文字と記号を一度に読みやすくし、白地黒文字へ移れる',()=>{
+  let s=complete(actWorkshop(workshop(),{type:'buySet',set:'common'},now),'common-frame');s.persistent.specs.color=1;
+  s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{controlColors:{close:'#f6d27a'}}},now);
+  const resources=s.resources,total=s.run.totalPixelsGenerated;
+  s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:'#ffffff'}},now);
+  const design=s.run.workshop.parts['common-frame']!.design;
+  expect(design).toMatchObject({nativeColors:false,color:'#ffffff',textColor:'#000000',controlColors:{}});
+  expect(colorContrast(design.color,design.textColor)).toBeGreaterThanOrEqual(BALANCE.workshop.design.minContrast);
+  expect(s.resources).toBe(resources);expect(s.run.totalPixelsGenerated).toBe(total);expect(isGameState(s)).toBe(true);
+  const reset=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{nativeColors:true}},now);
+  expect(reset.run.workshop.parts['common-frame']!.design).toMatchObject({nativeColors:true,color:BALANCE.workshop.design.color,textColor:BALANCE.workshop.design.textColor,controlColors:{}});
+  expect(reset.resources).toBe(resources);
+ });
+ it('配色の純粋helperは入力を変更せず、標準と同じ色の明示選択も保存できる',()=>{
+  const original=createComponentDesign(),copy=structuredClone(original);
+  const explicit=adjustComponentDesign(original,{color:BALANCE.workshop.design.color},paletteFor(0));
+  expect(original).toEqual(copy);expect(explicit!.nativeColors).toBe(false);expect(usesNativeComponentColors(explicit!)).toBe(false);expect(isComponentDesign(explicit)).toBe(true);
+  expect(adjustComponentDesign(original,{textColor:original.color},paletteFor(0))).toBeNull();
+ });
+ it('背景の明示選択と標準復帰は同じ保存色でも区別し、旧flags省略を読み込める',()=>{
+  let s=complete(actWorkshop(workshop(),{type:'buySet',set:'common'},now),'common-button');
+  s=actWorkshop(s,{type:'customize',patch:{background:BALANCE.workshop.customization.background}},now);
+  expect(s.persistent.editorCustomization.nativeBackground).toBe(false);
+  expect(effectiveEditorBackground(s.persistent.editorCustomization,1)).toBe(BALANCE.workshop.customization.background);
+  s=actWorkshop(s,{type:'adjust',part:'common-button',patch:{color:BALANCE.workshop.design.color}},now);
+  expect(decodeSave(encodeSave(s))).toEqual(s);
+  s=actWorkshop(s,{type:'customize',patch:{nativeBackground:true}},now);
+  expect(effectiveEditorBackground(s.persistent.editorCustomization,1)).toBe(BALANCE.workshop.customization.nativeBackgrounds[1]);
+  const old=structuredClone(s);delete old.persistent.editorCustomization.nativeBackground;for(const part of Object.values(old.run.workshop.parts))if(part)delete part.design.nativeColors;
+  expect(decodeSave(JSON.stringify(old))).toEqual(old);
+  const invalid=JSON.parse(encodeSave(s));invalid.run.workshop.parts['common-button'].design.nativeColors='yes';expect(()=>decodeSave(JSON.stringify(invalid))).toThrow();
+  const badBackground=JSON.parse(encodeSave(s));badBackground.persistent.editorCustomization.nativeBackground=1;expect(()=>decodeSave(JSON.stringify(badBackground))).toThrow();
+ });
 });

@@ -31,6 +31,7 @@ const STAGE8A_VIEWS = ['entry','set-shop','main','catalog','files-complete','req
 export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
   ...['stage8a-seed-ready','stage8a-seed-layout-before','stage8a-seed-workspace-before','stage8a-seed-export-before'].flatMap(name=>[name,`${name}-era1`,`${name}-era2`]),
   ...STAGE8A_VIEWS.flatMap(view=>[`stage8a-${view}`,...[0,1,2].map(era=>`stage8a-${view}-era${era}`)]),
+  ...[0,1,2,3].map(era=>`stage8a-desktop-common-custom-era${era}`),
   ...WORKSHOP_PARTS.flatMap(part=>[0,1,2,3,4].flatMap(step=>[0,1,2].map(era=>`stage8a-part-${part.id}-step-${step}-era${era}`))),
 ];
 const MAIN_SETS:readonly UiSetId[]=['common','foundation','files','mail'];
@@ -62,6 +63,7 @@ function addSets(s:GameState,sets:readonly UiSetId[],step:PartProduction['step']
 // Tests may complete a part through the same new domain actions as the UI.
 export function completeWorkshopPartFixture(s:GameState,id:WorkshopPartId,now:number,exported=true):GameState {
  const p=getWorkshopPart(id);s.resources.pixels=Math.max(s.resources.pixels,1e12);
+ s.run.totalPixelsGenerated=Math.max(s.run.totalPixelsGenerated,s.resources.pixels);
  if(!s.run.workshop.purchasedSets.includes(p.set))s=addSets(s,[p.set],0,now);
  s=actWorkshop(s,{type:'selectPart',part:id},now);s=actWorkshop(s,{type:'place',part:id,rect:{...p.defaultRect}},now);
  for(const element of p.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
@@ -69,12 +71,11 @@ export function completeWorkshopPartFixture(s:GameState,id:WorkshopPartId,now:nu
  return exported?actWorkshop(s,{type:'export',part:id},now):s;
 }
 function customizeCommon(s:GameState):GameState {
- const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','close','minimize','maximize'];p.design={...p.design,color:'#000080',textColor:'#ffffff',titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:'#ffffff',minimize:'#ffffff',maximize:'#ffffff'},symbolShape:'square'};}
+ const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','close','minimize','maximize'];s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:'#000080',textColor:'#ffffff',titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:'#ffffff',minimize:'#ffffff',maximize:'#ffffff'},symbolShape:'square'}},s.lastTickAt);}
  s.run.workshop.activePart='common-frame';return s;
 }
 function customEditor(s:GameState,era:number):GameState {
- const c=s.persistent.editorCustomization;c.accent='#008080';c.bandPosition='bottom';
- if(era>0){c.docking='left';c.panelWidth=208;c.background='#000000';c.gridSpacing=16;c.fontSize=14;c.panelPositions={palette:'right',tools:'left',parts:'left',info:'top'};c.panelWidths={palette:208,tools:208,parts:208};}
+ s=actWorkshop(s,{type:'customize',patch:era>0?{accent:'#008080',bandPosition:'bottom',panelWidth:208,background:'#000000',gridSpacing:16,fontSize:14}:{accent:'#008080',bandPosition:'bottom'}},s.lastTickAt);
  s.run.workshop.view='settings';return s;
 }
 function buyDesktopApp(s:GameState,id:DesktopUpgrade):GameState {
@@ -101,6 +102,8 @@ function prototypeReady(now:number):GameState {
 export function createFixture(name:string|null,now:number):GameState|null {
  if(!name||!FIXTURE_NAMES.includes(name))return null;
  if(name==='intro')return createInitialState(now);
+ const native=/^stage8a-desktop-common-custom-era([0-3])$/.exec(name);
+ if(native){let s=customizeCommon(desktopState(now,Number(native[1])));for(const nativeWindow of Object.values(s.run.desktop.windows)){nativeWindow.open=false;nativeWindow.minimized=false;}s=focusWindow(s,'files');return s;}
  if(name.startsWith('stage8a-seed-')){
   const era=Number(/-era([12])$/.exec(name)?.[1]??0),base=name.replace(/-era[12]$/,'');
   const id=base==='stage8a-seed-layout-before'?'layout':base==='stage8a-seed-workspace-before'?'workspace':'export';
@@ -109,14 +112,14 @@ export function createFixture(name:string|null,now:number):GameState|null {
   return s;
  }
  const part=/^stage8a-part-(.+)-step-([0-4])-era([0-2])$/.exec(name);
- if(part){let s=addSets(workshopState(now,Number(part[3])),UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);const id=part[1] as WorkshopPartId;s.run.workshop.parts[id]=production(id,Number(part[2]) as PartProduction['step'],now);s.run.workshop.activePart=id;return s;}
+ if(part){let s=addSets(workshopState(now,Number(part[3])),UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);const id=part[1] as WorkshopPartId;s.run.workshop.parts[id]=production(id,Number(part[2]) as PartProduction['step'],now);if(id==='bin-undo'||id==='bin-empty')s.run.workshop.parts['bin-list']=production('bin-list',4,now);s.run.workshop.activePart=id;return s;}
  const view=/^stage8a-(entry|set-shop|main|catalog|files-complete|required-complete-16color|common-custom|editor-custom)(?:-era([0-2]))?$/.exec(name);
  if(view){const mode=view[1]!,era=Number(view[2]??0);let s=workshopState(now,era);
   if(mode==='entry'||mode==='set-shop')return s;
   if(mode==='main')return addSets(s,[...MAIN_SETS,'photo'],0,now);
   if(mode==='catalog'){s=addSets(s,UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);return s;}
   s=addSets(s,mode==='files-complete'?['common','foundation','files']:MAIN_SETS,4,now,true);
-  if(mode==='files-complete'){s.run.workshop.view='exports';return s;}
+  if(mode==='files-complete'){s.run.workshop.view='workbench';s.run.workshop.activePart='files-list';s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;return s;}
   if(mode==='required-complete-16color'){s.run.workshop.exitInspected=true;s.run.workshop.guide.seen=[...new Set([...s.run.workshop.guide.seen,'wall' as const])];s.run.workshop.guide.current='wall';s.run.workshop.guide.collapsed=false;return s;}
   return mode==='common-custom'?customizeCommon(s):customEditor(s,era);
  }

@@ -1,44 +1,97 @@
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type ReactNode, type CSSProperties } from 'react';
 import { createI18n, type I18n, type MessageKey } from '../content/i18n';
 import { BALANCE } from '../config/balance';
 import { WORKSHOP_PARTS, getWorkshopPart, type WorkshopPartId } from '../content/workshopCatalog';
 import type { CaptureScene, FrozenPhoto } from '../systems/captureScene';
 import { readCapture } from '../systems/captureScene';
 import type { Screenshot } from '../systems/desktopState';
-import type { WorkshopState, EditorCustomization, ComponentDesign } from '../systems/workshopState';
+import { effectiveEditorBackground, type WorkshopState, type EditorCustomization } from '../systems/workshopState';
 import coast from '../assets/wallpaper/coast.webp';
 import night from '../assets/wallpaper/night.webp';
 import { LineIcon, ProductGlyph } from './desktop-icons';
+import { partVisual } from './workshop/partVisual';
+import { WorkshopGlyph } from './workshop/WorkshopGlyph';
+import './workshop/workshop.css';
 import './legacy-capture-preview.css';
 
 /** A frozen preview is a document: no runtime, live state reconstruction, or editable old UI. */
-export function WorkshopSnapshot({workshop,customization,stage,i18n,now}:{workshop:WorkshopState;customization:EditorCustomization;stage:number;i18n:I18n;now:number}) {
-  const active=workshop.activePart?getWorkshopPart(workshop.activePart):null;
-  const set=active?.set??workshop.purchasedSets[0];
-  return <div className={`capture-workshop capture-editor-${stage}`} style={{background:customization.background,fontSize:customization.fontSize}}>
+export function WorkshopSnapshot({workshop,customization,stage,i18n,now,desktopStage=0,files=[],pixels}:{workshop:WorkshopState;customization:EditorCustomization;stage:number;i18n:I18n;now:number;desktopStage?:number;files?:CaptureScene['files'];pixels?:number}) {
+  const active=workshop.activePart?getWorkshopPart(workshop.activePart):null,set=active?.set??workshop.purchasedSets[0];
+  const frame=workshop.parts['common-frame'],framePlaced=Boolean(frame&&frame.step>0),design=framePlaced?frame!.design:null;
+  // Match the destination's containing frame, rather than treating it as a sibling part.
+  const rect=set==='common'&&framePlaced?frame!.rect:{x:0,y:0,width:BALANCE.workshop.canvas.width,height:BALANCE.workshop.canvas.height};
+  const frameElements=framePlaced?frame!.elements:['title'],frameVisual=design?partVisual('common-frame',design):null;
+  const titleStyle:CSSProperties|undefined=design&&frame!.step>=2?{backgroundColor:frameVisual?.customColors?design.color:undefined,color:frameVisual?.customColors?design.textColor:undefined,textAlign:design.titleAlign,fontSize:design.fontSize,borderRadius:`${design.radius}px ${design.radius}px 0 0`}:undefined;
+  const controls=(side:'start'|'end')=><div className="capture-static-window-controls">{frameElements.filter((symbol):symbol is 'minimize'|'maximize'|'close'=>['minimize','maximize','close'].includes(symbol)).filter(symbol=>(design?.controlSides[symbol]??design?.controlSide??'end')===side).map(symbol=><span key={symbol} data-static-control={symbol} style={frameVisual?.customColors?{color:design?.controlColors[symbol]??design?.textColor,background:design?.color}:undefined}><WorkshopGlyph name={symbol}/></span>)}</div>;
+  const knownRows:StaticRow[]=[...files.filter(file=>file.kind==='set'||file.kind==='shot').map(file=>({id:file.id,name:file.name,at:file.at})),...WORKSHOP_PARTS.filter(part=>workshop.parts[part.id]).map(part=>({id:part.id,name:i18n.t(part.labelKey as MessageKey),at:workshop.parts[part.id]!.exportedAt??workshop.parts[part.id]!.completedAt??workshop.enteredAt}))];
+  const partProps={workshop,i18n,now,rows:knownRows,pixels};
+  const panelSide=stage===0?'right':customization.panelPositions.parts,background=effectiveEditorBackground(customization,stage===2?2:stage===1?1:0);
+  return <div className={`capture-workshop workshop-root capture-editor-${stage}`} data-static-workshop-view={workshop.view} style={{background,fontSize:customization.fontSize}} inert aria-hidden="true">
     <div className="capture-workshop-band" style={{background:customization.accent,order:customization.bandPosition==='bottom'?1:undefined}}><strong>{i18n.t(stage===2?'ws.appGesso':'ws.app')}</strong><span>{set?i18n.t(`ws.set.${set}` as MessageKey):i18n.t('ws.canvas')}</span></div>
-    <div className="capture-workshop-body"><aside>{workshop.purchasedSets.map(id=><p key={id}>{i18n.t(`ws.set.${id}` as MessageKey)}</p>)}</aside><div className="capture-workshop-canvas" style={{background:customization.background,backgroundImage:customization.grid?'linear-gradient(#80808022 1px,transparent 1px),linear-gradient(90deg,#80808022 1px,transparent 1px)':undefined,backgroundSize:`${customization.gridSpacing}px ${customization.gridSpacing}px`}}>
-      {WORKSHOP_PARTS.filter(p=>p.set===set).map(p=>{const production=workshop.parts[p.id];if(!production||production.step===0)return null;const r=production.rect;return <div className="capture-workshop-part" key={p.id} style={{left:`${r.x/640*100}%`,top:`${r.y/416*100}%`,width:`${r.width/640*100}%`,height:`${r.height/416*100}%`}}><StaticPart id={p.id} design={production.design} elements={production.elements} i18n={i18n} now={now}/></div>;})}
+    <div className="capture-workshop-body"><aside style={{order:panelSide==='left'?-1:1,width:customization.panelWidth}}>{workshop.purchasedSets.map(id=><p key={id}>{i18n.t(`ws.set.${id}` as MessageKey)}</p>)}</aside><div className="capture-workshop-canvas" style={{background}}>
+      {workshop.view==='exports'?<div className="capture-static-export-list">{WORKSHOP_PARTS.filter(part=>workshop.parts[part.id]?.exportedAt!==null&&workshop.parts[part.id]?.exportedAt!==undefined).map(part=><p key={part.id}>{i18n.t(part.labelKey as MessageKey)}<time>{i18n.dateTime(workshop.parts[part.id]!.exportedAt!)}</time></p>)}</div>
+      :workshop.view==='settings'?<table className="capture-static-settings"><tbody><tr><th>{i18n.t('ws.accent')}</th><td>{customization.accent}</td></tr>{stage>0&&<><tr><th>{i18n.t('ws.fontSize')}</th><td>{i18n.number(customization.fontSize)}</td></tr><tr><th>{i18n.t('ws.panelWidth')}</th><td>{i18n.number(customization.panelWidth)}</td></tr><tr><th>{i18n.t('ws.gridSpacing')}</th><td>{i18n.number(customization.gridSpacing)}</td></tr></>}</tbody></table>
+      :<div className="capture-static-canvas-sizer" style={{width:(BALANCE.workshop.canvas.width+8)*workshop.zoom,height:(BALANCE.workshop.canvas.height+32)*workshop.zoom}}><div className="capture-logical-workbench" style={{width:BALANCE.workshop.canvas.width,height:BALANCE.workshop.canvas.height,transform:`scale(${workshop.zoom})`}}>
+        <div className="ws-target-window capture-static-target-window" data-static-workshop-target={set??'common'} data-static-common-frame={framePlaced||undefined} data-destination-era={desktopStage} data-symbol-shape={design?.symbolShape} style={{left:rect.x,top:rect.y,width:rect.width+8,borderRadius:design?.radius,filter:design?.shadow?'drop-shadow(2px 2px 1px #0006)':undefined}}>
+          {frameElements.length>0&&<div className="ws-target-title" style={titleStyle}>{controls('start')}<span style={{textAlign:design?.titleAlign}}>{frameElements.includes('title')&&i18n.t(`ws.set.${set??'common'}` as MessageKey)}</span>{controls('end')}</div>}
+          <div data-static-client="true" className={`ws-destination capture-static-destination ${customization.grid&&workshop.parts[workshop.activePart!]?.step!==3?'has-grid':''}`} style={{width:rect.width,height:rect.height,borderRadius:design?`0 0 ${design.radius}px ${design.radius}px`:undefined,'--ws-grid':`${customization.gridSpacing}px`} as CSSProperties}>
+            {WORKSHOP_PARTS.filter(part=>part.set===set&&part.id!=='common-frame').map(part=>{const production=workshop.parts[part.id];if(!production||production.step===0)return null;const r=production.rect;return <div className="capture-workshop-part" data-static-part={part.id} key={part.id} style={{left:r.x-rect.x,top:r.y-rect.y,width:r.width,height:r.height}}><StaticPart id={part.id} production={production} {...partProps}/></div>;})}
+          </div>
+        </div>
+      </div></div>}
     </div></div>
   </div>;
 }
-function StaticPart({id,design:d,elements,i18n,now}:{id:WorkshopPartId;design:ComponentDesign;elements:readonly string[];i18n:I18n;now:number}) {
-  const part=getWorkshopPart(id),style:CSSProperties={background:d.color,color:d.textColor,borderRadius:d.radius,fontSize:d.fontSize,boxShadow:d.shadow?'1px 1px 0 #666':undefined};
-  const label=i18n.t(`ws.part.${id}` as MessageKey);
-  const controls=(side:'start'|'end')=>elements.filter(e=>['minimize','maximize','close'].includes(e)&&(d.controlSides[e]??d.controlSide)===side).map(symbol=><span key={symbol} style={{color:d.controlColors[symbol]??d.textColor,borderWidth:d.symbolShape==='square'?2:1}}><LineIcon kind={symbol as 'minimize'|'maximize'|'close'}/></span>);
-  return <div className={`capture-static-part capture-part-${part.kind}`} style={style}>
-    {part.kind==='frame'?<><div className="capture-part-title" style={{background:d.color,color:d.textColor}}><div>{controls('start')}</div><b style={{textAlign:d.titleAlign}}>{i18n.t('ws.preview.window')}</b><div>{controls('end')}</div></div><p>{i18n.t('ws.preview.windowContent')}</p></>
-      :part.kind==='button'?<span className="capture-part-button">{label}</span>
-      :part.kind==='progress'?<div className={`capture-part-progress ${d.progressStyle}`} style={{height:d.progressHeight}}><i/>{d.showPercent&&<span>{i18n.t('number.percent',{value:i18n.number(50)})}</span>}</div>
-      :part.kind==='scrollbar'?<div className="capture-part-scrollbar" style={{width:d.scrollbarWidth}}>{d.arrows&&<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 10 4-4 4 4z" fill="currentColor"/></svg>}<i/>{d.arrows&&<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4z" fill="currentColor"/></svg>}</div>
-      :part.kind==='slider'?<div className="capture-part-slider"><i/></div>
-      :part.kind==='input'?<span className="capture-part-input">{i18n.t('ws.preview.search')}</span>
-      :part.kind==='toggle'?<label><svg className="capture-part-check" viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3 3 7-7" fill="none" stroke="currentColor"/></svg>{label}</label>
-      :part.kind==='list'||part.kind==='table'?<table><tbody>{[0,1,2].map(n=><tr key={n}><td>{i18n.t('ws.preview.line',{count:n+1})}</td><td>{i18n.integer(n+1)}</td></tr>)}</tbody></table>
-      :id==='clock-time'?<time>{i18n.time(now)}</time>
-      :id.startsWith('photo-')||id==='foundation-wallpaper'?<img src={coast} alt=""/>
-      :<span style={{borderBottom:d.separator?'1px solid currentColor':undefined}}>{label}</span>}
-  </div>;
+interface StaticRow {id:string;name:string;at:number|null}
+function StaticPart({id,production:p,workshop,i18n,now,rows,pixels}:{id:WorkshopPartId;production:import('../systems/workshopState').PartProduction;workshop:WorkshopState;i18n:I18n;now:number;rows:StaticRow[];pixels?:number}) {
+  const part=getWorkshopPart(id),d=p.design,visual=partVisual(id,d),has=(element:string)=>p.elements.includes(element),label=i18n.t(`ws.part.${id}` as MessageKey);
+  const style:CSSProperties={background:visual.background,color:visual.foreground,borderRadius:d.radius,fontSize:d.fontSize,boxShadow:d.shadow?'1px 1px 0 #666':undefined,'--capture-part-bg':visual.background,'--capture-part-fg':visual.foreground,'--capture-part-accent':visual.customColors?d.color:'#000080','--capture-scroll-width':`${d.scrollbarWidth}px`} as CSSProperties;
+  const button=(element:string,text:string)=>has(element)&&<span className="capture-part-button" data-static-element={element}>{text}</span>;
+  const complete=Object.values(workshop.parts).filter(part=>part?.step===4).length,total=Object.keys(workshop.parts).length,progress=total?complete/total*BALANCE.workshop.preview.percentDivisor:0;
+  const fileRows=(showDates:boolean)=>rows.map(row=><tr key={row.id}><td>{row.name}</td>{showDates&&<td>{row.at===null?'':i18n.legacyDate(row.at)}</td>}</tr>);
+  let content:ReactNode;
+  switch(id){
+    case 'common-scrollbar':content=has('track')&&<div className="capture-part-scrollbar" data-static-thumb={has('thumb')} data-static-arrows={has('arrows')&&d.arrows} style={{scrollbarWidth:d.scrollbarWidth<BALANCE.workshop.design.scrollbarWidth?'thin':'auto'}}><ul>{rows.map(row=><li key={row.id}>{row.name}</li>)}</ul></div>;break;
+    case 'common-button':content=button('label',i18n.t('ws.preview.press'));break;
+    case 'common-heading':content=has('label')&&<strong style={{borderBottom:has('separator')&&d.separator?'1px solid currentColor':undefined}}>{i18n.t('ws.preview.folderHeading')}</strong>;break;
+    case 'common-progress':content=has('track')&&<div className="capture-progress-group"><div className={`capture-part-progress ${d.progressStyle}`} style={{height:d.progressHeight}}>{has('fill')&&<i style={{width:`${progress}%`}}/>}</div>{has('percent')&&d.showPercent&&<output>{i18n.t('ws.productionProgress',{count:i18n.integer(complete),total:i18n.integer(total)})}</output>}</div>;break;
+    case 'foundation-taskbar':content=<>{has('app-slots')&&<><span className="capture-part-button">{i18n.t('ws.set.files')}</span><span className="capture-part-button">{i18n.t('ws.set.mail')}</span></>}{has('resource-area')&&pixels!==undefined&&<span>{i18n.t('ws.pixels',{count:i18n.pixels(pixels)})}</span>}</>;break;
+    case 'foundation-icons':content=has('icon')&&<div className="capture-static-icons">{rows.filter(row=>row.id.startsWith('set:')).map(row=><span key={row.id}><WorkshopGlyph name="file"/>{has('caption')&&row.name}</span>)}</div>;break;
+    case 'foundation-desktop':content=null;break;
+    case 'foundation-notification':content=<>{has('message')&&<span>{label}</span>}{button('action',i18n.t('ws.preview.open'))}</>;break;
+    case 'foundation-upgrades':content=has('item')&&<span>{i18n.t('ws.set.clock')}</span>;break;
+    case 'files-list':content=<table>{has('columns')&&<thead><tr><th>{i18n.t('ws.fileName')}</th><th>{i18n.t('ws.fileDate')}</th></tr></thead>}{has('rows')&&<tbody>{fileRows(true)}</tbody>}</table>;break;
+    case 'files-back':content=button('back',i18n.t('ws.preview.back'));break;
+    case 'files-sort':content=has('sort-key')&&<span className="capture-part-input">{i18n.t('files.name')}</span>;break;
+    case 'files-search':content=has('query')&&<span className="capture-part-input"/>;break;
+    case 'files-large':content=has('icon')&&<WorkshopGlyph name="file"/>;break;
+    case 'files-storage':content=has('capacity')&&<span>{label}</span>;break;
+    case 'mail-list':content=has('subject')&&<ul>{workshop.guide.seen.map(guide=><li key={guide}>{i18n.t('guide.title')}</li>)}</ul>;break;
+    case 'mail-reply':content=button('reply',i18n.t('ws.preview.reply'));break;
+    case 'mail-folders':content=<>{button('inbox',i18n.t('ws.preview.inbox'))}{button('archive',i18n.t('ws.preview.archive'))}</>;break;
+    case 'mail-unread':content=has('unread')&&<span>{label}</span>;break;
+    case 'photo-brightness':case 'photo-tone':case 'theme-radius':case 'theme-icons':content=(has('track')||has('thumb'))&&<div className="capture-part-slider">{has('thumb')&&<i/>}</div>;break;
+    case 'photo-wallpaper':content=button('apply',i18n.t('ws.preview.setWallpaper'));break;
+    case 'photo-compare':content=has('before')&&<span>{i18n.t('ws.preview.original')}</span>;break;
+    case 'photo-switch':content=<>{button('previous',i18n.t('ws.preview.previousPhoto'))}{button('next',i18n.t('ws.preview.nextPhoto'))}</>;break;
+    case 'bin-undo':content=button('restore',i18n.t('bin.restore'));break;
+    case 'bin-empty':content=button('empty',i18n.t('bin.empty'));break;
+    case 'clock-time':content=p.elements.length>0&&<time>{i18n.time(now)}</time>;break;
+    case 'clock-calendar':content=has('month')&&<span>{i18n.month(now)}</span>;break;
+    case 'clock-timer':content=button('start',i18n.t('ws.preview.startTimer'));break;
+    case 'theme-mode':content=<>{button('light',i18n.t('theme.light'))}{button('dark',i18n.t('theme.dark'))}</>;break;
+    case 'theme-accent':content=has('palette')&&<span>{i18n.t('theme.accent')}</span>;break;
+    case 'theme-slideshow':content=has('images')&&<span>{i18n.t('theme.slideshow')}</span>;break;
+    case 'terminal-commands':content=has('command')&&<ul>{(['list','photo','export'] as const).map(command=><li key={command}>{i18n.t(`ws.optional.command.${command}`)}</li>)}</ul>;break;
+    case 'terminal-run':content=<>{button('run',i18n.t('ws.preview.runCommand'))}{button('stop',i18n.t('ws.preview.stopCommand'))}</>;break;
+    case 'manager-processes':content=<table><thead><tr>{has('process')&&<th>{i18n.t('manager.name')}</th>}{has('rate')&&<th>{i18n.t('manager.rate')}</th>}{has('share')&&<th>{i18n.t('manager.share')}</th>}</tr></thead>{has('process')&&<tbody>{WORKSHOP_PARTS.filter(part=>workshop.parts[part.id]?.step===4).map(part=><tr key={part.id}><td>{i18n.t(part.labelKey as MessageKey)}</td>{has('rate')&&<td/>}{has('share')&&<td/>}</tr>)}</tbody>}</table>;break;
+    case 'plugin-table':content=<table><thead><tr>{has('time')&&<th>{i18n.t('ws.element.time')}</th>}{has('pixels')&&<th>{i18n.t('ws.preview.pixels')}</th>}</tr></thead></table>;break;
+    case 'plugin-tabs':content=has('tab')&&<><span className="capture-part-button">{i18n.t('ws.set.files')}</span><span className="capture-part-button">{i18n.t('ws.optional.productionHistory')}</span></>;break;
+    // Local selections, photo adjustments, timer state and command logs are not part of a saved WorkshopState.
+    // Keep their produced surface and geometry without inventing values for an unrecorded interaction.
+    default:content=null;
+  }
+  return <div className={`capture-static-part capture-part-${part.kind}`} data-static-part-content={id} style={style}>{content}</div>;
 }
 function FrozenPhoto({edit,scene,catalog,i18n,ancestors}:{edit:FrozenPhoto|null;scene:CaptureScene;catalog:Screenshot[];i18n:I18n;ancestors:readonly number[]}) {
   if(!edit)return null;
@@ -53,7 +106,7 @@ function CaptureReference({shot,i18n}:{shot:Screenshot;i18n:I18n}) {
 }
 function FrozenWindowContent({app,scene,catalog,i18n,ancestors}:{app:string;scene:CaptureScene;catalog:Screenshot[];i18n:I18n;ancestors:readonly number[]}) {
   if(app==='note')return <pre className="capture-note">{scene.note}</pre>;
-  if(app==='tessera'&&scene.workshop&&scene.editorCustomization)return <WorkshopSnapshot workshop={scene.workshop} customization={scene.editorCustomization} stage={scene.appearance.editor} i18n={i18n} now={scene.display.wallTime}/>;
+  if(app==='tessera'&&scene.workshop&&scene.editorCustomization)return <WorkshopSnapshot workshop={scene.workshop} customization={scene.editorCustomization} stage={scene.appearance.editor} i18n={i18n} now={scene.display.wallTime} desktopStage={scene.appearance.desktop} files={scene.files} pixels={scene.display.resources.pixels}/>;
   if(app==='photo')return <FrozenPhoto edit={scene.view.photo} scene={scene} catalog={catalog} i18n={i18n} ancestors={ancestors}/>;
   if(app==='files'||app==='tessera')return <table className="capture-files"><thead><tr><th>{i18n.t('files.name')}</th><th>{i18n.t('files.modified')}</th><th>{i18n.t('files.type')}</th></tr></thead><tbody>{scene.files.map(f=><tr key={f.id}><td>{f.name}</td><td>{f.at===null?'':i18n.dateTime(f.at)}</td><td>{i18n.t(`files.type.${f.kind}` as MessageKey)}</td></tr>)}</tbody></table>;
   if(app==='mail')return <div className="capture-mail">{scene.desktop.feedback.map(f=><div key={f.id}><b>{i18n.t(`feedback.sender.${f.sender}`)}</b><time>{i18n.dateTime(f.at)}</time><span>{f.completedAt===null?i18n.t('mail.pending'):i18n.t('mail.completed',{date:i18n.dateTime(f.completedAt)})}</span></div>)}</div>;

@@ -6,6 +6,7 @@ export const WORKSHOP_GUIDE_IDS = ['entered','place','elements','adjust','test',
 export type WorkshopGuideId = typeof WORKSHOP_GUIDE_IDS[number];
 export type PanelPosition = 'left' | 'right' | 'top' | 'bottom';
 export interface ComponentDesign {
+  nativeColors?:boolean;
   color: string; textColor: string; radius: number; fontSize: number; shadow: boolean;
   titleAlign: 'start' | 'center' | 'end'; controlSide: 'start' | 'end';
   controlColors: Record<string,string>; controlSides: Record<string,'start'|'end'>;
@@ -14,6 +15,7 @@ export interface ComponentDesign {
   motion: 'plain' | 'press' | 'smooth';
 }
 export interface EditorCustomization {
+  nativeBackground?:boolean;
   accent: string; bandPosition: 'top' | 'bottom'; panelWidth: number;
   background: string; grid: boolean; gridSpacing: number; fontSize: number;
   docking: 'standard' | 'left' | 'right'; presets: ComponentDesign[];
@@ -37,6 +39,7 @@ export interface SetDocument {
   parts: Partial<Record<WorkshopPartId,PartProduction>>;
 }
 export const createComponentDesign = (): ComponentDesign => ({
+  nativeColors:true,
   color: BALANCE.workshop.design.color, textColor: BALANCE.workshop.design.textColor,
   radius: BALANCE.workshop.design.radius, fontSize: BALANCE.workshop.design.fontSize,
   shadow: false, titleAlign: 'start', controlSide: 'end', controlColors: {}, controlSides: {},
@@ -44,6 +47,7 @@ export const createComponentDesign = (): ComponentDesign => ({
   separator: true, progressHeight: BALANCE.workshop.design.progressHeight, progressStyle: 'solid', showPercent: true, motion: 'plain',
 });
 export const createEditorCustomization = (): EditorCustomization => ({
+  nativeBackground:true,
   accent: BALANCE.workshop.customization.accent, bandPosition: 'top',
   panelWidth: BALANCE.workshop.customization.panelWidth, background: BALANCE.workshop.customization.background,
   grid: true, gridSpacing: BALANCE.workshop.customization.gridSpacing,
@@ -65,10 +69,40 @@ export function colorContrast(a:string,b:string):number {
   const light=(hex:string)=>{const channels=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);return channels[0]!*.2126+channels[1]!*.7152+channels[2]!*.0722;};
   const x=light(a),y=light(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
 }
+/** Undefined flags retain schema14's former default-vs-custom inference. */
+export const usesNativeComponentColors=(design:ComponentDesign):boolean=>design.nativeColors??(design.color===BALANCE.workshop.design.color&&design.textColor===BALANCE.workshop.design.textColor&&Object.keys(design.controlColors).length===0);
+export const usesNativeEditorBackground=(custom:Pick<EditorCustomization,'background'|'nativeBackground'>):boolean=>custom.nativeBackground??custom.background===BALANCE.workshop.customization.background;
+export function effectiveEditorBackground(custom:Pick<EditorCustomization,'background'|'nativeBackground'>,stage:0|1|2=0):string {
+  return usesNativeEditorBackground(custom)?BALANCE.workshop.customization.nativeBackgrounds[stage]:custom.background;
+}
+/** Apply a colour choice as one readable change, never through an invalid intermediate pair. */
+export function adjustComponentDesign(current:ComponentDesign,patch:Partial<ComponentDesign>,palette:readonly string[]):ComponentDesign|null {
+  const reset=patch.nativeColors===true;
+  const touched=['color','textColor','controlColors'].some(key=>Object.hasOwn(patch,key));
+  const next:ComponentDesign={...current,...patch,
+    controlColors:reset?{...patch.controlColors}:{...current.controlColors,...patch.controlColors},
+    controlSides:{...current.controlSides,...patch.controlSides},
+    ...(reset?{color:patch.color??BALANCE.workshop.design.color,textColor:patch.textColor??BALANCE.workshop.design.textColor}:{}),
+    ...(touched&&!reset?{nativeColors:false}:{}),
+  };
+  if(!color(next.color)||!color(next.textColor))return null;
+  const limit=BALANCE.workshop.design.minContrast;
+  if(colorContrast(next.color,next.textColor)<limit&&Object.hasOwn(patch,'color')){
+    const readable=palette.filter(candidate=>color(candidate)&&colorContrast(next.color,candidate)>=limit)
+      .sort((a,b)=>colorContrast(next.color,b)-colorContrast(next.color,a))[0];
+    if(!readable)return null;
+    next.textColor=readable;
+  }
+  for(const [symbol,value] of Object.entries(next.controlColors)){
+    if(!['minimize','maximize','close'].includes(symbol)||!color(value))return null;
+    if(colorContrast(next.color,value)<limit)delete next.controlColors[symbol];
+  }
+  return isComponentDesign(next)?next:null;
+}
 export function isComponentDesign(x:unknown):x is ComponentDesign {
   if(!record(x)||!color(x.color)||!color(x.textColor)||colorContrast(x.color,x.textColor)<BALANCE.workshop.design.minContrast)return false;
   const d=BALANCE.workshop.design;
-  return between(x.radius,0,d.radiusMax)&&between(x.fontSize,d.fontSizeMin,d.fontSizeMax)
+  return (x.nativeColors===undefined||typeof x.nativeColors==='boolean')&&between(x.radius,0,d.radiusMax)&&between(x.fontSize,d.fontSizeMin,d.fontSizeMax)
     && typeof x.shadow==='boolean'&&['start','center','end'].includes(x.titleAlign as string)
     && ['start','end'].includes(x.controlSide as string)&&['line','square'].includes(x.symbolShape as string)
     && between(x.scrollbarWidth,d.scrollbarMin,d.scrollbarMax)&&typeof x.arrows==='boolean'
@@ -80,7 +114,7 @@ export function isComponentDesign(x:unknown):x is ComponentDesign {
 export function isEditorCustomization(x:unknown):x is EditorCustomization {
   if(!record(x))return false;
   const c=BALANCE.workshop.customization;
-  return color(x.accent)&&color(x.background)&&['top','bottom'].includes(x.bandPosition as string)
+  return (x.nativeBackground===undefined||typeof x.nativeBackground==='boolean')&&color(x.accent)&&color(x.background)&&['top','bottom'].includes(x.bandPosition as string)
     && between(x.panelWidth,c.panelMin,c.panelMax)&&typeof x.grid==='boolean'
     &&between(x.gridSpacing,c.gridMin,c.gridMax)&&between(x.fontSize,c.fontMin,c.fontMax)
     &&['standard','left','right'].includes(x.docking as string)&&Array.isArray(x.presets)

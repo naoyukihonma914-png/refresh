@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
+import { editorName } from '../../systems/appearance';
 import { BALANCE } from '../../config/balance';
 import type { I18n, MessageKey } from '../../content/i18n';
 import { feedbackSubject, feedbackBodyText } from '../../content/feedback';
@@ -87,7 +88,7 @@ export function targetFileEntries(s:GameState,i18n:I18n):TargetFileEntry[] {
  return entries;
 }
 export function targetMailMessages(s:GameState,i18n:I18n):TargetMailMessage[] {
- const guides=s.run.workshop.guide.seen.map((id,index)=>({id:`guide:${id}`,subject:`${i18n.t('guide.title')} ${i18n.integer(index+1)}`,body:i18n.t(`ws.guide.${id}`),sender:i18n.t('guide.signature'),date:s.run.workshop.enteredAt}));
+ const guides=s.run.workshop.guide.seen.map((id,index)=>({id:`guide:${id}`,subject:`${i18n.t('guide.title')} ${i18n.integer(index+1)}`,body:i18n.t(`ws.guide.${id}`,{app:editorName(s,i18n)}),sender:i18n.t('guide.signature'),date:s.run.workshop.enteredAt}));
  const feedback=s.run.desktop.feedback.map(f=>({id:`feedback:${f.id}`,subject:feedbackSubject(f,i18n),body:feedbackBodyText(s,f,i18n),sender:i18n.t(`feedback.sender.${f.sender}`),date:f.at}));
  return [...guides,...feedback];
 }
