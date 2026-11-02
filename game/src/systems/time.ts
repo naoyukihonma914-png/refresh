@@ -5,7 +5,7 @@ import { BALANCE } from '../config/balance';
 import { advanceHomeGeneration } from './economy';
 import type { GameState } from './state';
 import { advanceSeedInstaller, updateSeedGuide } from './seed';
-import { advanceKumikiTimers } from './kumiki';
+import { advanceWorkshop } from './workshop';
 import { advanceShipping } from './release';
 
 export interface TimeResult {
@@ -41,7 +41,7 @@ export function advanceActiveTime(state: GameState, elapsedMs: number, language=
   if (state.run.world === 'release') return { state: advanceShipping(state, creditedMs), elapsedMs: elapsed, creditedMs, pixels: 0, capped: false, remainderMs: elapsed - creditedMs };
   const result = applyTime(state, elapsed, creditedMs, false);
   const next = advanceStray(advanceSeedInstaller(result.state, creditedMs),creditedMs);
-  const progressed = ['kumiki','desktop'].includes(next.run.world) ? advanceKumikiTimers(next, creditedMs) : updateSeedGuide(next);
+  const progressed = ['kumiki','desktop'].includes(next.run.world) ? advanceWorkshop(next, creditedMs) : updateSeedGuide(next);
   const desktop = advanceDesktopTime(progressed, creditedMs, state.lastTickAt + creditedMs,false,language,captures);
   return { ...result, state: { ...desktop, run: { ...desktop.run, restartMs: Math.max(0, desktop.run.restartMs - creditedMs) } }, remainderMs: elapsed - creditedMs };
 }
@@ -75,6 +75,6 @@ export function advanceOfflineTime(state: GameState, wallNow: number, language='
   result.creditedMs=creditedMs;
   // 時計が戻った差は0にし、次回の不在は現在の時計を基準にする。
   return { ...result, pixels:result.state.resources.pixels-state.resources.pixels, state: { ...result.state, lastTickAt: wallNow,
-    run: { ...result.state.run,play:{...result.state.run.play,stray:{...result.state.run.play.stray,lifeMs:Math.max(0,result.state.run.play.stray.lifeMs-elapsedMs)},clock:{...result.state.run.play.clock,count:elapsedMs>0?0:result.state.run.play.clock.count}}, seed: { ...result.state.run.seed, lastActionAt: result.state.elapsedMs }, kumiki: { ...result.state.run.kumiki, lastActionAt: result.state.elapsedMs } },
+    run: { ...result.state.run,play:{...result.state.run.play,stray:{...result.state.run.play.stray,lifeMs:Math.max(0,result.state.run.play.stray.lifeMs-elapsedMs)},clock:{...result.state.run.play.clock,count:elapsedMs>0?0:result.state.run.play.clock.count}}, seed: { ...result.state.run.seed, lastActionAt: result.state.elapsedMs }, workshop: { ...result.state.run.workshop, lastActionAt: result.state.elapsedMs } },
   } };
 }

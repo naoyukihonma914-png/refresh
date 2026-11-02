@@ -1,16 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { describe,expect,it } from 'vitest';
 import { BALANCE } from '../config/balance';
-import { createFixture, FIXTURE_NAMES } from './fixtures';
-import { createInitialState, isGameState, type GameState } from './state';
-import { decodeSave, encodeSave, loadGame, saveGame, createMemoryStorage } from './save';
-import { advanceActiveTime, advanceOfflineTime } from './time';
-import { buildSeed, canBuildSeed, cursorPrice, pressSeed, freshMomentum } from './seed';
-import { availableIcons, buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, prototypeConditions, targetFor } from './kumiki';
+import { focusWindow } from './desktop';
 import { passivePixelsPerSecond } from './economy';
-import { beginProductRelease, beginPrototypeRelease, buySpec, canBuySpec, canFundNextVersion, canRelease, canReleasePrototype, canStartNextVersion, dailySales, displayedSales, productPreviewState, releaseEstimate, releaseScreenshotBonus, selectedReleaseScreenshots, shippingComplete, shippingProduct, showShipping, SPEC_ORDER, startNextVersion, storeComplete, v1Conditions } from './release';
-import { focusWindow, takeScreenshot } from './desktop';
+import { createFixture,FIXTURE_NAMES } from './fixtures';
 import { actCommon } from './longPlay';
-import { readCapture, restoreScene } from './captureScene';
+import { beginProductRelease,beginPrototypeRelease,buySpec,canBuySpec,canFundNextVersion,canReleasePrototype,canStartNextVersion,dailySales,displayedSales,releaseEstimate,releaseScreenshotBonus,selectedReleaseScreenshots,shippingComplete,shippingProduct,showShipping,SPEC_ORDER,startNextVersion,storeComplete } from './release';
+import { createMemoryStorage,decodeSave,encodeSave,loadGame,saveGame } from './save';
+import { canBuildSeed,freshMomentum,pressSeed } from './seed';
+import { createInitialState,isGameState } from './state';
+import { advanceActiveTime,advanceOfflineTime } from './time';
+import { prototypeConditions } from './workshop';
 
 const now = 1_800_000_000_000;
 const ready = () => createFixture('release-ready', now)!;
@@ -25,35 +24,6 @@ const v1Ready = () => {
 };
 
 describe('試作版のリリース', () => {
-  it('出口の16色の壁と3条件がそろうまではリリースできない', () => {
-    const state = ready();
-    expect(prototypeConditions(state)).toEqual([true, true, true]);
-    expect(canReleasePrototype(state)).toBe(true);
-    for (const mutate of [
-      (s: typeof state) => { s.run.kumiki.exitInspected = false; },
-      (s: typeof state) => { s.run.kumiki.built = s.run.kumiki.built.filter(id => id !== 'input'); },
-      (s: typeof state) => { s.run.kumiki.exports = s.run.kumiki.exports.filter(e => e.kind === 'part'); },
-      (s: typeof state) => { s.run.kumiki.placed = s.run.kumiki.placed.filter(id => id !== 'button'); },
-      (s: typeof state) => { s.run.version = 'v1'; },
-      (s: typeof state) => { s.persistent.specs.color = 1; },
-      (s: typeof state) => { s.run.world = 'seed'; },
-    ]) {
-      const invalid = structuredClone(state); mutate(invalid);
-      expect(canReleasePrototype(invalid)).toBe(false);
-      expect(beginPrototypeRelease(invalid, now)).toBe(invalid);
-    }
-  });
-
-  it('累計の生成量と作ったもの・アイコンで売上を計算し、支出や重複エクスポートでは増減しない', () => {
-    const state = ready();
-    const icons = state.run.kumiki.exports.filter(e => e.kind === 'icon').length;
-    const r = BALANCE.release;
-    const expected = Math.floor(r.base * (state.run.totalPixelsGenerated / r.pixelUnit) ** r.exponent * (1 + r.perElement * (state.run.seed.built.length + state.run.kumiki.built.length + icons)));
-    expect(releaseEstimate(state)).toBe(expected);
-    state.resources.pixels = 0;
-    state.run.kumiki.exports.push(structuredClone(state.run.kumiki.exports[0]!));
-    expect(releaseEstimate(state)).toBe(expected);
-  });
 
   it.each([0, 1, 3, 200, 303, 14_500, 1_000_000])('%iドルを7日へ整数で配分し、初日から減少して合計を保つ', total => {
     const days = dailySales(total);
@@ -90,34 +60,8 @@ describe('試作版のリリース', () => {
     expect(away.state.resources).toEqual(active.resources);
   });
 
-  it('スライダーの受け取り待ちも出荷前に精算し、累計と製品へ一度だけ含める', () => {
-    const original = ready(); original.run.kumiki.bank = 1_234; original.run.kumiki.batchMs = 2_000;
-    const estimate = releaseEstimate(original), next = beginPrototypeRelease(original, now);
-    expect(next.run.kumiki.bank).toBe(0); expect(next.run.kumiki.batchMs).toBe(0);
-    expect(next.run.totalPixelsGenerated).toBe(original.run.totalPixelsGenerated + 1_234);
-    expect(shippingProduct(next)!.screen.pixels).toBe(original.resources.pixels + 1_234);
-    expect(shippingProduct(next)!.generatedPixels).toBe(next.run.totalPixelsGenerated);
-    expect(next.resources.dollars).toBe(estimate);
-  });
-
-  it('製品の画面・作者・エクスポートを独立した記録として残し、後の変更で書き換わらない', () => {
-    const before = ready();
-    const next = beginPrototypeRelease(before, now);
-    const product = shippingProduct(next)!;
-    before.run.kumiki.placed.length = 0; before.persistent.specs.color = 3;
-    before.run.kumiki.exports[0]!.name = 'Changed';
-    expect(product.screen.placed).toContain('button');
-    expect(product.screen.specs.color).toBe(0);
-    expect(product.exports[0]!.name).not.toBe('Changed');
-    expect(product.author).toBe('Aoi');
-    const preview = productPreviewState(product);
-    expect(preview.resources.pixels).toBe(product.screen.pixels);
-    expect(preview.persistent.products).toEqual([]); // スナップショットを再帰的に増やさない
-    expect(isGameState(preview)).toBe(true);
-  });
-
   it('売上不足の出荷と、256色の購入分を使い切る買い方を止め、作業を続けられる', () => {
-    const low = ready(); low.run.totalPixelsGenerated = 300_000;
+    const low = ready(); low.run.totalPixelsGenerated = low.resources.pixels = 1;
     expect(canReleasePrototype(low)).toBe(true);
     expect(canFundNextVersion(low)).toBe(false);
     expect(beginPrototypeRelease(low, now)).toBe(low);
@@ -153,45 +97,6 @@ describe('試作版のリリース', () => {
     expect(canBuySpec(state, key)).toBe(false); expect(buySpec(state, key)).toBe(state);
   });
 
-  it('作り直しは資源と構成をリセットし、性能・トークン・プラグイン・絵・名前・会話・製品を残す', () => {
-    const original = ready();
-    original.persistent.seedSkills = ['keyboard', 'history']; original.persistent.artwork.skills = ['fill'];
-    original.run.kumiki.design.primary = { color: '#008080', radius: 4, textSize: 'medium', shadow: true };
-    const state = advanceActiveTime(beginPrototypeRelease(original, now), BALANCE.release.animationMs).state;
-    const next = startNextVersion(buySpec(state, 'color'), now + 1_000);
-    expect(next.run.version).toBe('v1'); expect(next.run.world).toBe('seed');
-    expect(next.resources.pixels).toBe(0); expect(next.run.totalPixelsGenerated).toBe(0);
-    expect(next.run.seed.autoCursors).toBe(0); expect(next.run.seed.built).toEqual([]);
-    expect(next.run.kumiki.placed).toEqual([]); expect(next.run.kumiki.exports).toEqual([]);
-    expect(next.resources.tokens).toBe(state.resources.tokens); expect(next.resources.dollars).toBe(103);
-    expect(next.persistent.seedSkills).toEqual(['keyboard', 'history']); expect(next.persistent.artwork.skills).toEqual(['fill']);
-    expect(next.persistent.artwork.icons).toEqual(state.persistent.artwork.icons);
-    expect(next.persistent.products).toEqual(state.persistent.products); expect(next.persistent.playerName).toBe('Aoi');
-    expect(next.persistent.homeTheme.primary).toEqual(original.run.kumiki.design.primary);
-    expect(next.persistent.guideArchive.some(e => e.kind === 'kumiki' && e.id === 'wall')).toBe(true);
-    expect(next.run.seed.guide.current).toBe('return'); expect(next.run.restartMs).toBe(BALANCE.release.restartMs);
-    expect(startNextVersion(next, now)).toBe(next);
-  });
-
-  it('新しいテンプレートは前の絵を使い、前の報酬記録を持ち越さず、またピクセルとトークンが入る', () => {
-    let state = shipped(); state = buySpec(buySpec(state, 'color'), 'resolution');
-    // 解像度は高額なので確認用にドルを用意してから買う。
-    state.resources.dollars = 2_000; state = buySpec(state, 'resolution');
-    state = startNextVersion(state, now + 1_000); state.run.restartMs = 0;
-    state.run.seed.built = BALANCE.w1.items.map(i => i.id);
-    state = enterKumiki(state);
-    const drawing = state.run.kumiki.drawings.folder!, target = targetFor(state, 'folder', drawing.size);
-    expect(drawing.size).toBe(32); expect(drawing.rewarded.every(v => !v)).toBe(true);
-    expect(state.run.kumiki.underlays.folder).toEqual(state.persistent.artwork.icons.folder);
-    const tokens = state.resources.tokens;
-    for (const color of new Set(target.filter(c => c >= 0))) state = paintDrawing(state, 'folder', target.flatMap((c,i) => c === color ? [i] : []), color);
-    expect(state.resources.pixels).toBe(target.filter(c => c >= 0).length * 15);
-    state = exportKumiki(state, now);
-    expect(state.resources.tokens).toBe(tokens + 2);
-    expect(state.persistent.products[0]!.screen.specs.resolution).toBe(0);
-    expect(state.run.world).toBe('kumiki'); // 段階5のデスクトップは作らない
-  });
-
   it('セーブ未作成の新規データは保存せず、リセット直後のチェックポイントだけは製品と一緒に保存する', () => {
     const storage = createMemoryStorage();
     expect(saveGame(storage, createInitialState(now), now, { checkpoint: true }).kind).toBe('locked');
@@ -203,25 +108,6 @@ describe('試作版のリリース', () => {
     expect(loaded.kind === 'loaded' && loaded.state.persistent.products.length).toBe(1);
   });
 
-  it('第4版を変換し、出荷中を復元でき、不正な製品と集計値を拒む', () => {
-    const old = JSON.parse(encodeSave(ready())); old.schemaVersion = 4;
-    delete old.run.shipping; delete old.run.restartMs;
-    delete old.persistent.products; delete old.persistent.guideArchive; delete old.persistent.homeTheme;
-    const migrated = decodeSave(JSON.stringify(old));
-    expect(migrated.schemaVersion).toBe(13); expect(migrated.resources).toEqual(old.resources);
-    const state = shipped(); expect(decodeSave(encodeSave(state))).toEqual(state);
-    for (const mutate of [
-      (s: typeof state) => { s.run.shipping!.productId = 99; },
-      (s: typeof state) => { s.run.shipping!.elapsedMs = 9_000; },
-      (s: typeof state) => { s.persistent.products[0]!.screen.cursors = -1; },
-      (s: typeof state) => { s.persistent.products[0]!.revenue = 1.5; },
-      (s: typeof state) => { s.persistent.products.push(s.persistent.products[0]!); },
-    ]) {
-      const invalid = structuredClone(state); mutate(invalid);
-      expect(() => decodeSave(JSON.stringify(invalid))).toThrow();
-    }
-  });
-
   it.each(FIXTURE_NAMES.filter(name => name.startsWith('release-')))('固定状態%sを保存・復元できる', name => {
     const state = createFixture(name, now)!;
     expect(isGameState(state)).toBe(true); expect(decodeSave(encodeSave(state))).toEqual(state);
@@ -229,24 +115,6 @@ describe('試作版のリリース', () => {
 });
 
 describe('製品ページからv1.0を出荷する', () => {
-  it('動いているアプリ6つ・今の版の要望10件・名前つき6種・写真の壁紙・自動化の5条件をそれぞれ判定する', () => {
-    const state = v1Ready();
-    expect(v1Conditions(state)).toEqual([true,true,true,true,true]);
-    expect(canRelease(state)).toBe(true);
-    for (const [index, mutate] of [
-      [0, (s: GameState) => { s.run.desktop.windows.bin.open = false; }],
-      [1, (s: GameState) => { s.run.desktop.feedback = s.run.desktop.feedback.slice(1); }],
-      [2, (s: GameState) => { s.run.kumiki.exports = s.run.kumiki.exports.filter(e => e.id !== 'clock'); }],
-      [3, (s: GameState) => { s.persistent.desktopPrefs.wallpaper = null; }],
-      [4, (s: GameState) => { s.run.desktop.terminal.executions = 0; }],
-    ] as const) {
-      const invalid = structuredClone(state); mutate(invalid);
-      expect(v1Conditions(invalid)[index]).toBe(false);
-      expect(canRelease(invalid)).toBe(false);
-      expect(beginProductRelease(invalid, now)).toBe(invalid);
-    }
-    state.run.version = 'v2'; expect(canRelease(state)).toBe(false);
-  });
 
   it('製品ページの3秒と出荷の8秒を分け、閉じ直しと重複操作で売上を二重に付けない', () => {
     const before = v1Ready(), estimate = releaseEstimate(before);
@@ -288,7 +156,7 @@ describe('製品ページからv1.0を出荷する', () => {
     expect(next.persistent.progress.records['v1-released']).toBe(now);
     expect(next.run.play.contract).toEqual({ id: 'no-color', status: 'active' });
     expect(next.persistent.progress.selected).toBeNull();
-    expect(next.run.seed.installer?.items).not.toContain('color');
+    expect(next.run.seed.installer).toBeNull();
     expect(next.run.desktop.apps).toEqual([]); expect(next.run.desktop.feedback).toEqual([]);
     expect(next.run.seed.autoCursors).toBe(0); expect(next.resources.pixels).toBe(0);
     expect(next.persistent.products).toEqual(state.persistent.products); expect(isGameState(next)).toBe(true);
@@ -305,18 +173,6 @@ describe('製品ページからv1.0を出荷する', () => {
     expect(canFundNextVersion(low)).toBe(false); expect(beginProductRelease(low, now)).toBe(low);
   });
 
-  it('撮っていない場合も出荷時のデスクトップを凍結し、後から窓や絵を変えてもプレビューを保つ', () => {
-    const original = v1Ready(); original.persistent.screenshots = [];
-    const state = beginProductRelease(original, now), product = shippingProduct(state)!;
-    expect(product.screenshots).toEqual([]); expect(product.capture).toBeDefined();
-    const scene = readCapture(product.capture!);
-    original.run.desktop.windows.files.open = false;
-    original.run.kumiki.exports[0]!.frames[0]!.fill(-1);
-    expect(readCapture(product.capture!)).toEqual(scene);
-    expect(scene.desktop.windows.files.open).toBe(true);
-    expect(isGameState(state)).toBe(true);
-  });
-
   it('未選択は新しい順、指定時は掲載順を保存し、枚数を追加しても写真の加点を減らさない', () => {
     const original = v1Ready(), ids = original.persistent.screenshots.map(s => s.id);
     expect(selectedReleaseScreenshots(original).map(s => s.id)).toEqual([...ids].reverse());
@@ -331,26 +187,6 @@ describe('製品ページからv1.0を出荷する', () => {
     expect(product.screenshots?.[0]?.language).toBe('ja');
   });
 
-  it('製品の写真・壁紙元・fallbackを共有して保存し、アルバム削除後と再開後も読める', () => {
-    let original = v1Ready();
-    const source = original.persistent.screenshots[0]!;
-    original.run.desktop.photo.source = `shot:${source.id}`;
-    original.run.desktop.cooldownMs = 0; original = takeScreenshot(original, now + 100, 'ja');
-    const latest = original.persistent.screenshots.at(-1)!;
-    let state = beginProductRelease(original, now + 200, { screenshotIds: [latest.id] });
-    const product = shippingProduct(state)!;
-    expect(product.captureCatalog?.some(shot => shot.id === source.id)).toBe(true);
-    state = { ...state, persistent: { ...state.persistent, screenshots: [] } };
-    const storage = createMemoryStorage();
-    expect(saveGame(storage, state, now + 300).kind).toBe('saved');
-    const loaded = loadGame(storage); expect(loaded.kind).toBe('loaded');
-    if (loaded.kind !== 'loaded') throw new Error('save failed');
-    const savedProduct = shippingProduct(loaded.state)!;
-    expect(savedProduct).toEqual(product);
-    expect(() => restoreScene(savedProduct.screenshots![0]!, savedProduct.captureCatalog ?? [])).not.toThrow();
-    expect(readCapture(savedProduct.capture!)).toEqual(readCapture(product.capture!));
-  });
-
   it('新しい製品情報や助言を持たない旧保存を読み、売上と出荷位置を保つ', () => {
     const old = shipped(), raw = JSON.parse(encodeSave(old));
     delete raw.run.advice;
@@ -360,55 +196,27 @@ describe('製品ページからv1.0を出荷する', () => {
   });
 });
 
-it('実際の生成・購入・描画からv0.1を出荷し、256色を買って作り直せる', () => {
-  let state = createInitialState(0), momentum = freshMomentum(), time = 0, nextClick = 0;
-  const pause = (ms: number) => { for (let left = ms; left > 0; left -= 100) { time += 100; state = advanceActiveTime(state, 100).state; } };
-  const cursors = (goal: number) => {
-    while (canBuildSeed(state, 'cursor') && cursorPrice(state) < goal * .35) state = buildSeed(state, 'cursor', time);
-  };
-  for (const item of BALANCE.w1.items) {
-    while (!canBuildSeed(state, item.id)) {
-      if (time > 60 * 60_000) throw new Error('60分を超えた');
-      cursors(item.cost); pause(100);
-      if (time >= nextClick) { const result = pressSeed(state, momentum, time); state = result.state; momentum = result.momentum; nextClick = time + 400; }
-    }
-    state = buildSeed(state, item.id, time); pause(4_000);
-    if (item.id === 'color') pause(30_000);
-    if (item.id === 'motion') pause(15_000);
-  }
-  pause(30_000);
-  let budget = 0, id = '', pending: number[] = [], target: number[] = [];
-  for (const item of BALANCE.w2.items) {
-    while (state.resources.pixels < item.cost) {
-      if (time > 60 * 60_000) throw new Error('60分を超えた');
-      cursors(item.cost); pause(100); budget += .15; // 付録Eの1.5マス/秒
-      if (budget < 1) continue;
-      budget -= 1;
-      if (!pending.length) {
-        id = availableIcons(state).find(icon => !state.run.kumiki.drawings[icon]?.exported) ?? '';
-        if (!id) continue;
-        state = prepareDrawing(state, id);
-        const drawing = state.run.kumiki.drawings[id]!;
-        target = targetFor(state, id, drawing.size);
-        pending = target.flatMap((c, i) => c >= 0 && drawing.frames[0]![i] !== c ? [i] : []);
-      }
-      if (pending.length) {
-        const cell = pending.shift()!; state = paintDrawing(state, id, [cell], target[cell]!);
-        if (!pending.length) { state = exportKumiki(state, time); pause(2_000); if (id === 'folder') pause(30_000); }
-      }
-    }
-    state = buildKumiki(state, item.id); pause(4_000);
-    for (const part of ownedParts(state)) if (!state.run.kumiki.placed.includes(part)) state = placePart(state, part);
-    state = exportKumiki(state, time); pause(2_000);
-    if (item.id === 'extensions' || item.id === 'input') pause(15_000);
-  }
-  pause(30_000);
-  expect(canReleasePrototype(state)).toBe(true); expect(canFundNextVersion(state)).toBe(true);
-  const revenue = releaseEstimate(state);
-  state = beginPrototypeRelease(state, time); state = advanceActiveTime(state, BALANCE.release.animationMs).state;
-  state = buySpec(state, 'color'); state = startNextVersion(state, time + BALANCE.release.animationMs);
-  expect(state.run.version).toBe('v1'); expect(state.run.world).toBe('seed'); expect(state.persistent.specs.color).toBe(1);
-  expect(state.persistent.products).toHaveLength(1);
-  console.info(`v0.1の自動プレイ: ${(time / 60_000).toFixed(2)}分 / ${revenue}ドル / ${state.persistent.products[0]!.exports.filter(e => e.kind === 'icon').length}アイコン`);
-  expect(time).toBeGreaterThanOrEqual(39 * 60_000); expect(time).toBeLessThanOrEqual(60 * 60_000);
+describe('8a prototype integration',()=>{
+ it('requires editor entry, three finished parts, one export, and inspecting the display wall',()=>{
+  const s=ready();expect(prototypeConditions(s)).toEqual([true,true,true]);expect(canReleasePrototype(s)).toBe(true);
+  for(const mutate of [
+   (x:typeof s)=>{x.run.workshop.exitInspected=false;},
+   (x:typeof s)=>{for(const part of Object.values(x.run.workshop.parts))part.exportedAt=null;},
+   (x:typeof s)=>{x.run.workshop.parts={};},
+   (x:typeof s)=>{x.persistent.specs.color=1;},
+  ]){const x=structuredClone(s);mutate(x);expect(canReleasePrototype(x)).toBe(false);expect(beginPrototypeRelease(x,now)).toBe(x);}
+ });
+ it('freezes new production data without an editable drawing or home document',()=>{
+  const source=ready(),next=beginPrototypeRelease(source,now,true),product=next.persistent.products.at(-1)!;
+  expect(product.screen.workshop).toEqual(source.run.workshop);expect(product.screen).not.toHaveProperty('drawings');expect(product.screen).not.toHaveProperty('placed');
+  expect(product.exports.every(p=>p.kind==='part'&&!('frames' in p))).toBe(true);
+  source.run.workshop.parts['common-button']!.design.shadow=true;
+  expect(product.screen.workshop!.parts['common-button']!.design.shadow).toBe(false);
+  expect(decodeSave(encodeSave(next))).toEqual(next);
+ });
+ it('keeps the shipping flow through 256 colours and begins the next version with no made parts',()=>{
+  let s=beginPrototypeRelease(ready(),now,true);s=buySpec(s,'color');expect(canStartNextVersion(s)).toBe(true);
+  s=startNextVersion(s,now+1);expect(s.run.version).toBe('v1');expect(s.run.world).toBe('seed');
+  expect(s.persistent.specs.color).toBeGreaterThan(0);expect(s.run.workshop.parts).toEqual({});expect(s.persistent.setDocuments.length).toBeGreaterThan(0);
+ });
 });

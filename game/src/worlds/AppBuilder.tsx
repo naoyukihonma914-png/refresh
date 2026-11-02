@@ -2,7 +2,7 @@ import { useRef, useState, useLayoutEffect, type CSSProperties } from 'react';
 import { BALANCE } from '../config/balance';
 import type { AppBuildAction } from '../systems/appBuild';
 import { APP_PARTS, allAppParts, minimumPart, readableText, validPlacement, type AppPart, type AppPartId } from '../systems/appLayout';
-import { paletteFor } from '../content/kumikiArt';
+import { paletteFor } from '../content/palette';
 import type { BuiltApp, Rect } from '../systems/desktopState';
 import { nextDesktopApp } from '../systems/desktop';
 import type { DesktopProps } from './desktopTypes';

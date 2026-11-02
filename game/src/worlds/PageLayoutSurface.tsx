@@ -10,8 +10,8 @@ export function PageLayoutSurface({layout,parts,editing,canvas,onChange,i18n,mea
  useLayoutEffect(()=>{if(!canvas)return;const node=root.current;if(!node)return;const measure=()=>setSize(old=>old.width===node.clientWidth&&old.height===node.clientHeight?old:{width:node.clientWidth,height:node.clientHeight});measure();const o=new ResizeObserver(measure);o.observe(node);return()=>o.disconnect();},[canvas]);
  const fitted=useMemo(()=>fitPageLayout(layout??recommendedPage(),size.width,size.height),[layout,size]);
  useImperativeHandle(measureRef,()=>({measure(){
-  // Read the natural card before entering the canvas; do not save measurements until an edit is accepted.
-  const node=root.current!,page=node.closest<HTMLElement>('.seed-page')!,bounds=page.getBoundingClientRect(),scale=bounds.width/page.offsetWidth,grid=BALANCE.pageDesign.grid;
+  if(canvas)return structuredClone(fitted);
+  const node=root.current!,page=node.closest<HTMLElement>('[data-seed-construction]')??node,bounds=page.getBoundingClientRect(),scale=bounds.width/page.offsetWidth,grid=BALANCE.pageDesign.grid;
   const down=(n:number)=>Math.floor(n/grid)*grid,up=(n:number)=>Math.ceil(n/grid)*grid;
   const width=Math.max(352,down(page.clientWidth)),parts={} as PageLayout['parts'];let bottom=16;
   for(const id of PAGE_PARTS){
@@ -22,7 +22,7 @@ export function PageLayoutSurface({layout,parts,editing,canvas,onChange,i18n,mea
    parts[id]={x,y,width:Math.min(width-x,Math.max(min.width,rects.length?up((Math.max(...rects.map(r=>r.right))-bounds.left)/scale-x):width-64)),height};bottom=y+height+8;
   }
   return {width,height:Math.min(1080,up(Math.max(720,page.clientHeight,bottom))),parts};
- }}),[]);
+ }}),[canvas,fitted]);
  const begin=(e:React.PointerEvent<HTMLElement>,id:PagePart,resize=false)=>{
   if(!editing||e.button!==0)return;e.preventDefault();e.stopPropagation();e.currentTarget.setPointerCapture(e.pointerId);
   const button=root.current!.querySelector<HTMLElement>('[data-part="primary"]')!;

@@ -82,8 +82,8 @@ describe('進み具合に合わせた助言', () => {
     expect(advanceAdvice(memory, state, 100).current).toBe('seed-upgrade');
   });
 
-  it('出荷中・作り直し・引き継ぎ中には新しい助言を出さない', () => {
-    for (const name of ['release-complete', 'release-restarting', 'seed-inheriting']) {
+  it('出荷中・作り直し中には新しい助言を出さない', () => {
+    for (const name of ['release-complete', 'release-restarting']) {
       const state = createFixture(name, now)!;
       expect(nextAdvice(state)).toBeNull();
       const advice = advanceAdvice(createAdviceState(), state, BALANCE.w2.hintMs);

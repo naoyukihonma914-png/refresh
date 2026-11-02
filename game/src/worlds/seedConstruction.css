@@ -1,0 +1,72 @@
+/* World 1 is the editor being assembled, never an embedded home page. */
+.seed-construction {--seed-font:'Times New Roman','Refresh Serif',serif;--seed-heading-font:var(--seed-font);font-family:var(--seed-font);font-size:16px;line-height:1.5;}
+.seed-construction:not(.has-layout) {--editor-canvas:#fff;--editor-panel:#fff;color:#000;background:#fff;}
+.seed-construction.has-color:not(.has-layout) {--editor-canvas:var(--seed-background);--editor-panel:var(--seed-background);color:var(--seed-text);background:var(--seed-background);}
+.seed-construction .editor-shell-workspace {display:flex;flex-direction:column;min-inline-size:0;}
+.seed-construction-content {padding:8px;min-inline-size:0;}
+.seed-construction h1 {font-family:var(--seed-heading-font);font-size:16px;font-weight:400;margin:16px 0;line-height:1.5;}
+.seed-construction h2 {font-size:16px;margin:8px 0;font-weight:700;}
+.seed-construction p {margin:12px 0;}
+.seed-construction.has-font {--seed-font:'Refresh Sans','Refresh UI',sans-serif;}
+.seed-construction.has-font h1 {font-size:20px;font-weight:700;}
+.seed-construction button,.seed-construction select {font-family:inherit;font-size:13.33px;}
+.seed-construction:not(.has-layout) .seed-upgrades {padding-inline-start:40px;margin:16px 0;}
+.seed-construction:not(.has-layout) .seed-upgrades>li {margin:5px 0;}
+.seed-construction:not(.has-layout) .seed-upgrade-name {display:inline;}
+.seed-construction .seed-upgrade-name small {margin-inline:8px;font-size:12px;}
+.seed-construction .seed-upgrade-name>span {font-size:14px;}
+.seed-construction .seed-upgrades button {margin-inline:6px;}
+.seed-construction .seed-link {border:0;padding:1px 0;background:transparent;box-shadow:none;color:inherit;text-decoration:underline;font:inherit;}
+.seed-construction:not(.has-color):not(.has-layout) .seed-link {color:#000080;}
+.seed-construction:not(.has-layout) button:not(.seed-link),.seed-construction:not(.has-layout) select {color:#000;background:#efefef;border:1px solid #767676;border-radius:2px;box-shadow:none;min-block-size:24px;padding:1px 6px;}
+.seed-construction.has-border:not(.has-layout) .seed-generate,.seed-construction.has-border:not(.has-layout) [data-seed-upgrade] {border:2px solid #000;border-radius:0;}
+.seed-construction .seed-generate {min-block-size:32px;position:relative;}
+.seed-construction .seed-generator-line {min-block-size:100px;}
+.seed-construction .seed-generator-anchor {display:inline-block;position:relative;min-inline-size:240px;max-inline-size:100%;}
+.seed-construction .seed-auto-cursor {position:absolute;inline-size:18px;block-size:24px;pointer-events:none;}
+.seed-construction .seed-gain {position:absolute;inset-inline-start:50%;inset-block-start:-12px;pointer-events:none;white-space:nowrap;}
+.seed-construction .seed-construction-resources {display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.seed-construction .seed-construction-resources small {font-size:13px;}
+.seed-construction .seed-construction-notice {max-inline-size:850px;line-height:1.6;}
+.seed-construction .seed-construction-notice h2 {font-size:15px;}
+.seed-construction .seed-construction-notice p {margin:6px 0;white-space:pre-line;}
+.seed-construction .seed-construction-footer {flex:none;display:flex;align-items:baseline;gap:8px 18px;flex-wrap:wrap;padding:8px 16px;min-inline-size:0;font-size:13px;}
+.seed-construction .seed-construction-footer p {margin:0;}
+.seed-construction .seed-layout-actions {display:flex;gap:6px;flex-wrap:wrap;}
+.seed-construction .seed-layout-actions button {font-size:12px;}
+.seed-construction .seed-construction-palette {display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;}
+.seed-construction .seed-construction-palette button {inline-size:24px;block-size:24px;min-block-size:24px;flex:none;border:1px solid #777;border-radius:0;padding:0;box-shadow:inset 1px 1px #fff5;}
+.seed-construction .seed-construction-palette button[aria-pressed=true] {outline:2px solid currentColor;outline-offset:1px;}
+.seed-construction.has-layout .seed-construction-content {padding:0;flex:1;min-block-size:720px;}
+.seed-construction.has-layout .page-layout-surface {min-block-size:720px;block-size:100%;flex:1;}
+.seed-construction.has-layout .page-part>.page-part-content {padding:12px 16px;overflow:auto;}
+.seed-construction.has-layout [data-page-part=upgrades] {background:var(--editor-panel);color:var(--editor-ink);}
+.seed-construction.has-layout [data-page-part=upgrades] .page-part-content {border-inline-start:1px solid var(--editor-edge-dark);}
+.seed-construction.has-layout .seed-upgrades {list-style:none;margin:8px 0;padding:0;}
+.seed-construction.has-layout .seed-upgrades>li {display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:space-between;padding:7px 0;border-block-end:1px solid var(--editor-edge-dark);}
+.seed-construction.has-layout .seed-upgrade-name {min-inline-size:0;flex:1 1 180px;}
+.seed-construction.has-layout .seed-upgrade-name>span {display:block;}
+.seed-construction.has-layout .seed-upgrade-name small {display:inline-block;margin:2px 8px 2px 0;}
+.seed-construction.has-layout .seed-upgrades button {max-inline-size:100%;margin:0;}
+.seed-construction.has-layout .seed-cursor-purchase {margin-block-start:18px;}
+.seed-construction.has-workspace .editor-shell-workspace {border:2px inset var(--editor-edge-dark);}
+.seed-construction .seed-editor-bar {display:flex;align-items:center;gap:12px;min-block-size:40px;padding:4px 12px;flex-wrap:wrap;}
+.seed-construction .seed-editor-bar>b {font-family:'Refresh Pixel','Refresh UI',sans-serif;}
+.seed-construction .seed-editor-bar>button {margin-inline-start:auto;}
+.seed-construction .seed-editor-bar small {font-size:12px;}
+.seed-construction .seed-built-parts {padding:8px 10px;font-family:'Refresh Pixel','Refresh UI',sans-serif;font-size:14px;}
+.seed-construction .seed-built-parts h2 {font-size:14px;}
+.seed-construction .seed-built-parts ul {list-style:none;margin:8px 0;padding:0;}
+.seed-construction .seed-built-parts li {padding:4px 0;border-block-end:1px solid var(--editor-edge-dark);}
+.seed-construction .seed-construction-tool {padding:8px;}
+.seed-construction .seed-construction-tool svg {inline-size:28px;block-size:28px;fill:none;stroke:currentColor;stroke-width:1.5;}
+.seed-construction .seed-construction-layers {padding:4px 12px;font:12px 'Refresh Pixel','Refresh UI',sans-serif;}
+.seed-construction .page-settings {flex:1;inline-size:100%;padding:16px 24px;overflow:auto;background:#fff;color:#111;font:16px/1.5 'Refresh Serif',serif;}
+.seed-construction .page-settings h1 {font:700 20px 'Refresh Serif',serif;}
+.seed-construction .page-settings fieldset {max-inline-size:1000px;}
+.seed-construction .page-settings button,.seed-construction .page-settings select,.seed-construction .page-settings input {background:#f4f4f4;color:#111;border:1px solid #777;box-shadow:none;}
+.seed-construction.has-color .editor-shell-workspace {color:var(--seed-text);}
+.seed-construction .seed-generator-anchor {min-inline-size:0;}
+.seed-construction.has-layout .seed-generate {inline-size:min(100%,var(--page-button-width,auto));block-size:var(--page-button-height,auto);min-inline-size:120px;min-block-size:32px;max-inline-size:100%;white-space:normal;overflow-wrap:anywhere;}
+.seed-construction.has-layout .seed-generate {block-size:auto;min-block-size:var(--page-button-height,32px);}
+.seed-construction .seed-layout-actions button,.seed-construction .page-part-grip,.seed-construction .page-part-resize,.seed-construction .seed-construction-footer select {color:var(--editor-ink);}

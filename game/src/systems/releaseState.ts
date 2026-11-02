@@ -1,65 +1,62 @@
-import {isProgress,type Progress} from './longPlay';
-import { isPageDesign, type PageDesign } from './pageDesign';
-import { BALANCE, type KumikiItem, type KumikiSkill, type PartId, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
-import { isDesignMap, isExportedWork, PART_IDS, type Design, type ExportedWork } from './kumikiState';
-import type { SeedState } from './state';
+import { BALANCE, type SpecKey } from '../config/balance';
 import { isScreenshot, type Screenshot } from './desktopState';
 import { isReleasePresentation, type ReleasePresentation } from './releasePresentation';
+import { isWorkshopState, isEditorCustomization, type WorkshopState, type EditorCustomization } from './workshopState';
 
+/** Published metadata is independent of the current game's part/catalog identifiers. */
 export interface ProductScreen {
-  progress?:Progress;page?:PageDesign;legacyBonus?:{auto:number;drawing:number};
-  pixels: number; built: SeedItem[]; cursors: number; kumikiBuilt: KumikiItem[]; placed: PartId[];
-  design: Record<string, Design>; focus: boolean; interval: number; exportName: string;
-  specs: Record<SpecKey, number>; seedSkills: SeedSkill[];
-  pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean;
-  kumikiSkills: KumikiSkill[]; modern: boolean; log: { at: number; pixels: number }[];
-  history: SeedState['history'];
+  pixels:number; built:string[]; cursors:number; specs:Record<SpecKey,number>;
+  workshop?:WorkshopState; editorCustomization?:EditorCustomization; editorStage?:0|1|2; legacy?:boolean;
 }
+export interface ProductExport {kind:'icon'|'part';id:string;name:string|null;at:number}
+export type ArchivedExport=ProductExport;
 export interface ProductRecord {
-  presentation?: ReleasePresentation;
-  id: number; name: string | null; version: 'v0.1' | 'v1.0'; releasedAt: number; author: string | null;
-  generatedPixels: number; builtCount: number; revenue: number;
-  screen: ProductScreen; exports: ExportedWork[];
-  screenshots?: Screenshot[]; capture?: Screenshot; captureCatalog?: Screenshot[]; screenshotBonus?: number;
+  presentation?:ReleasePresentation;
+  id:number;name:string|null;version:'v0.1'|'v1.0';releasedAt:number;author:string|null;
+  generatedPixels:number;builtCount:number;revenue:number;
+  screen:ProductScreen;exports:ProductExport[];
+  screenshots?:Screenshot[];capture?:Screenshot;captureCatalog?:Screenshot[];screenshotBonus?:number;
 }
-export interface ShippingState { productId: number; elapsedMs: number; phase?: 'store' | 'shipping'; storeElapsedMs?: number }
-export interface GuideRecord { kind: 'seed' | 'kumiki' | 'release'; id: string; version: 'v0.1' | 'v1' | 'v2' }
-
-const obj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
-const amount = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x) && x >= 0;
-const count = (x: unknown): x is number => amount(x) && Number.isSafeInteger(x);
-const ids = (x: unknown, allowed: readonly unknown[]): x is string[] => Array.isArray(x) && new Set(x).size === x.length && x.every(id => allowed.includes(id));
-export function isProductRecord(x: unknown): x is ProductRecord {
-  if (!obj(x) || !(x.name === null || typeof x.name === 'string' && [...x.name].length <= BALANCE.release.maxProductName) || !count(x.id) || x.id < 1 || !['v0.1','v1.0'].includes(x.version as string) || !amount(x.releasedAt)
-    || x.author !== null && typeof x.author !== 'string' || !amount(x.generatedPixels) || !count(x.builtCount) || !count(x.revenue)) return false;
-  const s = x.screen;
-  if (!obj(s) || !amount(s.pixels) || !count(s.cursors) || !ids(s.built, BALANCE.w1.items.map(i => i.id))
-    || !ids(s.kumikiBuilt, [...BALANCE.w2.items.map(i => i.id),'switch','slider']) || !ids(s.placed, PART_IDS) || !isDesignMap(s.design)
-    || typeof s.focus !== 'boolean' || !count(s.interval) || s.interval < BALANCE.w2.intervalMin || s.interval > BALANCE.w2.intervalMax
-    || typeof s.exportName !== 'string' || !ids(s.seedSkills, BALANCE.w1.skills.map(i => i.id))
-    || !['none', 'dots', 'grid', 'diagonal'].includes(s.pattern as string) || typeof s.marquee !== 'boolean'
-    || !ids(s.kumikiSkills, BALANCE.w2.skills.map(i => i.id)) || typeof s.modern !== 'boolean') return false;
-  if(s.progress!==undefined&&!isProgress(s.progress))return false;
-  if(s.page!==undefined&&!isPageDesign(s.page))return false;
-  if(x.screenshots!==undefined&&(!Array.isArray(x.screenshots)||x.screenshots.length>BALANCE.release.storeMaxScreenshots||!x.screenshots.every(isScreenshot)||new Set(x.screenshots.map(shot=>shot.id)).size!==x.screenshots.length))return false;
+export interface ShippingState {productId:number;elapsedMs:number;phase?:'store'|'shipping';storeElapsedMs?:number}
+export interface GuideRecord {kind:'seed'|'kumiki'|'release';id:string;version:'v0.1'|'v1'|'v2'}
+const obj=(x:unknown):x is Record<string,unknown>=>!!x&&typeof x==='object'&&!Array.isArray(x);
+const amount=(x:unknown):x is number=>typeof x==='number'&&Number.isFinite(x)&&x>=0;
+const count=(x:unknown):x is number=>amount(x)&&Number.isSafeInteger(x);
+const text=(x:unknown):x is string=>typeof x==='string';
+const optionalName=(x:unknown)=>x===null||text(x);
+const strings=(x:unknown):x is string[]=>Array.isArray(x)&&x.every(text)&&new Set(x).size===x.length;
+const specKeys:SpecKey[]=['color','storage','memory','resolution','network','refresh','graphics'];
+const frozenSpecCounts:Record<SpecKey,number>={color:4,storage:5,memory:5,resolution:4,network:3,refresh:4,graphics:4};
+export function isProductScreen(s:unknown):s is ProductScreen {
+  return obj(s)&&amount(s.pixels)&&count(s.cursors)&&strings(s.built)&&obj(s.specs)
+    &&specKeys.every(key=>count((s.specs as Record<string,unknown>)[key])&&Number((s.specs as Record<string,unknown>)[key])<frozenSpecCounts[key])
+    &&(s.workshop===undefined||isWorkshopState(s.workshop))&&(s.editorCustomization===undefined||isEditorCustomization(s.editorCustomization))
+    &&(s.editorStage===undefined||[0,1,2].includes(s.editorStage as number))&&(s.legacy===undefined||typeof s.legacy==='boolean');
+}
+export function isProductRecord(x:unknown):x is ProductRecord {
+  if(!obj(x)||!optionalName(x.name)||text(x.name)&&[...x.name].length>BALANCE.release.maxProductName||!count(x.id)||x.id<1
+    ||!['v0.1','v1.0'].includes(String(x.version))||!amount(x.releasedAt)||!optionalName(x.author)||!amount(x.generatedPixels)||!count(x.builtCount)||!count(x.revenue)||!isProductScreen(x.screen))return false;
+  if(!Array.isArray(x.exports)||!x.exports.every(e=>obj(e)&&['icon','part'].includes(String(e.kind))&&text(e.id)&&e.id.length>0&&optionalName(e.name)&&amount(e.at))||new Set(x.exports.map(e=>`${e.kind}:${e.id}`)).size!==x.exports.length)return false;
+  if(x.screenshots!==undefined&&(!Array.isArray(x.screenshots)||x.screenshots.length>BALANCE.release.storeMaxScreenshots||!x.screenshots.every(isScreenshot)||new Set(x.screenshots.map(s=>s.id)).size!==x.screenshots.length))return false;
   if(x.capture!==undefined&&!isScreenshot(x.capture))return false;
-  if(x.captureCatalog!==undefined&&(!Array.isArray(x.captureCatalog)||!x.captureCatalog.every(isScreenshot)||new Set(x.captureCatalog.map(shot=>shot.id)).size!==x.captureCatalog.length))return false;
-  if(x.screenshotBonus!==undefined&&(!amount(x.screenshotBonus)||x.screenshotBonus>BALANCE.release.screenshotBonusMax))return false;
-  if(x.presentation!==undefined&&!isReleasePresentation(x.presentation))return false;
-  if(s.legacyBonus!==undefined&&(!obj(s.legacyBonus)||!amount(s.legacyBonus.auto)||s.legacyBonus.auto<1||s.legacyBonus.auto>1.2||!amount(s.legacyBonus.drawing)||s.legacyBonus.drawing<1||s.legacyBonus.drawing>2))return false;
-  if (!obj(s.specs) || !(Object.keys(BALANCE.spec) as SpecKey[]).every(key => obj(s.specs) && count(s.specs[key]) && s.specs[key] < BALANCE.spec[key].length)) return false;
-  if (!Array.isArray(s.log) || !s.log.every(e => obj(e) && amount(e.at) && amount(e.pixels))) return false;
-  if (!Array.isArray(s.history) || !s.history.every(e => obj(e) && ['cursor', ...BALANCE.w1.items.map(i => i.id)].includes(e.item as SeedItem | 'cursor') && amount(e.at))) return false;
-  return Array.isArray(x.exports) && x.exports.every(isExportedWork)
-    && new Set(x.exports.map(e => `${e.kind}:${e.id}`)).size === x.exports.length;
+  if(x.captureCatalog!==undefined&&(!Array.isArray(x.captureCatalog)||!x.captureCatalog.every(isScreenshot)||new Set(x.captureCatalog.map(s=>s.id)).size!==x.captureCatalog.length))return false;
+  return (x.screenshotBonus===undefined||amount(x.screenshotBonus)&&x.screenshotBonus<=BALANCE.release.screenshotBonusMax)&&(x.presentation===undefined||isReleasePresentation(x.presentation));
 }
-export function isGuideArchive(x: unknown): x is GuideRecord[] {
-  const allowed = {
-    seed: ['intro', 'instructions', 'tool', 'hint', 'return'],
-    kumiki: ['entered', 'draw', 'complete', 'export', 'extensions', 'name', 'wall', 'hint'],
-    release: ['confirm', 'sales'],
+/** Drop obsolete editable drawings and home layouts without changing a published ledger. */
+export function normalizeArchivedProduct(value:unknown):ProductRecord {
+  if(!obj(value)||!obj(value.screen))throw new Error('Invalid archived product');
+  const s=value.screen;
+  const screen:ProductScreen={pixels:s.pixels as number,built:s.built as string[],cursors:s.cursors as number,specs:s.specs as Record<SpecKey,number>,
+    ...(s.workshop!==undefined?{workshop:s.workshop as WorkshopState}:{}),...(s.editorCustomization!==undefined?{editorCustomization:s.editorCustomization as EditorCustomization}:{}),
+    ...(s.editorStage!==undefined?{editorStage:s.editorStage as 0|1|2}:{}),...(s.workshop===undefined?{legacy:true}:{}),
   };
-  return Array.isArray(x) && x.every(e => obj(e) && ['v0.1', 'v1', 'v2'].includes(e.version as string)
-    && Object.keys(allowed).includes(e.kind as string) && allowed[e.kind as keyof typeof allowed].includes(e.id as string))
-    && new Set(x.map(e => `${e.version}:${e.kind}:${e.id}`)).size === x.length;
+  if(!Array.isArray(value.exports))throw new Error('Invalid archived exports');
+  const exports=value.exports.map(e=>{if(!obj(e))throw new Error('Invalid archived export');return {kind:e.kind,id:e.id,name:e.name,at:e.at} as ProductExport;});
+  const product={...value,screen,exports} as unknown as ProductRecord;
+  if(!isProductRecord(product))throw new Error('Invalid archived product');
+  return product;
+}
+export function isGuideArchive(x:unknown):x is GuideRecord[] {
+  return Array.isArray(x)&&x.every(e=>obj(e)&&['seed','kumiki','release'].includes(String(e.kind))&&text(e.id)&&e.id.length>0&&e.id.length<=80&&['v0.1','v1','v2'].includes(String(e.version)))
+    &&new Set(x.map(e=>`${e.version}:${e.kind}:${e.id}`)).size===x.length;
 }

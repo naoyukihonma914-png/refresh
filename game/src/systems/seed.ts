@@ -4,16 +4,14 @@ import { recommendedPage } from './pageDesign';
 import { BALANCE, type SeedItem, type SeedSkill } from '../config/balance';
 import { creditPixels, manualClickValue } from './economy';
 import { createInitialState, type GameState, type GuideId } from './state';
-import { enterKumiki } from './kumiki';
-import { seedAppearanceForNewVersion } from './seedAppearance';
+import { enterWorkshop } from './workshop';
+import { createEditorCustomization } from './workshopState';
 import { desktopStage } from './appearance';
 import { createDesktopState } from './desktopState';
 import { desktopScreen, resizeDesktop } from './desktopGeometry';
 
 export function visibleSeedItems(state: GameState): SeedItem[] {
-  const { built, autoCursors } = state.run.seed;
-  // 最初の自動カーソルを作るまでは、それだけを次の一つとして見せる。
-  if (built.includes('save') && autoCursors === 0&&!contractBlocks(state,'cursor')) return [];
+  const { built } = state.run.seed;
   return BALANCE.w1.items.filter(item => !built.includes(item.id)&&!contractBlocks(state,item.id))
     .slice(0, built.includes('layout') ? BALANCE.w1.previewItems : 1).map(item => item.id);
 }
@@ -26,9 +24,11 @@ export function cursorPrice(state: GameState): number {
 export function canBuildSeed(state: GameState, id: SeedItem | 'cursor'): boolean {
   if (state.run.world === 'release' || state.run.seed.installer || state.run.restartMs > 0) return false;
   if (id === 'cursor') {const q=seedCursorQuote(state);return !contractBlocks(state,'cursor')&&state.run.seed.built.includes('save')&&q.count>0&&state.run.seed.autoCursors+q.count<=BALANCE.longPlay.cursorLimit&&state.resources.pixels>=q.cost;}
+  const deferredColor = id === 'color' && state.run.play.contract?.id === 'no-color' && state.run.play.contract.status === 'complete';
+  if (state.run.world !== 'seed' && !deferredColor) return false;
   const next = visibleSeedItems(state)[0];
-  const item = BALANCE.w1.items.find(item => item.id === id)!;
-  return id === next && state.resources.pixels >= item.cost;
+  const item = BALANCE.w1.items.find(item => item.id === id);
+  return !!item && id === next && state.resources.pixels >= item.cost;
 }
 
 function addGuide(state: GameState, id: GuideId): GameState {
@@ -42,9 +42,9 @@ function addGuide(state: GameState, id: GuideId): GameState {
 export function updateSeedGuide(state: GameState): GameState {
   let next = state;
   if (state.run.seed.built.includes('color')) next = addGuide(next, 'intro');
-  if (visibleSeedItems(state).includes('kumiki')) next = addGuide(next, 'tool');
+  if (visibleSeedItems(state).includes('export')) next = addGuide(next, 'tool');
   if (state.run.seed.built.includes('color') && state.elapsedMs - state.run.seed.lastActionAt >= BALANCE.w1.hintAfterMs
-    && !state.run.seed.built.includes('kumiki')) next = addGuide(next, 'hint');
+    && !state.run.seed.built.includes('export')) next = addGuide(next, 'hint');
   return next;
 }
 
@@ -62,7 +62,7 @@ export function buildSeed(state: GameState, id: SeedItem | 'cursor', now: number
       history: [...seed.history, { item: id, at: now }], lastActionAt: state.elapsedMs,
     } },
   });
-  return id === 'kumiki' ? enterKumiki(next) : next;
+  return id === 'export' ? enterWorkshop(next) : next;
 }
 
 export interface Momentum { value: number; lastPressAt: number | null }
@@ -119,7 +119,6 @@ export function createSeedVersion(previous: GameState, version: 'v1' | 'v2', now
   const next = createInitialState(now);
   next.run.version = version;
   next.persistent = {...structuredClone({...previous.persistent,screenshots:[]}),screenshots:[...previous.persistent.screenshots]};
-  next.persistent.seedAppearance = seedAppearanceForNewVersion(previous);
   // Appearance is permanent, but desktop contents and window positions belong to the old version.
   const screen = desktopScreen(desktopStage(next));
   next.run.desktop = resizeDesktop(createDesktopState(screen), screen, next.persistent.desktopPrefs.iconSize);
@@ -128,21 +127,13 @@ export function createSeedVersion(previous: GameState, version: 'v1' | 'v2', now
   if(version==='v2'&&next.persistent.progress.selected&&next.persistent.progress.records['v1-released']!==undefined){next.run.play.contract={id:next.persistent.progress.selected,status:'active'};next.persistent.progress.selected=null;}
   if (previous.persistent.seedSkills.includes('inherit')) {
     next.run.seed.page=structuredClone(previous.run.seed.page);
-    const items = BALANCE.w1.items.filter(item => item.id !== 'kumiki'&&!contractBlocks(next,item.id) && previous.run.seed.built.includes(item.id)).map(item => item.id);
-    if (items.length) next.run.seed.installer = { items, elapsedMs: 0 };
-  }
+  } else next.persistent.editorCustomization = createEditorCustomization();
+  // The skill carries the chosen editor design, never already purchased construction parts.
+  next.run.seed.installer = null;
   return next;
 }
 
 export function advanceSeedInstaller(state: GameState, activeMs: number): GameState {
-  const installer = state.run.seed.installer;
-  if (!installer) return state;
-  const elapsedMs = Math.min(BALANCE.w1.inheritMs, installer.elapsedMs + activeMs);
-  const count = Math.floor(elapsedMs / BALANCE.w1.inheritMs * installer.items.length);
-  const built = [...new Set([...state.run.seed.built, ...installer.items.slice(0, count)])];
-  const additions = built.filter(item => !state.run.seed.built.includes(item));
-  return { ...state, run: { ...state.run, seed: { ...state.run.seed, built,
-    history: [...state.run.seed.history, ...additions.map(item => ({ item, at: state.lastTickAt }))],
-    installer: elapsedMs === BALANCE.w1.inheritMs ? null : { ...installer, elapsedMs },
-  } } };
+  void activeMs;
+  return state.run.seed.installer ? { ...state, run: { ...state.run, seed: { ...state.run.seed, installer: null } } } : state;
 }

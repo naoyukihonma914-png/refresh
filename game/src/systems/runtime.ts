@@ -1,3 +1,4 @@
+import {setEditorStage,type VisualStage} from './appearance';
 import { advanceAdvice, readAdvice, type AdviceId } from './advice';
 import { setSeedEra, type SeedEra } from './seedAppearance';
 import {refreshDesktop} from './desktopExtras';
@@ -19,13 +20,14 @@ import { canSave, createInitialState, type GameState } from './state';
 import { advanceActiveTime, advanceOfflineTime, isInactiveGap, type TimeResult } from './time';
 import { applySeedSkills, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
 import type { GuideId } from './state';
-import { actKumiki, enterKumiki, type KumikiAction } from './kumiki';
+import { actWorkshop, enterWorkshop, canAssembleDesktop, type WorkshopAction } from './workshop';
+import { enterDesktop } from './desktop';
 import { archiveGuide, beginProductRelease, buySpec, canRelease, shippingComplete, showShipping, startNextVersion } from './release';
 
 export interface RuntimeSnapshot {
   state: GameState;
   frozenRate?: number;
-  tesseraIntent?:{serial:number;kind:'color'|'drawing'};
+  tesseraIntent?:{serial:number;kind:'color'|'part'};
   shotHintSerial?: number;
   language: string;
   status: 'starting' | 'ready' | 'blocked' | 'corrupt';
@@ -114,7 +116,7 @@ export class GameRuntime {
       : loadGame(this.platform.storage);
     if (loaded.kind === 'corrupt') { this.publish({ status: 'corrupt' }); return; }
     let state = loaded.kind === 'loaded' || loaded.kind === 'recovered' ? loaded.state : this.snapshot.state;
-    if (!this.fixture && state.run.seed.built.includes('kumiki') && !state.run.kumiki.entered) state = enterKumiki(state);
+    if (!this.fixture && state.run.seed.built.includes('export') && !state.run.workshop.entered) state = enterWorkshop(state);
     state = { ...state, persistent: { ...state.persistent, numberNotation: this.platform.settings.read().numberNotation ?? state.persistent.numberNotation } };
     const result = this.durableTime(state,advanceOfflineTime(state, this.platform.clock.wallNow(),this.snapshot.language),()=>advanceOfflineTime(state,this.platform.clock.wallNow(),this.snapshot.language,false));
     this.publish({
@@ -267,15 +269,28 @@ export class GameRuntime {
     this.sound('build',state);
   };
 
-  actKumiki = (action: KumikiAction) => {
+  actWorkshop = (action: WorkshopAction) => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
     const previous = this.snapshot.state;
-    const state = observeTesseraAction(previous, actKumiki(previous, action, this.platform.clock.wallNow()), action.type, this.platform.clock.wallNow());
+    let state = observeTesseraAction(previous, actWorkshop(previous, action, this.platform.clock.wallNow()), action.type, this.platform.clock.wallNow());
+    if (action.type === 'exit' && canAssembleDesktop(state)) state = enterDesktop(state);
     if (previous === state) return;
     this.publish({ state });
-    if(action.type==='build'||action.type==='place'||action.type==='skill')this.sound('build',state);if(action.type==='export')this.sound('export',state);if(action.type==='paint'||action.type==='fill')this.sound('press',state);
-    if (action.type !== 'paint' && action.type !== 'fill') this.persist();
+    if (['buySet','place','skill','test'].includes(action.type)) this.sound('build',state);
+    if (action.type === 'export') this.sound('export',state);
+    this.persist();
+  };
+
+  chooseEditorStage = (stage:VisualStage) => {
+    if (!this.canOperate() || this.snapshot.state.run.world==='release') return;
+    this.publish({state:setEditorStage(this.snapshot.state,stage)});this.persist();
+  };
+
+  setPlayerName = (name: string) => {
+    if (!this.canOperate() || [...name].length > BALANCE.w2.maxName) return;
+    this.publish({state:{...this.snapshot.state,persistent:{...this.snapshot.state.persistent,playerName:name.trim() || null}}});
+    this.persist();
   };
 
   actDesktop = (action: DesktopAction, options?:{automatic?:boolean}) => {
@@ -287,7 +302,7 @@ export class GameRuntime {
     if (state === this.snapshot.state) return;
     if(['buy','job-buy','job-update','skill','app-craft','app-install'].includes(action.type))this.sound('build',state);
     const request=action.type==='fix'?state.run.desktop.feedback.find(f=>f.id===action.id):null;
-    this.publish({state,...(request?.kind==='screenshot'?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}),...(request&&hasDesktopSkill(state,'direct')&&['color','redraw','practice'].includes(request.kind)?{tesseraIntent:{serial:(this.snapshot.tesseraIntent?.serial??0)+1,kind:request.kind==='color'?'color':'drawing'}}:{})});
+    this.publish({state,...(request?.kind==='screenshot'?{shotHintSerial:(this.snapshot.shotHintSerial??0)+1}:{}),...(request&&hasDesktopSkill(state,'direct')&&request.kind==='color'?{tesseraIntent:{serial:(this.snapshot.tesseraIntent?.serial??0)+1,kind:'color'}}:{})});
     if (action.type !== 'rect' && action.type !== 'icon' && action.type !== 'note') this.persist();
   };
 
@@ -316,7 +331,7 @@ export class GameRuntime {
     if(s.run.world!=='seed'||!s.run.seed.built.includes('color')||s.run.play.stray.lifeMs<=0||activeContract(s)==='no-color')return;
     const next=creditPixels(s,passivePixelsPerSecond(s)*BALANCE.longPlay.straySeconds);this.publish({state:{...next,run:{...next.run,play:{...next.run.play,stray:{...next.run.play.stray,lifeMs:0,waitMs:BALANCE.longPlay.strayMinMs}}}}});this.sound('press');this.persist();
   };
-  terminalExport=()=>{this.actKumiki({type:'export'});};
+  terminalExport=()=>{this.actWorkshop({type:'export'});};
   refreshWindows=()=>{
     if(!this.canOperate()||this.suspended||this.platform.visibility.isHidden())return;this.advanceForeground();let s=this.snapshot.state;const now=this.platform.clock.wallNow();
     if(s.run.world!=='desktop'||s.persistent.progress.records['secret-clock']===undefined||!s.run.desktop.apps.includes('terminal')||now-s.run.play.refreshAt<BALANCE.longPlay.refreshCooldownMs)return;

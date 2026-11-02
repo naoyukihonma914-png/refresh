@@ -17,8 +17,8 @@ import { StorePage } from './StorePage';
 
 // Only the nested game renderer is replaced. The parents, their generation
 // branches, all information leaves and every button/select are the real UI.
-vi.mock('../Desktop', () => ({
-  ScreenshotPreview: ({ shot }: { shot: Screenshot }) => createElement('div', { 'data-preview-shot': shot.id }),
+vi.mock('../LegacyCapturePreview', () => ({
+  LegacyCapturePreview: ({ shot }: { shot: Screenshot }) => createElement('div', { 'data-preview-shot': shot.id }),
 }));
 vi.mock('./ProductPreview', () => ({
   ProductPreview: ({ product }: { product: ProductRecord }) => createElement('div', { 'data-preview-product': product.id }),
@@ -105,7 +105,7 @@ describe('製品ページは別の骨格でも同じ製品と操作を表示す�
       for (const key of ['title', 'author', 'description', 'screenshots', 'release-details', 'environment', 'publisher', 'reviews', 'revenue-counts', 'rating-summary']) one(tree, 'data-store-info', key);
       expect(text(one(tree, 'data-store-info', 'title'))).toBe(productLabel(i18n, product.name, i18n.t('release.version.v1')));
       const description = text(one(tree, 'data-store-info', 'description'));
-      expect(description).toContain(i18n.t('store.description.desktop', { built: product.builtCount, icons: product.exports.filter(work => work.kind === 'icon').length, apps: 1 + state.run.desktop.apps.length }));
+      expect(description).toContain(i18n.t('store.description.desktop', { built: product.builtCount, icons: product.exports.length, apps: 1 + state.run.desktop.apps.length }));
       const environment = text(one(tree, 'data-store-info', 'environment'));
       for (const key of ['color', 'resolution', 'refresh'] as const) expect(environment).toContain(i18n.spec(key, product.screen.specs[key]));
       const reviews = one(tree, 'data-store-info', 'reviews');

@@ -3,9 +3,8 @@ import type { I18n } from '../../../content/i18n';
 import type { ProductRecord } from '../../../systems/releaseState';
 import type { Screenshot } from '../../../systems/desktopState';
 import type { GameRuntime, RuntimeSnapshot } from '../../../systems/runtime';
-import { PixelArt, ProductGlyph } from '../../desktop-icons';
-import { paletteFor } from '../../../content/kumikiArt';
-import { ScreenshotPreview } from '../../Desktop';
+import { ProductGlyph } from '../../desktop-icons';
+import { LegacyCapturePreview } from '../../LegacyCapturePreview';
 import { ProductPreview } from '../ProductPreview';
 
 export type StoreSection = 'about' | 'reviews';
@@ -27,9 +26,8 @@ export function StoreBreadcrumb({view}: {view: StoreView}) {
   const {i18n}=view;
   return <nav className="store-breadcrumb" aria-label={i18n.t('store.navigation')}><button onClick={view.top}>{i18n.t(view.prototype?'store.freeware':'store.archive')}</button><span aria-hidden="true" className="store-path-separator"/><span>{i18n.t('store.category')}</span><span aria-hidden="true" className="store-path-separator"/><span>{view.topic}</span></nav>;
 }
-export function StoreIcon({view}: {view: StoreView}) {
-  const icon=view.product.exports.find(work=>work.kind==='icon');
-  return <div className="store-product-icon" aria-hidden="true">{icon?<PixelArt frames={icon.frames} size={icon.size} palette={paletteFor(view.product.screen.specs.color)}/>:<ProductGlyph/>}</div>;
+export function StoreIcon(_props: {view: StoreView}) {
+  return <div className="store-product-icon" aria-hidden="true"><ProductGlyph/></div>;
 }
 export function StoreTitle({view}: {view: StoreView}) {
   return <div className="store-title-copy"><h1 data-store-info="title">{view.title}</h1>{view.product.author!==null&&<p className="store-author" data-store-info="author">{view.i18n.t('store.by',{author:view.product.author})}</p>}<p className="store-heading-topic">{view.topic}</p></div>;
@@ -39,7 +37,7 @@ export function StoreJumpLinks({view}: {view: StoreView}) {
   return <nav className="store-navigation" aria-label={i18n.t('store.navigation')}><button aria-current={view.section==='about'?'location':undefined} onClick={()=>view.jump('about')}>{i18n.t('store.about')}</button><button aria-current={view.section==='reviews'?'location':undefined} onClick={()=>view.jump('reviews')}>{i18n.t('store.reviews',{count:view.reviewRatings.length})}</button></nav>;
 }
 export function StoreMedia({view}: {view: StoreView}) {
-  return <section className="store-media" aria-label={view.i18n.t('store.screenshots')} data-store-info="screenshots" data-store-info-value={JSON.stringify(view.photos.map(shot=>shot.id))}><div className="store-hero">{view.photo?<ScreenshotPreview shot={view.photo} catalog={view.catalog} runtime={view.runtime} snapshot={view.snapshot} i18n={view.i18n}/>:<div className="store-home-media"><ProductPreview product={view.product} runtime={view.runtime} snapshot={view.snapshot} i18n={view.i18n}/></div>}</div>{view.photos.length>1&&<div className="store-photo-list store-photos" data-store-photo-choices="true">{view.photos.map((shot,index)=><button key={shot.id} aria-label={view.i18n.t('store.photoNumber',{count:index+1})} aria-pressed={view.selected===index} onClick={()=>view.selectPhoto(index)}><ScreenshotPreview shot={shot} catalog={view.catalog} runtime={view.runtime} snapshot={view.snapshot} i18n={view.i18n}/></button>)}</div>}</section>;
+  return <section className="store-media" aria-label={view.i18n.t('store.screenshots')} data-store-info="screenshots" data-store-info-value={JSON.stringify(view.photos.map(shot=>shot.id))}><div className="store-hero">{view.photo?<LegacyCapturePreview shot={view.photo} catalog={view.catalog} i18n={view.i18n}/>:<div className="store-home-media"><ProductPreview product={view.product} i18n={view.i18n}/></div>}</div>{view.photos.length>1&&<div className="store-photo-list store-photos" data-store-photo-choices="true">{view.photos.map((shot,index)=><button key={shot.id} aria-label={view.i18n.t('store.photoNumber',{count:index+1})} aria-pressed={view.selected===index} onClick={()=>view.selectPhoto(index)}><LegacyCapturePreview shot={shot} catalog={view.catalog} i18n={view.i18n}/></button>)}</div>}</section>;
 }
 export function StoreDescription({view}: {view: StoreView}) {
   return <section ref={view.aboutRef} className="store-about"><h2>{view.i18n.t('store.about')}</h2><p className="store-description" data-store-info="description">{view.description}</p></section>;
@@ -74,5 +72,5 @@ export function StoreFooter({view}: {view: StoreView}) {
   return <footer className="store-footer"><span>{view.publisher}</span><button onClick={view.top}>{view.i18n.t('store.backToTop')}</button></footer>;
 }
 export function StoreCapsule({view}: {view: StoreView}) {
-  return <div className="store-capsule" aria-label={view.i18n.t('store.currentScreen')}><ProductPreview product={view.product} runtime={view.runtime} snapshot={view.snapshot} i18n={view.i18n}/></div>;
+  return <div className="store-capsule" aria-label={view.i18n.t('store.currentScreen')}><ProductPreview product={view.product} i18n={view.i18n}/></div>;
 }

@@ -1,13 +1,13 @@
 import { BALANCE } from '../config/balance';
 import { desktopConditions } from './desktop';
-import { availableIcons, exportable, nextKumikiItem, ownedParts, prototypeConditions } from './kumiki';
+import { canExportWorkshop, completedParts, nextWorkshopSet, prototypeConditions, canAssembleDesktop } from './workshop';
 import { contractBlocks } from './longPlay';
 import type { GameState } from './state';
 
 export const ADVICE_IDS = [
   'seed-cursor', 'seed-upgrade', 'seed-kumiki',
-  'editor-draw', 'editor-export', 'editor-place', 'editor-build', 'editor-prototype', 'editor-desktop',
-  'desktop-apps', 'desktop-feedback', 'desktop-icons', 'desktop-wallpaper', 'desktop-automation', 'desktop-release',
+  'editor-produce', 'editor-export', 'editor-place', 'editor-build', 'editor-prototype', 'editor-desktop',
+  'desktop-apps', 'desktop-feedback', 'desktop-sets', 'desktop-wallpaper', 'desktop-automation', 'desktop-release',
 ] as const;
 export type AdviceId = typeof ADVICE_IDS[number];
 export interface AdviceState {
@@ -20,7 +20,7 @@ export const createAdviceState = (): AdviceState => ({ seen: [], current: null, 
 
 /** Choose an action the player can perform, rather than an unrelated generic tip. */
 export function nextAdvice(state: GameState): AdviceId | null {
-  const { run } = state, seed = run.seed, k = run.kumiki;
+  const { run } = state, seed = run.seed, k = run.workshop;
   if (run.world === 'release' || run.restartMs > 0 || seed.installer) return null;
   if (run.world === 'seed') {
     // The publisher first introduces himself after Color in the prototype.
@@ -30,26 +30,24 @@ export function nextAdvice(state: GameState): AdviceId | null {
     return 'seed-upgrade';
   }
   if (run.world === 'kumiki') {
-    const ready = exportable(state);
-    if (ready.icons.length || ready.parts.length) return 'editor-export';
-    if (ownedParts(state).some(part => !k.placed.includes(part))) return 'editor-place';
+    if (canExportWorkshop(state)) return 'editor-export';
     if (run.version === 'v0.1' && k.exitInspected && prototypeConditions(state).every(Boolean)) return 'editor-prototype';
-    if (k.built.includes('taskbar') && state.persistent.specs.color > 0) return 'editor-desktop';
-    if (!k.exports.some(work => work.kind === 'icon') || availableIcons(state).some(id => !k.drawings[id]?.exported)) return 'editor-draw';
-    return nextKumikiItem(state) ? 'editor-build' : 'editor-draw';
+    if (canAssembleDesktop(state)) return 'editor-desktop';
+    if (k.activePart && (k.parts[k.activePart]?.step ?? 0) < 4) return 'editor-produce';
+    return nextWorkshopSet(state) ? 'editor-build' : 'editor-produce';
   }
   if (run.version !== 'v1') return null;
   const missing = desktopConditions(state).findIndex(done => !done);
-  return (['desktop-apps', 'desktop-feedback', 'desktop-icons', 'desktop-wallpaper', 'desktop-automation'] as const)[missing] ?? 'desktop-release';
+  return (['desktop-apps', 'desktop-feedback', 'desktop-sets', 'desktop-wallpaper', 'desktop-automation'] as const)[missing] ?? 'desktop-release';
 }
 
 function fingerprint(state: GameState, id: AdviceId | null): string {
   const run = state.run;
   const activity = run.world === 'seed' ? run.seed.lastActionAt
-    : run.world === 'kumiki' ? run.kumiki.lastActionAt
+    : run.world === 'kumiki' ? run.workshop.lastActionAt
     : Math.max(0, Math.round(state.elapsedMs - run.desktop.idleMs));
   return JSON.stringify([run.version, run.world, id, activity, run.seed.built, run.seed.autoCursors,
-    run.kumiki.built, run.kumiki.placed, run.kumiki.exports.map(work => `${work.kind}:${work.id}:${work.at}`),
+    run.workshop.purchasedSets, completedParts(state), Object.values(run.workshop.parts).map(part=>[part.step,part.exportedAt]),
     run.desktop.upgrades, run.desktop.feedback.filter(work => work.completedAt !== null).length,
     state.persistent.desktopPrefs.wallpaper, run.desktop.terminal.executions]);
 }

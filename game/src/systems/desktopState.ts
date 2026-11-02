@@ -2,7 +2,6 @@ import { repairAppProjects, type AppProjects } from './appLayout';
 import { desktopScreen, resizeDesktop, LEGACY_DESKTOP, MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT, workHeight } from './desktopGeometry';
 import type { LogicalSize } from './viewport';
 import { readCapture } from './captureScene';
-import { ICON_IDS, PRACTICE_IDS } from '../content/kumikiArt';
 import { BALANCE, type DesktopUpgrade, type DesktopSkill } from '../config/balance';
 export const APP_IDS = ['tessera', 'note', 'files', 'mail', 'manager', 'photo', 'bin', 'clock', 'theme', 'terminal', 'settings'] as const;
 export type AppId = typeof APP_IDS[number];
@@ -16,7 +15,7 @@ export interface DesktopPreferences { skills:DesktopSkill[]; disabled:DesktopSki
 export const createDesktopPreferences = ():DesktopPreferences => ({skills:[],disabled:[],mode:'light',accent:'#0067c0',radius:8,radiusCustom:false,iconSize:48,slideshow:false,wallpaper:null,lastShotId:0});
 export interface Rect { x: number; y: number; width: number; height: number }
 export interface WindowState extends Rect { open: boolean; minimized: boolean; maximized: boolean; z: number; restore: Rect | null }
-export type FeedbackKind = 'redraw' | 'practice' | 'color' | 'screenshot' | 'sort' | 'search' | 'bright' | 'trash' | 'timer' | 'dark';
+export type FeedbackKind = 'color' | 'screenshot' | 'sort' | 'search' | 'bright' | 'trash' | 'timer' | 'dark';
 export interface Feedback {
   id: number; sender: 'hikari' | 'ren' | 'maki'; kind: FeedbackKind; target: string; baseline: number[]; baselineColor: string;
   at: number; completedAt: number | null; reward?:number;
@@ -72,8 +71,8 @@ export function isDesktopState(x: unknown): x is DesktopState {
   if (x.active !== null && !APP_IDS.includes(x.active as AppId)) return false;
   if (!amount(x.feedbackMs) || !count(x.feedbackSerial) || !amount(x.cooldownMs) || !Array.isArray(x.feedback)) return false;
   const requests = x.feedback;
-  if (!requests.every(f => obj(f) && count(f.id) && f.id > 0 && ['redraw','practice','color','screenshot','sort','search','bright','trash','timer','dark'].includes(f.kind as string)
-    && (f.kind === 'redraw' ? ICON_IDS.includes(f.target as 'folder') : f.kind === 'practice' ? PRACTICE_IDS.includes(f.target as 'document') : typeof f.target==='string' && (f.kind==='search'?f.target.length<=120:f.kind==='timer'?/^\d{1,16}$/.test(f.target):f.target===(f.kind==='color'?'primary':''))) && Array.isArray(f.baseline) && (f.kind==='trash'?f.baseline.length<=3&&f.baseline.every(c=>count(c)&&c>0):f.baseline.length <= 16384 && f.baseline.every(c => Number.isInteger(c) && c >= -1 && c < 256))
+  if (!requests.every(f => obj(f) && count(f.id) && f.id > 0 && ['color','screenshot','sort','search','bright','trash','timer','dark'].includes(f.kind as string)
+    && (typeof f.target==='string' && (f.kind==='search'?f.target.length<=120:f.kind==='timer'?/^\d{1,16}$/.test(f.target):f.target===(f.kind==='color'?'primary':''))) && Array.isArray(f.baseline) && (f.kind==='trash'?f.baseline.length<=3&&f.baseline.every(c=>count(c)&&c>0):f.baseline.length===0)
     && ['hikari','ren','maki'].includes(f.sender as string) && typeof f.baselineColor === 'string' && /^#[0-9a-f]{6}$/i.test(f.baselineColor) && (f.reward===undefined||amount(f.reward)) && amount(f.at) && (f.completedAt === null || amount(f.completedAt)))) return false;
   if (new Set(requests.map(f => f.id)).size !== requests.length || requests.some(f => f.id > (x.feedbackSerial as number)) || requests.filter(f => f.completedAt === null).length > 5) return false;
   return isDesktopExtras(x) && [x.notice,x.success,x.mailSelection].every(id => id === null || requests.some(f => f.id === id))
@@ -107,7 +106,7 @@ export function isScreenshot(x: unknown): x is Screenshot {
 }
 
 const strings=(x:unknown):x is string[]=>Array.isArray(x)&&x.every(v=>typeof v==='string');
-export const isPhotoEdit=(x:unknown):x is PhotoEdit=>obj(x)&&typeof x.source==='string'&&(/^(coast|night|sketch|shot:[1-9][0-9]*)$/).test(x.source)&&typeof x.brightness==='number'&&x.brightness>=0.5&&x.brightness<=1.5&&typeof x.tone==='number'&&x.tone>=-50&&x.tone<=50&&typeof x.crop==='number'&&x.crop>=0&&x.crop<=40;
+export const isPhotoEdit=(x:unknown):x is PhotoEdit=>obj(x)&&typeof x.source==='string'&&(/^(coast|night|shot:[1-9][0-9]*)$/).test(x.source)&&typeof x.brightness==='number'&&x.brightness>=0.5&&x.brightness<=1.5&&typeof x.tone==='number'&&x.tone>=-50&&x.tone<=50&&typeof x.crop==='number'&&x.crop>=0&&x.crop<=40;
 export function isDesktopPreferences(x:unknown):x is DesktopPreferences {
  return obj(x)&&strings(x.skills)&&new Set(x.skills).size===x.skills.length&&x.skills.every(id=>BALANCE.w3.skills.some(s=>s.id===id))&&strings(x.disabled)&&x.disabled.every(id=>(x.skills as string[]).includes(id)&&BALANCE.w3.skills.some(s=>s.id===id&&s.playful))&&['light','dark'].includes(x.mode as string)&&typeof x.accent==='string'&&/^#[0-9a-f]{6}$/i.test(x.accent)&&typeof x.radius==='number'&&x.radius>=0&&x.radius<=8&&typeof x.radiusCustom==='boolean'&&[32,48,64].includes(x.iconSize as number)&&typeof x.slideshow==='boolean'&&(x.wallpaper===null||isPhotoEdit(x.wallpaper))&&count(x.lastShotId);
 }

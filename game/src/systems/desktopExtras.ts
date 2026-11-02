@@ -3,7 +3,6 @@ import { resizeDesktop,fitWindow,workHeight } from './desktopGeometry';
 import { setDesktopStage, type DesktopStage } from './appearance';
 import { BALANCE, type DesktopSkill } from '../config/balance';
 import { createI18n } from '../content/i18n';
-import { PRACTICE_IDS } from '../content/kumikiArt';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import { desktopFiles } from './desktopFiles';
 import { hasDesktopSkill, hasUpgrade, jobCapacity, jobCursorQuote, jobUpdateCost } from './desktopJobs';
@@ -33,9 +32,7 @@ export function completeRequests(s:GameState,kinds:string[],now:number,automatic
 export function recycleValue(s:GameState,id:string):number {
  if(s.run.desktop.recycled.includes(id))return 0;
  if(id.startsWith('shot:'))return passivePixelsPerSecond(s)*BALANCE.w3.recycleShotSeconds;
- const work=s.run.kumiki.exports.find(e=>id===`current:icon:${e.id}`&&PRACTICE_IDS.includes(e.id as 'document'));
- const drawing=work?s.run.kumiki.drawings[work.id]:null;
- return work?(drawing?.earnedPixels??(drawing?.rewarded.filter(Boolean).length??work.frames[0]!.filter(c=>c>=0).length)*BALANCE.w2.dotValue)*BALANCE.w3.recycleIconMultiplier:0;
+ return 0;
 }
 export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='ja'):GameState {
  const d=s.run.desktop,p=s.persistent.desktopPrefs;
@@ -57,7 +54,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
  case 'search':{
   if(!hasUpgrade(s,'search')||a.text.length>120)return s;
   let next=desktop(s,{fileSearch:a.text});
-  const names=d.feedback.filter(f=>f.kind==='search'&&f.completedAt===null).map(f=>f.target==='home'?createI18n(language).t('files.home').toLocaleLowerCase():f.target.toLocaleLowerCase());
+  const names=d.feedback.filter(f=>f.kind==='search'&&f.completedAt===null).map(f=>f.target==='note'?createI18n(language).t('desktop.app.note').toLocaleLowerCase():f.target.toLocaleLowerCase());
   if(a.text.trim()&&names.some(name=>a.text.trim().toLocaleLowerCase()===name))next=completeRequests(next,['search'],now);
   return next;
  }
@@ -67,20 +64,20 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   if(!d.apps.includes('photo'))return s;
   if(a.type==='photo'&&Object.keys(a.edit).some(key=>!hasAppPart(s,'photo',key==='brightness'?'brightness':key==='tone'?'tone':key==='crop'?'crop':'source')))return s;
   const edit={...d.photo,...a.edit};
-  if(!['coast','night','sketch',...s.persistent.screenshots.filter(x=>!x.deleted).map(x=>`shot:${x.id}`)].includes(edit.source))return s;
+  if(!['coast','night',...s.persistent.screenshots.filter(x=>!x.deleted).map(x=>`shot:${x.id}`)].includes(edit.source))return s;
   if(!Number.isFinite(edit.brightness)||edit.brightness<.5||edit.brightness>1.5||!Number.isFinite(edit.tone)||edit.tone< -50||edit.tone>50||!Number.isFinite(edit.crop)||edit.crop<0||edit.crop>40||!hasUpgrade(s,'crop')&&a.edit.crop!==undefined&&a.edit.crop!==0)return s;
   return desktop(s,{photo:edit});
  }
  case 'compare':return hasUpgrade(s,'compare')?desktop(s,{compare:!d.compare}):s;
  case 'wallpaper':{
   if(!hasAppPart(s,'photo','wallpaper')||!hasAppPart(s,'photo','image'))return s;
-  const next={...s,persistent:{...s.persistent,desktopPrefs:{...p,wallpaper:{...d.photo}},artwork:{...s.persistent.artwork,wallpaper:d.photo.source==='sketch'?structuredClone(s.persistent.artwork.sketchbook):null}}};
+  const next={...s,persistent:{...s.persistent,desktopPrefs:{...p,wallpaper:{...d.photo}}}};
   return d.photo.brightness>1?completeRequests(next,['bright'],now):next;
  }
  case 'trash':{
   if(!hasAppPart(s,'bin','trash')||d.trash.some(t=>t.id===a.id))return s;
   const file=[...desktopFiles(s,createI18n(language),'screenshots'),...desktopFiles(s,createI18n(language),'exports')].find(f=>f.id===a.id);
-  if(!file||!(file.kind==='shot'||file.kind==='icon'&&file.id.startsWith('current:icon:')&&PRACTICE_IDS.includes(file.work!.id as 'document')))return s;
+  if(!file||file.kind!=='shot')return s;
   const reward=recycleValue(s,a.id);
   let next=desktop(creditPixels(s,reward),{trash:[...d.trash,{id:a.id,at:now,reward,first:!d.recycled.includes(a.id)}],recycled:[...new Set([...d.recycled,a.id])],trashCount:d.trashCount+(file.kind==='shot'?1:0),fileSelection:null});
   if(file.kind==='shot'){next=desktop(next,{feedback:next.run.desktop.feedback.map(f=>f.kind==='trash'&&f.completedAt===null?{...f,baseline:[...new Set([...f.baseline,file.shot!.id])]}:f)});if(next.run.desktop.feedback.some(f=>f.kind==='trash'&&f.completedAt===null&&f.baseline.length>=3))next=completeRequests(next,['trash'],now);}
@@ -96,7 +93,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   if(!hasAppPart(s,'bin','empty')||!d.trash.length)return s;
   const ids=new Set(d.trash.map(t=>t.id));
   const screenshots=s.persistent.screenshots.map(shot=>ids.has(`shot:${shot.id}`)?{...shot,deleted:true}:shot);
-  let next=desktop({...s,persistent:{...s.persistent,screenshots},run:{...s.run,kumiki:{...s.run.kumiki,exports:s.run.kumiki.exports.filter(e=>!ids.has(`current:${e.kind}:${e.id}`))}}},{trash:[]});
+  let next=desktop({...s,persistent:{...s.persistent,screenshots}},{trash:[]});
   // Referenced historical previews remain readable; collect only unreachable images.
   const retained=new Set(screenshots.filter(shot=>!shot.deleted).map(shot=>shot.id));
   const rootSources=[p.wallpaper?.source,d.photo.source];for(const source of rootSources)if(source?.startsWith('shot:'))retained.add(Number(source.slice(5)));
@@ -122,7 +119,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   if(typeof a.autoRadius==='boolean')prefs.radiusCustom=!a.autoRadius;
   if(a.iconSize!==undefined&&[32,48,64].includes(a.iconSize)&&hasUpgrade(s,'iconSize'))prefs.iconSize=a.iconSize;
   if(typeof a.slideshow==='boolean'&&hasUpgrade(s,'slideshow'))prefs.slideshow=a.slideshow;
-  let next:GameState={...s,persistent:{...s.persistent,desktopPrefs:prefs},run:{...s.run,seed:{...s.run.seed,page:{...s.run.seed.page,button:prefs.accent}},kumiki:{...s.run.kumiki,design:{...s.run.kumiki.design,primary:{...(s.run.kumiki.design.primary??{radius:0,textSize:'medium' as const,shadow:false}),color:prefs.accent}}}}};
+  let next:GameState={...s,persistent:{...s.persistent,desktopPrefs:prefs},run:{...s.run,seed:{...s.run.seed,page:{...s.run.seed.page,button:prefs.accent}}}};
   if(a.iconSize!==undefined)next={...next,run:{...next.run,desktop:resizeDesktop(next.run.desktop,next.run.desktop.screen,prefs.iconSize)}};
   if(prefs.mode==='dark')next=completeRequests(next,['dark'],now);return next;
  }

@@ -1,18 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe,expect,it } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { LegacyCapturePreview, WorkshopSnapshot } from '../worlds/LegacyCapturePreview';
+import { createI18n } from '../content/i18n';
+import { isProductRecord, normalizeArchivedProduct } from './releaseState';
 import { BALANCE } from '../config/balance';
 import { captureStore, CAPTURE_PREFIX } from '../platform/captures';
 import type { SaveStorage } from '../platform/storage';
 import { createFixture } from './fixtures';
-import { actDesktop,advanceDesktopTime,focusWindow,takeScreenshot } from './desktop';
+import { actDesktop,focusWindow,takeScreenshot } from './desktop';
 import { decodeCapture,encodeCapture } from './desktopState';
-import { isCaptureScene,projectCapture,readCapture,restoreScene } from './captureScene';
+import { isCaptureScene,projectCapture,readCapture } from './captureScene';
 import { clearGame,decodeSave,encodeSave,loadGame,SAVE_KEYS,saveGame } from './save';
 import { isGameState } from './state';
-import { desktopFiles } from './desktopFiles';
-import { createI18n } from '../content/i18n';
-import { actKumiki,paintDrawing,targetFor } from './kumiki';
+import { actWorkshop } from './workshop';
 const now=1800000000000;
 function disk(limit=Infinity){
  const entries=new Map<string,string>(),writes:string[]=[],reads:string[]=[];
@@ -23,14 +26,14 @@ const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now
 describe('場面の保存形式と独立した記録',()=>{
  it('表示に必要な場面だけを持ち、製品・報酬台帳・過去の会話・全生成履歴をコピーしない',()=>{
   const s=shotState(),scene=readCapture(s.persistent.screenshots[0]!);
-  expect(scene.version).toBe(9);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
-  expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene.editor.picture).not.toHaveProperty('rewarded');
-  expect(scene.home.rows.length).toBeLessThanOrEqual(4);expect(scene.home.history.length).toBeLessThanOrEqual(4);
+  expect(scene.version).toBe(10);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
+  expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene).not.toHaveProperty('editor');expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('wallpaper');
+  expect(scene.workshop).toEqual(s.run.workshop);expect(JSON.stringify(scene)).not.toContain('frames');
   const source=structuredClone(s);source.persistent.screenshots=[];
   const before=projectCapture(source,'ja');source.persistent.products.push(...Array(40).fill(source.persistent.products[0]!));source.persistent.guideArchive.push(...Array(100).fill({kind:'seed',id:'intro',version:'v0.1'}));
   expect(projectCapture(source,'ja')).toEqual(before);
  });
- it('場面の検査はゲームの版やアプリ購入の順序を参照せず、未知の場面形式と壊れた画素は拒む',()=>{
+ it('場面の検査はゲームの版やアプリ購入の順序を参照せず、未知の場面形式と壊れたパーツは拒む',()=>{
   const scene=projectCapture(createFixture('desktop-mail',now)!,'ja');scene.desktop.apps.reverse();
   const original=[...BALANCE.w3.apps];
   try{
@@ -40,15 +43,15 @@ describe('場面の保存形式と独立した記録',()=>{
   }finally{(BALANCE.w3.apps as unknown as unknown[]).splice(0,BALANCE.w3.apps.length,...original);}
   expect(isCaptureScene({...scene,version:999})).toBe(false);
   expect(isCaptureScene({...scene,desktop:{...scene.desktop,notice:9999999}})).toBe(false);
-  const bad=structuredClone(scene);bad.editor.picture!.frames[0]![0]=999;expect(isCaptureScene(bad)).toBe(false);
+  const bad=structuredClone(scene);bad.workshop.parts['common-frame']!.rect.x=-1;expect(isCaptureScene(bad)).toBe(false);
  });
  it('実際の第6版の2枚入りセーブを移行し、資源・製品・窓・撮影時の本文とパレットを保つ',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString();
   const old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products).toEqual(old.persistent.products);expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
+  expect(s.schemaVersion).toBe(14);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products.map(p=>[p.id,p.revenue,p.generatedPixels])).toEqual(old.persistent.products.map((p:{id:number;revenue:number;generatedPixels:number})=>[p.id,p.revenue,p.generatedPixels]));expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
   expect(s.persistent.screenshots).toHaveLength(2);
   const oldFrame=decodeCapture(old.persistent.screenshots[0].data) as typeof s;
-  const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene.home.design).toEqual(oldFrame.run.kumiki.design);
+  const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('editor');
   expect(scene.desktop.windows).toEqual(oldFrame.run.desktop.windows);expect(scene.palette).toHaveLength(256);
   expect(s.run.desktop.feedback.every(f=>f.sender==='hikari')).toBe(true);
   const target=disk();expect(saveGame(target.storage,s,now).kind).toBe('saved');expect(loadGame(target.storage).kind).toBe('loaded');
@@ -61,29 +64,25 @@ describe('場面の保存形式と独立した記録',()=>{
   expect(target.writes).toEqual([SAVE_KEYS.backup,SAVE_KEYS.primary]);expect(target.reads.filter(k=>k.startsWith(CAPTURE_PREFIX)&&k!==CAPTURE_PREFIX+'index')).toEqual([]);
   const loaded=loadGame(target.storage);expect(loaded.kind).toBe('loaded');if(loaded.kind==='loaded')expect(loaded.state).toEqual({...s,lastSavedAt:now+1});
  });
- it('Tesseraのエクスポートで過去の撮影を複製せず、元の絵や資源も書き換えない',()=>{
-  let source=shotState();const d=source.run.kumiki.drawings.folder!,target=targetFor(source,'folder',d.size);
-  for(const color of new Set(target.filter(c=>c>=0)))source=paintDrawing(source,'folder',target.flatMap((c,i)=>c===color?[i]:[]),color);
-  const original=encodeSave(source),next=actKumiki(source,{type:'export'},now);
+ it('工房のエクスポートは過去の撮影を複製せず、凍結したパーツと資源を書き換えない',()=>{
+  const source=shotState();source.run.workshop.parts['common-frame']!.exportedAt=null;
+  const original=encodeSave(source),recording=source.persistent.screenshots[0]!.data,next=actWorkshop(source,{type:'export',part:'common-frame'},now);
   expect(next.persistent.screenshots).toBe(source.persistent.screenshots);
-  expect(next.run.kumiki.drawings.folder!.exported).toBe(true);expect(source.run.kumiki.drawings.folder!.exported).toBe(false);
-  expect(encodeSave(source)).toBe(original);
+  expect(next.run.workshop.parts['common-frame']!.exportedAt).toBe(now);expect(source.run.workshop.parts['common-frame']!.exportedAt).toBeNull();
+  expect(next.persistent.screenshots[0]!.data).toBe(recording);expect(encodeSave(source)).toBe(original);
  });
- it('場面の外部参照は主データの版の移行より先に復元し、版が一致する場合だけに限定しない',()=>{
-  const target=disk();saveGame(target.storage,shotState(),now);
+ it('場面の外部参照を単独で復元でき、同じ形式の読み取り専用文書になる',()=>{
+  const target=disk(),s=shotState();saveGame(target.storage,s,now);
   const stored=JSON.parse(target.storage.getItem(SAVE_KEYS.primary)!);
-  // Emulate a lower game schema with the already-versioned scene reference envelope.
-  stored.schemaVersion=6;
-  const restored=decodeSave(JSON.stringify(stored),ref=>captureStore(target.storage).get(ref));
-  expect(restored.schemaVersion).toBe(13);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(9);
+  const reference=stored.persistent.screenshots[0];
+  const restored={...reference,data:captureStore(target.storage).get(reference.sceneRef)};
+  expect(readCapture(restored)).toEqual(readCapture(s.persistent.screenshots[0]!));
  });
- it('隠し絵128角2コマと毎回変わる累積記録があっても400枚を5MiBへ保存できる',()=>{
+ it('パーツ49個と毎回変わる累積記録があっても400枚を5MiBへ保存できる',()=>{
   let s=createFixture('desktop-files',now)!;s.persistent.specs.storage=3;
-  const art={size:128,frames:Array.from({length:2},(_,f)=>Array.from({length:128**2},(_,i)=>(i*37+f*13)%256))};
-  s.persistent.progress.unknownArt=art;
   for(let i=0;i<400;i++){s.run.desktop.cooldownMs=0;s.persistent.progress.counts.shots=i;s=takeScreenshot(s,now+i,'ja');}
   const target=disk(5*1024*1024);expect(saveGame(target.storage,s,now).kind).toBe('saved');
-  const loaded=loadGame(target.storage);expect(loaded.kind).toBe('loaded');if(loaded.kind==='loaded')expect(restoreScene(loaded.state.persistent.screenshots[399]!,loaded.state.persistent.screenshots).persistent.progress.unknownArt).toEqual(art);
+  const loaded=loadGame(target.storage);expect(loaded.kind).toBe('loaded');if(loaded.kind==='loaded')expect(readCapture(loaded.state.persistent.screenshots[399]!).workshop).toEqual(s.run.workshop);
  },45000);
  it('新しい画像の書き込みが途中で失敗しても元の記録を保ち、追加した未参照データだけを片付けて再試行できる',()=>{
   const target=disk(),s=shotState();saveGame(target.storage,s,now);const before=new Map(target.entries);
@@ -120,31 +119,96 @@ describe('場面の保存形式と独立した記録',()=>{
   }
  },15000);
 });
-describe('小さな指摘への対応',()=>{
- it('描き直し対象を最近のものから外して順に回し、3人の差出人を使う',()=>{
-  let s=createFixture('desktop-files',now)!;
-  // Two already-exported current icons give the request generator multiple eligible targets.
-  s.run.kumiki.exports=s.persistent.products[0]!.exports;
-  const targets:string[]=[],senders:string[]=[];
-  for(let i=0;i<12;i++){
-   s=advanceDesktopTime(s,240000,now+i*240000);const f=s.run.desktop.feedback.at(-1)!;if(f.kind==='redraw')targets.push(f.target);senders.push(f.sender);
-   s.run.desktop.feedback=s.run.desktop.feedback.map(f=>({...f,completedAt:now+i*240000}));
+
+describe('凍結した旧撮影の読み取り境界',()=>{
+ it.each(['v7-two-shots','v8-two-shots','v9-two-shots','v10-two-shots','v11-home-controls','v12-progress'])('%sを現行カタログから独立して読み、古い編集状態を返さない',name=>{
+  const raw=JSON.parse(gunzipSync(readFileSync(new URL(`./testdata/${name}.json.gz`,import.meta.url))).toString());
+  const shots=raw.persistent.screenshots as import('./desktopState').Screenshot[];
+  expect(shots.length).toBeGreaterThan(0);
+  const original=[...BALANCE.w3.apps];
+  try{
+   (BALANCE.w3.apps as unknown as unknown[]).splice(0,BALANCE.w3.apps.length,{id:'new-catalog-only',cost:1});
+   for(const shot of shots){
+    const data=shot.data,source=decodeCapture(data);
+    expect(isCaptureScene(source)).toBe(true);
+    const scene=readCapture(shot);
+    expect(scene.archived).toBe(true);expect(scene.note).toBe((source as {note:string}).note);
+    expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('editor');expect(scene).not.toHaveProperty('secretArt');
+    expect(scene.files.every(file=>!Object.hasOwn(file,'picture'))).toBe(true);expect(shot.data).toBe(data);
+   }
+  }finally{(BALANCE.w3.apps as unknown as unknown[]).splice(0,BALANCE.w3.apps.length,...original);}
+ });
+ it('未知の版・壊れた旧画素・自分や未来を指す参照を拒む',()=>{
+  const raw=JSON.parse(gunzipSync(readFileSync(new URL('./testdata/v12-progress.json.gz',import.meta.url))).toString());
+  const shot=raw.persistent.screenshots[0] as import('./desktopState').Screenshot;
+  const legacy=decodeCapture(shot.data) as {version:number;editor:{picture:{frames:number[][]}}};
+  expect(isCaptureScene({...legacy,version:999})).toBe(false);
+  const broken=structuredClone(legacy);broken.editor.picture.frames[0]![0]=999;
+  expect(isCaptureScene(broken)).toBe(false);
+  const scene=projectCapture(createFixture('desktop-files',now)!,'ja');
+  scene.view.photo.source='shot:2';
+  expect(()=>readCapture({id:2,at:now,language:'ja',data:encodeCapture(scene)})).toThrow();
+  scene.view.photo.source='coast';scene.files.push({id:'shot:2',name:'saved',kind:'shot',at:now,bytes:0,shotId:2});
+  expect(()=>readCapture({id:2,at:now,language:'ja',data:encodeCapture(scene)})).toThrow();
+ });
+});
+
+describe('製品と入れ子の撮影の静的表示',()=>{
+ it('旧製品の未知の旧IDと売上を保ち、描画フレームとホーム配置を捨てる',()=>{
+  const raw=JSON.parse(gunzipSync(readFileSync(new URL('./testdata/v12-progress.json.gz',import.meta.url))).toString());
+  const old=raw.persistent.products[0];old.screen.built=['retired-editor-item'];old.exports[0].id='retired-export-id';
+  const product=normalizeArchivedProduct(old);
+  expect(isProductRecord(product)).toBe(true);expect(product.revenue).toBe(old.revenue);expect(product.generatedPixels).toBe(old.generatedPixels);
+  expect(product.screen.built).toEqual(['retired-editor-item']);expect(product.exports[0]!.id).toBe('retired-export-id');
+  expect(product.screen).not.toHaveProperty('drawings');expect(product.screen).not.toHaveProperty('homeTheme');expect(product.screen).not.toHaveProperty('placed');
+  expect(product.exports.every(work=>!Object.hasOwn(work,'frames'))).toBe(true);
+ });
+ it('同じ撮影が写真と壁紙の両方に入っても表示の展開を制限し、全記録を残す',()=>{
+  const state=createFixture('desktop-files',now)!;state.run.desktop.windows.photo.open=true;state.run.desktop.windows.photo.minimized=false;
+  const catalog:import('./desktopState').Screenshot[]=[];
+  for(let id=1;id<=12;id++){
+   const source=id===1?'coast':`shot:${id-1}`;
+   state.run.desktop.photo={source,brightness:1,tone:0,crop:0};state.persistent.desktopPrefs.wallpaper={...state.run.desktop.photo};
+   catalog.push({id,at:now+id,language:'ja',data:encodeCapture(projectCapture(state,'ja'))});
   }
-  expect(targets[0]).not.toBe(targets[1]);expect(new Set(senders).size).toBe(3);
+  const before=catalog.map(shot=>shot.data),markup=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot:catalog.at(-1)!,catalog,i18n:createI18n('ja')}));
+  expect(markup.match(/data-preview-shot=/g)?.length).toBeLessThanOrEqual(2**BALANCE.w3.capturePreviewDepth-1);
+  expect(markup).toContain('data-capture-reference=');expect(catalog.map(shot=>shot.data)).toEqual(before);
  });
- it('撮影の依頼から最小化・最大化・閉じた状態でも2つの窓を見える位置に出す',()=>{
-  let s=createFixture('desktop-mail',now)!;const request=s.run.desktop.feedback.find(f=>f.kind==='screenshot')!;
-  s=actDesktop(s,{type:'maximize',app:'tessera'},now);s=actDesktop(s,{type:'close',app:'note'},now);
-  s=actDesktop(s,{type:'fix',id:request.id},now);expect(s.run.desktop.windows.tessera.open).toBe(true);expect(s.run.desktop.windows.tessera.maximized).toBe(false);expect(s.run.desktop.windows.note.open).toBe(true);expect(s.run.desktop.windows.note.minimized).toBe(false);expect(s.run.desktop.active).toBe('note');
-  expect(s.run.desktop.windows.note.x).toBeGreaterThanOrEqual(s.run.desktop.windows.tessera.x+s.run.desktop.windows.tessera.width/2);
+});
+
+
+describe('保存した部品工房の静的な配置と材質',()=>{
+ const props=()=>{const state=createFixture('stage8a-required-complete-16color',now)!;return {workshop:state.run.workshop,customization:state.persistent.editorCustomization,stage:0,i18n:createI18n('ja'),now,pixels:state.resources.pixels};};
+ const openTag=(markup:string,attribute:string,value:string)=>{const match=markup.match(new RegExp(`<[^>]+${attribute}="${value}"[^>]*>`));expect(match).not.toBeNull();return match![0];};
+ it('共通の枠を唯一の外枠とし、その原点から子パーツを同じ寸法で配置する',()=>{
+  const snapshot=props(),w=snapshot.workshop;w.activePart='common-button';w.parts['common-frame']!.rect={x:16,y:24,width:608,height:368};w.parts['common-button']!.rect={x:64,y:128,width:160,height:56};
+  const before=structuredClone(w),markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  expect(markup.match(/data-static-common-frame=/g)).toHaveLength(1);expect(markup).not.toContain('data-static-part="common-frame"');
+  const frame=openTag(markup,'data-static-common-frame','true');expect(frame).toContain('left:16px');expect(frame).toContain('top:24px');expect(frame).toContain('width:616px');expect(frame).not.toContain('height:');const client=openTag(markup,'data-static-client','true');expect(client).toContain('width:608px');expect(client).toContain('height:368px');
+  const button=openTag(markup,'data-static-part','common-button');expect(button).toContain('left:48px');expect(button).toContain('top:104px');expect(button).toContain('width:160px');expect(button).toContain('height:56px');expect(w).toEqual(before);
  });
- it('ホームとスケッチは実際の編集で日時を更新し、フォルダーは中身の最新日時を使い、文書名をそろえる',()=>{
-  let s=createFixture('desktop-files',now)!;
-  s=actKumiki(s,{type:'design',id:'primary',design:{color:'#d0523a',radius:0,textSize:'medium',shadow:false}},now+1);
-  s=actKumiki(s,{type:'paint',id:'free',cells:[0],color:2,frame:0,mirror:false},now+2);
-  s=takeScreenshot(s,now+3,'ja');const files=desktopFiles(s,createI18n('ja'),'root');
-  expect(files.find(f=>f.id==='home')!.at).toBe(now+1);expect(files.find(f=>f.id==='sketch')!.at).toBe(now+2);expect(files.find(f=>f.id==='screenshots')!.at).toBe(now+3);
-  expect(files.find(f=>f.id==='exports')!.at).toBe(Math.max(...s.persistent.products.flatMap(p=>p.exports).map(w=>w.at)));
-  for(const lang of ['ja','en'])expect(createI18n(lang).t('files.home')).toBe(createI18n(lang).t('k.home'));
+ it('未変更の材質は現在の宛先と同じ95風になり、明示した色の組と寸法はそのまま残る',()=>{
+  const snapshot=props(),w=snapshot.workshop;w.activePart='common-button';
+  let markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot)),button=openTag(markup,'data-static-part-content','common-button');
+  expect(button).toContain('background:#c0c0c0');expect(button).toContain('color:#000000');
+  expect(markup).toContain('background:#5d6f7d');
+  w.parts['common-frame']!.design.controlColors.close='#f6d27a';
+  const symbolOnly=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  expect(openTag(symbolOnly,'data-static-control','close')).toContain('color:#f6d27a');
+  expect(symbolOnly).not.toContain('background-color:#3a3450');
+  w.parts['common-button']!.design={...w.parts['common-button']!.design,nativeColors:false,color:'#7a2e2a',textColor:'#f4efe4',radius:8,fontSize:16};
+  markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));button=openTag(markup,'data-static-part-content','common-button');
+  expect(button).toContain('background:#7a2e2a');expect(button).toContain('color:#f4efe4');expect(button).toContain('border-radius:8px');expect(button).toContain('font-size:16px');
+  w.parts['common-frame']!.design.fontSize=28;markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));expect(openTag(markup,'data-static-common-frame','true')).not.toContain('height:');expect(markup).toContain('font-size:28px');
+ });
+ it('現在の完成数を使い、まだ追加していない要素や架空の半分完成・架空の行を描かない',()=>{
+  const snapshot=props(),w=snapshot.workshop;w.activePart='common-progress';
+  const markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  expect(markup).toContain(snapshot.i18n.t('ws.productionProgress',{count:'22',total:'22'}));expect(markup).not.toContain('width:50%');expect(markup).not.toContain(snapshot.i18n.t('ws.preview.line',{count:1}));
+  w.parts['common-button']!.step=1;w.parts['common-button']!.elements=[];
+  const partial=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  const content=partial.match(/<div [^>]*data-static-part-content="common-button"[^>]*>(.*?)<\/div>/s)!;
+  expect(content[1]).toBe('');
  });
 });

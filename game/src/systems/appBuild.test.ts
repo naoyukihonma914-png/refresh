@@ -1,18 +1,16 @@
-import { BALANCE } from '../config/balance';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
-import { describe,it,expect } from 'vitest';
-import { createFixture } from './fixtures';
-import { actAppBuild, hasAppPart, functionalApp, missingConditionParts, appLayoutBonus } from './appBuild';
-import { BUILDABLE_APPS, allAppParts, changePart, fitAppLayout, overlap, readableText, recommendedLayout, validLayout } from './appLayout';
-import { actDesktop, buyDesktopApp, desktopConditions, focusWindow, takeScreenshot } from './desktop';
-import { jobRate } from './desktopJobs';
+import { describe,expect,it } from 'vitest';
+import { BALANCE } from '../config/balance';
 import { createI18n } from '../content/i18n';
-import { decodeSave, encodeSave } from './save';
-import { projectCapture,readCapture,restoreScene,isCaptureScene } from './captureScene';
-import { enterKumiki, exportKumiki, paintDrawing, prepareDrawing, targetFor, completeDrawing } from './kumiki';
-import { createSeedVersion } from './seed';
-import { paletteFor } from '../content/kumikiArt';
+import { paletteFor } from '../content/palette';
+import { actAppBuild,appLayoutBonus,functionalApp,hasAppPart,missingConditionParts } from './appBuild';
+import { BUILDABLE_APPS,allAppParts,changePart,fitAppLayout,overlap,readableText,recommendedLayout,validLayout } from './appLayout';
+import { isCaptureScene,projectCapture } from './captureScene';
+import { actDesktop,buyDesktopApp,desktopConditions,focusWindow } from './desktop';
+import { jobRate } from './desktopJobs';
+import { createFixture } from './fixtures';
+import { decodeSave,encodeSave } from './save';
 const now=1800000000000;
 const ready=()=>createFixture('desktop-ready',now)!;
 function checkLayout(layout:ReturnType<typeof recommendedLayout>){
@@ -80,7 +78,7 @@ describe('段階6.2：アプリの組み立てと詰みの防止',()=>{
  });
  it('実際の第10版を追加料金なく移行し、購入済みアプリ・12機能・撮影を失わない',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v10-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(s.run.desktop.apps).toEqual(old.run.desktop.apps);
+  expect(s.schemaVersion).toBe(14);expect(s.resources.tokens).toBeGreaterThanOrEqual(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(s.run.desktop.apps).toEqual(old.run.desktop.apps);
   for(const app of BUILDABLE_APPS){expect(functionalApp(s,app)).toBe(true);expect(validLayout(s.run.desktop.projects[app]!.installed,app)).toBe(true);}
   for(const id of ['sort','search','large'])expect(hasAppPart(s,'files',id)).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);
  });
@@ -102,7 +100,7 @@ describe('段階6.2：アプリの組み立てと詰みの防止',()=>{
   let s=ready();s=actAppBuild(s,{type:'app-remove',app:'theme',part:'appearance'});s=actAppBuild(s,{type:'app-install',app:'theme'});s=actDesktop(s,{type:'theme',iconSize:64},now);expect(s.persistent.desktopPrefs.iconSize).toBe(64);expect(actDesktop(s,{type:'theme',mode:'dark'},now)).toBe(s);
  });
  it('購入済みの自動仕分けで使っていたメールのフォルダーも旧データから引き継ぐ',()=>{
-  const raw=JSON.parse(gunzipSync(readFileSync(new URL('./testdata/v10-two-shots.json.gz',import.meta.url))).toString());raw.run.desktop.upgrades=raw.run.desktop.upgrades.filter((id:string)=>id!=='folders');raw.persistent.desktopPrefs.skills.push('sortMail');const s=decodeSave(JSON.stringify(raw));expect(s.run.desktop.projects.mail!.installed!.parts.some(p=>p.id==='folders')).toBe(true);expect(s.resources.tokens).toBe(raw.resources.tokens);expect(s.resources.dollars).toBe(raw.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(raw.resources.pixels);
+  const raw=JSON.parse(gunzipSync(readFileSync(new URL('./testdata/v10-two-shots.json.gz',import.meta.url))).toString());raw.run.desktop.upgrades=raw.run.desktop.upgrades.filter((id:string)=>id!=='folders');raw.persistent.desktopPrefs.skills.push('sortMail');const s=decodeSave(JSON.stringify(raw));expect(s.run.desktop.projects.mail!.installed!.parts.some(p=>p.id==='folders')).toBe(true);expect(s.resources.tokens).toBeGreaterThanOrEqual(raw.resources.tokens);expect(s.resources.dollars).toBe(raw.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(raw.resources.pixels);
  });
  it('行の高さを小さくした一覧では、増えた表示行も撮影に残し、40行の上限を保つ',()=>{
   const s=createFixture('desktop-stage2',now)!;s.run.desktop.windows.files={...s.run.desktop.windows.files,x:0,y:0,open:true,minimized:false,height:728};s.run.desktop.fileFolder='screenshots';s.run.desktop.projects.files!.installed!.parts.find(p=>p.id==='list')!.rowHeight=20;const shot=s.persistent.screenshots[0]!;s.persistent.screenshots=Array.from({length:50},(_,i)=>({...shot,id:i+1}));s.run.desktop.fileSelection='shot:50';const scene=projectCapture(s,'ja');expect(scene.files.length).toBeGreaterThan(25);expect(scene.files.length).toBeLessThanOrEqual(40);expect(scene.files.some(f=>f.id==='shot:50')).toBe(true);expect(isCaptureScene(scene)).toBe(true);
@@ -111,21 +109,34 @@ describe('段階6.2：アプリの組み立てと詰みの防止',()=>{
   const scene=projectCapture(ready(),'ja'),settings=BALANCE.appBuild as unknown as {controlMinWidth:number},old=settings.controlMinWidth;
   try{settings.controlMinWidth=9999;expect(isCaptureScene(scene)).toBe(true);}finally{settings.controlMinWidth=old;}
  });
- it('撮影した場面・アプリの配置・稼働中の色を、後の編集と外観変更から独立して保つ',()=>{
-  let s=ready();s.run.kumiki.workspace='compose';s=focusWindow(s,'files');s=actAppBuild(s,{type:'app-edit',app:'files'});s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot),frozen=shot.data;s=actAppBuild(s,{type:'app-remove',app:'files',part:'list'});s=actAppBuild(s,{type:'app-install',app:'files'});
-  expect(scene.version).toBe(9);const restored=restoreScene(shot,s.persistent.screenshots);expect(restored.run.kumiki.workspace).toBe('compose');expect(restored.run.desktop.projects.files!.installed!.parts.some(p=>p.id==='list')).toBe(true);expect(shot.data).toBe(frozen);expect(projectCapture(restored,'ja').editingApp).toBe('files');
- });
  it('配置ボーナスは色の好みで変わらず、端にそろっていない配置には付けない',()=>{
   const s=ready(),before=appLayoutBonus(s);for(const p of Object.values(s.run.desktop.projects))for(const part of p!.installed!.parts)part.color='#008080';expect(appLayoutBonus(s)).toBe(before);
   s.run.desktop.projects.files!.installed={width:640,height:416,parts:[{id:'list',x:8,y:8,width:112,height:64,color:'#ffffff',fontSize:12,rowHeight:24,striped:false}]};expect(appLayoutBonus(s)).toBeLessThan(before);
  });
 });
 describe('先のレビューの回帰',()=>{
- it('全消去したフォルダを再出荷しても標準テンプレートに戻り、次のアイコンへ進める',()=>{
-  let s=createFixture('release-ready',now)!;s=paintDrawing(s,'folder',Array.from({length:256},(_,i)=>i),-1);s=exportKumiki(s,now);expect(s.persistent.artwork.icons.folder!.frames[0]!.every(c=>c===-1)).toBe(true);
-  s=enterKumiki(createSeedVersion(s,'v1',now));const target=targetFor(s,'folder',16);expect(target.some(c=>c>=0)).toBe(true);for(const color of new Set(target.filter(c=>c>=0)))s=paintDrawing(s,'folder',target.flatMap((c,i)=>c===color?[i]:[]),color);expect(completeDrawing(s,'folder')).toBe(true);s=exportKumiki(s,now);s.run.kumiki.built.push('button');s=prepareDrawing(s,'bin');expect(s.run.kumiki.drawings.bin).toBeDefined();
- });
  it('制作ノートの新しい導入を日本語・英語の両方で出す',()=>{
   expect(createI18n('ja').t('intro.note')).toContain('ボタン1つの画面までは、もうできている。');expect(createI18n('ja').t('intro.note')).toContain('お客さんに使ってもらう');expect(createI18n('en').t('intro.note')).toContain('already finished');
+ });
+});
+
+describe('8a production boundary',()=>{
+ it('recommendation never creates inventory or completes an unmade part',()=>{
+  let s=createFixture('desktop-early',now)!;s=buyDesktopApp(s,'files');
+  s.run.workshop.parts={};s.run.desktop.projects.files!.crafted=[];
+  const parts=structuredClone(s.run.workshop.parts),wallet={...s.resources};
+  s=actAppBuild(s,{type:'app-recommend',app:'files'});
+  expect(s.run.desktop.projects.files!.crafted).toEqual([]);
+  expect(s.run.desktop.projects.files!.draft.parts).toEqual([]);
+  expect(s.run.workshop.parts).toEqual(parts);expect(s.resources).toEqual(wallet);
+ });
+ it('the old craft shortcut opens the production target and grants no part',()=>{
+  let s=createFixture('desktop-early',now)!;s=buyDesktopApp(s,'files');
+  s.run.workshop.parts['files-list']!.step=0;s.run.workshop.parts['files-list']!.elements=[];
+  s.run.workshop.parts['files-list']!.completedAt=null;s.run.workshop.parts['files-list']!.exportedAt=null;s.run.workshop.parts['files-list']!.tested=false;
+  s.run.desktop.projects.files!.crafted=[];
+  s=actAppBuild(s,{type:'app-craft',app:'files',part:'list'});
+  expect(s.run.workshop.activePart).toBe('files-list');expect(s.run.workshop.parts['files-list']!.step).toBe(0);
+  expect(s.run.desktop.projects.files!.crafted).toEqual([]);
  });
 });

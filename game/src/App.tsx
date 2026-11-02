@@ -6,7 +6,7 @@ import { Stage } from './components/Stage';
 import { createI18n } from './content/i18n';
 import type { GameRuntime } from './systems/runtime';
 import { Foundation } from './worlds/Foundation';
-import { Kumiki } from './worlds/Kumiki';
+import { Workshop } from './worlds/Workshop';
 import { Intro } from './worlds/Intro';
 import { StorePage } from './worlds/release/StorePage';
 import { Release } from './worlds/Release';
@@ -33,7 +33,7 @@ export function App({ runtime, debug }: { runtime: GameRuntime; debug: boolean }
           : snapshot.state.run.world === 'desktop'
           ? <Desktop key={snapshot.state.createdAt} snapshot={snapshot} i18n={i18n} runtime={runtime} />
           : snapshot.state.run.world === 'kumiki'
-          ? <Kumiki key={snapshot.state.createdAt} snapshot={snapshot} i18n={i18n} runtime={runtime} />
+          ? <Workshop key={snapshot.state.createdAt} snapshot={snapshot} i18n={i18n} runtime={runtime} />
           : <Foundation snapshot={snapshot} i18n={i18n} runtime={runtime} />)}
         {snapshot.status === 'ready' && snapshot.state.run.restartMs > 0 && <VersionTransition reducedMotion={runtime.platform.animation.reducedMotion()}/>}
         {snapshot.notice && <p className="runtime-notice" role="alert">{i18n.t(snapshot.notice)}</p>}

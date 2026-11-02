@@ -1,8 +1,10 @@
-import { BALANCE, type DesktopUpgrade } from '../config/balance';
-import { paletteFor } from '../content/kumikiArt';
+import { BALANCE,type DesktopUpgrade } from '../config/balance';
+import { paletteFor } from '../content/palette';
+import { APP_PARTS,changePart,emptyProject,fitAppLayout,placeAppPart,recommendedLayout,validLayout,type AppLayout,type AppPartId,type AppProject,type PartMinimums } from './appLayout';
 import type { BuiltApp } from './desktopState';
 import type { GameState } from './state';
-import { APP_PARTS, allAppParts, changePart, fitAppLayout, placeAppPart, emptyProject, recommendedLayout, validLayout, type AppPartId, type AppLayout, type AppProject, type PartMinimums } from './appLayout';
+import { actWorkshop } from './workshop';
+import { completedAppRoles,workshopPartForRole } from './workshopDesktopBridge';
 export const hasAppPart=(s:GameState,app:BuiltApp,id:string)=>s.run.desktop.apps.includes(app)&&(s.run.desktop.projects?.[app]?.installed?.parts.some(p=>p.id===id)??!s.run.desktop.projects?.[app]);
 export const functionalApp=(s:GameState,app:BuiltApp)=>APP_PARTS[app].base.every(id=>hasAppPart(s,app,id));
 export type AppBuildAction=
@@ -10,16 +12,19 @@ export type AppBuildAction=
  |{type:'app-craft'|'app-place'|'app-remove';app:BuiltApp;part:AppPartId;rect?:import('./desktopState').Rect;metrics?:PartMinimums}
  |{type:'app-change';app:BuiltApp;part:AppPartId;patch:Parameters<typeof changePart>[2];metrics?:PartMinimums};
 export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
- const d=s.run.desktop,project=d.projects[a.app];if(!project||!d.upgrades.includes(a.app))return s;
+ const d=s.run.desktop,stored=d.projects[a.app];if(!stored||!d.upgrades.includes(a.app))return s;
+ const project={...stored,crafted:[...new Set([...stored.crafted,...completedAppRoles(s,a.app)])]};
  const update=(p:AppProject):GameState=>({...s,run:{...s.run,desktop:{...d,projects:{...d.projects,[a.app]:p}}}});
  const edit=(draft:AppLayout,crafted=project.crafted)=>draft===project.draft?s:update({...project,crafted,draft,undo:[...project.undo,project.draft].slice(-BALANCE.appBuild.history),redo:[]});
  if(a.type==='app-fit'){const draft=fitAppLayout(project.draft,project.draft.width,project.draft.height,a.metrics);return JSON.stringify(draft)===JSON.stringify(project.draft)?s:update({...project,draft});}
  if(a.type==='app-close')return {...s,run:{...s.run,desktop:{...d,editingApp:null}}};
- if(a.type==='app-edit')return {...s,run:{...s.run,kumiki:{...s.run.kumiki,workspace:'compose'},desktop:{...d,editingApp:a.app}}};
- if(a.type==='app-recommend'){const crafted=[...new Set([...project.crafted,...APP_PARTS[a.app].base])] as AppPartId[];return edit(recommendedLayout(a.app,crafted,undefined,a.metrics,project.draft),crafted);}
+ if(a.type==='app-edit')return {...s,run:{...s.run,workshop:{...s.run.workshop,view:'workbench'},desktop:{...d,editingApp:a.app,projects:{...d.projects,[a.app]:project}}}};
+ if(a.type==='app-recommend')return edit(recommendedLayout(a.app,project.crafted,undefined,a.metrics,project.draft));
  if(a.type==='app-craft'){
-  if(!(APP_PARTS[a.app].base as readonly string[]).includes(a.part)||project.crafted.includes(a.part))return s;
-  return update({...project,crafted:[...project.crafted,a.part]});
+  if(!(APP_PARTS[a.app].base as readonly string[]).includes(a.part)&&!(s.run.desktop.upgrades as readonly string[]).includes(a.part))return s;
+  const part=workshopPartForRole(a.app,a.part);if(!part)return s;
+  const next=actWorkshop(s,{type:'selectPart',part},s.lastTickAt);
+  return {...next,run:{...next.run,desktop:{...next.run.desktop,editingApp:null}}};
  }
  if(a.type==='app-place'){
   if(!project.crafted.includes(a.part)||project.draft.parts.some(p=>p.id===a.part))return s;
@@ -43,12 +48,13 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
  return s;
 }
 export function ownAppBlueprint(s:GameState,app:BuiltApp):GameState {
- const project=emptyProject();if(app==='mail'&&s.persistent.desktopPrefs.skills.includes('sortMail'))project.crafted.push('folders');
- return {...s,run:{...s.run,kumiki:{...s.run.kumiki,workspace:'compose'},desktop:{...s.run.desktop,editingApp:app,projects:{...s.run.desktop.projects,[app]:project}}}};
+ const project=emptyProject();project.crafted=completedAppRoles(s,app);
+ return {...s,run:{...s.run,workshop:{...s.run.workshop,view:'workbench'},desktop:{...s.run.desktop,editingApp:app,projects:{...s.run.desktop.projects,[app]:project}}}};
 }
-export function ownFeaturePart(s:GameState,id:DesktopUpgrade,app:BuiltApp):GameState {
- const p=s.run.desktop.projects?.[app];if(!p||!allAppParts(app).includes(id as AppPartId))return s;
- return {...s,run:{...s.run,kumiki:{...s.run.kumiki,workspace:'compose'},desktop:{...s.run.desktop,editingApp:app,projects:{...s.run.desktop.projects,[app]:{...p,crafted:[...new Set([...p.crafted,id as AppPartId])]}}}}};
+export function ownFeaturePart(s:GameState,_id:DesktopUpgrade,app:BuiltApp):GameState {
+ const p=s.run.desktop.projects[app];if(!p)return s;
+ const crafted=[...new Set([...p.crafted,...completedAppRoles(s,app)])];
+ return {...s,run:{...s.run,workshop:{...s.run.workshop,view:'workbench'},desktop:{...s.run.desktop,editingApp:app,projects:{...s.run.desktop.projects,[app]:{...p,crafted}}}}};
 }
 export function appLayoutBonus(s:GameState):number {
  const installed=s.run.desktop.apps.map(app=>s.run.desktop.projects?.[app]?.installed).filter((v):v is AppLayout=>!!v&&v.parts.length>0);

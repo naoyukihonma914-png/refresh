@@ -1,0 +1,41 @@
+.editor-shell {--editor-panel:#d6cfc0;--editor-edge-light:#f4efe4;--editor-edge-dark:#8f8574;--editor-ink:#1f1c18;--editor-canvas:#5d6f7d;--editor-palette-width:54px;--editor-parts-width:276px;--editor-tools-width:48px;display:flex;flex-direction:column;inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;overflow:hidden;background:var(--editor-canvas);color:var(--editor-ink);font:16px/1.4 'Refresh Pixel','Refresh UI',sans-serif;}
+.editor-shell.editor-stage-1 {--editor-panel:#34343d;--editor-edge-light:#55545e;--editor-edge-dark:#19191e;--editor-ink:#e6e2d8;--editor-canvas:#29292f;--editor-palette-width:32px;--editor-parts-width:232px;--editor-tools-width:32px;font-size:12px;}
+.editor-shell.editor-stage-2 {--editor-panel:#383838;--editor-edge-light:#525252;--editor-edge-dark:#202020;--editor-ink:#e4e4e4;--editor-canvas:#2b2b2b;--editor-palette-width:270px;--editor-parts-width:240px;--editor-tools-width:36px;font:13px/1.4 'Refresh UI',sans-serif;}
+.editor-shell:not(.has-palette) {--editor-palette-width:0px;}
+.editor-shell:not(.has-parts-panel) {--editor-parts-width:0px;}
+.editor-shell:not(.has-tools) {--editor-tools-width:0px;}
+.editor-shell-top,.editor-shell-bottom,.editor-shell-layers {flex:none;min-inline-size:0;background:var(--editor-panel);color:var(--editor-ink);}
+.editor-shell-top {border-block-end:2px solid var(--editor-edge-dark);box-shadow:inset 0 2px var(--editor-edge-light);}
+.editor-shell-body {display:flex;flex:1;min-inline-size:0;min-block-size:0;}
+.editor-shell-rail {display:flex;min-inline-size:0;min-block-size:0;flex:none;}
+.editor-shell-left-rail,.editor-shell-right-rail {max-inline-size:55%;overflow:auto;}
+.editor-shell-top-rail,.editor-shell-bottom-rail {flex-direction:column;max-block-size:160px;overflow:auto;}
+.editor-shell-left-rail .editor-shell-palette,.editor-shell-right-rail .editor-shell-palette {inline-size:var(--editor-palette-width);flex:none;}
+.editor-shell-left-rail .editor-shell-parts,.editor-shell-right-rail .editor-shell-parts {inline-size:var(--editor-parts-width);flex:none;}
+.editor-shell-left-rail .editor-shell-tools,.editor-shell-right-rail .editor-shell-tools {inline-size:var(--editor-tools-width);flex:none;}
+.editor-shell-left-rail .editor-shell-bottom,.editor-shell-right-rail .editor-shell-bottom {inline-size:200px;max-inline-size:200px;}
+.editor-shell-palette,.editor-shell-parts,.editor-shell-tools {min-inline-size:0;min-block-size:0;overflow:auto;background:var(--editor-panel);color:var(--editor-ink);}
+.editor-shell-palette {grid-area:palette;border-inline-end:2px solid var(--editor-edge-dark);}
+.editor-shell-parts {grid-area:parts;border-inline-start:2px solid var(--editor-edge-dark);}
+.editor-shell-tools {grid-area:tools;border-inline-start:2px solid var(--editor-edge-dark);}
+.editor-shell-workspace {flex:1;min-inline-size:360px;min-block-size:0;overflow:auto;position:relative;}
+.editor-shell-bottom {min-block-size:28px;padding:3px 10px;border-block-start:2px solid var(--editor-edge-light);font-size:.85em;}
+.editor-shell-layers {border-block-start:1px solid var(--editor-edge-dark);}
+.editor-stage-1 .editor-shell-top,.editor-stage-1 .editor-shell-palette,.editor-stage-1 .editor-shell-parts,.editor-stage-1 .editor-shell-tools,.editor-stage-1 .editor-shell-bottom,.editor-stage-2 .editor-shell-top,.editor-stage-2 .editor-shell-palette,.editor-stage-2 .editor-shell-parts,.editor-stage-2 .editor-shell-tools,.editor-stage-2 .editor-shell-bottom {border-width:1px;box-shadow:none;}
+.editor-stage-1 .editor-shell-bottom {min-block-size:22px;padding:2px 8px;}
+.editor-stage-2 .editor-shell-bottom {min-block-size:25px;}
+.editor-stage-2 .editor-shell-palette {border-inline-start:1px solid var(--editor-edge-dark);border-inline-end:0;}
+.editor-stage-2 .editor-shell-parts {border-inline-start:0;border-inline-end:1px solid var(--editor-edge-dark);}
+.editor-shell button,.editor-shell input,.editor-shell select {font:inherit;}
+.editor-shell button,.editor-shell select {max-inline-size:100%;min-block-size:24px;padding:3px 8px;background:var(--editor-panel);color:inherit;border:1px solid var(--editor-edge-dark);border-radius:0;box-shadow:inset 1px 1px var(--editor-edge-light),inset -1px -1px var(--editor-edge-dark);}
+.editor-shell button:active:not(:disabled),.editor-shell button[aria-pressed=true] {box-shadow:inset 1px 1px var(--editor-edge-dark);}
+.editor-shell button:disabled {opacity:.55;cursor:default;}
+.editor-shell input,.editor-shell select {min-inline-size:0;}
+.editor-shell input {color:inherit;background:var(--editor-canvas);border:1px solid var(--editor-edge-light);padding:3px 6px;}
+.editor-shell input[type=checkbox] {inline-size:18px;block-size:18px;vertical-align:middle;margin-inline-end:6px;}
+.editor-shell :focus-visible {outline:2px solid currentColor;outline-offset:2px;}
+/* A saved desktop window can be smaller than the editor's working surface. */
+.window-content > .workshop-root.is-embedded {overflow:auto;overscroll-behavior:contain;}
+.window-content > .workshop-root.is-embedded > .editor-shell {min-inline-size:760px;min-block-size:480px;}
+.window-content > .workshop-root.is-embedded > .editor-shell > .editor-shell-top {overflow-x:auto;white-space:nowrap;}
+.window-content > .workshop-root.is-embedded > .editor-shell > .editor-shell-top > * {min-inline-size:max-content;}

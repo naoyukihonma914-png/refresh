@@ -1,6 +1,5 @@
 import { editorStage } from '../systems/appearance';
 import type { CSSProperties } from 'react';
-import { iconTemplate, paletteFor } from '../content/kumikiArt';
 import type { GameState } from '../systems/state';
 import type { AppId } from '../systems/desktopState';
 export function PixelArt({ frames, size, palette, frame = 0, grey = false, style }: { frames: number[][]; size: number; palette: string[]; frame?: number; grey?: boolean; style?: CSSProperties }) {
@@ -8,11 +7,17 @@ export function PixelArt({ frames, size, palette, frame = 0, grey = false, style
     {(frames[frame] ?? frames[0] ?? []).map((color,i) => color < 0 ? null : <rect key={i} x={i%size} y={Math.floor(i/size)} width="1" height="1" fill={grey ? '#8b8b8b' : palette[color]} />)}
   </svg>;
 }
-export function AppIcon({ app, state, frame = 0, palette }: { palette?:string[]; app: AppId; state: GameState; frame?: number }) {
+export function AppIcon({ app, state }: { palette?:string[]; app: AppId; state: GameState; frame?: number }) {
   if (['files','mail','photo','bin','clock','settings'].includes(app)) {
-    const id = (app==='files'?'folder':app) as 'folder'|'mail'|'photo'|'bin'|'clock'|'settings';
-    const work = state.run.kumiki.exports.find(e => e.kind === 'icon' && e.id === id);
-    return <PixelArt frames={work?.frames ?? [iconTemplate(id,16)]} size={work?.size ?? 16} palette={palette??paletteFor(state.persistent.specs.color)} frame={frame} grey={!work} />;
+    const paths:Record<string,React.ReactNode>={
+      files:<><path d="M5 13h15l5 5h18v23H5z" fill="#d6b975" stroke="#74613c"/><path d="M5 19h38v4H5z" fill="#f0dc9b"/></>,
+      mail:<><path d="M4 11h40v29H4z" fill="#f4f0df" stroke="#6c7a82"/><path d="m5 12 19 15 19-15M5 39l14-15m24 15L29 24" fill="none" stroke="#6c7a82"/></>,
+      photo:<><path d="M4 8h40v33H4z" fill="#dde8e7" stroke="#52696a"/><circle cx="32" cy="18" r="4" fill="#cbb169"/><path d="m6 38 12-17 9 10 5-5 10 12" fill="#729287"/></>,
+      bin:<><path d="m11 13 3 29h20l3-29M8 11h32M18 7h12m-9 12v18m7-18v18" fill="#c9cfd0" stroke="#60717b" strokeWidth="2"/></>,
+      clock:<><circle cx="24" cy="24" r="19" fill="#f4f0df" stroke="#60717b" strokeWidth="2"/><path d="M24 12v13l10 5" fill="none" stroke="#405660" strokeWidth="2"/></>,
+      settings:<><path d="m17 5 14 0 2 6 6 3 5 10-5 10-6 3-2 6H17l-2-6-6-3-5-10 5-10 6-3z" fill="#aab9bf" stroke="#526974"/><circle cx="24" cy="24" r="8" fill="#f2f0e8" stroke="#526974"/></>,
+    };
+    return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true">{paths[app]}</svg>;
   }
   if(app==='tessera'&&editorStage(state)===2)return <svg viewBox="0 0 48 48" className="app-icon gesso-icon" aria-hidden="true"><path d="M6 8h36v34H6z" fill="#526a7e" stroke="#263744"/><path d="M8 10h32v13H8z" fill="#7895ad"/><path d="m14 33 3-8 14-14 5 5-14 14z" fill="#e9e2cf" stroke="#263744"/><path d="m14 33 8-3-5-5z" fill="#d8ab63"/></svg>;
   if(app==='terminal')return <svg viewBox="0 0 48 48" className="app-icon" aria-hidden="true"><rect x="4" y="8" width="40" height="32" rx="3" fill="#26323a" stroke="#8c9ba5"/><path d="m12 17 6 6-6 6m11 1h10" stroke="#e4ecef" strokeWidth="2" fill="none"/></svg>;

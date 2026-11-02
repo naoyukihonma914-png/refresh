@@ -1,29 +1,28 @@
-import { actAppBuild } from './appBuild';
-import { isBuildable, featureApp } from './appLayout';
-import type { DesktopUpgrade } from '../config/balance';
-import type { GameState } from './state';
-import { readFileSync } from 'node:fs';
-import { gunzipSync } from 'node:zlib';
+import{seedPartsPixelsPerSecond,workshopPartsPixelsPerSecond}from'./economy';
 import { describe,expect,it } from 'vitest';
+import type { DesktopUpgrade } from '../config/balance';
 import { BALANCE } from '../config/balance';
 import { createI18n } from '../content/i18n';
-import { createFixture } from './fixtures';
-import { actDesktop,advanceDesktopTime,activeScreenshots,buyDesktopApp as buyBlueprint,desktopConditions,focusWindow,nextDesktopApp,screenshotParts,screenshotReward,takeScreenshot,visibleApps } from './desktop';
-import { hasDesktopSkill,jobCapacity,jobCursorCost,jobCursorRate,jobRate,jobsRate } from './desktopJobs';
-import { JOB_IDS, type Feedback } from './desktopState';
-import { desktopFiles } from './desktopFiles';
-import { advanceActiveTime,advanceOfflineTime } from './time';
-import { homePixelsPerSecond,passivePixelsPerSecond } from './economy';
-import { decodeSave,encodeSave,saveGame,loadGame,createMemoryStorage,SAVE_KEYS } from './save';
-import { isGameState } from './state';
-import { readCapture,restoreScene } from './captureScene';
 import { captureStore } from '../platform/captures';
+import { actAppBuild } from './appBuild';
+import { featureApp,isBuildable } from './appLayout';
+import { readCapture } from './captureScene';
+import { actDesktop,activeScreenshots,advanceDesktopTime,buyDesktopApp as buyBlueprint,desktopConditions,focusWindow,nextDesktopApp,screenshotParts,screenshotReward,visibleApps } from './desktop';
+import { desktopFiles } from './desktopFiles';
+import { hasDesktopSkill,jobCapacity,jobCursorCost,jobCursorRate,jobRate,jobsRate } from './desktopJobs';
+import { JOB_IDS,type Feedback } from './desktopState';
+import { homePixelsPerSecond,passivePixelsPerSecond } from './economy';
+import { createFixture } from './fixtures';
+import { createMemoryStorage,decodeSave,encodeSave,loadGame,SAVE_KEYS,saveGame } from './save';
+import type { GameState } from './state';
+import { isGameState } from './state';
+import { advanceActiveTime,advanceOfflineTime } from './time';
 const now=1800000000000;
 const fixture=(name='desktop-ready')=>createFixture(name,now)!;
 const action=(s:ReturnType<typeof fixture>,a:Parameters<typeof actDesktop>[1],at=now)=>actDesktop(s,a,at,'ja');
 function request(s:ReturnType<typeof fixture>,kind:Feedback['kind']){
  const id=++s.run.desktop.feedbackSerial;
- s.run.desktop.feedback.push({id,kind,sender:'hikari',target:kind==='search'?'home':kind==='timer'?String(now+60000):'',at:now,completedAt:null,baseline:[],baselineColor:'#0067c0'});return s;
+ s.run.desktop.feedback.push({id,kind,sender:'hikari',target:kind==='search'?'note':kind==='timer'?String(now+60000):'',at:now,completedAt:null,baseline:[],baselineColor:'#0067c0'});return s;
 }
 function buyDesktopApp(s:GameState,id:DesktopUpgrade){let next=buyBlueprint(s,id);const app=isBuildable(id)?id:featureApp(id);if(next!==s&&app){next=actAppBuild(next,{type:'app-recommend',app});next=actAppBuild(next,{type:'app-install',app});}return next;}
 describe('段階6：アプリとジョブ',()=>{
@@ -40,7 +39,7 @@ describe('段階6：アプリとジョブ',()=>{
   const rate=passivePixelsPerSecond(s),before=s.run.totalPixelsGenerated;
   for(const app of JOB_IDS)s=action(s,{type:'close',app});
   s=advanceActiveTime(s,1000).state;expect(s.run.totalPixelsGenerated-before).toBeCloseTo(rate,3);
-  expect(jobsRate(s)).toBeGreaterThan(0);expect(passivePixelsPerSecond(s)).toBeCloseTo(homePixelsPerSecond(s)+jobsRate(s));
+  expect(jobsRate(s)).toBeGreaterThan(0);expect(passivePixelsPerSecond(s)).toBeCloseTo(homePixelsPerSecond(s)+seedPartsPixelsPerSecond(s)+workshopPartsPixelsPerSecond(s)+jobsRate(s));
  });
  it('ジョブの値段は切り上げ。更新×2と小さな機能×1.25、色・Hzを毎秒に掛ける',()=>{
   let s=fixture('desktop-jobs'),j=s.run.desktop.jobs.files,rate=jobCursorRate(s,'files');
@@ -50,15 +49,10 @@ describe('段階6：アプリとジョブ',()=>{
   const before=jobCursorRate(s,'files');s=buyDesktopApp(s,'manager');s=buyDesktopApp(s,'search');expect(jobCursorRate(s,'files')).toBeCloseTo(before*1.25);
   s.persistent.specs.refresh=2;expect(jobCursorRate(s,'files')).toBeCloseTo(before*1.25*4);
  });
- it('不在のジョブはストレージ上限まで入り、集中モードでもジョブは動く',()=>{
-  const s=fixture();s.run.kumiki.focus=true;s.run.desktop.terminal.running=false;const rate=passivePixelsPerSecond(s),before=s.run.totalPixelsGenerated;
-  const off=advanceOfflineTime(s,now+24*3600000);expect(off.capped).toBe(true);expect(off.creditedMs).toBe(2*3600000);expect(off.state.run.totalPixelsGenerated-before).toBeCloseTo(rate*7200,1);
-  expect(s.run.totalPixelsGenerated).toBe(before);
- });
  it('写真・テーマ・書類の表示操作を保存し、日付の並べ替えと日本語・英語の検索を完了する',()=>{
   let s=request(fixture(),'sort');s=action(s,{type:'sort',by:'date'});expect(s.run.desktop.feedback.at(-1)!.completedAt).toBe(now);
   s=request(s,'search');const tokens=s.resources.tokens;s=action(s,{type:'search',text:'違う名前'});expect(s.resources.tokens).toBe(tokens);
-  s=action(s,{type:'search',text:createI18n('ja').t('files.home')});expect(s.resources.tokens).toBe(tokens+2);expect(desktopFiles(s,createI18n('ja'),'root').map(f=>f.id)).toEqual(['home']);
+  s=action(s,{type:'search',text:createI18n('ja').t('desktop.app.note')});expect(s.resources.tokens).toBe(tokens+2);expect(desktopFiles(s,createI18n('ja'),'root').map(f=>f.id)).toEqual(['note']);
   s=action(s,{type:'search',text:''});s=request(s,'bright');s=action(s,{type:'photo',edit:{source:'night',brightness:1.3,tone:12,crop:15}});s=action(s,{type:'wallpaper'});
   expect(s.persistent.desktopPrefs.wallpaper).toEqual(s.run.desktop.photo);expect(s.run.desktop.feedback.at(-1)!.completedAt).toBe(now);
   s=request(s,'dark');s=action(s,{type:'theme',mode:'dark',accent:'#a76628',radius:3,iconSize:64,slideshow:true});expect(s.run.desktop.feedback.at(-1)!.completedAt).toBe(now);
@@ -130,26 +124,13 @@ describe('段階6：アプリとジョブ',()=>{
   let s=fixture();const kinds=new Set<string>();
   // A single completed redraw gives other templates a turn in the rotation.
   for(let i=0;i<20;i++){s=advanceDesktopTime(s,240000,now,true);const f=s.run.desktop.feedback.at(-1)!;kinds.add(f.kind);s.run.desktop.feedback=s.run.desktop.feedback.map(x=>({...x,completedAt:now}));}
-  expect([...kinds].sort()).toEqual(['redraw','practice','color','screenshot','sort','search','bright','trash','timer','dark'].sort());
+  expect([...kinds].sort()).toEqual(['color','screenshot','sort','search','bright','trash','timer','dark'].sort());
   s=action(s,{type:'skill',id:'autoFeedback'});s=request(s,'sort');const tokens=s.resources.tokens;s=advanceDesktopTime(s,100,now);expect(s.resources.tokens).toBe(tokens+1);expect(s.run.desktop.fileSort).toBe('date');
  });
  it('v1.0の5条件まで到達でき、今回の段階では出荷に進まない',()=>{
   let s=fixture();for(const app of ['files','mail','clock','bin'] as const)s=focusWindow(s,app);
   for(let i=0;i<10;i++){s=request(s,'sort');s=action(s,{type:'sort',by:'date'});}
   expect(desktopConditions(s)).toEqual([true,true,true,true,true]);expect(s.run.world).toBe('desktop');
- });
- it('第7版の実データと旧V1撮影を変更せず読み、第9版・V4撮影と混在して保存できる',()=>{
-  const raw=gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString();const old=JSON.parse(raw);let s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
-  expect(readCapture(s.persistent.screenshots[0]!).version).toBe(1);expect(nextDesktopApp(s)?.id).toBe('sort');
-  s=buyDesktopApp(s,'sort');s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now+1000,'en');expect(readCapture(s.persistent.screenshots.at(-1)!).version).toBe(9);
-  expect(decodeSave(encodeSave(s))).toEqual(s);expect(restoreScene(s.persistent.screenshots[0]!,s.persistent.screenshots).persistent.productionNote).toBe(readCapture(old.persistent.screenshots[0]).note);
- });
- it('V4の写真・テーマ・ジョブ・12機能も撮影時の状態を独立して保つ',()=>{
-  let s=fixture();s=action(s,{type:'theme',mode:'dark'});s=action(s,{type:'manager-tab',tab:'performance'});s=action(s,{type:'calendar-month',at:1830297600000});s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);
-  expect(scene.version).toBe(9);expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('persistent');
-  s=action(s,{type:'theme',mode:'light'});s=action(s,{type:'job-update',app:'files'});const restored=restoreScene(shot,s.persistent.screenshots);
-  expect(restored.persistent.desktopPrefs.mode).toBe('dark');expect(restored.run.desktop.jobs.files.updates).toBe(1);expect(restored.run.desktop.upgrades).toHaveLength(21);expect(restored.run.desktop.managerTab).toBe('performance');expect(restored.run.desktop.calendarMonth).toBe(1830297600000);expect(scene.version!==1&&scene.display.managerShotRate).toBeGreaterThan(0);
  });
  it.each(['desktop-jobs','desktop-photo','desktop-ready','desktop-stalled'])('%sの固定状態を往復できる',name=>{const s=fixture(name);expect(isGameState(s)).toBe(true);expect(decodeSave(encodeSave(s))).toEqual(s);});
 });

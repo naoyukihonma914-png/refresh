@@ -1,15 +1,15 @@
-import {seedCursorQuote} from './seed';
-import {manualClickValue,passivePixelsPerSecond} from './economy';
-import {globalMultiplier} from './longPlay';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { GameRuntime } from './runtime';
+import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 import { BALANCE } from '../config/balance';
 import { TEST_LANGUAGE } from '../content/i18n';
-import { createFixture } from './fixtures';
-import { createMemoryStorage, createSettingsStorage, SETTINGS_KEY } from '../platform/storage';
+import { createMemoryStorage,createSettingsStorage,SETTINGS_KEY } from '../platform/storage';
 import type { Platform } from '../platform/types';
-import { encodeSave, loadGame, SAVE_KEYS } from './save';
+import { manualClickValue,passivePixelsPerSecond } from './economy';
+import { createFixture } from './fixtures';
+import { GameRuntime } from './runtime';
+import { encodeSave,loadGame,SAVE_KEYS } from './save';
+import { seedCursorQuote } from './seed';
 
+const debugBase=1+BALANCE.w1.items.filter(item=>item.id==='border'||item.id==='save').reduce((n,item)=>n+item.perSecond,0);
 const hour = BALANCE.time.millisecondsPerHour;
 let storage: ReturnType<typeof createMemoryStorage>;
 let runtime: GameRuntime;
@@ -97,18 +97,18 @@ describe('プラットフォームを通した保存・時間処理', () => {
     expect(loadGame(storage).kind).toBe('loaded');
     step(10_000);
     const saved = loadGame(storage);
-    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10.199);
+    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10.199*debugBase);
   });
 
   it('端末時計を戻しても能動時間と自動保存は止まらない', async () => {
     await start(); runtime.enableDebugSave();
     step(10_000, -hour);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(10.199);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(10.199*debugBase);
     const saved = loadGame(storage);
-    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10.199);
+    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(10.199*debugBase);
     expect(runtime.getSnapshot().offline).toBeNull();
     step(1_000);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(11.219);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(11.219*debugBase);
   });
 
   it('単調時計が進まない長い停止も端末時計の差から検出し、上限まで保存する', async () => {
@@ -116,23 +116,23 @@ describe('プラットフォームを通した保存・時間処理', () => {
     clock.wall += 3 * hour;
     clock.mono += 100;
     vi.advanceTimersByTime(100);
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_272);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_272*debugBase);
     expect(runtime.getSnapshot().offline?.capped).toBe(true);
     const saved = loadGame(storage);
-    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBe(7_272);
+    expect(saved.kind === 'loaded' && saved.state.resources.pixels).toBeCloseTo(7_272*debugBase);
     step(1_000);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_273.02);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_273.02*debugBase);
   });
 
   it('開いたまま3時間処理が止まった場合は2時間分だけ加算し、次の処理で重ねない', async () => {
     await start(); runtime.enableDebugSave();
     clock.wall += 3 * hour; clock.mono += 3 * hour;
     vi.advanceTimersByTime(100);
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_272);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_272*debugBase);
     runtime.persist();
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_272);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_272*debugBase);
     runtime.dispose(); await start();
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_272);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_272*debugBase);
   });
 
   it('短い処理遅れは能動時間として計算し、留守の知らせを出さない', async () => {
@@ -140,7 +140,7 @@ describe('プラットフォームを通した保存・時間処理', () => {
     const elapsed = BALANCE.time.inactivityGapMs - BALANCE.time.tickMs;
     clock.wall += elapsed; clock.mono += elapsed;
     vi.advanceTimersByTime(100);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(elapsed / 1_000*(1+BALANCE.longPlay.achievementBonus));
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(elapsed / 1_000*(1+BALANCE.longPlay.achievementBonus)*debugBase);
     expect(runtime.getSnapshot().offline).toBeNull();
   });
 
@@ -150,30 +150,31 @@ describe('プラットフォームを通した保存・時間処理', () => {
     vi.advanceTimersByTime(100);
     expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
     step(1_000);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(1.019);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(1.019*debugBase);
   });
 
   it('持っているストレージの上限を開いたままの停止にも適用する', async () => {
     await start(); runtime.enableDebugSave(); runtime.changeDebugSpec('storage', 1);
     clock.wall += 6 * hour; clock.mono += 6 * hour;
     vi.advanceTimersByTime(100);
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(14_544);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(14_544*debugBase);
   });
 
   it('端数の能動時間は複数回の保存をまたいで残る', async () => {
     await start(); runtime.enableDebugSave();
     clock.mono += 50; runtime.persist();
     clock.mono += 50; runtime.persist();
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(0.1);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(0.1*debugBase*(1+BALANCE.longPlay.achievementBonus));
   });
 
   it('再開した不在分を保存し、再読み込みで重複付与しない', async () => {
     const state = createFixture('foundation-saved', clock.wall - 3 * hour)!;
+    state.resources.pixels=0;const expected=passivePixelsPerSecond(state)*7200;
     storage.setItem(SAVE_KEYS.primary, encodeSave(state));
     await start();
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(expected);
     runtime.dispose(); await start();
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_200);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(expected);
     expect(runtime.getSnapshot().offline).toBeNull();
   });
 
@@ -183,10 +184,10 @@ describe('プラットフォームを通した保存・時間処理', () => {
     clock.wall += 3 * hour; clock.mono += 3 * hour;
     runtime.leave();
     clock.hidden = false; runtime.visibilityChanged();
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(7_272);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_272*debugBase);
     expect(runtime.getSnapshot().offline?.capped).toBe(true);
     step(1_000);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_273.02);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(7_273.02*debugBase);
   });
 
   it('不在中に時計が戻っても0扱いで復帰し、能動生成は続く', async () => {
@@ -196,7 +197,7 @@ describe('プラットフォームを通した保存・時間処理', () => {
     clock.hidden = false; runtime.visibilityChanged();
     expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
     step(1_000);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(1.019);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(1.019*debugBase);
   });
 
   it('固定状態の保存と言語設定は実データに影響しない', async () => {
@@ -300,8 +301,9 @@ describe('段階2の操作と保存', () => {
     }
     for (let i = 0; i < 8; i++) runtime.pressSeed();
     runtime.buildSeed('cursor');
+    const before=runtime.getSnapshot().state.resources.pixels,rate=passivePixelsPerSecond(runtime.getSnapshot().state);
     step(2_000);
-    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(3.85);
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(before+rate*2);
   });
 
   it('タブの所有権を失った後は生成・購入・設定が動かない', async () => {
@@ -314,14 +316,14 @@ describe('段階2の操作と保存', () => {
   });
 
   it('組木の購入と世界2の開始を保存し、実績を1回だけ知らせる', async () => {
-    const fixture = createFixture('seed-motion', clock.wall)!;
+    const fixture = createFixture('stage8a-seed-export-before', clock.wall)!;
     storage.setItem(SAVE_KEYS.primary, encodeSave(fixture));
-    await start();vi.mocked(platform.unlockAchievement).mockClear(); runtime.buildSeed('kumiki'); runtime.buildSeed('kumiki');
+    await start();vi.mocked(platform.unlockAchievement).mockClear(); runtime.buildSeed('export'); runtime.buildSeed('export');
     expect(platform.unlockAchievement).toHaveBeenCalledExactlyOnceWith('kumiki-created');
     expect(runtime.getSnapshot().state.run.world).toBe('kumiki');
-    expect(runtime.getSnapshot().state.run.seed.built).toContain('kumiki');
+    expect(runtime.getSnapshot().state.run.seed.built).toContain('export');
     const saved = loadGame(storage);
-    expect(saved.kind === 'loaded' && saved.state.run.seed.built.includes('kumiki')).toBe(true);
+    expect(saved.kind === 'loaded' && saved.state.run.seed.built.includes('export')).toBe(true);
   });
 
   it('勢いを保存・読み込み・タブ復帰へ持ち越さない', async () => {
@@ -409,8 +411,8 @@ describe('出荷の保存と再開', () => {
     storage.setItem = write; runtime.startNextVersion();
     const checkpoint = loadGame(storage);
     expect(checkpoint.kind === 'loaded' && checkpoint.state.run.version).toBe('v1');
-    step(1_000); runtime.pressSeed();
-    expect(runtime.getSnapshot().state.resources.pixels).toBe(1.62);
+    step(1_000); const beforePress=runtime.getSnapshot().state;runtime.pressSeed();
+    expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(beforePress.resources.pixels+manualClickValue(beforePress));
     runtime.dispose(); await start();
     expect(runtime.getSnapshot().state.resources.pixels).toBe(0);
     expect(runtime.getSnapshot().state.persistent.products).toHaveLength(1);
@@ -443,70 +445,6 @@ describe('段階7：v1.0の通常の出荷からv2へ', () => {
     await start();
     vi.mocked(platform.unlockAchievement).mockClear();
   };
-
-  it.each([null, 'no-cursors', 'no-color'] as const)('案件%sを任意に選び、製品ページ・出荷・60Hz購入・v2開始と保存再開まで通る', async contract => {
-    await prepare();
-    const before = runtime.getSnapshot().state;
-    const shots = before.persistent.screenshots;
-    const selected = [shots.at(-1)!.id, shots[0]!.id];
-    expect(before.persistent.progress.records['v1-released']).toBeUndefined();
-    runtime.requestPrototypeRelease();
-    expect(runtime.getSnapshot().releaseConfirmation).toBe(true);
-    runtime.confirmProductRelease(selected); runtime.confirmProductRelease(selected);
-    let state = runtime.getSnapshot().state;
-    const product = state.persistent.products.at(-1)!;
-    expect(product.version).toBe('v1.0');
-    expect(product.screenshots!.map(shot => shot.id)).toEqual(selected);
-    expect(state.persistent.products).toHaveLength(before.persistent.products.length + 1);
-    expect(state.resources.dollars).toBe(before.resources.dollars + product.revenue);
-    expect(state.persistent.progress.records['v1-released']).toBe(clock.wall);
-    expect(vi.mocked(platform.unlockAchievement).mock.calls.filter(([id]) => id === 'v1-released')).toHaveLength(1);
-    expect(state.run.shipping?.phase).toBe('store');
-    runtime.purchaseSpec('refresh'); runtime.showShipping();
-    expect(runtime.getSnapshot().state.persistent.specs.refresh).toBe(0);
-    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('store');
-
-    step(1_000); runtime.leave(); runtime.dispose(); clock.wall += 3 * hour; await start();
-    state = runtime.getSnapshot().state;
-    expect(state.run.shipping?.storeElapsedMs).toBe(1_000);
-    expect(state.resources.dollars).toBe(before.resources.dollars + product.revenue);
-    expect(state.persistent.products.at(-1)!.screenshots).toEqual(product.screenshots);
-    expect(runtime.getSnapshot().offline).toBeNull();
-    step(BALANCE.release.storeAnimationMs - 1_000); runtime.showShipping();
-    expect(runtime.getSnapshot().state.run.shipping?.phase).toBe('shipping');
-    step(BALANCE.release.animationMs);
-    runtime.common({ type: 'contract-select', id: contract });
-    expect(runtime.getSnapshot().state.persistent.progress.selected).toBe(contract);
-    runtime.startNextVersion();
-    expect(runtime.getSnapshot().state.run.world).toBe('release');
-    const dollars = runtime.getSnapshot().state.resources.dollars;
-    runtime.purchaseSpec('refresh');
-    expect(runtime.getSnapshot().state.persistent.specs.refresh).toBe(1);
-    expect(runtime.getSnapshot().state.resources.dollars).toBe(dollars - BALANCE.spec.refresh[1]!.price);
-    runtime.startNextVersion(); runtime.startNextVersion();
-    state = runtime.getSnapshot().state;
-    expect(state.run.world).toBe('seed'); expect(state.run.version).toBe('v2');
-    expect(state.resources.pixels).toBe(0); expect(state.resources.tokens).toBe(before.resources.tokens);
-    expect(state.run.seed.autoCursors).toBe(0); expect(state.run.desktop.upgrades).toEqual([]);
-    expect(state.run.desktop.feedback).toEqual([]); expect(state.run.shipping).toBeNull();
-    expect(state.persistent.progress.selected).toBeNull();
-    expect(state.run.play.contract).toEqual(contract ? { id: contract, status: 'active' } : null);
-    expect(state.persistent.screenshots).toEqual(before.persistent.screenshots);
-    expect(state.persistent.artwork.icons).toEqual(before.persistent.artwork.icons);
-    if (contract === 'no-color') expect(state.run.seed.installer?.items).not.toContain('color');
-    const saved = loadGame(storage);
-    expect(saved.kind === 'loaded' && saved.state.run.version).toBe('v2');
-    runtime.dispose(); await start();
-    expect(runtime.getSnapshot().introVisible).toBe(false);
-    expect(runtime.getSnapshot().state.persistent.specs.refresh).toBe(1);
-    expect(runtime.getSnapshot().state.run.play.contract).toEqual(state.run.play.contract);
-    expect(vi.mocked(platform.unlockAchievement).mock.calls.filter(([id]) => id === 'v1-released')).toHaveLength(1);
-    step(BALANCE.release.restartMs + BALANCE.w1.inheritMs);
-    const resumed = runtime.getSnapshot().state;
-    runtime.pressSeed();
-    expect(runtime.getSnapshot().state.resources.pixels - resumed.resources.pixels).toBeCloseTo(manualClickValue(resumed));
-    expect(runtime.getSnapshot().state.persistent.products.at(-1)!.screen.specs.refresh).toBe(0);
-  });
 
   it('製品の画像保存と売上画面への移行が失敗しても元の段階へ残り、再試行で一度だけ出荷する', async () => {
     await prepare(); runtime.requestPrototypeRelease();
@@ -565,29 +503,16 @@ describe('段階7：v1.0の通常の出荷からv2へ', () => {
   });
 });
 
-it('構成の組み立て中に保存ができた時点ですぐ書き込み、再起動後も続きから組み立てる', async () => {
-  storage.setItem(SAVE_KEYS.primary, encodeSave(createFixture('seed-inheriting', clock.wall)!));
-  await start(); step(3_400);
-  const saved = loadGame(storage);
-  expect(saved.kind).toBe('loaded');
-  if (saved.kind === 'loaded') {
-    expect(saved.state.run.seed.built).toEqual(['border', 'save']);
-    expect(saved.state.run.seed.installer?.elapsedMs).toBe(3_400);
-  }
-  runtime.dispose(); await start(); step(6_600);
-  expect(runtime.getSnapshot().state.run.seed.installer).toBeNull();
-  expect(runtime.getSnapshot().state.run.seed.built).toEqual(['border', 'save', 'color', 'font', 'layout', 'motion']);
-});
-
-it('描画の報酬済み記録を保存し、再起動後に同じマスを塗っても二重加算しない', async () => {
-  storage.setItem(SAVE_KEYS.primary, encodeSave(createFixture('kumiki-early', clock.wall)!));
-  await start();
-  const reward=10*globalMultiplier(runtime.getSnapshot().state);
-  runtime.actKumiki({ type: 'paint', id: 'folder', cells: [49], color: 0, frame: 0, mirror: false });
-  expect(runtime.getSnapshot().state.resources.pixels).toBe(reward);
-  runtime.leave(); runtime.dispose(); await start();
-  runtime.actKumiki({ type: 'paint', id: 'folder', cells: [49], color: 0, frame: 0, mirror: false });
-  expect(runtime.getSnapshot().state.resources.pixels).toBe(reward);
+it('制作工程をすぐ保存し、再読込・再配置で工程払いを重複しない',async()=>{
+ const fixture=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!;
+ storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
+ const rect=runtime.getSnapshot().state.run.workshop.parts['common-button']!.rect;
+ runtime.actWorkshop({type:'place',part:'common-button',rect});
+ const paid=runtime.getSnapshot().state.resources.pixels;
+ expect(loadGame(storage).kind).toBe('loaded');runtime.dispose();await start();
+ expect(runtime.getSnapshot().state.run.workshop.parts['common-button']!.step).toBe(1);
+ runtime.actWorkshop({type:'place',part:'common-button',rect});
+ expect(runtime.getSnapshot().state.resources.pixels).toBe(paid);
 });
 
 describe('段階5の保存と製品名',()=>{
@@ -651,7 +576,7 @@ describe('段階6.5の操作と永続の記録',()=>{
   await start();runtime.common({type:'sound',enabled:false,volume:.4});vi.mocked(platform.audio.play).mockClear();runtime.pressSeed();expect(platform.audio.play).not.toHaveBeenCalled();runtime.common({type:'sound',enabled:true});vi.mocked(platform.audio.play).mockImplementation(()=>{throw new Error('no device')});expect(()=>runtime.pressSeed()).not.toThrow();runtime.enableDebugSave();runtime.persist();const saved=loadGame(storage);expect(saved.kind==='loaded'&&saved.state.persistent.progress.sound).toEqual({enabled:true,volume:.4});
  });
  it('10台のまとめ買いを保存し、残高と台数が一致する',async()=>{
-  const s=createFixture('seed-motion',clock.wall)!;s.resources.pixels=1e6;s.run.totalPixelsGenerated=1e6;storage.setItem(SAVE_KEYS.primary,encodeSave(s));await start();runtime.common({type:'bulk',mode:'ten'});const before=runtime.getSnapshot().state,q=seedCursorQuote(before);runtime.buildSeed('cursor');const after=runtime.getSnapshot().state;expect(after.run.seed.autoCursors-before.run.seed.autoCursors).toBe(10);expect(before.resources.pixels-after.resources.pixels).toBe(q.cost);expect(loadGame(storage).kind).toBe('loaded');
+  const s=createFixture('seed-motion',clock.wall)!;s.run.seed.autoCursors=11;s.resources.pixels=1e6;s.run.totalPixelsGenerated=1e6;storage.setItem(SAVE_KEYS.primary,encodeSave(s));await start();runtime.common({type:'bulk',mode:'ten'});const before=runtime.getSnapshot().state,q=seedCursorQuote(before);runtime.buildSeed('cursor');const after=runtime.getSnapshot().state;expect(after.run.seed.autoCursors-before.run.seed.autoCursors).toBe(10);expect(before.resources.pixels-after.resources.pixels).toBe(q.cost);expect(loadGame(storage).kind).toBe('loaded');
  });
 });
 

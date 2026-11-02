@@ -6,6 +6,7 @@ import { passivePixelsPerSecond } from './economy';
 import { createFixture } from './fixtures';
 import { encodeSave, decodeSave } from './save';
 import { advanceOfflineTime } from './time';
+import { actWorkshop } from './workshop';
 
 const now = 1_800_000_000_000;
 function automated() {
@@ -67,11 +68,14 @@ describe('第2版：不在中のターミナル', () => {
   });
 
   it('不在の完成品エクスポートも一度だけ行い、繰り返してトークンを増やさない', () => {
-    const state = automated();
-    state.run.kumiki = createFixture('secret-art', now)!.run.kumiki;
+    let state = automated();
+    state.run.workshop = createFixture('stage8a-part-common-button-step-3-era0', now)!.run.workshop;
+    state = actWorkshop(state, { type:'test', part:'common-button', interaction:'press' }, now);
+    expect(state.run.workshop.parts['common-button']!.step).toBe(4);
+    expect(state.run.workshop.parts['common-button']!.exportedAt).toBeNull();
     state.run.play.terminalCommand = 'export';
     const first = advanceOfflineTime(state, now + 180_000).state;
-    expect(first.run.kumiki.drawings.folder!.exported).toBe(true);
+    expect(first.run.workshop.parts['common-button']!.exportedAt).not.toBeNull();
     expect(first.resources.tokens).toBeGreaterThan(state.resources.tokens);
     expect(first.run.desktop.terminal.executions).toBe(1);
     expect(first.persistent.screenshots).toHaveLength(0);
