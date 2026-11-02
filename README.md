@@ -135,3 +135,17 @@ PR #9の標準配置の比較は [mainと修正後の画像・結果](docs/revie
 - `?state=stage7-store`／`stage7-shipping`／`stage7-complete`：製品ページ、売上集計中、出荷完了。
 - `?state=stage7-v2`／`stage7-v2-inherit`：60Hz購入済みのv2と、構成の継承中。
 - `?state=stage7-advice0`〜`stage7-advice3`／`stage7-offline0`〜`stage7-offline3`：各時代の助言・不在の知らせ。実セーブから隔離した確認用。
+
+
+製品ページと出荷画面の世代確認は `python tools/check_stage7_screens.py --base-url http://127.0.0.1:4173`。3世代と試作版×3言語×2サイズの48場面を操作し、画像・JSON・全画像の一覧を `game/artifacts/stage7-layouts/` に出力する。`--generation`・`--screen`・`--language`・`--width`で絞り込み、`--resume`で成功した条件を保って再開できる。第1世代はOSのゴシック体を使い、確認環境の書体については[確認記録](docs/reviews/stage7/screen-verification.md)に記載。
+
+- `?state=stage7-store-gen1`〜`stage7-store-gen3`：ソフトウェアの製品ページ3世代。
+- `?state=stage7-sales-gen1`〜`stage7-sales-gen3`：ソフトウェアの売上レポート3世代。
+- `?state=stage7-freeware`／`stage7-freeware-sales`：第1世代の試作版ページと出荷。
+
+第3世代は保存した様式だけの見本で、未実装のデスクトップ段4・5は解放しない。[資料の閲覧範囲](docs/reviews/stage7/screen-references.md)。
+
+3世代の骨格の再確認では、`--mode semantic --resume`で同じ製品データの情報集合を比較し、`--mode reference --reference-url <変更前ビルドの配信元> --resume`で第1世代の変更前後を撮影する。`--mode artifacts --resume`で横並びの比較画像2枚と全画像ZIPを再生成できる。画面構成は世代ごとの別コンポーネントに分岐し、情報・操作の小さな部品を共有している。
+
+
+提供画像への忠実度パスは `python tools/check_stage7_screens.py --generation 2 --generation 3 --skip-freeware --output-dir game/artifacts/stage7-fidelity` で第2・第3世代の24条件を確認する。同じ`--output-dir`と`--resume`を付けて`--mode semantic`、`--mode reference --reference-url <変更前配信元>`、`--mode artifacts`を順に実行すると、情報集合・第1世代の比較・全画像ZIPを再生成できる。第1世代の比較はv1/試作版×製品/出荷×日本語2サイズの8条件。参考パックはリポジトリへ含めない。

@@ -1,0 +1,264 @@
+/* Sales reports use the same saved data and purchase controls in each generation. */
+.shipping-page[data-generation] {
+  position:relative;inline-size:100%;block-size:100%;overflow:auto;background:#f0f0f0;color:#222;
+  font:13px/1.45 'MS PGothic','ＭＳ Ｐゴシック','MS UI Gothic',Osaka,'IPAPGothic',sans-serif;font-variant-numeric:tabular-nums;
+  --report-line:#aaa;--report-heading:#e7e7e7;--report-muted:#555;--report-accent:#c8553d;
+}
+.shipping-page[data-generation] * {box-sizing:border-box;}
+.shipping-page[data-generation] .shipping-header {
+  position:relative;min-block-size:44px;padding:8px 24px;display:flex;align-items:center;gap:16px;
+  background:#dedede;border-block-end:1px solid #777;box-shadow:none;border-radius:0;
+}
+.shipping-page[data-generation] .shipping-header>b {font-size:15px;white-space:nowrap;border-inline-start:4px solid var(--report-accent);padding-inline-start:8px;}
+.shipping-page[data-generation] .shipping-header>h1 {font-family:inherit;font-size:15px;font-weight:700;line-height:1.4;margin:0;white-space:nowrap;}
+.shipping-page[data-generation] .shipping-header>span {margin-inline-start:auto;font-size:12px;overflow-wrap:anywhere;}
+.shipping-page[data-generation] .shipping-report-shell {max-inline-size:1840px;margin:18px auto 0;padding:0 20px 24px;}
+.shipping-page[data-generation] .shipping-report-heading {display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-block-end:14px;border-block-end:1px solid #888;padding-block-end:7px;}
+.shipping-page[data-generation] .shipping-report-heading>h2 {font-size:14px;margin:0;}
+.shipping-page[data-generation] .shipping-report-heading>p {font-size:12px;margin:0;white-space:nowrap;}
+.shipping-page[data-generation] .shipping-report-main {display:grid;grid-template-columns:300px 360px minmax(0,1fr);align-items:start;gap:16px;}
+.shipping-page[data-generation] .shipping-report-main>section {min-inline-size:0;}
+.shipping-page[data-generation] h2 {font-family:inherit;font-size:13px;font-weight:700;line-height:1.45;}
+.shipping-page[data-generation] .shipping-report-main>section>h2,
+.shipping-page[data-generation] .shipping-report-notes>h2,
+.shipping-page[data-generation] .shipping-report-contract>h2,
+.shipping-page[data-generation] .shipping-report-execute>h2 {
+  border:1px solid var(--report-line);background:var(--report-heading);padding:5px 8px;margin:0;font-size:13px;
+}
+.shipping-page[data-generation] .shipping-report-preview {background:#fff;border:1px solid var(--report-line);border-block-start:0;padding:8px 9px;}
+.shipping-page[data-generation] .shipping-report-preview>.product-preview {margin:0;border:1px solid #777;border-radius:0;background:#e6e6e6;box-shadow:none;}
+.shipping-page[data-generation] .shipping-product-table,
+.shipping-page[data-generation] .shipping-daily-table,
+.shipping-page[data-generation] .spec-table {inline-size:100%;border-collapse:collapse;border:1px solid var(--report-line);table-layout:auto;background:#fff;}
+.shipping-page[data-generation] .shipping-product-table th,
+.shipping-page[data-generation] .shipping-product-table td,
+.shipping-page[data-generation] .shipping-daily-table th,
+.shipping-page[data-generation] .shipping-daily-table td,
+.shipping-page[data-generation] .spec-table th,
+.shipping-page[data-generation] .spec-table td {
+  border:1px solid var(--report-line);block-size:auto;min-block-size:0;padding:6px 8px;color:inherit;font:inherit;text-align:start;vertical-align:middle;overflow-wrap:anywhere;
+}
+.shipping-page[data-generation] .shipping-product-table th {inline-size:28%;background:#eee;font-weight:400;}
+.shipping-page[data-generation] .shipping-daily-table thead th,
+.shipping-page[data-generation] .spec-table thead th {background:#eee;font-weight:400;text-align:center;}
+.shipping-page[data-generation] .shipping-daily-table tbody th {inline-size:30%;font-weight:400;white-space:nowrap;}
+.shipping-page[data-generation] .shipping-daily-table td {text-align:end;white-space:nowrap;}
+.shipping-page[data-generation] .shipping-daily-table tfoot th,
+.shipping-page[data-generation] .shipping-daily-table tfoot td {font-weight:700;background:#eee;border-block-start:2px solid #777;}
+.shipping-page[data-generation] .shipping-daily-table .revenue-total {font-size:inherit;}
+.shipping-page[data-generation] .shipping-order-balance {display:flex;justify-content:space-between;gap:12px;margin:0;padding:6px 8px;background:#fff;border-inline:1px solid var(--report-line);}
+.shipping-page[data-generation] .available-dollars {font-size:13px;font-weight:700;}
+.shipping-page[data-generation] .spec-table th:first-child {inline-size:15%;}
+.shipping-page[data-generation] .spec-table th:nth-child(2),
+.shipping-page[data-generation] .spec-table th:nth-child(3) {inline-size:10%;}
+.shipping-page[data-generation] .spec-table th:nth-child(4) {inline-size:auto;}
+.shipping-page[data-generation] .spec-table th:nth-child(5) {inline-size:11%;}
+.shipping-page[data-generation] .spec-table th:last-child {inline-size:13%;}
+.shipping-page[data-generation] .spec-table tbody th {font-weight:400;}
+.shipping-page[data-generation] .spec-table td:nth-last-child(-n+2) {white-space:nowrap;text-align:end;}
+.shipping-page[data-generation] .spec-table .recommended-spec {box-shadow:none;background:#fff6f2;}
+.shipping-page[data-generation] .spec-table .recommended-spec>th {font-weight:700;color:#8c3b2d;}
+.shipping-page[data-generation] .spec-table .unaffordable {color:#777;}
+.shipping-page[data-generation] .shipping-right {display:block;overflow:visible;}
+.shipping-page[data-generation] button,
+.shipping-page[data-generation] .shipping-right button,
+.shipping-page[data-generation] .shipping-footer button,
+.shipping-page[data-generation] select {
+  min-block-size:27px;border:2px outset #e8e8e8;border-radius:0;padding:2px 10px;background:#e6e6e6;color:#222;font:inherit;box-shadow:none;
+}
+.shipping-page[data-generation] button:active:not(:disabled) {border-style:inset;}
+.shipping-page[data-generation] button:focus-visible,
+.shipping-page[data-generation] select:focus-visible {outline:1px dotted currentColor;outline-offset:2px;}
+.shipping-page[data-generation] .shipping-right .shipping-primary {background:#e6e6e6;color:#8c3b2d;border-color:#e8e8e8;font-weight:700;}
+.shipping-page[data-generation] button:disabled,
+.shipping-page[data-generation] .shipping-right button:disabled,
+.shipping-page[data-generation] .next-version button:disabled {background:#e6e6e6;border-color:#ddd;color:#888;cursor:default;}
+.shipping-page[data-generation] .carry-dollars,
+.shipping-page[data-generation] .shipping-pending {font-size:12px;color:var(--report-muted);margin:8px 0 0;}
+.shipping-page[data-generation] .shipping-report-notes {margin-block-start:18px;}
+.shipping-page[data-generation] .shipping-guide {border:1px solid var(--report-line);border-block-start:0;background:#fff;padding:8px 10px;}
+.shipping-page[data-generation] .shipping-guide p {font-size:13px;line-height:1.5;margin:0;}
+.shipping-page[data-generation] .shipping-guide p:first-child {font-size:12px;margin-block-end:3px;gap:8px;}
+.shipping-page[data-generation] .shipping-guide span {color:var(--report-muted);}
+.shipping-page[data-generation] .shipping-report-contract {margin-block-start:14px;}
+.shipping-page[data-generation] .shipping-report-contract .contract-selection {display:grid;grid-template-columns:minmax(170px,1fr) minmax(300px,2fr) minmax(260px,2fr);align-items:center;gap:4px 18px;border:1px solid var(--report-line);border-block-start:0;background:#fff;padding:9px 10px;}
+.shipping-page[data-generation] .contract-selection>h2 {margin:0;font-size:13px;grid-column:1;grid-row:1;}
+.shipping-page[data-generation] .contract-selection>p {font-size:12px;margin:0;}
+.shipping-page[data-generation] .contract-selection>p:first-of-type {grid-column:1;grid-row:2;}
+.shipping-page[data-generation] .contract-selection>label {grid-column:2;grid-row:1 / span 2;}
+.shipping-page[data-generation] .contract-selection>p:last-child {grid-column:3;grid-row:1 / span 2;}
+.shipping-page[data-generation] .contract-selection select {inline-size:100%;max-inline-size:100%;background:#fff;border:1px solid #888;}
+.shipping-page[data-generation] .shipping-report-execute {margin-block-start:14px;}
+.shipping-page[data-generation] .next-version {display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:24px;margin:0;border:1px solid var(--report-line);border-block-start:0;background:#fff;padding:10px;}
+.shipping-page[data-generation] .next-version p {font-size:13px;line-height:1.5;margin:0;text-align:start;}
+.shipping-page[data-generation] .next-version-theme {font-weight:700;margin-block-start:3px;}
+.shipping-page[data-generation] .next-version .shipping-next-requirement {color:#8c3b2d;margin-block-start:5px;}
+.shipping-page[data-generation] .next-version button {min-block-size:30px;padding:4px 18px;background:#e6e6e6;border:2px outset #e8e8e8;color:#222;font-size:13px;white-space:nowrap;}
+.shipping-page[data-generation] .shipping-footer {font-size:12px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 24px;margin-block-start:16px;padding-block-start:8px;border-block-start:1px solid #aaa;color:var(--report-muted);}
+.shipping-page[data-generation] .shipping-footer label {display:flex;align-items:center;gap:8px;}
+.shipping-page[data-generation] .shipping-footer details {flex:none;}
+.shipping-page[data-generation] .shipping-footer summary {cursor:pointer;}
+.shipping-page[data-generation] .shipping-footer button {margin:6px 6px 0 0;}
+
+
+/* 2012 analytics: thin controls, a shallow line chart, bare metrics, detail and breakdown. */
+.shipping-page.shipping-generation-2 {background:#f0f0f0;font:12px/1.4 Arial,'Meiryo','Refresh UI',sans-serif;color:#333;--report-line:#c7c7c7;--report-heading:#f1f1f1;--report-muted:#666;}
+.shipping-page.shipping-generation-2 .shipping-portal-header {display:flex;align-items:center;gap:20px;min-block-size:38px;padding:7px 22px;background:#f7f7f7;border-block-end:1px solid #bdbdbd;color:#333;}
+.shipping-page.shipping-generation-2 .shipping-portal-header>b {font-size:13px;white-space:nowrap;border-inline-start:3px solid #c8553d;padding-inline-start:8px;}
+.shipping-page.shipping-generation-2 .shipping-portal-header>h1 {margin:0;font-size:14px;font-weight:700;}
+.shipping-page.shipping-generation-2 .shipping-portal-header>span {margin-inline-start:auto;font-size:12px;color:#666;}
+.shipping-page.shipping-generation-2 .shipping-portal-page {max-inline-size:1800px;margin:0 auto;background:#fff;min-block-size:calc(100% - 38px);padding:10px 18px 20px;border-inline:1px solid #ccc;}
+.shipping-page.shipping-generation-2 .shipping-portal-context {display:flex;justify-content:space-between;align-items:center;gap:20px;border-block-end:1px solid #ccc;padding-block-end:8px;margin-block-end:0;}
+.shipping-page.shipping-generation-2 .shipping-portal-context>h2 {font-size:14px;font-weight:700;margin:0;}
+.shipping-page.shipping-generation-2 .shipping-period-field {display:flex;align-items:center;gap:10px;flex:none;font-size:11px;margin:0;}
+.shipping-page.shipping-generation-2 .shipping-period-field>b {font-weight:400;}
+.shipping-page.shipping-generation-2 .shipping-period-field>span {display:block;padding:4px 7px;background:#f8f8f8;border:1px solid #bbb;color:#444;}
+.shipping-page.shipping-generation-2 .shipping-portal-chart {margin:0;border-block-end:1px solid #b9b9b9;background:#fff;}
+.shipping-page.shipping-generation-2 .shipping-trend {margin:0;padding:8px 10px 5px;}
+.shipping-page.shipping-generation-2 .shipping-trend figcaption {font-size:11px;font-weight:400;color:#555;margin-block-end:4px;}
+.shipping-page.shipping-generation-2 .shipping-trend svg {display:block;inline-size:100%;block-size:180px;}
+.shipping-page.shipping-generation-2 .shipping-chart-grid {fill:none;stroke:#d5d5d5;stroke-width:1;}
+.shipping-page.shipping-generation-2 .shipping-chart-line {fill:none;stroke:#597d90;stroke-width:2;}
+.shipping-page.shipping-generation-2 .shipping-chart-area {fill:#597d9014;}
+.shipping-page.shipping-generation-2 .shipping-trend circle {fill:#597d90;stroke:#fff;stroke-width:1;}
+.shipping-page.shipping-generation-2 .shipping-chart-bar {fill:#7d929f;}
+.shipping-page.shipping-generation-2 .shipping-trend-days {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;padding:0;margin:0;list-style:none;font-size:11px;text-align:center;color:#666;}
+.shipping-page.shipping-generation-2 .shipping-portal-summary {border-collapse:collapse;inline-size:100%;table-layout:fixed;border:0;border-block-end:1px solid #b9b9b9;margin-block-end:14px;}
+.shipping-page.shipping-generation-2 .shipping-portal-summary th {font-size:11px;font-weight:400;text-align:center;color:#666;padding:7px 10px 0;border-inline-end:1px solid #ddd;}
+.shipping-page.shipping-generation-2 .shipping-portal-summary td {padding:3px 10px 10px;text-align:center;border-inline-end:1px solid #ddd;vertical-align:middle;}
+.shipping-page.shipping-generation-2 .shipping-portal-summary th:last-child,
+.shipping-page.shipping-generation-2 .shipping-portal-summary td:last-child {border-inline-end:0;}
+.shipping-page.shipping-generation-2 .shipping-portal-summary strong {font-size:24px;font-weight:400;}
+.shipping-page.shipping-generation-2 .shipping-period-comparison {display:flex;justify-content:space-evenly;gap:18px;flex-wrap:wrap;font-size:11px;}
+.shipping-page.shipping-generation-2 .shipping-period-comparison span {display:flex;align-items:baseline;gap:8px;}
+.shipping-page.shipping-generation-2 .shipping-period-comparison b {font-size:20px;font-weight:400;}
+.shipping-page.shipping-generation-2 .shipping-portal-layout {display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start;}
+.shipping-page.shipping-generation-2 .shipping-portal-report,
+.shipping-page.shipping-generation-2 .shipping-portal-sidebar {min-inline-size:0;}
+.shipping-page.shipping-generation-2 h2 {font-family:Arial,'Meiryo','Refresh UI',sans-serif;}
+.shipping-page.shipping-generation-2 .shipping-portal-details>h2,
+.shipping-page.shipping-generation-2 .shipping-portal-order>h2,
+.shipping-page.shipping-generation-2 .shipping-portal-sidebar h2,
+.shipping-page.shipping-generation-2 .shipping-portal-project>h2,
+.shipping-page.shipping-generation-2 .shipping-portal-execute>h2 {font-size:12px;background:#f1f1f1;color:#444;border:1px solid #c7c7c7;margin:0;padding:5px 8px;}
+.shipping-page.shipping-generation-2 .shipping-portal-details {margin-block-end:14px;}
+.shipping-page.shipping-generation-2 .shipping-daily-table th,
+.shipping-page.shipping-generation-2 .shipping-daily-table td {padding:5px 9px;border-inline:0;font-size:12px;}
+.shipping-page.shipping-generation-2 .shipping-daily-table thead th {background:#f5f5f5;color:#555;}
+.shipping-page.shipping-generation-2 .shipping-daily-table tbody tr:nth-child(even) {background:#fafafa;}
+.shipping-page.shipping-generation-2 .shipping-portal-breakdown {border:1px solid #ccc;margin-block-end:14px;}
+.shipping-page.shipping-generation-2 .shipping-portal-breakdown .shipping-trend {padding:7px 8px;}
+.shipping-page.shipping-generation-2 .shipping-portal-breakdown .shipping-trend svg {block-size:112px;}
+.shipping-page.shipping-generation-2 .shipping-portal-breakdown .shipping-trend-days {font-size:10px;gap:2px;}
+.shipping-page.shipping-generation-2 .shipping-portal-product .shipping-report-preview {padding:10px 28px;}
+.shipping-page.shipping-generation-2 .shipping-portal-notices {margin-block-start:14px;}
+.shipping-page.shipping-generation-2 .shipping-guide {padding:9px;}
+.shipping-page.shipping-generation-2 .shipping-guide p {font-size:12px;line-height:1.5;}
+.shipping-page.shipping-generation-2 .shipping-portal-project {margin-block-start:16px;}
+.shipping-page.shipping-generation-2 .shipping-portal-project .contract-selection {padding:10px;border:1px solid #ccc;border-block-start:0;background:#fff;}
+.shipping-page.shipping-generation-2 .contract-selection h2 {background:none;border:0;padding:0;font-size:12px;}
+.shipping-page.shipping-generation-2 .contract-selection p {margin:5px 0;font-size:12px;}
+.shipping-page.shipping-generation-2 .contract-selection select {min-inline-size:420px;max-inline-size:100%;background:#fff;}
+.shipping-page.shipping-generation-2 .shipping-portal-execute {margin-block-start:14px;}
+.shipping-page.shipping-generation-2 button,
+.shipping-page.shipping-generation-2 .shipping-right button,
+.shipping-page.shipping-generation-2 .shipping-right .shipping-primary,
+.shipping-page.shipping-generation-2 .next-version button {background:linear-gradient(#fff,#e6e6e6);border:1px solid #aaa;border-block-end-color:#888;color:#333;min-block-size:25px;font-size:12px;}
+.shipping-page.shipping-generation-2 .shipping-right .shipping-primary {color:#8c3b2d;}
+
+/* Sales-report reference: compact summary and links, a period strip and dense daily ledger. */
+.shipping-page.shipping-generation-3 {overflow:hidden;background:#343638;font:12px/1.35 'Segoe UI','Refresh UI',sans-serif;color:#dce0e3;--report-line:#505457;--report-heading:#3d4043;--report-muted:#b4bdc3;}
+.shipping-page.shipping-generation-3 .shipping-app-header {display:flex;align-items:center;gap:22px;min-block-size:40px;padding:8px 22px;background:#2b2d2f;color:#e3e6e8;border-block-end:1px solid #4d5154;}
+.shipping-page.shipping-generation-3 .shipping-app-header>b {font-size:13px;font-weight:600;white-space:nowrap;border-inline-start:3px solid #c8553d;padding-inline-start:8px;}
+.shipping-page.shipping-generation-3 .shipping-app-header>h1 {font-size:14px;font-weight:400;margin:0;}
+.shipping-page.shipping-generation-3 .shipping-app-header>span {margin-inline-start:auto;color:#b7c0c7;font-size:12px;}
+.shipping-page.shipping-generation-3 .shipping-app-layout {display:block;block-size:calc(100% - 40px);}
+.shipping-page.shipping-generation-3 .shipping-app-workspace {min-inline-size:0;overflow-y:auto;overflow-x:hidden;block-size:100%;max-inline-size:1840px;margin:0 auto;padding:14px 22px 24px;}
+.shipping-page.shipping-generation-3 .shipping-app-workspace section {min-inline-size:0;scroll-margin-block-start:12px;}
+.shipping-page.shipping-generation-3 .shipping-app-workspace section:focus {outline:1px solid #929ba1;outline-offset:4px;}
+.shipping-page.shipping-generation-3 h2 {font-family:'Segoe UI','Refresh UI',sans-serif;}
+.shipping-page.shipping-generation-3 .shipping-app-overview>h2 {font-size:17px;line-height:1.4;font-weight:400;margin:0 0 10px;padding-block-end:6px;border-block-end:1px solid #777d80;}
+.shipping-page.shipping-generation-3 .shipping-finance-overview {display:grid;grid-template-columns:minmax(440px,680px) minmax(0,1fr);gap:70px;margin-block-end:16px;align-items:start;}
+.shipping-page.shipping-generation-3 .shipping-finance-summary {border-collapse:collapse;inline-size:100%;background:#27292b;border:1px solid #242628;border-radius:0;box-shadow:none;}
+.shipping-page.shipping-generation-3 .shipping-finance-summary th,
+.shipping-page.shipping-generation-3 .shipping-finance-summary td {padding:5px 10px;text-align:start;border-block-end:1px solid #44484b;font-size:12px;font-weight:400;}
+.shipping-page.shipping-generation-3 .shipping-finance-summary th {inline-size:48%;color:#c9cfd4;}
+.shipping-page.shipping-generation-3 .shipping-finance-summary strong {font-size:12px;font-weight:600;}
+.shipping-page.shipping-generation-3 .shipping-finance-summary .shipping-summary-group th {padding-block:4px;color:#929da5;font-size:11px;border-block-end:0;}
+.shipping-page.shipping-generation-3 .shipping-finance-summary tbody.shipping-period-comparison {display:table-row-group;}
+.shipping-page.shipping-generation-3 .shipping-finance-links {padding-block-start:1px;}
+.shipping-page.shipping-generation-3 .shipping-finance-links>b {display:block;margin-block-end:5px;font-size:11px;color:#b9c1c7;}
+.shipping-page.shipping-generation-3 .shipping-finance-links>div {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 18px;max-inline-size:780px;}
+.shipping-page.shipping-generation-3 .shipping-finance-links button {display:block;min-block-size:24px;padding:1px 0;text-align:start;white-space:normal;overflow-wrap:anywhere;border:0;border-radius:0;background:transparent;color:#c3d0d9;text-decoration:underline;font-size:12px;font-weight:400;box-shadow:none;}
+.shipping-page.shipping-generation-3 .shipping-finance-links button:hover {color:#fff;}
+.shipping-page.shipping-generation-3 .shipping-finance-links button[aria-current] {color:#fff;font-weight:600;}
+.shipping-page.shipping-generation-3 .shipping-app-period-strip {border-block:1px solid #5b6266;background:#454b4f;padding:6px 9px;margin-block-end:10px;}
+.shipping-page.shipping-generation-3 .shipping-period-field {display:flex;gap:14px;align-items:center;margin:0;font-size:11px;}
+.shipping-page.shipping-generation-3 .shipping-period-field>b {font-weight:400;color:#d4d9dc;}
+.shipping-page.shipping-generation-3 .shipping-period-field>span {padding:2px 6px;border:1px solid #6c7378;background:#383d41;border-radius:0;white-space:nowrap;color:#eef0f1;}
+.shipping-page.shipping-generation-3 .shipping-app-details {margin-block-end:12px;}
+.shipping-page.shipping-generation-3 .shipping-app-workspace section>h2 {font-size:12px;font-weight:600;padding:0 0 6px;margin:0;color:#d7dde1;}
+.shipping-page.shipping-generation-3 .shipping-app-workspace .shipping-app-overview>h2 {font-size:17px;font-weight:400;padding:0 0 6px;margin:0 0 10px;}
+.shipping-page.shipping-generation-3 .shipping-daily-table {border:0;table-layout:auto;background:#343638;}
+.shipping-page.shipping-generation-3 .shipping-daily-table th,
+.shipping-page.shipping-generation-3 .shipping-daily-table td {border-inline:0;border-block:1px solid #4a4e51;padding:4px 9px;font-size:12px;line-height:1.35;color:#d5dbe0;}
+.shipping-page.shipping-generation-3 .shipping-daily-table thead th {background:#3c3f42;color:#bfc7cd;font-size:11px;}
+.shipping-page.shipping-generation-3 .shipping-daily-table th:first-child {inline-size:40%;}
+.shipping-page.shipping-generation-3 .shipping-daily-table th:nth-child(2),
+.shipping-page.shipping-generation-3 .shipping-daily-table td:nth-child(2),
+.shipping-page.shipping-generation-3 .shipping-daily-table th:last-child,
+.shipping-page.shipping-generation-3 .shipping-daily-table td:last-child {inline-size:30%;min-inline-size:220px;}
+.shipping-page.shipping-generation-3 .shipping-daily-table tbody tr:nth-child(even) {background:#393c3e;}
+.shipping-page.shipping-generation-3 .shipping-daily-table tfoot th,
+.shipping-page.shipping-generation-3 .shipping-daily-table tfoot td {background:#2c2f31;color:#e0e4e7;border-block-start:1px solid #62686c;}
+.shipping-page.shipping-generation-3 .shipping-app-trend {margin-block-end:15px;}
+.shipping-page.shipping-generation-3 .shipping-trend {margin:0;border-block:1px solid #4a4e51;border-radius:0;padding:6px 8px 4px;background:transparent;box-shadow:none;}
+.shipping-page.shipping-generation-3 .shipping-trend figcaption {font-size:11px;font-weight:400;color:#bfc7cd;margin-block-end:3px;}
+.shipping-page.shipping-generation-3 .shipping-trend svg {display:block;inline-size:100%;block-size:78px;}
+.shipping-page.shipping-generation-3 .shipping-chart-grid {fill:none;stroke:#4b5155;stroke-width:1;}
+.shipping-page.shipping-generation-3 .shipping-chart-line {fill:none;stroke:#b2bfc8;stroke-width:1.7;}
+.shipping-page.shipping-generation-3 .shipping-chart-area {fill:#b2bfc80b;}
+.shipping-page.shipping-generation-3 .shipping-trend circle {fill:#c0cad1;stroke:#343638;stroke-width:1;}
+.shipping-page.shipping-generation-3 .shipping-trend-days {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;list-style:none;padding:0;margin:2px 0 0;font-size:10px;color:#aab4bc;text-align:center;}
+.shipping-page.shipping-generation-3 .shipping-app-management {display:grid;grid-template-columns:322px minmax(0,1fr);gap:24px;align-items:start;margin-block-end:16px;}
+.shipping-page.shipping-generation-3 .shipping-app-product,
+.shipping-page.shipping-generation-3 .shipping-app-specs,
+.shipping-page.shipping-generation-3 .shipping-app-notes,
+.shipping-page.shipping-generation-3 .shipping-app-contracts,
+.shipping-page.shipping-generation-3 .shipping-app-execute {border:0;background:transparent;border-radius:0;padding:0;margin-block-end:14px;box-shadow:none;}
+.shipping-page.shipping-generation-3 .shipping-product-information .shipping-report-preview {border:0;padding:0 20px 8px;background:transparent;}
+.shipping-page.shipping-generation-3 .shipping-product-table {border:0;background:transparent;}
+.shipping-page.shipping-generation-3 .shipping-product-table th,
+.shipping-page.shipping-generation-3 .shipping-product-table td {border-inline:0;border-block-color:#4a4e51;padding:4px 7px;font-size:12px;background:transparent;color:#d5dbe0;}
+.shipping-page.shipping-generation-3 .shipping-product-table th {background:transparent;color:#b1bbc3;}
+.shipping-page.shipping-generation-3 .shipping-order-balance {border:0;background:#3c4043;padding:5px 8px;margin-block-end:6px;border-radius:0;font-size:12px;}
+.shipping-page.shipping-generation-3 .spec-table {background:transparent;border-color:#4a4e51;}
+.shipping-page.shipping-generation-3 .spec-table th,
+.shipping-page.shipping-generation-3 .spec-table td {font-size:12px;padding:4px 7px;border-color:#4a4e51;color:#d5dbe0;}
+.shipping-page.shipping-generation-3 .spec-table thead th {background:#3c3f42;color:#bfc7cd;}
+.shipping-page.shipping-generation-3 .spec-table .recommended-spec {background:#49413d;box-shadow:none;}
+.shipping-page.shipping-generation-3 .spec-table .recommended-spec>th {color:#f2c5b9;}
+.shipping-page.shipping-generation-3 .spec-table .unaffordable {color:#b1b7bd;}
+.shipping-page.shipping-generation-3 .carry-dollars {color:#b4bdc3;font-size:11px;margin-block-start:5px;}
+.shipping-page.shipping-generation-3 .shipping-guide {border:0;padding:0;background:transparent;}
+.shipping-page.shipping-generation-3 .shipping-guide p {font-size:12px;line-height:1.45;color:#cbd2d7;}
+.shipping-page.shipping-generation-3 .shipping-guide p:first-child {font-size:11px;}
+.shipping-page.shipping-generation-3 .shipping-guide span {color:#aeb9c2;}
+.shipping-page.shipping-generation-3 .contract-selection>h2 {font-size:12px;margin:0;}
+.shipping-page.shipping-generation-3 .contract-selection p {font-size:11px;margin-block:5px;color:#b4bdc3;}
+.shipping-page.shipping-generation-3 .contract-selection select {border:1px solid #747d84;border-radius:0;background:#41464a;color:#e1e6e9;padding:4px 7px;min-inline-size:400px;}
+.shipping-page.shipping-generation-3 .next-version {border:0;padding:0;gap:24px;background:transparent;}
+.shipping-page.shipping-generation-3 .next-version p {font-size:12px;color:#d2d9de;}
+.shipping-page.shipping-generation-3 .next-version .shipping-next-requirement {color:#f2c5b9;}
+.shipping-page.shipping-generation-3 .shipping-footer {border-block-start:1px solid #555c61;margin-block-start:4px;padding-block-start:8px;color:#b6c0c7;}
+.shipping-page.shipping-generation-3 button,
+.shipping-page.shipping-generation-3 .shipping-right button,
+.shipping-page.shipping-generation-3 .shipping-right .shipping-primary,
+.shipping-page.shipping-generation-3 .shipping-footer button,
+.shipping-page.shipping-generation-3 .next-version button,
+.shipping-page.shipping-generation-3 .shipping-footer select {background:#4a5055;border:1px solid #707a82;border-radius:0;color:#e0e6ea;min-block-size:24px;font-size:12px;padding:3px 8px;box-shadow:none;}
+.shipping-page.shipping-generation-3 .shipping-right .shipping-primary {border-color:#b98070;color:#f2c5b9;}
+.shipping-page.shipping-generation-3 button:disabled,
+.shipping-page.shipping-generation-3 .shipping-right button:disabled,
+.shipping-page.shipping-generation-3 .next-version button:disabled {background:#3a3f43;border-color:#525b62;color:#939ea7;}
+.shipping-page.shipping-generation-3 .shipping-finance-links button {background:transparent;border:0;box-shadow:none;border-radius:0;padding:1px 0;min-block-size:24px;font-size:12px;}

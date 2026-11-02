@@ -4,6 +4,7 @@ import { BALANCE, type KumikiItem, type KumikiSkill, type PartId, type SeedItem,
 import { isDesignMap, isExportedWork, PART_IDS, type Design, type ExportedWork } from './kumikiState';
 import type { SeedState } from './state';
 import { isScreenshot, type Screenshot } from './desktopState';
+import { isReleasePresentation, type ReleasePresentation } from './releasePresentation';
 
 export interface ProductScreen {
   progress?:Progress;page?:PageDesign;legacyBonus?:{auto:number;drawing:number};
@@ -15,6 +16,7 @@ export interface ProductScreen {
   history: SeedState['history'];
 }
 export interface ProductRecord {
+  presentation?: ReleasePresentation;
   id: number; name: string | null; version: 'v0.1' | 'v1.0'; releasedAt: number; author: string | null;
   generatedPixels: number; builtCount: number; revenue: number;
   screen: ProductScreen; exports: ExportedWork[];
@@ -43,6 +45,7 @@ export function isProductRecord(x: unknown): x is ProductRecord {
   if(x.capture!==undefined&&!isScreenshot(x.capture))return false;
   if(x.captureCatalog!==undefined&&(!Array.isArray(x.captureCatalog)||!x.captureCatalog.every(isScreenshot)||new Set(x.captureCatalog.map(shot=>shot.id)).size!==x.captureCatalog.length))return false;
   if(x.screenshotBonus!==undefined&&(!amount(x.screenshotBonus)||x.screenshotBonus>BALANCE.release.screenshotBonusMax))return false;
+  if(x.presentation!==undefined&&!isReleasePresentation(x.presentation))return false;
   if(s.legacyBonus!==undefined&&(!obj(s.legacyBonus)||!amount(s.legacyBonus.auto)||s.legacyBonus.auto<1||s.legacyBonus.auto>1.2||!amount(s.legacyBonus.drawing)||s.legacyBonus.drawing<1||s.legacyBonus.drawing>2))return false;
   if (!obj(s.specs) || !(Object.keys(BALANCE.spec) as SpecKey[]).every(key => obj(s.specs) && count(s.specs[key]) && s.specs[key] < BALANCE.spec[key].length)) return false;
   if (!Array.isArray(s.log) || !s.log.every(e => obj(e) && amount(e.at) && amount(e.pixels))) return false;

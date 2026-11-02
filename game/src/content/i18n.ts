@@ -47,6 +47,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
   const dateTime = new Intl.DateTimeFormat(intl, { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
   const month = new Intl.DateTimeFormat(intl, {year:'numeric',month:'long'});
   const date = new Intl.DateTimeFormat(intl, { year: 'numeric', month: 'short', day: 'numeric' });
+  const legacyDate = new Intl.DateTimeFormat(intl, { year: 'numeric', month: '2-digit', day: '2-digit' });
 
   function t(key: MessageKey, params: Record<string, string | number> = {}): string {
     const message = locale.messages[key];
@@ -88,6 +89,7 @@ export function createI18n(language: string, { strictInterpolation = import.meta
     dateTime: (timestamp: number) => dateTime.format(timestamp),
     month: (timestamp:number) => month.format(timestamp),
     date: (timestamp: number) => date.format(timestamp),
+    legacyDate: (timestamp: number) => legacyDate.format(timestamp),
     spec: (key: SpecKey, level: number) => t(`spec.${key}.${level}` as MessageKey),
     languageName: (id: string) => id === TEST_LANGUAGE ? t('language.test')
       : LOCALES[id]!._meta.name,

@@ -8,6 +8,7 @@ import { activeScreenshots, desktopConditions } from './desktop';
 import { encodeScene, projectCapture, readCapture } from './captureScene';
 import type { Screenshot } from './desktopState';
 import { reconcileProgress } from './longPlay';
+import { presentationAtRelease } from './releasePresentation';
 
 export const SPEC_ORDER: readonly SpecKey[] = ['color', 'storage', 'memory', 'resolution', 'network', 'refresh', 'graphics'];
 const uniqueExports = (state: GameState) => [...new Map(state.run.kumiki.exports.map(work => [`${work.kind}:${work.id}`, work])).values()];
@@ -95,7 +96,7 @@ function createReleasedProduct(original: GameState, now: number, reducedMotion: 
     specs: p.specs, seedSkills: p.seedSkills, pattern: p.seedAppearance.pattern, marquee: p.seedAppearance.marquee,
     kumikiSkills: p.artwork.skills, modern: p.artwork.modern, log: k.generationLog, history: state.run.seed.history,
   });
-  const product: ProductRecord = { id: Math.max(0, ...p.products.map(p => p.id)) + 1, name: p.productName, version: state.run.version === 'v0.1' ? 'v0.1' : 'v1.0', releasedAt: now, author: p.playerName,
+  const product: ProductRecord = { presentation: presentationAtRelease(state), id: Math.max(0, ...p.products.map(p => p.id)) + 1, name: p.productName, version: state.run.version === 'v0.1' ? 'v0.1' : 'v1.0', releasedAt: now, author: p.playerName,
     generatedPixels: state.run.totalPixelsGenerated, builtCount: screen.built.length + screen.kumikiBuilt.length + (state.run.version === 'v0.1' ? 0 : state.run.desktop.upgrades.length),
     revenue: releaseEstimate(state, selectedIds), screen, exports: structuredClone(uniqueExports(state)),
     ...(store ? { screenshots: structuredClone(selectedReleaseScreenshots(state, selectedIds)), screenshotBonus: releaseScreenshotBonus(state, selectedIds) } : {}),

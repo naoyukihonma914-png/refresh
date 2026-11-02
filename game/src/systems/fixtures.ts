@@ -11,6 +11,7 @@ import { createSeedVersion, updateSeedGuide } from './seed';
 import { buildKumiki, enterKumiki, exportKumiki, ownedParts, paintDrawing, placePart, prepareDrawing, targetFor } from './kumiki';
 import { blankDrawing } from './kumikiState';
 import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion } from './release';
+import { softwarePresentation, type SoftwareStage } from './releasePresentation';
 
 function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
  let next=buyBlueprint(state,id);const app=isBuildable(id)?id:featureApp(id);
@@ -19,6 +20,7 @@ function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
 }
 
 export const FIXTURE_NAMES = [
+  'stage7-store-gen1','stage7-store-gen2','stage7-store-gen3','stage7-sales-gen1','stage7-sales-gen2','stage7-sales-gen3','stage7-freeware','stage7-freeware-sales',
   'stage7-ready0','stage7-ready1','stage7-ready2','stage7-ready3','stage7-no-photos','stage7-store','stage7-shipping','stage7-complete','stage7-v2','stage7-v2-inherit','stage7-advice','stage7-advice0','stage7-advice1','stage7-advice2','stage7-advice3','stage7-offline','stage7-offline0','stage7-offline1','stage7-offline2','stage7-offline3','desktop-stage3',
   'longplay-seed','stray-seed','secret-art','contract-no-cursors','contract-no-color','contracts-offer','longplay-editor0','longplay-editor1','longplay-editor2','longplay-desktop0','longplay-desktop1','longplay-desktop2',
   'app-build-missing','app-build-empty','app-build-files','intro', 'editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2',
@@ -36,6 +38,21 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
   if (name === 'intro') return state;
+  if(name?.startsWith('stage7-freeware')){
+    let next=beginProductRelease(createFixture('release-ready',now)!,now,{language:'ja'});
+    next=advanceShipping(next,BALANCE.release.storeAnimationMs);
+    if(name==='stage7-freeware-sales')next=advanceShipping(showShipping(next),BALANCE.release.animationMs);
+    return next;
+  }
+  if(name?.match(/^stage7-(store|sales)-gen[1-3]$/)){
+    const generation=Number(name.at(-1));
+    let next=createFixture(`stage7-ready${generation===1?0:generation===2?2:3}`,now)!;
+    next=advanceShipping(beginProductRelease(next,now,{language:'ja'}),BALANCE.release.storeAnimationMs);
+    // Generation 3 is a presentation preview, without unlocking future desktop gameplay.
+    next.persistent.products.at(-1)!.presentation=softwarePresentation(((generation-1)*2) as SoftwareStage);
+    if(name.startsWith('stage7-sales'))next=advanceShipping(showShipping(next),BALANCE.release.animationMs);
+    return next;
+  }
   if(name?.startsWith('stage7-')){
     const era=/[0-3]$/.test(name)?Number(name.at(-1)):3;
     let next=createFixture('desktop-stage'+era,now)!;
