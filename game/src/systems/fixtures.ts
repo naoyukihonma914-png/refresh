@@ -1,3 +1,4 @@
+import {reconcileProgress} from './longPlay';
 import { actAppBuild } from './appBuild';
 import { featureApp, isBuildable } from './appLayout';
 import type { DesktopUpgrade } from '../config/balance';
@@ -17,6 +18,7 @@ function buyDesktopApp(state:GameState,id:DesktopUpgrade):GameState {
 }
 
 export const FIXTURE_NAMES = [
+  'longplay-seed','stray-seed','secret-art','contract-no-cursors','contract-no-color','contracts-offer','longplay-editor0','longplay-editor1','longplay-editor2','longplay-desktop0','longplay-desktop1','longplay-desktop2',
   'app-build-missing','app-build-empty','app-build-files','intro', 'editor-stage0','editor-stage1','editor-stage2','desktop-stage0','desktop-stage1','desktop-stage2',
   'desktop-jobs','desktop-photo','desktop-ready','desktop-stalled',
   'desktop-early', 'desktop-wait', 'desktop-files', 'desktop-mail', 'desktop-modern', 'desktop-full',
@@ -32,6 +34,15 @@ export function createFixture(name: string | null, now: number): GameState | nul
   if (!FIXTURE_NAMES.some(item => item === name)) return null;
   const state = createInitialState(now);
   if (name === 'intro') return state;
+  if(name?.startsWith('longplay-')||name==='stray-seed'||name==='secret-art'||name?.startsWith('contract')){
+    let next=name==='contracts-offer'?createFixture('release-rich',now)!:name?.startsWith('contract-')?state:name==='secret-art'?createFixture('kumiki-mature',now)!:name?.startsWith('longplay-editor')?createFixture('editor-stage'+name.at(-1),now)!:name?.startsWith('longplay-desktop')?createFixture('desktop-stage'+name.at(-1),now)!:createFixture('seed-motion',now)!;
+    if(name?.startsWith('contract-')){next.run.version='v2';next.run.play.contract={id:name==='contract-no-color'?'no-color':'no-cursors',status:'active'};next.resources.pixels=next.run.totalPixelsGenerated=100000;}
+    if(name==='contracts-offer'){next.run.version='v1';next.persistent.specs.color=1;next.persistent.seedSkills=['inherit'];next.persistent.progress.records['v1-released']=now;}
+    if(name==='stray-seed')next.run.play.stray={waitMs:120000,lifeMs:30000,x:.2,y:.7,serial:1};
+    if(name==='secret-art'){const d=next.run.kumiki.drawings.folder!,target=targetFor(next,'folder',d.size);let count=0;for(let i=0;i<target.length&&count<16;i++)if(target[i]===-1){d.frames[0]![i]=0;count++;}d.exported=false;d.dirty=true;next.run.kumiki.exports=next.run.kumiki.exports.filter(w=>!(w.kind==='icon'&&w.id==='folder'));}
+    return reconcileProgress(next,now);
+  }
+
   if(name==='app-build-missing'){const next=createFixture('desktop-stage2',now)!;next.run.desktop.projects.files!.draft.parts=next.run.desktop.projects.files!.draft.parts.filter(p=>p.id!=='sort');next.run.desktop.projects.files!.installed=structuredClone(next.run.desktop.projects.files!.draft);next.run.desktop.feedback=[{id:1,kind:'sort',sender:'hikari',target:'',baseline:[],baselineColor:'#000000',at:now,completedAt:null}];next.run.desktop.feedbackSerial=1;next.run.desktop.notice=1;next.run.desktop.success=null;return next;}
   if(name==='app-build-empty'||name==='app-build-files'){let next=createFixture('desktop-early',now)!;next.resources.pixels=next.run.totalPixelsGenerated=1e9;next=buyBlueprint(next,'files');if(name==='app-build-files'){next=actAppBuild(next,{type:'app-recommend',app:'files'});next=buyBlueprint(next,'sort');}next.persistent.artwork.skills.push('update');next.persistent.appearance.editor=1;next.run.desktop.windows.tessera={...next.run.desktop.windows.tessera,x:0,y:0,width:800,height:572,maximized:true,restore:{x:40,y:40,width:600,height:400}};return next;}
   if(name?.startsWith('editor-stage')||name?.startsWith('desktop-stage')){

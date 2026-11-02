@@ -7,7 +7,7 @@ import type { SaveStorage } from '../platform/storage';
 import { createFixture } from './fixtures';
 import { actDesktop,advanceDesktopTime,focusWindow,takeScreenshot } from './desktop';
 import { decodeCapture,encodeCapture } from './desktopState';
-import { isCaptureScene,projectCapture,readCapture } from './captureScene';
+import { isCaptureScene,projectCapture,readCapture,restoreScene } from './captureScene';
 import { clearGame,decodeSave,encodeSave,loadGame,SAVE_KEYS,saveGame } from './save';
 import { isGameState } from './state';
 import { desktopFiles } from './desktopFiles';
@@ -23,7 +23,7 @@ const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now
 describe('場面の保存形式と独立した記録',()=>{
  it('表示に必要な場面だけを持ち、製品・報酬台帳・過去の会話・全生成履歴をコピーしない',()=>{
   const s=shotState(),scene=readCapture(s.persistent.screenshots[0]!);
-  expect(scene.version).toBe(7);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(8);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
   expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene.editor.picture).not.toHaveProperty('rewarded');
   expect(scene.home.rows.length).toBeLessThanOrEqual(4);expect(scene.home.history.length).toBeLessThanOrEqual(4);
   const source=structuredClone(s);source.persistent.screenshots=[];
@@ -45,7 +45,7 @@ describe('場面の保存形式と独立した記録',()=>{
  it('実際の第6版の2枚入りセーブを移行し、資源・製品・窓・撮影時の本文とパレットを保つ',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString();
   const old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(12);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products).toEqual(old.persistent.products);expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
+  expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products).toEqual(old.persistent.products);expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
   expect(s.persistent.screenshots).toHaveLength(2);
   const oldFrame=decodeCapture(old.persistent.screenshots[0].data) as typeof s;
   const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene.home.design).toEqual(oldFrame.run.kumiki.design);
@@ -75,8 +75,16 @@ describe('場面の保存形式と独立した記録',()=>{
   // Emulate a lower game schema with the already-versioned scene reference envelope.
   stored.schemaVersion=6;
   const restored=decodeSave(JSON.stringify(stored),ref=>captureStore(target.storage).get(ref));
-  expect(restored.schemaVersion).toBe(12);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(7);
+  expect(restored.schemaVersion).toBe(13);expect(readCapture(restored.persistent.screenshots[0]!).version).toBe(8);
  });
+ it('隠し絵128角2コマと毎回変わる累積記録があっても400枚を5MiBへ保存できる',()=>{
+  let s=createFixture('desktop-files',now)!;s.persistent.specs.storage=3;
+  const art={size:128,frames:Array.from({length:2},(_,f)=>Array.from({length:128**2},(_,i)=>(i*37+f*13)%256))};
+  s.persistent.progress.unknownArt=art;
+  for(let i=0;i<400;i++){s.run.desktop.cooldownMs=0;s.persistent.progress.counts.shots=i;s=takeScreenshot(s,now+i,'ja');}
+  const target=disk(5*1024*1024);expect(saveGame(target.storage,s,now).kind).toBe('saved');
+  const loaded=loadGame(target.storage);expect(loaded.kind).toBe('loaded');if(loaded.kind==='loaded')expect(restoreScene(loaded.state.persistent.screenshots[399]!,loaded.state.persistent.screenshots).persistent.progress.unknownArt).toEqual(art);
+ },45000);
  it('新しい画像の書き込みが途中で失敗しても元の記録を保ち、追加した未参照データだけを片付けて再試行できる',()=>{
   const target=disk(),s=shotState();saveGame(target.storage,s,now);const before=new Map(target.entries);
   let next=actDesktop(s,{type:'note',text:'新しい場面'},now+1);next.run.desktop.cooldownMs=0;next=takeScreenshot(next,now+1,'ja');

@@ -1,0 +1,170 @@
+{
+  "checks": [
+    "All 3 desktop eras × 3 languages × 2 viewports: clock unlocks on the tenth click; achievement and feedback notices remain separate, with a native 16px icon"
+  ],
+  "scenes": [
+    {
+      "world": "desktop notices",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "desktop notices",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": []
+}

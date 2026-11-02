@@ -197,7 +197,7 @@ describe('試作版のリリース', () => {
     delete old.run.shipping; delete old.run.restartMs;
     delete old.persistent.products; delete old.persistent.guideArchive; delete old.persistent.homeTheme;
     const migrated = decodeSave(JSON.stringify(old));
-    expect(migrated.schemaVersion).toBe(12); expect(migrated.resources).toEqual(old.resources);
+    expect(migrated.schemaVersion).toBe(13); expect(migrated.resources).toEqual(old.resources);
     const state = shipped(); expect(decodeSave(encodeSave(state))).toEqual(state);
     for (const mutate of [
       (s: typeof state) => { s.run.shipping!.productId = 99; },

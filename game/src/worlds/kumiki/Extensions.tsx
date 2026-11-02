@@ -1,3 +1,4 @@
+import {Records,SoundSettings} from '../../components/LongPlaySettings';
 import { EditorAppearance } from '../../components/AppearanceSelect';
 import { canSwitchEditor,editorName,unlockedDesktopStage } from '../../systems/appearance';
 import { ProductSettings } from '../../components/ProductSettings';
@@ -10,14 +11,15 @@ import { PageSettings } from '../PageSettings';
 import { LanguageSelect } from '../../components/LanguageSelect';
 
 export function Extensions({ runtime, snapshot, i18n }: { runtime: GameRuntime; snapshot: RuntimeSnapshot; i18n: I18n }) {
-  const [tab, setTab] = useState<'tools' | 'home'>('tools');
+  const [tab, setTab] = useState<'tools' | 'home'|'records'|'sound'>(snapshot.state.run.kumiki.built.includes('extensions')?'tools':'records');
   const { state } = snapshot;
   return <section className="extensions-page">
     <nav className="extension-tabs">
-      <button aria-pressed={tab === 'tools'} onClick={() => setTab('tools')}>{editorName(state,i18n)}</button>
+      {state.run.kumiki.built.includes('extensions')&&<button aria-pressed={tab === 'tools'} onClick={() => setTab('tools')}>{editorName(state,i18n)}</button>}
       <button aria-pressed={tab === 'home'} onClick={() => setTab('home')}>{i18n.t('k.homeSettings')}</button>
+      <button aria-pressed={tab==='records'} onClick={()=>setTab('records')}>{i18n.t('settings.records')}</button><button aria-pressed={tab==='sound'} onClick={()=>setTab('sound')}>{i18n.t('settings.sound')}</button>
     </nav>
-    {tab === 'home' ? <PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={() => setTab('tools')} /> : <div>
+    {tab==='records'?<Records state={state} i18n={i18n}/>:tab==='sound'?<SoundSettings state={state} runtime={runtime} i18n={i18n}/>:tab === 'home' ? <PageSettings key={state.createdAt} state={state} runtime={runtime} i18n={i18n} onClose={() => setTab('tools')} /> : <div>
       <h1>{i18n.t('k.extensions')}</h1>
       <p>{i18n.t('k.tokens', { count: state.resources.tokens })}</p>
       {([1, 2] as const).filter(band => band === 1 || state.run.version !== 'v0.1').map(band => <fieldset key={band}>

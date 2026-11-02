@@ -1,3 +1,4 @@
+import {createProgress,createPlay,isProgress,isPlay,type Progress,type PlayState} from './longPlay';
 import { createPageDesign, isPageDesign, type PageDesign } from './pageDesign';
 import { desktopScreen } from './desktopGeometry';
 import { createAppearance, unlockedEditorStage, unlockedDesktopStage, type Appearance } from './appearance';
@@ -6,7 +7,7 @@ import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/
 import { createArtwork, createKumikiState, isArtwork, isDesignMap, isKumikiState, type Artwork, type Design, type KumikiState } from './kumikiState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -23,6 +24,7 @@ export interface SeedState {
 // ここには JSON として保存できるものだけを入れる。
 // 選択中の道具・押しているキー・勢いなど、一時的な表示状態は入れない。
 export interface GameState {
+  legacyGeneration?:boolean;
   schemaVersion: typeof SCHEMA_VERSION;
   createdAt: number;
   lastTickAt: number; // 不在用の端末時計。能動時間には使わない。
@@ -30,6 +32,7 @@ export interface GameState {
   elapsedMs: number;
   resources: { pixels: number; tokens: number; dollars: number };
   run: {
+    play:PlayState;
     version: 'v0.1' | 'v1' | 'v2';
     world: 'seed' | 'kumiki' | 'release' | 'desktop';
     shipping: ShippingState | null;
@@ -40,6 +43,7 @@ export interface GameState {
     desktop: DesktopState;
   };
   persistent: {
+    progress:Progress;
     appearance:Appearance;
     specs: Record<SpecKey, number>; playerName: string | null;
     productName: string | null;
@@ -68,7 +72,7 @@ export function createInitialState(now: number): GameState {
     elapsedMs: 0,
     resources: { pixels: 0, tokens: 0, dollars: 0 },
     run: {
-      version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
+      play:createPlay(),version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
       seed: {
         page:createPageDesign(),built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
@@ -76,7 +80,7 @@ export function createInitialState(now: number): GameState {
       kumiki: createKumikiState(), desktop: createDesktopState(),
     },
     persistent: {
-      appearance:createAppearance(),
+      progress:createProgress(),appearance:createAppearance(),
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
       playerName: null, productName: null, numberNotation: 'compact',
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
@@ -118,6 +122,7 @@ export function isGameState(value: unknown): value is GameState {
   if (run.world === 'release' ? !isRecord(run.shipping) || !isCount(run.shipping.productId)
     || !persistent.products.some(p => p.id === (run.shipping as Record<string, unknown>).productId)
     || !isAmount(run.shipping.elapsedMs) || run.shipping.elapsedMs > BALANCE.release.animationMs : run.shipping !== null) return false;
+  if(!isProgress(persistent.progress)||!isPlay(run.play))return false;
   if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;
   const screen=desktopScreen((persistent.appearance as unknown as Appearance).desktop);

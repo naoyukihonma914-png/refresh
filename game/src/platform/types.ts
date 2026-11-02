@@ -1,8 +1,10 @@
+import type {SoundRequest} from './audio';
+import type {AchievementId} from '../systems/longPlay';
 import type { SaveStorage, createSettingsStorage } from './storage';
 
 export type Unsubscribe = () => void;
 export type TabLease = { acquired: boolean; isOwner: () => boolean; release: () => void };
-export type Achievement = 'kumiki-created' | 'prototype-released' | 'v1-released';
+export type Achievement = AchievementId;
 export interface GameKey { code: string; pressed: boolean; repeat: boolean; editable: boolean; preventDefault(): void }
 
 export interface Platform {
@@ -32,5 +34,6 @@ export interface Platform {
   setFullscreen(enabled: boolean): Promise<boolean>;
   quit(): boolean;
   unlockAchievement(achievement: Achievement): void;
+  readonly audio:{play(request:SoundRequest):void;dispose():void};
   createPreview(): Platform;
 }

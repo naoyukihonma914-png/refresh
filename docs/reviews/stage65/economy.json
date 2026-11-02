@@ -1,0 +1,288 @@
+{
+  "assumptions": {
+    "clicks_per_sec": 2.5,
+    "dots_per_sec": 1.5,
+    "decide_sec": 4,
+    "read_sec": 15,
+    "desktop_active_ratio": 0.5
+  },
+  "appendixE": {
+    "v01Seconds": 2729,
+    "v1Seconds": 24007,
+    "v1Hours": 6.668611111111111
+  },
+  "implementationModel": {
+    "v01Seconds": 2671,
+    "v1Seconds": 27663,
+    "v1Hours": 7.684166666666667,
+    "withinSixToEightHours": true,
+    "homeCursors": 124,
+    "exportedIconsThisVersion": 16,
+    "exportedIconsLifetime": 31,
+    "achievements": [
+      "apps7",
+      "cursors10",
+      "cursors50",
+      "feedback10",
+      "feedback50",
+      "first-export",
+      "first-pixel",
+      "first-shot",
+      "icons6",
+      "kumiki-created",
+      "parts-all",
+      "practice10",
+      "prototype-released",
+      "save-created",
+      "shots100",
+      "terminal",
+      "wallpaper"
+    ],
+    "jobs": {
+      "組木": [
+        41,
+        4
+      ],
+      "ファイル": [
+        38,
+        4
+      ],
+      "写真": [
+        23,
+        2
+      ],
+      "ターミナル": [
+        0,
+        0
+      ]
+    },
+    "entryRate": 452.92500000000007,
+    "exitRate": 730605.31307595,
+    "pixels": 8360793413.264794,
+    "revenue": 20752,
+    "purchases": [
+      {
+        "seconds": 3,
+        "world": "素の画面",
+        "name": "枠線"
+      },
+      {
+        "seconds": 12,
+        "world": "素の画面",
+        "name": "保存"
+      },
+      {
+        "seconds": 47,
+        "world": "素の画面",
+        "name": "色"
+      },
+      {
+        "seconds": 89,
+        "world": "素の画面",
+        "name": "書体"
+      },
+      {
+        "seconds": 132,
+        "world": "素の画面",
+        "name": "配置"
+      },
+      {
+        "seconds": 200,
+        "world": "素の画面",
+        "name": "動き"
+      },
+      {
+        "seconds": 354,
+        "world": "素の画面",
+        "name": "組木を作る"
+      },
+      {
+        "seconds": 373,
+        "world": "組木",
+        "name": "選択ツール"
+      },
+      {
+        "seconds": 404,
+        "world": "拡張",
+        "name": "窓を半分に並べる（トークン2）"
+      },
+      {
+        "seconds": 417,
+        "world": "組木",
+        "name": "ボタン"
+      },
+      {
+        "seconds": 465,
+        "world": "拡張",
+        "name": "通知から直す（トークン2）"
+      },
+      {
+        "seconds": 481,
+        "world": "組木",
+        "name": "拡張機能"
+      },
+      {
+        "seconds": 820,
+        "world": "組木",
+        "name": "入力欄"
+      },
+      {
+        "seconds": 1141,
+        "world": "組木",
+        "name": "窓の枠"
+      },
+      {
+        "seconds": 1148,
+        "world": "拡張",
+        "name": "スクショの連写（トークン4）"
+      },
+      {
+        "seconds": 1474,
+        "world": "組木",
+        "name": "タスクバー"
+      },
+      {
+        "seconds": 2575,
+        "world": "組木",
+        "name": "デスクトップとして組み立てる"
+      },
+      {
+        "seconds": 2579,
+        "world": "デスクトップ",
+        "name": "到着"
+      },
+      {
+        "seconds": 3489,
+        "world": "デスクトップ",
+        "name": "ファイル"
+      },
+      {
+        "seconds": 4433,
+        "world": "デスクトップ",
+        "name": "ファイル：並べ替え"
+      },
+      {
+        "seconds": 4747,
+        "world": "拡張",
+        "name": "構成を引き継ぐ（トークン12）"
+      },
+      {
+        "seconds": 5332,
+        "world": "デスクトップ",
+        "name": "メール"
+      },
+      {
+        "seconds": 6661,
+        "world": "デスクトップ",
+        "name": "メール：返信の下書き"
+      },
+      {
+        "seconds": 7930,
+        "world": "デスクトップ",
+        "name": "持ち場"
+      },
+      {
+        "seconds": 8359,
+        "world": "拡張",
+        "name": "持ち場を増やす（トークン15）"
+      },
+      {
+        "seconds": 8879,
+        "world": "デスクトップ",
+        "name": "タスクマネージャー"
+      },
+      {
+        "seconds": 9683,
+        "world": "デスクトップ",
+        "name": "ファイル：検索"
+      },
+      {
+        "seconds": 10202,
+        "world": "デスクトップ",
+        "name": "ファイル：大きいアイコン表示"
+      },
+      {
+        "seconds": 10836,
+        "world": "デスクトップ",
+        "name": "写真"
+      },
+      {
+        "seconds": 11995,
+        "world": "デスクトップ",
+        "name": "写真：切り抜き"
+      },
+      {
+        "seconds": 12724,
+        "world": "デスクトップ",
+        "name": "写真：比べて見る"
+      },
+      {
+        "seconds": 13323,
+        "world": "デスクトップ",
+        "name": "ごみ箱"
+      },
+      {
+        "seconds": 14197,
+        "world": "デスクトップ",
+        "name": "ごみ箱：元に戻す"
+      },
+      {
+        "seconds": 15511,
+        "world": "デスクトップ",
+        "name": "メール：フォルダ分け"
+      },
+      {
+        "seconds": 16615,
+        "world": "デスクトップ",
+        "name": "時計"
+      },
+      {
+        "seconds": 17559,
+        "world": "デスクトップ",
+        "name": "時計：タイマー"
+      },
+      {
+        "seconds": 18883,
+        "world": "デスクトップ",
+        "name": "時計：カレンダー"
+      },
+      {
+        "seconds": 20827,
+        "world": "デスクトップ",
+        "name": "テーマ"
+      },
+      {
+        "seconds": 22791,
+        "world": "デスクトップ",
+        "name": "テーマ：壁紙のスライドショー"
+      },
+      {
+        "seconds": 24790,
+        "world": "デスクトップ",
+        "name": "テーマ：アイコンの大きさ"
+      },
+      {
+        "seconds": 27659,
+        "world": "デスクトップ",
+        "name": "ターミナル"
+      },
+      {
+        "seconds": 27663,
+        "world": "デスクトップ",
+        "name": "v1.0 の条件がそろう（要望 52 件）"
+      }
+    ]
+  },
+  "limits": [
+    "Appendix E is a planning model, not a browser speedrun. It retains averaged drawing, recycling and half-active screenshot/feedback assumptions.",
+    "No optional secrets, stray pixels, repair/restart rewards, contract rewards, paid cosmetic upgrades or background hours are assumed.",
+    "The screenshot count milestone is estimated at the photo unlock, as E averages screenshots instead of storing individual captures.",
+    "App construction time and the actual window layout can change the result; the functional game rules are tested separately."
+  ],
+  "latePriceSensitivity": {
+    "factor": 3,
+    "v1Seconds": 36323,
+    "v1Hours": 10.089722222222223,
+    "withinSixToEightHours": false
+  }
+}

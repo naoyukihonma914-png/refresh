@@ -1,3 +1,4 @@
+import {isProgress,isPlay,type Progress,type PlayState} from './longPlay';
 import { isPageDesign, type PageDesign } from './pageDesign';
 import { type AppProjects } from './appLayout';
 import type { BuiltApp } from './desktopState';
@@ -129,6 +130,7 @@ export function restoreScene(shot:Screenshot,catalog:Screenshot[]):GameState {
   state.run.desktop.screen='screen' in s?{...s.screen}:{...LEGACY_DESKTOP};
   if(s.version>=6){const current=s as CaptureSceneV6;state.run.desktop.projects=structuredClone(current.appProjects);state.run.desktop.editingApp=current.editingApp;}
   if(s.version>=7){const current=s as CaptureSceneV7;state.run.seed.page=structuredClone(current.page);state.run.kumiki.legacyBonus=current.legacyBonus;}
+  if(s.version>=8){const current=s as CaptureSceneV8;state.persistent.progress=structuredClone({...current.common.progress,unknownArt:current.secretArt});state.run.play=structuredClone(current.common.play);state.run.desktop.settingsPage=current.common.settingsPage;}else state.legacyGeneration=true;
   state.persistent.screenshots=catalog.filter(s=>s.id<shot.id);
   return state;
 }
@@ -143,7 +145,7 @@ export interface CaptureSceneV2 extends Omit<CaptureSceneV1,'version'|'desktop'>
  desktop:Omit<DesktopState,'projects'|'editingApp'|'screen'|'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'recycled'|'trashCount'|'reservation'|'terminal'|'shotHistory'|'stalled'|'stalledClosed'|'stallMs'|'stallSerial'|'idleMs'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'|'feedback'> & {feedback:Omit<Feedback,'baseline'|'baselineColor'>[]};
  view:{preferences:DesktopPreferences;desktop:Pick<DesktopState,'upgrades'|'builtAt'|'jobs'|'workspace'|'workspaces'|'fileSort'|'fileDescending'|'fileSearch'|'largeIcons'|'mailFolder'|'photo'|'compare'|'trash'|'reservation'|'terminal'|'stalled'|'settingsPage'|'managerTab'|'managerProcess'|'calendarMonth'>;photo:PhotoEdit};
 }
-export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3|CaptureSceneV4|CaptureSceneV5|CaptureSceneV6|CaptureSceneV7;
+export type CaptureScene=CaptureSceneV1|CaptureSceneV2|CaptureSceneV3|CaptureSceneV4|CaptureSceneV5|CaptureSceneV6|CaptureSceneV7|CaptureSceneV8;
 export function projectCaptureV2(state:GameState,language:string):CaptureSceneV2 {
  const d=state.run.desktop;
  // V1's document projection remains shared, while the V2 desktop has its own contract.
@@ -179,7 +181,7 @@ function isCaptureSceneV2(v:unknown):v is CaptureSceneV2 {
  const t=ex.terminal;
  return ['processes','performance'].includes(ex.managerTab as string)&&['home','shots','feedback','tessera','files','photo','terminal'].includes(ex.managerProcess as string)&&(ex.calendarMonth===null||num(ex.calendarMonth))&&record(t)&&[60000,3600000].includes(t.interval as number)&&typeof t.running==='boolean'&&num(t.elapsedMs)&&num(t.executions)&&Array.isArray(t.log)&&t.log.length<=20&&t.log.every(l=>record(l)&&num(l.at)&&typeof l.ok==='boolean')&&(ex.stalled===null||apps2.includes(ex.stalled as string))&&['skills','data','specs','general'].includes(ex.settingsPage as string);
 }
-export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value)||isCaptureSceneV4(value)||isCaptureSceneV5(value)||isCaptureSceneV6(value)||isCaptureSceneV7(value);}
+export function isCaptureScene(value:unknown):value is CaptureScene {return isCaptureSceneV1(value)||isCaptureSceneV2(value)||isCaptureSceneV3(value)||isCaptureSceneV4(value)||isCaptureSceneV5(value)||isCaptureSceneV6(value)||isCaptureSceneV7(value)||isCaptureSceneV8(value);}
 
 // Format 3 records the selected visual stages. Older formats keep their own readers.
 export interface CaptureSceneV3 extends Omit<CaptureSceneV2,'version'> {version:3;appearance:Appearance}
@@ -245,5 +247,13 @@ function isCaptureSceneV6(v:unknown):v is CaptureSceneV6 {
 }
 
 export interface CaptureSceneV7 extends Omit<CaptureSceneV6,'version'>{version:7;page:PageDesign;legacyBonus?:{auto:number;drawing:number}}
-export function projectCapture(state:GameState,language:string):CaptureSceneV7{return {...projectCaptureV6(state,language),version:7,page:structuredClone(state.run.seed.page),...(state.run.kumiki.legacyBonus?{legacyBonus:{...state.run.kumiki.legacyBonus}}:{})};}
+function projectCaptureV7(state:GameState,language:string):CaptureSceneV7{return {...projectCaptureV6(state,language),version:7,page:structuredClone(state.run.seed.page),...(state.run.kumiki.legacyBonus?{legacyBonus:{...state.run.kumiki.legacyBonus}}:{})};}
 function isCaptureSceneV7(v:unknown):v is CaptureSceneV7{return record(v)&&v.version===7&&isPageDesign(v.page)&&(v.legacyBonus===undefined||record(v.legacyBonus)&&num(v.legacyBonus.auto)&&v.legacyBonus.auto>=1&&v.legacyBonus.auto<=1.2&&num(v.legacyBonus.drawing)&&v.legacyBonus.drawing>=1&&v.legacyBonus.drawing<=2)&&isCaptureSceneV6({...v,version:6});}
+
+export interface CaptureSceneV8 extends Omit<CaptureSceneV7,'version'>{version:8;secretArt:Progress['unknownArt'];common:{progress:Progress;play:PlayState;settingsPage:GameState['run']['desktop']['settingsPage']}}
+export function projectCapture(state:GameState,language:string):CaptureSceneV8 {
+ const original=state.run.desktop.settingsPage,source=['records','sound'].includes(original)?{...state,run:{...state.run,desktop:{...state.run.desktop,settingsPage:'general' as const}}}:state;
+ // Keep the picture in a shared section: counters change on every shot, the picture does not.
+ return {...projectCaptureV7(source,language),version:8,secretArt:structuredClone(state.persistent.progress.unknownArt),common:{progress:structuredClone({...state.persistent.progress,unknownArt:null}),play:structuredClone(state.run.play),settingsPage:original}};
+}
+function isCaptureSceneV8(v:unknown):v is CaptureSceneV8{return record(v)&&v.version===8&&(v.secretArt===null||pictureValid(v.secretArt))&&record(v.common)&&isProgress(v.common.progress)&&isPlay(v.common.play)&&['skills','general','data','specs','records','sound'].includes(String(v.common.settingsPage))&&isCaptureSceneV7({...v,version:7});}

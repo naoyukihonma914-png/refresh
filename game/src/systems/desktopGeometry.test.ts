@@ -36,9 +36,9 @@ describe('PR #7：段ごとの論理画面',()=>{
   }
  });
  it('第9版の実データを移し、旧V3記録は1920×1080のまま、新しいV4記録は撮影時の縦横比を保つ',()=>{
-  const raw=gunzipSync(readFileSync(new URL('./testdata/v9-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw);let s=decodeSave(raw);expectBounds(s);expect(s.schemaVersion).toBe(12);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
+  const raw=gunzipSync(readFileSync(new URL('./testdata/v9-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw);let s=decodeSave(raw);expectBounds(s);expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
   const oldShot=s.persistent.screenshots[0]!;expect(readCapture(oldShot).version).toBe(3);expect(restoreScene(oldShot,s.persistent.screenshots).run.desktop.screen).toEqual({width:1920,height:1080});
-  s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);expect(scene.version).toBe(7);expect(isCaptureScene(scene)).toBe(true);expect(restoreScene(shot,s.persistent.screenshots).run.desktop.screen).toEqual({width:800,height:600});
+  s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!,scene=readCapture(shot);expect(scene.version).toBe(8);expect(isCaptureScene(scene)).toBe(true);expect(restoreScene(shot,s.persistent.screenshots).run.desktop.screen).toEqual({width:800,height:600});
   const invalid=structuredClone(scene);if(invalid.version===4){invalid.screen.width=0;expect(isCaptureScene(invalid)).toBe(false);}
   expect(decodeSave(encodeSave(s))).toEqual(s);
  });

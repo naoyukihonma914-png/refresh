@@ -1,3 +1,4 @@
+import {ContractSelection} from '../components/LongPlaySettings';
 import { productLabel } from '../content/products';
 import { BALANCE, type SpecKey } from '../config/balance';
 import type { I18n } from '../content/i18n';
@@ -60,6 +61,7 @@ export function Release({ runtime, snapshot, i18n }: { runtime: GameRuntime; sna
         </tbody></table></div>
         <p className="carry-dollars">{i18n.t('release.carryDollars')}</p>
         {!complete ? <p role="status">{i18n.t('release.salesPending')}</p> : state.persistent.specs.color === 0 && <p>{i18n.t('release.buyColorFirst')}</p>}
+        <ContractSelection state={state} runtime={runtime} i18n={i18n}/>
         <div className="next-version"><p className="next-version-theme">{i18n.t('release.nextTheme')}</p><button disabled={!canStartNextVersion(state)} onClick={runtime.startNextVersion}>{i18n.t('release.startNext')}</button></div>
       </section>
     </div>

@@ -1,12 +1,12 @@
 import { hasAppPart, ownFeaturePart } from './appBuild';
-import { resizeDesktop } from './desktopGeometry';
+import { resizeDesktop,fitWindow,workHeight } from './desktopGeometry';
 import { setDesktopStage, type VisualStage } from './appearance';
 import { BALANCE, type DesktopSkill } from '../config/balance';
 import { createI18n } from '../content/i18n';
 import { PRACTICE_IDS } from '../content/kumikiArt';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import { desktopFiles } from './desktopFiles';
-import { hasDesktopSkill, hasUpgrade, jobCapacity, jobCursorCost, jobUpdateCost } from './desktopJobs';
+import { hasDesktopSkill, hasUpgrade, jobCapacity, jobCursorQuote, jobUpdateCost } from './desktopJobs';
 import { JOB_IDS, type AppId, type DesktopState, type JobId, type PhotoEdit } from './desktopState';
 import { readCapture } from './captureScene';
 import type { GameState } from './state';
@@ -48,9 +48,10 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
    if(!j.assigned&&JOB_IDS.filter(id=>d.jobs[id].assigned).length>=jobCapacity(s))return s;
    return desktop(s,{jobs:{...d.jobs,[a.app]:{...j,assigned:!j.assigned}}});
   }
-  const cost=a.type==='job-buy'?jobCursorCost(s,a.app):jobUpdateCost(s,a.app);
-  if(s.resources.pixels<cost||a.type==='job-buy'&&j.cursors>=10000||a.type==='job-update'&&j.updates>=100)return s;
-  return desktop({...s,resources:{...s.resources,pixels:s.resources.pixels-cost}},{jobs:{...d.jobs,[a.app]:{...j,...(a.type==='job-buy'?{cursors:j.cursors+1}:{updates:j.updates+1})}}});
+  const quantity=a.type==='job-buy'?jobCursorQuote(s,a.app).count:1;
+  const cost=a.type==='job-buy'?jobCursorQuote(s,a.app).cost:jobUpdateCost(s,a.app);
+  if(quantity<1||s.resources.pixels<cost||a.type==='job-buy'&&j.cursors>=10000||a.type==='job-update'&&j.updates>=100)return s;
+  return desktop({...s,resources:{...s.resources,pixels:s.resources.pixels-cost}},{jobs:{...d.jobs,[a.app]:{...j,...(a.type==='job-buy'?{cursors:j.cursors+quantity}:{updates:j.updates+1})}}});
  }
  case 'sort':return hasUpgrade(s,'sort')?completeRequests(desktop(s,{fileSort:a.by,fileDescending:d.fileSort===a.by?!d.fileDescending:false}),a.by==='date'?['sort']:[],now):s;
  case 'search':{
@@ -144,4 +145,12 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
  case 'settings-page':return desktop(s,{settingsPage:a.page});
  case 'restart':return d.stalled===a.app?desktop(creditPixels(s,passivePixelsPerSecond(s)*BALANCE.w3.restartSeconds),{stalled:null,stalledClosed:false,stallMs:BALANCE.w3.stallMinMs+(d.stallSerial*7919)%(BALANCE.w3.stallMaxMs-BALANCE.w3.stallMinMs)}):s;
  }
+}
+
+export function refreshDesktop(s:GameState,now:number):GameState {
+ if(s.run.world!=='desktop'||!hasAppPart(s,'terminal','commands')||s.persistent.progress.records['secret-clock']===undefined||now-s.run.play.refreshAt<BALANCE.longPlay.refreshCooldownMs)return s;
+ const d=s.run.desktop,apps=Object.entries(d.windows).filter(([,w])=>w.open&&!w.minimized).map(([id])=>id as AppId),step=d.screen.width===800?22:d.screen.width===1024?30:34,windows={...d.windows};
+ // Cascade when native minimum sizes make a full tile impossible. Keep every title reachable.
+ for(const [i,app] of apps.entries())windows[app]={...windows[app],...fitWindow(app,{x:16+i*8,y:16+i*step,width:d.screen.width-32-Math.max(0,apps.length-1)*8,height:Math.max(240,Math.min(360,workHeight(d.screen)-32-Math.max(0,apps.length-1)*step))},d.screen),maximized:false,restore:null};
+ const next=desktop(creditPixels(s,passivePixelsPerSecond(s)*BALANCE.longPlay.refreshSeconds),{windows});return {...next,run:{...next.run,play:{...next.run.play,refreshAt:now}}};
 }

@@ -1,3 +1,4 @@
+import {createProgress,createPlay,migrateProgress} from './longPlay';
 import { ICON_IDS } from '../content/kumikiArt';
 import { BALANCE } from '../config/balance';
 import { createPageDesign, isPageDesign } from './pageDesign';
@@ -18,6 +19,7 @@ export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup
 
 // 配布・PRで使用した第1〜第4版を順に変換する。試作の形式は推測しない。
 const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
+  12(data){const old=data as GameState;return migrateProgress({...old,schemaVersion:13,run:{...old.run,play:createPlay()},persistent:{...old.persistent,progress:createProgress()}});},
   1(data) {
     const old = data as GameState;
     const defaults = createInitialState(0);
@@ -41,8 +43,8 @@ const migrations: Readonly<Record<number, (data: unknown) => unknown>> = {
   3(data) {
     const next = { ...(data as GameState), schemaVersion: 4 };
     const projected = { ...next, schemaVersion: SCHEMA_VERSION,
-      run: { ...next.run, seed:{...next.run.seed,page:createPageDesign()},shipping: null, restartMs: 0, desktop: createDesktopState() },
-      persistent: { ...next.persistent, appearance:createAppearance(), products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
+      run: { ...next.run,play:createPlay(), seed:{...next.run.seed,page:createPageDesign()},shipping: null, restartMs: 0, desktop: createDesktopState() },
+      persistent: { ...next.persistent,progress:createProgress(), appearance:createAppearance(), products: [], guideArchive: [], homeTheme: {}, productName: null, numberNotation: 'compact', screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null, homeUpdatedAt: null, sketchUpdatedAt: null },
     };
     if (!isGameState(projected)) throw new Error('保存データの内容が不正です');
     const palette = paletteFor(1);

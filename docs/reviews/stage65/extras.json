@@ -1,0 +1,171 @@
+{
+  "checks": [
+    "3 languages × 2 viewports: purchase cuts exit estimate by at least 10%, old/new values last 2 seconds; all desktop eras buy exactly 10 job cursors and show max quotes; editor/desktop synth timbres verified",
+    "Scene 8 captures settings/sound and keeps the photographed volume independent of subsequent edits"
+  ],
+  "scenes": [
+    {
+      "world": "job bulk",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 0,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 1,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 2,
+      "language": "ja",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 0,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 1,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 2,
+      "language": "en",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 0,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 1,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    },
+    {
+      "world": "job bulk",
+      "era": 2,
+      "language": "en-XA",
+      "viewport": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "pageErrors": []
+}

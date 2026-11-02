@@ -460,6 +460,16 @@
 .app-layout [data-app-part=appearance]>label {justify-content:space-between;border-bottom:1px solid #8886;min-height:36px;}
 .app-layout [data-app-part=processes]>article {padding:8px;}
 .app-layout [data-app-part=time] .clock-time {font-size:3.333em;}
+.app-layout .clock-app>.app-layout-part {padding:4px;}
+.clock-face,.clock-timer {display:flex;flex-direction:column;align-items:flex-start;gap:8px;white-space:normal;}
+.clock-face {gap:4px;white-space:nowrap;}
+.clock-face :is(h2,p),.clock-timer :is(h2,p) {margin:0;font-size:inherit;line-height:1.4;}
+.clock-face .clock-time {margin:0;font-size:3.333em;line-height:1.1;}
+.clock-timer :is(input,button) {font:inherit;max-width:100%;min-width:0;box-sizing:border-box;}
+.clock-timer .clock-time-field {display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:0;max-width:100%;}
+.clock-timer button {white-space:normal;overflow-wrap:anywhere;}
+.clock-timer p {overflow-wrap:anywhere;}.clock-timer p>button {margin-inline-start:8px;}
+.app-layout .clock-calendar {margin:0;padding:0;border:0;}
 /* Custom part colors include controls and selection; era styles still supply their bevels. */
 .desktop .app-layout .app-layout-part :is(p,b,strong,h1,h2,span,label,td,th,small,button,input,textarea,select,option,aside,article,table,.file-list,.files-address,.app-toolbar,.photo-adjustments,figcaption) {color:inherit;font-size:inherit;}
 .desktop .app-layout .app-layout-part :is(th,button,input,textarea,select,option,aside,article,.app-toolbar) {background-color:var(--app-background);}

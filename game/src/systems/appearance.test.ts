@@ -50,14 +50,14 @@ describe('段階6.1：見た目の進化と互換性',()=>{
  });
  it('実際の第8版とV2撮影は書き換えず、旧modern購入者には新しい動作環境を付ける',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v8-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(12);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(readCapture(s.persistent.screenshots[0]!).version).toBe(2);
+  expect(s.schemaVersion).toBe(13);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);expect(readCapture(s.persistent.screenshots[0]!).version).toBe(2);
   expect(s.persistent.appearance).toEqual({editor:0,desktop:0});expect(s.persistent.desktopPrefs.radiusCustom).toBe(false);
   old.persistent.artwork.skills.push('modern');old.persistent.artwork.modern=true;old.persistent.desktopPrefs.radius=3;
   const modern=decodeSave(JSON.stringify(old));expect(modern.persistent.appearance).toEqual({editor:2,desktop:2});expect(modern.persistent.artwork.skills).toContain('update');expect(canSwitchEditor(modern)).toBe(true);expect(modern.persistent.desktopPrefs.radiusCustom).toBe(true);expect(modern.resources).toEqual(s.resources);
  });
  it('V4撮影は撮影時の段・角の設定を持ち、後の変更を受けない。過去のV1・V2も混在できる',()=>{
   let s=createFixture('desktop-stage2',now)!;s=actDesktop(s,{type:'theme',radius:3},now);s.run.desktop.cooldownMs=0;s=takeScreenshot(s,now,'ja');const shot=s.persistent.screenshots.at(-1)!;const scene=readCapture(shot);
-  expect(scene.version).toBe(7);expect(isCaptureScene(scene)).toBe(true);s=setDesktopStage(setEditorStage(s,0),0);s=actDesktop(s,{type:'theme',autoRadius:true},now);
+  expect(scene.version).toBe(8);expect(isCaptureScene(scene)).toBe(true);s=setDesktopStage(setEditorStage(s,0),0);s=actDesktop(s,{type:'theme',autoRadius:true},now);
   const frozen=restoreScene(shot,s.persistent.screenshots);expect(frozen.persistent.appearance).toEqual({editor:2,desktop:2});expect(frozen.persistent.desktopPrefs).toMatchObject({radius:3,radiusCustom:true});
   const invalid=structuredClone(scene);if(invalid.version===4){invalid.appearance.desktop=9 as never;expect(isCaptureScene(invalid)).toBe(false);}
   const mixed=decodeSave(gunzipSync(readFileSync(new URL('./testdata/v7-two-shots.json.gz',import.meta.url))).toString());mixed.persistent.screenshots.push({...shot,id:10});mixed.persistent.desktopPrefs.lastShotId=10;expect(decodeSave(encodeSave(mixed))).toEqual(mixed);
