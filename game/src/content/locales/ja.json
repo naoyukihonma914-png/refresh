@@ -954,6 +954,10 @@
     "store.previous": "前の写真",
     "store.next": "次の写真",
     "release.confirm.title.v1": "v1.0 のリリース",
-    "release.progress": "{product} リリースまで {done}/{total}"
+    "release.progress": "{product} リリースまで {done}/{total}",
+    "guide.return.v2": "おかえりなさい。今度は60Hzで、自動の作業も速くなりました。\n「この画面で配信したい」という声に応えて、次の v2.0 は配信に使える画面を目指しましょう。まずは、この新しい性能で画面を作り始めましょう。",
+    "guide.return.v2.title": "次のバージョンへ",
+    "release.confirm.v1.title": "v1.0 のリリース",
+    "release.sales.v1.title": "最初の売上"
   }
 }

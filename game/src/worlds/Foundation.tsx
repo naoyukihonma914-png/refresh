@@ -148,7 +148,7 @@ export function Foundation({ snapshot, i18n, runtime, embedded = false, preview 
   const noticeNode=<>      {!embedded && (guide.seen.length > 0 || state.run.advice.current) && <section className="guide-notices">
         {state.run.advice.current ? <AdviceMessage memory={state.run.advice} i18n={i18n} app={i18n.t('k.app')} onRead={runtime.readAdvice}/> : guide.collapsed ? <button className="text-button" onClick={() => { runtime.readSeedGuide(guide.current!); setArchive(true); }}>{i18n.t('guide.reopen', { count: guide.seen.length })}</button>
           : <><h2>{i18n.t('guide.title')}</h2>
-            <p className="guide-body">{guide.current && i18n.t(`guide.${guide.current}`)}</p>
+            <p className="guide-body">{guide.current && i18n.t(guide.current==='return'&&state.run.version==='v2'?'guide.return.v2':`guide.${guide.current}`)}</p>
             <p className="guide-signature">{i18n.t('guide.signature')}</p>
             <div className="guide-actions">
               {guide.current === 'intro' && !guide.seen.includes('instructions') && <button className="text-button" onClick={() => runtime.readSeedGuide('listen')}>{i18n.t('guide.listen')}</button>}

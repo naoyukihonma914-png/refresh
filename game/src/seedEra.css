@@ -59,3 +59,6 @@
 .seed-era-1.is-embedded:not(.page-layout-active) .seed-era-title,.seed-era-1.is-embedded:not(.page-layout-active) .home-heading {font-size:20px;}
 .seed-era-1 .page-settings {font:14px 'Refresh UI',sans-serif;background:#fff;color:#222;}
 .seed-era-1 .page-settings h1 {font:700 20px 'Refresh UI',sans-serif;}
+
+.seed-page.seed-era-1:not(.page-layout-active) {display:block;}
+.seed-page.seed-era-1:not(.page-layout-active)>.page-tools {inline-size:min(980px,100%);margin:12px auto;justify-content:flex-end;}

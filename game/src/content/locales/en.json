@@ -994,6 +994,10 @@
     "store.previous": "Previous photos",
     "store.next": "Next photos",
     "release.confirm.title.v1": "Release v1.0",
-    "release.progress": "Release {product}: {done}/{total}"
+    "release.progress": "Release {product}: {done}/{total}",
+    "guide.return.v2": "Welcome back. At 60Hz, your automatic work is faster too.\nA customer wrote, “I want to stream with this screen.” Let us make v2.0 a screen for streaming. Start by building with your new hardware.",
+    "guide.return.v2.title": "The next version",
+    "release.confirm.v1.title": "Release v1.0",
+    "release.sales.v1.title": "First sales"
   }
 }

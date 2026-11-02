@@ -121,3 +121,6 @@
 .desktop.desktop-era-2 .taskbar-right>.taskbar-progress .progress-caption {display:none;}
 .desktop.desktop-era-3 .taskbar-progress>.release-progress-count {display:none;}
 .store-description,.store-reviews p,.store-reviews h3,.shipping-guide p,.release-confirm-body p,.advice-message p {overflow-wrap:anywhere;}
+
+.desktop .taskbar-progress:has(>.release-progress-ring) .progress-caption {min-inline-size:0;overflow:hidden;text-overflow:ellipsis;}
+.desktop.desktop-era-3 .taskbar-progress>.release-progress-count {display:inline;}

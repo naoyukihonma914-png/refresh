@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { BALANCE } from '../../config/balance';
 import type { I18n } from '../../content/i18n';
 import { productLabel } from '../../content/products';
-import { installedApps } from '../../systems/desktop';
+import { readCapture } from '../../systems/captureScene';
 import { shippingProduct, storeComplete } from '../../systems/release';
 import type { GameRuntime, RuntimeSnapshot } from '../../systems/runtime';
 import { ScreenshotPreview } from '../Desktop';
@@ -30,7 +30,7 @@ export function StorePage({ runtime, snapshot, i18n }: { runtime: GameRuntime; s
       <div className="store-main-column">
         <section ref={about} className="store-about"><h1>{title}</h1>{product.author !== null && <p className="store-author">{i18n.t('store.by', { author: product.author })}</p>}
           <table><tbody><tr><th>{i18n.t('store.published')}</th><td>{i18n.date(product.releasedAt)}</td></tr><tr><th>{i18n.t('store.topic')}</th><td>{i18n.t(prototype ? 'store.topic.prototype' : 'store.topic.desktop')}</td></tr><tr><th>{i18n.t('store.languages')}</th><td>{i18n.t('store.languageList')}</td></tr></tbody></table>
-          <p className="store-description">{i18n.t(prototype ? 'store.description.prototype' : 'store.description.desktop', { built: product.builtCount, icons: product.exports.filter(work => work.kind === 'icon').length, apps: product.capture ? installedApps(state).filter(id=>id!=='note'&&id!=='settings').length : 0 })}</p>
+          <p className="store-description">{i18n.t(prototype ? 'store.description.prototype' : 'store.description.desktop', { built: product.builtCount, icons: product.exports.filter(work => work.kind === 'icon').length, apps: product.capture ? 1 + readCapture(product.capture).desktop.apps.length : 0 })}</p>
         </section>
         {photos.length > 1 && <section className="store-photos"><h2>{i18n.t('store.screenshots')}</h2><div>{photos.map((shot, index) => <button key={shot.id} aria-label={i18n.t('store.photoNumber', { count: index + 1 })} aria-pressed={selected === index} onClick={() => setSelected(index)}><ScreenshotPreview shot={shot} catalog={catalog} runtime={runtime} snapshot={snapshot} i18n={i18n} /></button>)}</div></section>}
         <section ref={reviews} className="store-reviews"><h2>{i18n.t('store.reviews', { count: 3 })}</h2>{(['hikari', 'ren', 'maki'] as const).map((sender, index) => <article key={sender}>
