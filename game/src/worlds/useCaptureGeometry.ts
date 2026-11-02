@@ -101,7 +101,7 @@ export function collectCaptureGeometry(root:HTMLElement,state:GameState):Capture
       element(`${app}:controls`,'common-frame:controls',button,layer,app,'common-frame');
       const symbol=(button as HTMLElement).dataset.windowSymbol;
       const rect=transform(button.getBoundingClientRect());
-      if(symbol&&rect.width>0&&rect.height>0)placements.push({app,role:`chrome:${symbol}`,sourcePartId:'common-frame',rect});
+      if(symbol&&rect.width>0&&rect.height>0){const paint=getComputedStyle(button);placements.push({app,role:`chrome:${symbol}`,sourcePartId:'common-frame',rect,paint:{color:paint.color,backgroundColor:paint.backgroundColor}});}
     }
     for(const part of node.querySelectorAll('[data-app-part]')){
       if(part.closest('.desktop-window')!==node||!shown(part))continue;

@@ -46,7 +46,7 @@ describe('第3版の制作と依頼の接続',()=>{
   s.run.desktop.cooldownMs=0;
   const geometry:CaptureGeometry={origin:'dom',viewport:{x:0,y:0,width:800,height:600},occluders:[],elements:[{id:'files-visible',app:'files',type:'files-list',sourcePartId:'files-list',layer:10,rects:[{x:10,y:20,width:100,height:40}]},{id:'note-visible',app:'note',type:'note',layer:20,rects:[{x:200,y:20,width:100,height:40}]}]};
   registerCaptureGeometry(s,geometry);const tokens=s.resources.tokens;
-  s=takeScreenshot(s,now+1,'ja',BALANCE.w3.screenshotMultiplier,true);
+  s=takeScreenshot(s,now+1,'ja',BALANCE.w3.timerOfflineMultiplier,true);
   const expected=BALANCE.w3.feedbackTokens*BALANCE.w3.autoFeedbackMultiplier;
   expect(s.resources.tokens-tokens).toBe(expected);
   expect(s.run.desktop.feedback[0]).toMatchObject({completedAt:now+1,reward:expected});

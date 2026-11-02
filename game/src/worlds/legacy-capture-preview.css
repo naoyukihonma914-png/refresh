@@ -90,6 +90,7 @@
 .capture-workshop .capture-part-scrollbar::-webkit-scrollbar {width:var(--capture-scroll-width);}
 .capture-workshop .capture-static-window-controls {display:flex;gap:2px;flex:none;}
 .capture-workshop .capture-static-window-controls>span {display:inline-flex;align-items:center;justify-content:center;width:22px;height:21px;padding:0;background:#c0c0c0;color:#000;border:2px outset #eee;}
+.capture-workshop.workshop-root .capture-static-target-window .capture-static-window-controls>span {background-color:#c0c0c0;color:#000;}
 .capture-workshop [data-symbol-shape=square] .capture-static-window-controls>span {border:2px solid currentColor;}
 .capture-workshop .capture-static-icons {display:flex;gap:6px;}
 .capture-workshop .capture-static-icons>span {display:flex;flex-direction:column;gap:2px;}
@@ -109,7 +110,12 @@
 .legacy-capture-preview .capture-native .recorded-native-window>.window-title>span {display:flex;align-items:center;min-inline-size:0;max-inline-size:none;flex:none;}
 .legacy-capture-preview .recorded-native-window>.window-title>span>.app-icon {inline-size:100%;block-size:100%;}
 .legacy-capture-preview .recorded-native-controls {position:absolute;inset:0;display:block;gap:0;margin:0;pointer-events:none;}
-.legacy-capture-preview .recorded-native-controls>button {position:absolute;margin:0;padding:0;}
+.legacy-capture-preview .capture-native .recorded-native-window>.window-title .recorded-native-controls>button {position:absolute;margin:0;padding:0;color:#000;background-color:#c0c0c0;}
+.legacy-capture-preview .capture-native.desktop-era-1 .recorded-native-window>.window-title .recorded-native-controls>button {color:#fff;background-color:transparent;}
+.legacy-capture-preview .capture-native.desktop-era-2 .recorded-native-window>.window-title .recorded-native-controls>button {color:#182e3b;background-color:transparent;}
+.legacy-capture-preview .capture-native.desktop-era-2 .recorded-native-window>.window-title .recorded-native-controls>.window-close {color:#fff;}
+.legacy-capture-preview .capture-native.desktop-era-3 .recorded-native-window>.window-title .recorded-native-controls>button {color:inherit;background-color:transparent;}
+.legacy-capture-preview .capture-native.desktop-era-3 .recorded-native-window>.window-title .recorded-native-controls>.window-close {color:#fff;background-color:#c75050;}
 .legacy-capture-preview .recorded-fallback-controls {position:absolute;inset-block-start:0;inset-inline-end:0;display:flex;gap:4px;}
 .legacy-capture-preview .recorded-fallback-controls .line-icon {inline-size:16px;block-size:16px;}
 .legacy-capture-preview .recorded-native-client {position:absolute;min-inline-size:0;min-block-size:0;overflow:hidden;padding:0;flex:none;}

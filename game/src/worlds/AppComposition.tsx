@@ -1,20 +1,22 @@
 import { BALANCE } from '../config/balance';
 import { createContext, useContext, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { I18n, MessageKey } from '../content/i18n';
-import { fitAppLayout, type AppLayout, type AppPartId, type PartMinimums } from '../systems/appLayout';
+import { fitAppLayout,minimumPart, type AppLayout, type AppPartId, type PartMinimums } from '../systems/appLayout';
 import {createComponentDesign,usesNativeComponentColors} from '../systems/workshopState';
 import {assemblyLayout,getInstalledAppParts,installedAssembly,type InstalledAppPart} from '../systems/appAssembly';
 import {partVisual} from './workshop/partVisual';
 import type { BuiltApp } from '../systems/desktopState';
 import type { DesktopProps } from './desktopTypes';
 import {ClockFace,ClockTimerContents} from '../components/ClockContents';
+import {PhotoAdjustment} from '../components/PhotoAdjustment';
 export const partLabel=(id:AppPartId,i18n:I18n)=>i18n.t(`builder.part.${id}` as MessageKey);
+const photoAdjustment=(id:AppPartId):id is 'brightness'|'tone'|'crop'=>id==='brightness'||id==='tone'||id==='crop';
 export function usePartMinimums(layout:AppLayout,i18n:I18n,fontFamily?:string,now=0){
  const ref=useRef<HTMLDivElement>(null),[metrics,setMetrics]=useState<PartMinimums>({});
  const key=layout.parts.map(p=>p.id+':'+p.fontSize).join(',');
  const clockText=i18n.date(now)+i18n.time(now);
- useLayoutEffect(()=>{const root=ref.current;if(!root)return;const measure=()=>{const next:PartMinimums={};for(const node of root.querySelectorAll<HTMLElement>('[data-measure-part]'))next[node.dataset.measurePart as AppPartId]={width:Math.ceil((node.scrollWidth+(node.dataset.measurePart==='places'?48:24))/8)*8,height:node.dataset.measurePart==='time'||node.dataset.measurePart==='timer'?Math.ceil((node.offsetHeight+8)/8)*8:32};setMetrics(old=>JSON.stringify(old)===JSON.stringify(next)?old:next);};measure();const observer=new ResizeObserver(measure);observer.observe(root);for(const node of root.querySelectorAll('[data-measure-part]'))observer.observe(node);return()=>observer.disconnect();},[key,i18n.language,clockText]);
- const ruler=<div ref={ref} className="app-part-measure" style={{fontFamily}} aria-hidden="true" inert>{layout.parts.map(p=><span key={p.id} data-measure-part={p.id} style={{fontSize:p.fontSize,...(p.id==='timer'?{width:280}:{})}}>{p.id==='time'?<ClockFace i18n={i18n} now={now}/>:p.id==='timer'?<ClockTimerContents i18n={i18n}><p>{i18n.t('clock.scheduled',{time:i18n.dateTime(now)})}<button className="win-button">{i18n.t('clock.cancel')}</button></p></ClockTimerContents>:<>{partLabel(p.id,i18n)}{p.id==='places'&&(['root','exports','screenshots'] as const).map(id=><span className="part-measure-line" key={id}>{i18n.t(`files.${id}`)}</span>)}</>}</span>)}</div>;
+ useLayoutEffect(()=>{const root=ref.current;if(!root)return;const measure=()=>{const next:PartMinimums={};for(const node of root.querySelectorAll<HTMLElement>('[data-measure-part]')){const id=node.dataset.measurePart as AppPartId;next[id]={width:Math.ceil((node.scrollWidth+(id==='places'?48:24))/BALANCE.appBuild.grid)*BALANCE.appBuild.grid,height:id==='time'||id==='timer'||photoAdjustment(id)?Math.ceil((node.offsetHeight+BALANCE.appBuild.grid)/BALANCE.appBuild.grid)*BALANCE.appBuild.grid:32};}setMetrics(old=>JSON.stringify(old)===JSON.stringify(next)?old:next);};measure();const observer=new ResizeObserver(measure);observer.observe(root);for(const node of root.querySelectorAll('[data-measure-part]'))observer.observe(node);return()=>observer.disconnect();},[key,i18n.language,clockText]);
+ const ruler=<div ref={ref} className="app-part-measure" style={{fontFamily}} aria-hidden="true" inert>{layout.parts.map(p=><span key={p.id} data-measure-part={p.id} style={{fontSize:p.fontSize,...(p.id==='timer'?{width:280}:photoAdjustment(p.id)?{width:minimumPart(p.id).width-BALANCE.appBuild.grid,whiteSpace:'normal' as const}:{})}}>{p.id==='time'?<ClockFace i18n={i18n} now={now}/>:p.id==='timer'?<ClockTimerContents i18n={i18n}><p>{i18n.t('clock.scheduled',{time:i18n.dateTime(now)})}<button className="win-button">{i18n.t('clock.cancel')}</button></p></ClockTimerContents>:photoAdjustment(p.id)?<PhotoAdjustment label={i18n.t(`photo.${p.id}`)} min={0} max={1} value={0}>{p.id==='crop'?i18n.t('number.percent',{value:i18n.integer(0)}):i18n.number(0)}</PhotoAdjustment>:<>{partLabel(p.id,i18n)}{p.id==='places'&&(['root','exports','screenshots'] as const).map(id=><span className="part-measure-line" key={id}>{i18n.t(`files.${id}`)}</span>)}</>}</span>)}</div>;
  return {metrics,ruler};
 }
 export function commonDesignStyle(assembly:ReturnType<typeof installedAssembly>):CSSProperties {

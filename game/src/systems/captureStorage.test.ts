@@ -25,6 +25,14 @@ function disk(limit=Infinity){
 }
 const shotState=()=>takeScreenshot(focusWindow(createFixture('desktop-files',now)!,'note'),now,'ja');
 describe('新しい撮影は採用した部品と表示された位置を読み取り専用で残す',()=>{
+ it('入れ子の写真でも窓の記号は撮影時の黒字・灰色地を明示し、外側アプリの色を継承しない',()=>{
+  const s=createFixture('stage8b-capture-overlap-era0',now)!,nativeWindow=s.run.desktop.windows.note,client={x:nativeWindow.x+5,y:nativeWindow.y+23,width:nativeWindow.width-10,height:nativeWindow.height-28};
+  const placements=(['minimize','maximize','close'] as const).map((symbol,index)=>({app:'note',role:`chrome:${symbol}`,rect:{x:nativeWindow.x+nativeWindow.width-54+index*18,y:nativeWindow.y+3,width:16,height:14},paint:{color:'rgb(0, 0, 0)',backgroundColor:'rgb(192, 192, 192)'}}));
+  registerCaptureGeometry(s,{origin:'dom',viewport:{x:0,y:0,...s.run.desktop.screen},elements:[],occluders:[],windowClients:{note:client},placements});
+  const shot={id:1,at:now,language:'ja',data:encodeCapture(projectCapture(s,'ja'))},i18n=createI18n('ja');
+  const markup=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n}));
+  for(const symbol of ['minimize','maximize','close']){const control=markup.match(new RegExp(`<button[^>]*data-recorded-symbol="${symbol}"[^>]*>`))![0];expect(control).toContain('color:rgb(0, 0, 0)');expect(control).toContain('background-color:rgb(192, 192, 192)');}
+ });
  it('DOMの実client・slot・タイトルを凍結し、現在の工房や配置へ戻さず再生する',()=>{
   const s=createFixture('stage8b-capture-uncovered-era0',now)!,nativeWindow=s.run.desktop.windows.files;
   const source=s.run.desktop.projects.files!.installedAssembly!.slots.find(slot=>slot.role==='list')!;
@@ -235,7 +243,8 @@ describe('保存した部品工房の静的な配置と材質',()=>{
   w.parts['common-frame']!.design.controlColors.close='#f6d27a';
   const symbolOnly=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
   expect(openTag(symbolOnly,'data-static-control','close')).toContain('color:#f6d27a');
-  expect(symbolOnly).not.toContain('background-color:#3a3450');
+  expect(openTag(symbolOnly,'data-static-control','close')).toContain('background-color:#3a3450');
+  expect(symbolOnly.match(/<div class="ws-target-title"[^>]*>/)![0]).not.toContain('background-color:#3a3450');
   w.parts['common-button']!.design={...w.parts['common-button']!.design,nativeColors:false,color:'#7a2e2a',textColor:'#f4efe4',radius:8,fontSize:16};
   markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));button=openTag(markup,'data-static-part-content','common-button');
   expect(button).toContain('background:#7a2e2a');expect(button).toContain('color:#f4efe4');expect(button).toContain('border-radius:8px');expect(button).toContain('font-size:16px');

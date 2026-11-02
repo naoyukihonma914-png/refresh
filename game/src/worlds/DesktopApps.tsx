@@ -22,6 +22,7 @@ import { ScreenshotPreview } from './Desktop';
 import { LineIcon } from './desktop-icons';
 import type { DesktopProps as Props } from './desktopTypes';
 import { PhotoSurface } from './PhotoSurface';
+import {PhotoAdjustment} from '../components/PhotoAdjustment';
 // The second original photo is bundled, like the coast, and is never fetched at runtime.
 import night from '../assets/wallpaper/night.webp';
 export function Photograph({edit,wallpaper=false,...props}:Props&{edit:PhotoEdit;wallpaper?:boolean}) {
@@ -69,9 +70,9 @@ export function PhotoApp(props:Props){
  {hasUpgrade(s,'compare')&&<AppPart id="compare"><button className="win-button" aria-pressed={d.compare} onClick={()=>runtime.actDesktop({type:'compare'})}>{i18n.t('photo.compare')}</button></AppPart>}
  <AppPart id="wallpaper"><button className="win-button accent" onClick={()=>runtime.actDesktop({type:'wallpaper'})}>{i18n.t('photo.wallpaper')}</button></AppPart></div>
  <AppPart id="image"><div className="photo-workbench">{d.compare&&hasUpgrade(s,'compare')&&<figure><figcaption>{i18n.t('photo.before')}</figcaption><Photograph {...props} edit={{...edit,brightness:1,tone:0,crop:0}}/></figure>}<figure><figcaption>{i18n.t('photo.after')}</figcaption><Photograph {...props} edit={edit}/></figure></div></AppPart>
- <div className="photo-adjustments"><AppPart id="brightness"><label>{i18n.t('photo.brightness')}<input type="range" min=".5" max="1.5" step=".05" value={edit.brightness} onChange={e=>change({brightness:Number(e.target.value)})}/><output>{i18n.number(edit.brightness)}</output></label></AppPart>
- <AppPart id="tone"><label>{i18n.t('photo.tone')}<input type="range" min="-50" max="50" value={edit.tone} onChange={e=>change({tone:Number(e.target.value)})}/><output>{i18n.integer(edit.tone)}</output></label></AppPart>
- {hasUpgrade(s,'crop')&&<AppPart id="crop"><label>{i18n.t('photo.crop')}<input type="range" min="0" max="40" value={edit.crop} onChange={e=>change({crop:Number(e.target.value)})}/><output title={i18n.t('photo.cropValue',{count:edit.crop})}>{i18n.t('number.percent',{value:i18n.integer(edit.crop)})}</output></label></AppPart>}</div></div>;
+ <div className="photo-adjustments"><AppPart id="brightness"><PhotoAdjustment label={i18n.t('photo.brightness')} min={.5} max={1.5} step={.05} value={edit.brightness} onChange={brightness=>change({brightness})}>{i18n.number(edit.brightness)}</PhotoAdjustment></AppPart>
+ <AppPart id="tone"><PhotoAdjustment label={i18n.t('photo.tone')} min={-50} max={50} value={edit.tone} onChange={tone=>change({tone})}>{i18n.integer(edit.tone)}</PhotoAdjustment></AppPart>
+ {hasUpgrade(s,'crop')&&<AppPart id="crop"><PhotoAdjustment label={i18n.t('photo.crop')} min={0} max={40} value={edit.crop} onChange={crop=>change({crop})} title={i18n.t('photo.cropValue',{count:edit.crop})}>{i18n.t('number.percent',{value:i18n.integer(edit.crop)})}</PhotoAdjustment></AppPart>}</div></div>;
 }
 export function BinApp({snapshot,runtime,i18n}:Props){
  const s=snapshot.state,d=s.run.desktop;

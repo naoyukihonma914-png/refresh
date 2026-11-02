@@ -11,13 +11,14 @@ import type { GameState } from './state';
 import { evaluateVisibility, intersectRect, subtractRect, type CaptureElement, type CaptureOccluder, type CaptureVisibility } from './captureVisibility';
 import type { CaptureScene } from './captureScene';
 
-export interface CapturePlacement {app:string;role:string;sourcePartId?:string;rect:Rect}
+export interface CapturePlacement {app:string;role:string;sourcePartId?:string;rect:Rect;paint?:{color:string;backgroundColor:string}}
 export interface CaptureGeometry {origin:'dom'|'model';viewport:Rect;elements:CaptureElement[];occluders:CaptureOccluder[];windowClients?:Record<string,Rect>;windowTitles?:Record<string,string>;placements?:CapturePlacement[]}
 export interface CaptureEvaluation extends CaptureVisibility {version:1;origin:CaptureGeometry['origin'];reward:number;unit:number;resolutionMultiplier:number;colorMultiplier:number;globalMultiplier:number;windowClients:Record<string,Rect>;windowTitles:Record<string,string>;placements:CapturePlacement[]}
 const record=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const amount=(value:unknown):value is number=>typeof value==='number'&&Number.isFinite(value)&&value>=0;
 const count=(value:unknown):value is number=>amount(value)&&Number.isSafeInteger(value);
 const rectValid=(value:unknown):value is Rect=>record(value)&&['x','y','width','height'].every(key=>typeof value[key]==='number'&&Number.isFinite(value[key]))&&Number(value.width)>0&&Number(value.height)>0;
+const frozenColor=(value:unknown)=>typeof value==='string'&&(/^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i.test(value)||/^rgba?\([\d., %/+-]+\)$/.test(value));
 export function isCaptureEvaluation(value:unknown):value is CaptureEvaluation {
   if(!record(value)||value.version!==1||!['dom','model'].includes(String(value.origin))||!Array.isArray(value.parts)||value.parts.length>BALANCE.capture.maxElements)return false;
   if(!value.parts.every(part=>record(part)&&typeof part.id==='string'&&typeof part.type==='string'&&(part.app===undefined||typeof part.app==='string')&&(part.sourcePartId===undefined||typeof part.sourcePartId==='string')
@@ -28,7 +29,7 @@ export function isCaptureEvaluation(value:unknown):value is CaptureEvaluation {
     &&count(value.fullyHidden)&&value.fullyHidden===parts.filter(part=>part.area>0&&!part.visible).length&&Array.isArray(value.visibleWindows)&&value.visibleWindows.every(id=>typeof id==='string')
     &&['reward','unit','resolutionMultiplier','colorMultiplier','globalMultiplier'].every(key=>amount(value[key]))
     &&record(value.windowClients)&&Object.values(value.windowClients).every(rectValid)&&record(value.windowTitles)&&Object.values(value.windowTitles).every(title=>typeof title==='string')&&Array.isArray(value.placements)&&value.placements.length<=BALANCE.capture.maxElements
-    &&value.placements.every(item=>record(item)&&typeof item.app==='string'&&typeof item.role==='string'&&(item.sourcePartId===undefined||typeof item.sourcePartId==='string')&&rectValid(item.rect));
+    &&value.placements.every(item=>record(item)&&typeof item.app==='string'&&typeof item.role==='string'&&(item.sourcePartId===undefined||typeof item.sourcePartId==='string')&&rectValid(item.rect)&&(item.paint===undefined||record(item.paint)&&frozenColor(item.paint.color)&&frozenColor(item.paint.backgroundColor)));
 }
 
 /** Runtime-only measurement cache. It never enters a save and is invalidated when its source graph changes. */

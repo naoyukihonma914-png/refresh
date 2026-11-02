@@ -4,7 +4,6 @@ import { actAppBuild, ownAppBlueprint, functionalApp, hasAppPart, type AppBuildA
 import { desktopScreen, fitWindow, fitIcon, workHeight } from './desktopGeometry';
 import { desktopStage } from './appearance';
 import { evaluateCapture,screenshotContentCount,screenshotContentReward } from './captureEvaluation';
-import { globalMultiplier } from './longPlay';
 import { nextDesktopOffer,followingDesktopOffer } from './desktopOffers';
 import { APP_REQUIRED,sourceForSlot } from '../content/appRecipes';
 export {fitWindow} from './desktopGeometry';
@@ -124,8 +123,6 @@ export function observeTesseraAction(before: GameState, after: GameState, type: 
 }
 export const screenshotParts = screenshotContentCount;
 export const screenshotCapacity = (state: GameState) => BALANCE.w3.baseShotCapacity * BALANCE.w3.storageCapacityMultiplier ** state.persistent.specs.storage;
-/** A preview of a small visible-content increment; never a passive production quote. */
-export const desktopAppShotGain = (state: GameState) => BALANCE.capture.pixelsPerPart * (BALANCE.w3.partsPerWindow + 1) * BALANCE.w3.shotResolutionMultiplier ** state.persistent.specs.resolution * BALANCE.spec.color[state.persistent.specs.color]!.multiplier * globalMultiplier(state);
 export const screenshotReward = screenshotContentReward;
 export function takeScreenshot(state: GameState, now: number, language: string, multiplier=1, automatic=false): GameState {
   if (state.run.world !== 'desktop' || state.run.desktop.cooldownMs > 0 || activeScreenshots(state).length >= screenshotCapacity(state)) return state;

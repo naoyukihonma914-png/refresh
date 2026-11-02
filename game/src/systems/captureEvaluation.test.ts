@@ -36,6 +36,14 @@ describe('撮影は内容の記録であり毎秒や整頓の採点ではない'
   expect(readCapture({id:1,at:now,language:'ja',data:saved}).evaluation).toEqual(scene.evaluation);
   expect(isCaptureEvaluation({...scene.evaluation,visibleCount:999})).toBe(false);
  });
+ it('窓の記号の実表示色も凍結し、任意のCSS式や外部参照を保存色として受け入れない',()=>{
+  const s=state(),g=geometry();g.placements=[{app:'note',role:'chrome:close',rect:{x:20,y:20,width:16,height:14},paint:{color:'rgb(0, 0, 0)',backgroundColor:'rgb(192, 192, 192)'}}];
+  registerCaptureGeometry(s,g);const scene=projectCapture(s,'ja');expect(isCaptureEvaluation(scene.evaluation)).toBe(true);
+  const restored=readCapture({id:1,at:now,language:'ja',data:encodeScene(scene)});
+  expect(restored.evaluation?.placements[0]?.paint).toEqual(g.placements[0]!.paint);
+  const bad=structuredClone(scene.evaluation);bad.placements[0]!.paint!.backgroundColor='url(https://invalid.test/image)';
+  expect(isCaptureEvaluation(bad)).toBe(false);
+ });
  it('写真の品質は写った部品の個数と種類だけ。位置を動かしても変わらず種類が増えると増える',()=>{
   const standard=shot(),shifted=shot(geometry(true,200)),sameType=shot(geometry(false));
   expect(capturedContentSummary(standard)).toEqual({count:2,kinds:2,fullyHidden:0});
