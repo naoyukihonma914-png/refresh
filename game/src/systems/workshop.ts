@@ -83,12 +83,12 @@ export function enterWorkshop(s:GameState):GameState {
 function writePart(s:GameState,id:WorkshopPartId,part:PartProduction):GameState {
   return {...s,run:{...s.run,workshop:{...s.run.workshop,parts:{...s.run.workshop.parts,[id]:part}}}};
 }
-function snapshotSet(s:GameState,set:UiSetId,now:number):GameState {
+function snapshotSet(s:GameState,set:UiSetId,now:number,preserveDate=false):GameState {
   const parts:Partial<Record<WorkshopPartId,PartProduction>>={};
   for(const d of partsForSet(set)) { const p=s.run.workshop.parts[d.id];if(p?.step===4)parts[d.id]=structuredClone(p); }
   if(Object.keys(parts).length===0)return s;
-  const id=`${s.run.version}:${set}`,setDocument={id,set,version:s.run.version,at:now,parts};
-  const documents=s.persistent.setDocuments,previous=documents.findIndex(d=>d.id===id);
+  const id=`${s.run.version}:${set}`,documents=s.persistent.setDocuments,previous=documents.findIndex(d=>d.id===id);
+  const setDocument={id,set,version:s.run.version,at:preserveDate&&previous>=0?documents[previous]!.at:now,parts};
   return {...s,persistent:{...s.persistent,setDocuments:previous<0?[...documents,setDocument]:documents.map((d,i)=>i===previous?setDocument:d)}};
 }
 const paletteAllows=(s:GameState,color:string):boolean=>/^#[\da-f]{6}$/i.test(color)&&(s.persistent.specs.color>=2||paletteFor(s.persistent.specs.color).includes(color.toLowerCase()));
@@ -194,6 +194,8 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
       if(setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now);
       s=showGuide(s,'complete');
     }
+    // A completed set document is the current version's work, while released products stay frozen.
+    if(s!==state&&p.step===4&&['place','addElement','adjust'].includes(action.type)&&setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now,true);
   }
   if(s===state)return state;
   return {...s,run:{...s.run,workshop:{...s.run.workshop,lastActionAt:s.elapsedMs}}};

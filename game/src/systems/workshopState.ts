@@ -78,7 +78,7 @@ export function effectiveEditorBackground(custom:Pick<EditorCustomization,'backg
 /** Apply a colour choice as one readable change, never through an invalid intermediate pair. */
 export function adjustComponentDesign(current:ComponentDesign,patch:Partial<ComponentDesign>,palette:readonly string[]):ComponentDesign|null {
   const reset=patch.nativeColors===true;
-  const touched=['color','textColor','controlColors'].some(key=>Object.hasOwn(patch,key));
+  const touched=['color','textColor'].some(key=>Object.hasOwn(patch,key));
   const next:ComponentDesign={...current,...patch,
     controlColors:reset?{...patch.controlColors}:{...current.controlColors,...patch.controlColors},
     controlSides:{...current.controlSides,...patch.controlSides},

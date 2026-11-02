@@ -8,6 +8,7 @@ import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, takeScreensho
 import { createInitialState, type GameState } from './state';
 import { createSeedVersion, updateSeedGuide } from './seed';
 import { UI_SETS, WORKSHOP_PARTS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
+import { BASE_PALETTE } from '../content/palette';
 import { createComponentDesign, type PartProduction } from './workshopState';
 import { actWorkshop, enterWorkshop } from './workshop';
 import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion, releaseEstimate } from './release';
@@ -71,19 +72,20 @@ export function completeWorkshopPartFixture(s:GameState,id:WorkshopPartId,now:nu
  return exported?actWorkshop(s,{type:'export',part:id},now):s;
 }
 function customizeCommon(s:GameState):GameState {
- const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','close','minimize','maximize'];s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:'#000080',textColor:'#ffffff',titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:'#ffffff',minimize:'#ffffff',maximize:'#ffffff'},symbolShape:'square'}},s.lastTickAt);}
+ const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','close','minimize','maximize'];s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:BASE_PALETTE[11]!,textColor:BASE_PALETTE[4]!,titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:BASE_PALETTE[4]!,minimize:BASE_PALETTE[4]!,maximize:BASE_PALETTE[4]!},symbolShape:'square'}},s.lastTickAt);}
  s.run.workshop.activePart='common-frame';return s;
 }
 function customEditor(s:GameState,era:number):GameState {
- s=actWorkshop(s,{type:'customize',patch:era>0?{accent:'#008080',bandPosition:'bottom',panelWidth:208,background:'#000000',gridSpacing:16,fontSize:14}:{accent:'#008080',bandPosition:'bottom'}},s.lastTickAt);
+ s=actWorkshop(s,{type:'customize',patch:era>0?{accent:BASE_PALETTE[13]!,bandPosition:'top',panelWidth:208,background:BASE_PALETTE[0]!,gridSpacing:16,fontSize:14}:{accent:BASE_PALETTE[13]!,bandPosition:'top'}},s.lastTickAt);
  s.run.workshop.view='settings';return s;
 }
 function buyDesktopApp(s:GameState,id:DesktopUpgrade):GameState {
  let n=buyBlueprint(s,id);const app=isBuildable(id)?id:featureApp(id);
  if(app){n=actAppBuild(n,{type:'app-recommend',app});n=actAppBuild(n,{type:'app-install',app});n=focusWindow(n,app);}return n;
 }
-function desktopState(now:number,era=0,stop:DesktopUpgrade|'all'|'none'='all'):GameState {
+function desktopState(now:number,era=0,stop:DesktopUpgrade|'all'|'none'='all',customCommon=false):GameState {
  let s=workshopState(now,Math.min(era,2));s.run.version='v1';s.persistent.specs.color=1;s=addSets(s,BASE_SETS,4,now,true);
+ if(customCommon)s=customizeCommon(s);
  s.persistent.desktopPrefs.skills=era===0?[]:era===1?['major1']:era===2?['major1','major2']:['major1','major2','major3'];
  const stage=Math.min(era,3) as 0|1|2|3;s.persistent.appearance.desktop=stage;s=enterDesktop(s);s.elapsedMs+=BALANCE.w3.enterMs;
  if(stop!=='none')for(const item of BALANCE.w3.apps){s=buyDesktopApp(s,item.id);if(item.id===stop)break;}
@@ -103,7 +105,7 @@ export function createFixture(name:string|null,now:number):GameState|null {
  if(!name||!FIXTURE_NAMES.includes(name))return null;
  if(name==='intro')return createInitialState(now);
  const native=/^stage8a-desktop-common-custom-era([0-3])$/.exec(name);
- if(native){let s=customizeCommon(desktopState(now,Number(native[1])));for(const nativeWindow of Object.values(s.run.desktop.windows)){nativeWindow.open=false;nativeWindow.minimized=false;}s=focusWindow(s,'files');return s;}
+ if(native){let s=desktopState(now,Number(native[1]),'all',true);for(const nativeWindow of Object.values(s.run.desktop.windows)){nativeWindow.open=false;nativeWindow.minimized=false;}s=focusWindow(s,'files');return s;}
  if(name.startsWith('stage8a-seed-')){
   const era=Number(/-era([12])$/.exec(name)?.[1]??0),base=name.replace(/-era[12]$/,'');
   const id=base==='stage8a-seed-layout-before'?'layout':base==='stage8a-seed-workspace-before'?'workspace':'export';
@@ -118,8 +120,12 @@ export function createFixture(name:string|null,now:number):GameState|null {
   if(mode==='entry'||mode==='set-shop')return s;
   if(mode==='main')return addSets(s,[...MAIN_SETS,'photo'],0,now);
   if(mode==='catalog'){s=addSets(s,UI_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);return s;}
-  s=addSets(s,mode==='files-complete'?['common','foundation','files']:MAIN_SETS,4,now,true);
-  if(mode==='files-complete'){s.run.workshop.view='workbench';s.run.workshop.activePart='files-list';s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;return s;}
+  if(mode==='files-complete'){
+   s=addSets(addSets(s,['common','foundation'],4,now,true),['files'],0,now);
+   for(const descriptor of partsForSet('files'))s=completeWorkshopPartFixture(s,descriptor.id,now,false);
+   s.run.workshop.view='workbench';s.run.workshop.activePart='files-list';s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;return s;
+  }
+  s=addSets(s,MAIN_SETS,4,now,true);
   if(mode==='required-complete-16color'){s.run.workshop.exitInspected=true;s.run.workshop.guide.seen=[...new Set([...s.run.workshop.guide.seen,'wall' as const])];s.run.workshop.guide.current='wall';s.run.workshop.guide.collapsed=false;return s;}
   return mode==='common-custom'?customizeCommon(s):customEditor(s,era);
  }

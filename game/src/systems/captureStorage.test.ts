@@ -193,6 +193,10 @@ describe('保存した部品工房の静的な配置と材質',()=>{
   let markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot)),button=openTag(markup,'data-static-part-content','common-button');
   expect(button).toContain('background:#c0c0c0');expect(button).toContain('color:#000000');
   expect(markup).toContain('background:#5d6f7d');
+  w.parts['common-frame']!.design.controlColors.close='#f6d27a';
+  const symbolOnly=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
+  expect(openTag(symbolOnly,'data-static-control','close')).toContain('color:#f6d27a');
+  expect(symbolOnly).not.toContain('background-color:#3a3450');
   w.parts['common-button']!.design={...w.parts['common-button']!.design,nativeColors:false,color:'#7a2e2a',textColor:'#f4efe4',radius:8,fontSize:16};
   markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));button=openTag(markup,'data-static-part-content','common-button');
   expect(button).toContain('background:#7a2e2a');expect(button).toContain('color:#f4efe4');expect(button).toContain('border-radius:8px');expect(button).toContain('font-size:16px');

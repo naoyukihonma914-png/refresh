@@ -42,6 +42,17 @@ class Checks:
         self.report['failed'] = sum(case['status'] == 'failed' for case in self.report['cases'])
         self.report['pageErrors'] = [error for case in self.report['cases'] for error in case.get('pageErrors', [])]
         self.report['externalRequests'] = [url for case in self.report['cases'] for url in case.get('externalRequests', [])]
+        self.report['consoleMessages'] = [{'case': case['id'], **message} for case in self.report['cases'] for message in case.get('console', [])]
+        production = [case for case in self.report['cases'] if case['step'] == '8a2' and len(case.get('completedParts', [])) == 29]
+        self.report['coverage'] = {
+            'seedPurchases': sum(len(case.get('purchases', [])) for case in self.report['cases'] if case['step'] == '8a1'),
+            'workshopPartsCompletedThroughFourSteps': sum(len(case['completedParts']) for case in production),
+            'workshopStageTransitions': 4 * sum(len(case['completedParts']) for case in production),
+            'additionalWidgetFinishes': sum(len(case.get('completedParts', [])) for case in self.report['cases'] if case['step'] == '8a2' and len(case.get('completedParts', [])) == 1),
+            'interactionTypes': sorted({gesture for case in production for gesture in case.get('interactions', {}).values()}),
+            'sevenControlSaveRoundtrips': sum(bool(case.get('saveRoundtrip')) and len(case.get('editorControls', [])) == 7 for case in self.report['cases']),
+            'nativeWindowScenarios': sum(len(case.get('nativeWindowActions', {})) for case in self.report['cases']),
+        }
         (self.out / 'summary.json').write_text(json.dumps(self.report, ensure_ascii=False, indent=2) + '\n')
         cards = []
         for case in self.report['cases']:
@@ -343,10 +354,19 @@ class Checks:
         expect(rows).to_have_count(3)
         rows.first.locator('select').first.select_option('start')
         rows.last.locator('.ws-order-controls button').first.click()
+        inspector = root.locator('.ws-inspector')
+        inspector.locator(':scope > .ws-colors').first.locator(':scope > div > button').nth(11).click()
+        inspector.locator(':scope > .ws-colors').nth(1).locator(':scope > div > button').nth(4).click()
+        title_options = inspector.locator(':scope > label > select')
+        title_options.nth(0).select_option('center')
+        title_options.nth(1).select_option('square')
+        rows.first.locator('.ws-colors > div > button').nth(4).click()
         after = self.state(page)
         frame = after['run']['workshop']['parts']['common-frame']
         assert frame['elements'] != before['run']['workshop']['parts']['common-frame']['elements']
         assert frame['design']['controlSides']['minimize'] == 'start'
+        assert frame['design']['color'] == '#1f3f7a' and frame['design']['textColor'] == '#f4efe4'
+        assert frame['design']['nativeColors'] is False and frame['design']['symbolShape'] == 'square' and frame['design']['titleAlign'] == 'center'
         self.geometry(page, root)
         self.capture(page, case, '共通の窓記号：左右と並びを変更', 'common-symbols')
         root.locator('[data-workshop-action=confirmAdjustment]').click()
@@ -360,14 +380,24 @@ class Checks:
         previous = self.state(page)['persistent']['editorCustomization']
         width = settings.locator('[data-workshop-customize=panelWidth]')
         width.focus()
-        width.press('ArrowRight')
-        settings.locator('select').first.select_option('top' if previous['bandPosition'] == 'bottom' else 'bottom')
+        width.press('End')
+        settings.locator('select').first.select_option('bottom')
         grid = settings.locator('input[type=checkbox]').first
         grid.set_checked(not grid.is_checked())
+        settings.locator('.ws-colors').first.locator(':scope > div > button').nth(8).click()
+        settings.locator('.ws-colors').nth(1).locator(':scope > div > button').nth(0).click()
+        for control in [settings.locator('input[type=range]').nth(0), settings.locator('input[type=range]').nth(1)]:
+            previous_value = control.input_value()
+            control.focus()
+            control.press('ArrowRight' if float(previous_value) < float(control.get_attribute('max')) else 'ArrowLeft')
+            assert control.input_value() != previous_value
         customized = self.state(page)
         saved = customized['persistent']['editorCustomization']
-        assert saved['panelWidth'] > previous['panelWidth']
+        assert saved['panelWidth'] == float(width.get_attribute('max')) and saved['panelWidth'] > previous['panelWidth']
         assert saved['bandPosition'] != previous['bandPosition'] and saved['grid'] != previous['grid']
+        assert saved['accent'] == '#f6d27a' and saved['background'] == '#101018' and saved['nativeBackground'] is False
+        assert saved['gridSpacing'] != previous['gridSpacing'] and saved['fontSize'] != previous['fontSize']
+        case['editorControls'] = ['accent', 'bandPosition', 'panelWidth', 'background', 'grid', 'gridSpacing', 'fontSize']
         self.geometry(page, root)
         self.capture(page, case, '工房自身の設定を実操作で変更', 'editor-settings')
         root.locator('.ws-page-scroll > button').first.click()
@@ -406,6 +436,9 @@ class Checks:
         era = case['era'] if desktop_era is None else desktop_era
         self.navigate(page, f'stage8a-desktop-common-custom-era{era}', case)
         desktop = page.locator('.desktop-live')
+        achievement = desktop.locator('.achievement-toast header > button')
+        if achievement.count():
+            achievement.click()
         frame = desktop.locator('.desktop-window[data-app=files]')
         expect(frame).to_be_visible()
         start = frame.locator(':scope > .window-title [data-produced-controls=start]')
@@ -491,16 +524,59 @@ class Checks:
                     if image['file'] == old_file:
                         image.update(file=exports_file, label='エクスポートしたセットの一覧')
             root = page.locator('[data-workshop=true]')
-            assert self.state(page)['run']['workshop']['activePart'] == 'files-list'
+            fixture = self.state(page)
+            workshop = fixture['run']['workshop']
+            assert workshop['activePart'] == 'files-list'
+            assert workshop['purchasedSets'] == ['common', 'foundation', 'files']
+            assert all(production['step'] == 4 and production['exportedAt'] is None for identity, production in workshop['parts'].items() if identity.startswith('files-'))
+            assert [document['set'] for document in fixture['persistent']['setDocuments']] == ['common', 'foundation', 'files']
+            case['filesCompleteBeforeExport'] = {'completedParts': 17, 'filesCompleted': 6, 'filesExported': 0, 'setDocuments': ['common', 'foundation', 'files']}
             self.workshop_space_gate(page, root, case)
             expect(root.locator('[data-workshop-target=files]')).to_be_visible()
             self.geometry(page, root)
+            case['fileTargetChromeGeometry'] = root.locator('.ws-actual-window-controls > button').evaluate_all('nodes=>nodes.map(node=>({width:node.clientWidth,height:node.clientHeight,scrollWidth:node.scrollWidth,scrollHeight:node.scrollHeight}))')
+            assert all(button['scrollHeight'] <= button['height'] + 2 for button in case['fileTargetChromeGeometry'])
             self.capture(page, case, 'ファイルの6パーツが完成した窓', 'files-complete')
             if language == 'ja' and width == 1920:
                 for phase in [1, 2, 3, 4]:
                     self.navigate(page, f'stage8a-part-common-frame-step-{phase}-era{era}', case)
                     self.capture(page, case, f'同じパーツ：工程{phase}（パーツ名・工程表示つき）', f'common-frame-step{phase}')
+            self.navigate(page, f'stage8a-entry-era{era}', case)
+            root = page.locator('[data-workshop=true]')
+            self.geometry(page, root)
+            self.capture(page, case, '工房に入った直後（最終既定色）', 'entry')
+            root.locator('.ws-text-button').first.click()
+            self.geometry(page, root)
+            self.capture(page, case, 'UIセットの購入（最終既定色）', 'set-shop')
+            root.locator('[data-workshop-set=clock]').click()
+            self.geometry(page, root)
+            self.capture(page, case, '購入したのは材料と制作する権利（最終既定色）', 'set-purchased')
+            self.navigate(page, f'stage8a-required-complete-16color-era{era}', case)
+            root = page.locator('[data-workshop=true]')
+            expect(root.locator('.ws-exit-requirements')).to_be_visible()
+            expect(root.locator('[data-workshop-action=release]')).to_be_enabled()
+            root.locator('.ws-exit-requirements').scroll_into_view_if_needed()
+            self.geometry(page, root)
+            self.capture(page, case, '16色の表示要件とリリースの入口（最終既定色）', '16color-exit')
             case['correctedFraming'] = True
+        finally:
+            context.close()
+            self.persist()
+
+    def recheck_flat_native(self, language, width, era):
+        assert era == 2, 'The additional flat desktop belongs to the editor-era-2 case'
+        identity = f'8a3-era{era}-{language}-{width}'
+        case = next(row for row in self.report['cases'] if row['id'] == identity)
+        assert case.get('saveRoundtrip') and len(case.get('editorControls', [])) == 7
+        assert case.get('nativeWindowActions', {}).get('2') == ['maximize', 'restore', 'move', 'minimize', 'close', 'reopen']
+        context, page = self.open('stage8a-desktop-common-custom-era3', case)
+        try:
+            self.native_frame(page, case, desktop_era=3)
+            assert not case['pageErrors'], case['pageErrors']
+            case['status'] = 'passed'
+            case.pop('error', None)
+            case['images'] = [item for item in case['images'] if not item['file'].endswith('-failure.png')]
+            print('PASS flat-native', identity, flush=True)
         finally:
             context.close()
             self.persist()
@@ -516,6 +592,7 @@ def main():
     parser.add_argument('--era', action='append', type=int, choices=[0, 1, 2])
     parser.add_argument('--catalog-only', action='store_true', help='Exercise optional and plugin widgets from new step-3 fixtures')
     parser.add_argument('--captures-only', action='store_true', help='Refresh corrected Files and primary phase screenshots without replaying passed flows')
+    parser.add_argument('--flat-native-only', action='store_true', help='Finish verified editor-era-2 cases by checking the additional flat desktop')
     parser.add_argument('--part', action='append', help='Limit catalog-only checks to named new catalog IDs')
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--recheck', action='store_true')
@@ -531,7 +608,10 @@ def main():
             for era in args.era or [0, 1, 2]:
                 for language in args.language or ['ja', 'en', 'en-XA']:
                     for width in args.width or [1920, 1366]:
-                        if args.captures_only:
+                        if args.flat_native_only:
+                            assert step == '8a3', '--flat-native-only belongs to 8a3'
+                            checks.recheck_flat_native(language, width, era)
+                        elif args.captures_only:
                             checks.recapture(step, language, width, era)
                         elif args.catalog_only:
                             assert step == '8a2', '--catalog-only belongs to 8a2'

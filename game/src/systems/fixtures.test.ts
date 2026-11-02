@@ -25,4 +25,21 @@ describe('第3版：ブラウザ固定状態の整合性',()=>{
   expect(ready.persistent.specs.color).toBe(0);
   expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras')).toHaveLength(47);
  });
+ it('ファイル完成の固定状態は6パーツの書類ができたエクスポート直前を示す',()=>{
+  const state=createFixture('stage8a-files-complete-era0',now)!;
+  expect(state.run.workshop.activePart).toBe('files-list');expect(state.run.workshop.view).toBe('workbench');
+  expect(state.run.workshop.purchasedSets).toEqual(['common','foundation','files']);
+  expect(state.persistent.setDocuments.map(document=>document.set)).toEqual(['common','foundation','files']);
+  for(const [id,production] of Object.entries(state.run.workshop.parts)){
+   expect(production?.step).toBe(4);
+   expect(production?.exportedAt).toBe(id.startsWith('files-')?null:now);
+  }
+ });
+ it('実デスクトップの共通枠には移動前に選んだ色と左右の記号を引き継ぐ',()=>{
+  for(const era of [0,1,2,3]){
+   const state=createFixture(`stage8a-desktop-common-custom-era${era}`,now)!;
+   expect(state.run.world).toBe('desktop');
+   expect(state.run.workshop.parts['common-frame']?.design).toMatchObject({nativeColors:false,color:'#1f3f7a',textColor:'#f4efe4',controlSides:{close:'start',minimize:'end',maximize:'end'}});
+  }
+ });
 });

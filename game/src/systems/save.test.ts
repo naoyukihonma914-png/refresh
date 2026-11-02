@@ -5,9 +5,10 @@ import { createInitialState, isGameState, SCHEMA_VERSION } from './state';
 import { LEGACY_PART_PRICES, LEGACY_REMOVED_SKILL_PRICES } from './legacySave';
 import { BALANCE } from '../config/balance';
 import { buildSeed } from './seed';
+import { pageColors } from './pageDesign';
 import { advanceShipping, buySpec, showShipping, startNextVersion } from './release';
 import { getWorkshopPart } from '../content/workshopCatalog';
-import { createComponentDesign, type PartProduction } from './workshopState';
+import { createComponentDesign, effectiveEditorBackground, type PartProduction } from './workshopState';
 
 const savedState = () => {
   const state = createInitialState(1_000);
@@ -100,6 +101,27 @@ describe('第14版への保存データ移行', () => {
     expect(next.persistent.progress.secretPart).toBe(true);expect(next.persistent.setDocuments).toEqual([]);
     expect(next.run.workshop.parts).toEqual({});expect(next.run.workshop.purchasedSets).toEqual([]);
     assertRetiredStateRemoved(next);expect(JSON.stringify(old)).toBe(raw);
+    expect(decodeSave(encodeSave(next))).toEqual(next);
+  });
+  it.each(['#7cc4f2','#3a3450','#F4EFE4'])('旧W1で選んだ背景%sを工房の色へ移し、次の読込でも失わない', background => {
+    const old=legacyState();old.run.world='seed';old.run.kumiki.entered=false;old.run.seed.built.pop();old.run.seed.history=[];
+    old.resources.pixels=100_000;old.run.seed.page.background=background;
+    const raw=JSON.stringify(old),baseline=decodeSave(JSON.stringify({...old,run:{...old.run,seed:{...old.run.seed,page:{...old.run.seed.page,background:null}}}}));
+    let next=decodeSave(raw);
+    expect(next.persistent.editorCustomization).toMatchObject({background,nativeBackground:false});
+    expect(next.resources).toEqual(baseline.resources);expect(next.run.seed.page.background).toBe(background);
+    expect(pageColors(next.run.seed.page,next.persistent.specs.color,next.persistent.editorCustomization,next.persistent.appearance.editor).background).toBe(background);
+    for(const id of ['bars','workspace','export'] as const)next=buildSeed(next,id,2_000);
+    expect(next.run.world).toBe('kumiki');expect(effectiveEditorBackground(next.persistent.editorCustomization,next.persistent.appearance.editor)).toBe(background);
+    const reloaded=decodeSave(encodeSave(next));expect(reloaded.persistent.editorCustomization).toEqual(next.persistent.editorCustomization);expect(reloaded.resources).toEqual(next.resources);
+    assertRetiredStateRemoved(next);expect(JSON.stringify(old)).toBe(raw);
+  });
+  it.each(['null','omitted'] as const)('旧W1の背景が%sなら標準材質を維持する', choice => {
+    const old=legacyState();old.run.seed.page.background=null;if(choice==='omitted')erase(old.run.seed.page,'background');
+    const next=decodeSave(JSON.stringify(old));
+    expect(next.persistent.editorCustomization.nativeBackground).toBe(true);
+    expect(next.persistent.editorCustomization.background).toBe(BALANCE.workshop.customization.background);
+    for(const stage of [0,1,2] as const)expect(effectiveEditorBackground(next.persistent.editorCustomization,stage)).toBe(BALANCE.workshop.customization.nativeBackgrounds[stage]);
     expect(decodeSave(encodeSave(next))).toEqual(next);
   });
   it('途中の素の画面は購入した6項目を保ち、新しい3項目を通常操作で作れる', () => {

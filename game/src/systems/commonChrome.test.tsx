@@ -20,4 +20,20 @@ describe('制作した窓枠と実際の窓の接続',()=>{
  it('未完成の窓枠はインストール済みの実窓へ適用しない',()=>{
   const s=createFixture('stage8a-part-common-frame-step-3-era0',now)!;expect(producedWindowChrome(s)).toBeNull();
  });
+ it('文字サイズや形だけの変更はネイティブの窓色を変えず、明示した標準値と同じ紫は反映する',()=>{
+  let s=createFixture('stage8a-part-common-frame-step-4-era0',now)!;
+  s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{radius:8}},now);
+  expect(producedWindowChrome(s)).toMatchObject({custom:true,customColors:false});
+  const design=s.run.workshop.parts['common-frame']!.design;
+  s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:design.color}},now);
+  expect(producedWindowChrome(s)).toMatchObject({customColors:true});
+ });
+ it('記号だけの色を選んでも標準のタイトル帯を保つ',()=>{
+  let s=createFixture('stage8a-part-common-frame-step-4-era0',now)!;
+  s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{controlColors:{close:'#f6d27a'}}},now);
+  const chrome=producedWindowChrome(s)!;
+  expect(chrome.customColors).toBe(false);
+  const markup=renderToStaticMarkup(<CommonWindowControls chrome={chrome} side="end" maximized={false} i18n={createI18n('ja')} onAction={()=>{}}/>);
+  expect(markup).toContain('color:#f6d27a');expect(markup).not.toContain('color:#f4efe4');
+ });
 });

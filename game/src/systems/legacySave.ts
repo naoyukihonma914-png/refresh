@@ -200,6 +200,13 @@ export function migrateLegacySave(value: unknown): unknown {
   workshop.guide.current = workshop.guide.seen.includes(currentGuide as WorkshopGuideId) ? currentGuide as WorkshopGuideId : null;
   workshop.guide.collapsed = previousGuide.collapsed === true;
   const editorCustomization = createEditorCustomization();
+  // A non-null W1 background was an explicit player choice, including default-looking colours.
+  // The editor is now canonical for W1/W2, so do not let its native default hide that choice.
+  const selectedBackground = optionalRecord(old.run.seed.page).background;
+  if (typeof selectedBackground === 'string' && /^#[0-9a-f]{6}$/i.test(selectedBackground)) {
+    editorCustomization.background = selectedBackground;
+    editorCustomization.nativeBackground = false;
+  }
   const theme = optionalRecord(old.persistent.homeTheme), designs = optionalRecord(k.design);
   const accent = optionalRecord(theme.primary).color ?? optionalRecord(designs.primary).color;
   if (typeof accent === 'string' && /^#[0-9a-f]{6}$/i.test(accent)) editorCustomization.accent = accent;

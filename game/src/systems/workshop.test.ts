@@ -8,6 +8,8 @@ import { createInitialState, isGameState, type GameState } from './state';
 import { actWorkshop, advanceWorkshop, canAssembleDesktop, canBuyWorkshopSet, completedParts, completedSets, defaultComponentDesign, enterWorkshop, normalizeWorkshopRect, partRectValid, partMinimumSize, prototypeConditions, workshopPlacementGrid } from './workshop';
 import { adjustComponentDesign, colorContrast, createComponentDesign, createEditorCustomization, effectiveEditorBackground, isComponentDesign, isEditorCustomization, isWorkshopState, usesNativeComponentColors, usesNativeEditorBackground } from './workshopState';
 import { decodeSave, encodeSave } from './save';
+import { createSeedVersion } from './seed';
+import { beginPrototypeRelease } from './release';
 import { paletteFor } from '../content/palette';
 import { creditPixels, cursorPixelsPerSecond, manualClickValue, passivePixelsPerSecond, seedPartsPixelsPerSecond, workshopPartsPixelsPerSecond } from './economy';
 
@@ -132,6 +134,39 @@ describe('第3版：工房の制作と経済',()=>{
     expect(Object.values(s.persistent.setDocuments[0]!.parts)).toHaveLength(5);
     s=actWorkshop(s,{type:'export'},now);expect(s.persistent.setDocuments).toHaveLength(1);
     expect(Object.values(s.persistent.setDocuments[0]!.parts).every(p=>p!.exportedAt===now)).toBe(true);
+  });
+  it('現在版の完成セット書類は仕上げ後の調整・配置・並びに追随し、報酬と制作時刻は変わらない',()=>{
+    let s=completeSet(workshop(),'common');s.persistent.specs.color=1;s=actWorkshop(s,{type:'export'},now+10);
+    const before=s,frozen=structuredClone(s),original=s.persistent.setDocuments[0]!,wallet=s.resources,total=s.run.totalPixelsGenerated;
+    const productionTimes=Object.fromEntries(Object.entries(s.run.workshop.parts).map(([id,p])=>[id,{completedAt:p!.completedAt,exportedAt:p!.exportedAt}]));
+    s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:'#ffffff'}},now+20);
+    let current=s.persistent.setDocuments.find(entry=>entry.id==='v0.1:common')!;
+    expect(current.parts['common-frame']!.design).toEqual(s.run.workshop.parts['common-frame']!.design);
+    expect(current.parts['common-frame']!.design).not.toBe(s.run.workshop.parts['common-frame']!.design);
+    const rect={...s.run.workshop.parts['common-button']!.rect,x:s.run.workshop.parts['common-button']!.rect.x+8};
+    s=actWorkshop(s,{type:'place',part:'common-button',rect},now+30);
+    current=s.persistent.setDocuments.find(entry=>entry.id==='v0.1:common')!;expect(current.parts['common-button']!.rect).toEqual(rect);
+    s=actWorkshop(s,{type:'addElement',part:'common-frame',element:'close',index:0,side:'start'},now+40);
+    current=s.persistent.setDocuments.find(entry=>entry.id==='v0.1:common')!;
+    expect(current.parts['common-frame']!.elements[0]).toBe('close');expect(current.parts['common-frame']!.design.controlSides.close).toBe('start');
+    expect(current.at).toBe(original.at);expect(current).not.toBe(original);expect(before).toEqual(frozen);
+    expect(s.resources).toBe(wallet);expect(s.run.totalPixelsGenerated).toBe(total);
+    for(const [id,p] of Object.entries(s.run.workshop.parts))expect({completedAt:p!.completedAt,exportedAt:p!.exportedAt}).toEqual(productionTimes[id]);
+    expect(actWorkshop(s,{type:'export'},now+50)).toBe(s);expect(decodeSave(encodeSave(s))).toEqual(s);
+  });
+  it('現在版の書類を直しても過去版の書類と出荷済み製品の記録は凍結したまま',()=>{
+    let previous=workshop();for(const set of ['common','foundation','files','mail'] as const)previous=completeSet(previous,set);
+    previous=actWorkshop(previous,{type:'export'},now+10);previous=actWorkshop(previous,{type:'exit'},now+20);
+    const released=beginPrototypeRelease(previous,now+30);expect(released.persistent.products).toHaveLength(1);
+    let s=createSeedVersion(released,'v1',now+40);s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s=advanceWorkshop(enterWorkshop(creditPixels(s,10_000_000)),BALANCE.workshop.enterMs);
+    s=completeSet(s,'common');s=actWorkshop(s,{type:'export'},now+50);
+    const oldSet=s.persistent.setDocuments.find(entry=>entry.id==='v0.1:common')!,oldCopy=structuredClone(oldSet),product=s.persistent.products[0]!,productCopy=structuredClone(product),products=s.persistent.products;
+    const current=s.persistent.setDocuments.find(entry=>entry.id==='v1:common')!,currentCopy=structuredClone(current);
+    const next=actWorkshop(s,{type:'adjust',part:'common-button',patch:{radius:12}},now+60);
+    expect(next.persistent.setDocuments.find(entry=>entry.id==='v1:common')!.parts['common-button']!.design.radius).toBe(12);
+    expect(s.persistent.setDocuments.find(entry=>entry.id==='v1:common')).toEqual(currentCopy);
+    expect(next.persistent.setDocuments.find(entry=>entry.id==='v0.1:common')).toBe(oldSet);expect(oldSet).toEqual(oldCopy);
+    expect(next.persistent.products).toBe(products);expect(product).toEqual(productCopy);expect(decodeSave(encodeSave(next))).toEqual(next);
   });
   it('全47部品を固有の実操作で仕上げ、写真7つも完成・保存できる',()=>{
     let s=workshop();for(const set of ['common','foundation','files','mail','photo','bin','clock','theme','terminal','manager'] as const){s=actWorkshop(s,{type:'buySet',set},now);expect(isGameState(s)).toBe(true);for(const part of partsForSet(set))s=complete(s,part.id);}
@@ -309,6 +344,18 @@ describe('工房：標準材質と明示的な配色',()=>{
   const reset=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{nativeColors:true}},now);
   expect(reset.run.workshop.parts['common-frame']!.design).toMatchObject({nativeColors:true,color:BALANCE.workshop.design.color,textColor:BALANCE.workshop.design.textColor,controlColors:{}});
   expect(reset.resources).toBe(resources);
+ });
+ it('標準のタイトル帯と記号ごとの色は独立し、帯の背景を明示した時だけ標準色を離れる',()=>{
+  const defaults=createComponentDesign(),symbols=adjustComponentDesign(defaults,{controlColors:{close:'#f6d27a'}},paletteFor(1))!;
+  expect(symbols).toMatchObject({nativeColors:true,color:defaults.color,textColor:defaults.textColor,controlColors:{close:'#f6d27a'}});
+  expect(usesNativeComponentColors(symbols)).toBe(true);
+  const customBand=adjustComponentDesign(symbols,{color:'#ffffff'},paletteFor(1))!;
+  expect(customBand).toMatchObject({nativeColors:false,color:'#ffffff',textColor:'#000000',controlColors:{}});
+  const legacy={...defaults};delete legacy.nativeColors;
+  const oldSymbols=adjustComponentDesign(legacy,{controlColors:{close:'#f6d27a'}},paletteFor(1))!;
+  expect(oldSymbols.nativeColors).toBeUndefined();expect(usesNativeComponentColors(oldSymbols)).toBe(false);
+  const reset=adjustComponentDesign(symbols,{nativeColors:true},paletteFor(1))!;
+  expect(reset.controlColors).toEqual({});expect(usesNativeComponentColors(reset)).toBe(true);
  });
  it('配色の純粋helperは入力を変更せず、標準と同じ色の明示選択も保存できる',()=>{
   const original=createComponentDesign(),copy=structuredClone(original);
