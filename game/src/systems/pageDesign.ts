@@ -21,7 +21,9 @@ export interface PageDesign {
  background:string|null;text:string|null;button:string|null;
  headingFont:PageFont;bodyFont:PageFont;motion:typeof PAGE_MOTIONS[number];heading:string;
  layout:PageLayout|null;partFonts:Record<PagePart,PageTextSize>;
+ partColors?:Partial<Record<PagePart,{background:string|null;text:string|null}>>;
 }
+export const pagePartColors=(page:PageDesign,id:PagePart):{background:string|null;text:string|null}=>page.partColors?.[id]??{background:null,text:null};
 export const createPageDesign=():PageDesign=>({background:null,text:null,button:null,headingFont:'sans',bodyFont:'sans',motion:'push',heading:'',layout:null,partFonts:Object.fromEntries(PAGE_PARTS.map(id=>[id,'normal'])) as PageDesign['partFonts']});
 export const pageFonts:Record<PageFont,string>={sans:"'Refresh Sans',sans-serif",serif:"'Refresh Serif',serif",pixel:"'Refresh Pixel',monospace",mono:"'Refresh Mono',monospace"};
 export function contrast(a:string,b:string){const l=(c:string)=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i]!,0);const x=l(a),y=l(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
@@ -142,6 +144,8 @@ export function isPageDesign(value:unknown):value is PageDesign {
   ||!PAGE_FONTS.includes(value.headingFont as PageFont)||!PAGE_FONTS.includes(value.bodyFont as PageFont)||!PAGE_MOTIONS.includes(value.motion as PageDesign['motion'])||typeof value.heading!=='string'||[...value.heading].length>80
   ||!obj(value.partFonts)||Object.keys(value.partFonts).length!==PAGE_PARTS.length||!PAGE_PARTS.every(id=>PAGE_TEXT_SIZES.includes((value.partFonts as Record<string,unknown>)[id] as PageTextSize)))return false;
  if(value.background&&value.text&&contrast(value.background as string,value.text as string)<4.5)return false;
+ const partColors=(value as {partColors?:unknown}).partColors;
+ if(partColors!==undefined&&(!obj(partColors)||!Object.keys(partColors).every(key=>PAGE_PARTS.includes(key as PagePart)&&obj((partColors as Record<string,unknown>)[key])&&['background','text'].every(slot=>{const v=((partColors as Record<string,Record<string,unknown>>)[key]!)[slot];return v===null||typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);}))))return false;
  if(value.layout===null)return true;
  const layout=value.layout;
  if(!obj(layout)||!onGrid(layout.width)||!onGrid(layout.height)||layout.width<config.minCanvasWidth||layout.width>config.maxWidth||layout.height<config.minCanvasHeight||layout.height>config.maxHeight||!obj(layout.parts)||Object.keys(layout.parts).length!==PAGE_PARTS.length||'button'in layout)return false;
@@ -152,6 +156,7 @@ export type PageAction=
  |{type:'font';slot:'headingFont'|'bodyFont';font:PageFont}
  |{type:'motion';motion:PageDesign['motion']}|{type:'layout';layout:PageLayout}
  |{type:'part-size';part:PagePart;size:PagePartSize}|{type:'part-font';part:PagePart;size:PageTextSize}
+ |{type:'part-color';part:PagePart;slot:'background'|'text';color:string|null}
  |{type:'recommended'|'reset'|'layout-guide-seen'}|{type:'heading';heading:string};
 export function actPageDesign(s:GameState,a:PageAction):GameState {
  if(a.type==='layout-guide-seen')return s.run.seed.built.includes('layout')&&!s.persistent.testplay.layoutGuideSeen?{...s,persistent:{...s.persistent,testplay:{...s.persistent.testplay,layoutGuideSeen:true}}}:s;
@@ -178,6 +183,14 @@ export function actPageDesign(s:GameState,a:PageAction):GameState {
  if(a.type==='part-font'){
   if(!b.includes('font')||!PAGE_PARTS.includes(a.part)||!PAGE_TEXT_SIZES.includes(a.size))return s;
   page.partFonts={...p.partFonts,[a.part]:a.size};
+ }
+ if(a.type==='part-color'){
+  if(!b.includes('color')||!PAGE_PARTS.includes(a.part)||a.color!==null&&!paletteFor(s.persistent.specs.color).includes(a.color))return s;
+  const colors=pageColors(page,s.persistent.specs.color,editorCustomization,editorStage(s));
+  const current={...(page.partColors?.[a.part]??{background:null,text:null})};
+  if(a.slot==='text'){if(a.color&&contrast(current.background??colors.background,a.color)<4.5)return s;current.text=a.color;}
+  else{current.background=a.color;const bg=a.color??colors.background;if(current.text&&contrast(bg,current.text)<4.5)current.text=readableText(bg);}
+  page.partColors={...page.partColors,[a.part]:current};
  }
  if(a.type==='recommended'){if(!b.includes('layout'))return s;page.layout=recommendedPage();}
  if(a.type==='reset')page={...createPageDesign(),heading:p.heading,layout:b.includes('layout')?recommendedPage():null};

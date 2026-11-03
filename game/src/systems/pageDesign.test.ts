@@ -13,6 +13,19 @@ describe('組み立て中のエディタを安全に設計する',()=>{
  it('未作成の色・書体・配置・動きを変更できない',()=>{
   const s=createInitialState(now);for(const a of [{type:'color',slot:'button',color:BASE_PALETTE[6]!},{type:'font',slot:'bodyFont',font:'pixel'},{type:'motion',motion:'lift'},{type:'layout',layout:recommendedPage()}] as const)expect(actPageDesign(s,a)).toBe(s);
  });
+ it('部品ごとに背景色と文字色を持て、読めない組み合わせを拒む',()=>{
+  let s=ready();
+  s=actPageDesign(s,{type:'part-color',part:'heading',slot:'background',color:BASE_PALETTE[0]!});
+  expect(s.run.seed.page.partColors?.heading?.background).toBe(BASE_PALETTE[0]);
+  expect(actPageDesign(s,{type:'part-color',part:'heading',slot:'text',color:BASE_PALETTE[0]!})).toBe(s);
+  s=actPageDesign(s,{type:'part-color',part:'generator',slot:'background',color:BASE_PALETTE[6]!});
+  expect(s.run.seed.page.partColors?.generator?.background).toBe(BASE_PALETTE[6]);
+  expect(s.run.seed.page.partColors?.heading?.background).toBe(BASE_PALETTE[0]);
+  expect(actPageDesign(s,{type:'part-color',part:'generator',slot:'background',color:'#123456'})).toBe(s);
+  expect(decodeSave(encodeSave(s)).run.seed.page).toEqual(s.run.seed.page);
+  expect(isPageDesign(s.run.seed.page)).toBe(true);
+  expect(isPageDesign({...s.run.seed.page,partColors:{heading:{background:'red',text:null}}})).toBe(false);
+ });
  it('おすすめは中央カードでなく作業面と右の一覧を分け、狭い面でも全領域を保つ',()=>{
   const l=recommendedPage();expect(l.parts.upgrades.x).toBeGreaterThan(l.parts.generator.x+l.parts.generator.width);expect(l.parts.generator.width).toBe(BALANCE.pageDesign.partSizes.generator.extraLarge.width);expect(l.parts.generator.height).toBe(BALANCE.pageDesign.partSizes.generator.extraLarge.height);expect(l.parts.generator.x-l.parts.heading.x).toBe(l.parts.heading.x+l.parts.heading.width-(l.parts.generator.x+l.parts.generator.width));expect(l.parts.upgrades.y).toBe(l.parts.heading.y);expect(isRecommendedPage(l)).toBe(true);
   for(const width of [1920,1552,1366,800,480,352]){const f=fitPageLayout(l,width,720);expect(PAGE_PARTS.every(id=>validPagePlacement(f,id,f.parts[id]))).toBe(true);expect(isPageDesign({...createPageDesign(),layout:f})).toBe(true);expect(isRecommendedPage(f)).toBe(true);if(width>=1000)expect(f.parts.upgrades.x-f.parts.generator.x-f.parts.generator.width).toBeGreaterThanOrEqual(16);}

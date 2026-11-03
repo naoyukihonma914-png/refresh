@@ -645,6 +645,8 @@
     "page.part.generator": "Generate button",
     "page.part.upgrades": "Available items",
     "page.customize": "Customize",
+    "page.partColors": "This part's colors",
+    "page.screenBackground": "Screen background",
     "common.close": "Close",
     "page.colors": "Colors",
     "page.color.background": "Background color",
