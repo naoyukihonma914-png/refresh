@@ -10,11 +10,12 @@ import {isGameState} from './state';
 import {migrateLegacyPageDesign,migrateTestplaySave} from './testplayMigration';
 import {isWorkshopHelpTarget} from './workshopState';
 import {enterWorkshop} from './workshop';
+import {expectFittingMigration} from './workshopFitting.testSupport';
 const fixtures=['seed-before-layout','seed-custom-layout','seed-inherited-layout','workshop-mid','desktop-records','shipping'] as const;
 const oldSave=(name:typeof fixtures[number])=>JSON.parse(gunzipSync(readFileSync(new URL(`./testdata/tp-v15-main-${name}.json.gz`,import.meta.url))).toString());
 
 describe('TP1: 真正main形式15から16への移行',()=>{
- it.each(fixtures)('%s: 財布・制作・作品・写真を保持しlive pageだけを6部品へ移す',name=>{
+ it.each(fixtures)('%s: 財布・作品・写真を保持し、live pageと制作表現だけを移す',name=>{
   const source=oldSave(name),untouched=JSON.stringify(source);
   expect(source.schemaVersion).toBe(15);expect(isLegacyPageDesign(source.run.seed.page)).toBe(true);
   const state=decodeSave(JSON.stringify(source));
@@ -24,7 +25,7 @@ describe('TP1: 真正main形式15から16への移行',()=>{
   for(const field of ['background','text','button','headingFont','bodyFont','motion','heading'] as const)expect(state.run.seed.page[field]).toEqual(source.run.seed.page[field]);
   if(source.run.seed.page.layout){const layout=state.run.seed.page.layout!;expect(Object.keys(layout.parts).sort()).toEqual([...PAGE_PARTS].sort());expect(PAGE_PARTS.every(part=>validPagePlacement(layout,part,layout.parts[part]))).toBe(true);}
   for(const field of ['specs','seedSkills','editorSkills','editorCustomization','progress','productionNote','setDocuments','products','screenshots'] as const)expect(state.persistent[field]).toEqual(source.persistent[field]);
-  expect(state.run.workshop.parts).toEqual(source.run.workshop.parts);expect(state.run.workshop.purchasedSets).toEqual(source.run.workshop.purchasedSets);expect(state.run.workshop.helpTarget).toBeNull();
+  expectFittingMigration(state.run.workshop.parts,source.run.workshop.parts,source.lastTickAt);expect(state.run.workshop.purchasedSets).toEqual(source.run.workshop.purchasedSets);expect(state.run.workshop.helpTarget).toBeNull();
   expect(decodeSave(encodeSave(state))).toEqual(state);expect(JSON.stringify(source)).toBe(untouched);
  });
  it('未配置の旧プレイヤーだけを未紹介にし、引継ぎ直後のbuilt=[]を再紹介しない',()=>{

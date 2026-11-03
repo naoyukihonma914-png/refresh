@@ -4,12 +4,27 @@ import {createFixture} from './fixtures';
 import {passivePixelsPerSecond} from './economy';
 import {actWorkshop} from './workshop';
 import {completionFeedback,feedbackCounterValue,workshopVisible} from './workshopFeedback';
+import { fittingDefinition } from '../content/workshopFitting';
+import type { WorkshopPartId } from '../content/workshopCatalog';
+import type { GameState } from './state';
+import { defaultPieceSocket, emptyFitting } from './workshopFitting';
 
 const now=1_800_000_000_000;
+function lastPiece(state:GameState,id:WorkshopPartId){
+ state=structuredClone(state);
+ state.run.workshop.parts[id]={...state.run.workshop.parts[id]!,step:1,elements:[],fitting:emptyFitting(),completedAt:null,exportedAt:null,tested:false};
+ const pieces=fittingDefinition(id).pieces;
+ for(const piece of pieces){
+  state=actWorkshop(state,{type:'spawnPiece',part:id,piece},now);
+  const socket=defaultPieceSocket(fittingDefinition(id),state.run.workshop.parts[id]!.fitting!,piece)!;
+  if(piece===pieces.at(-1))return {before:state,after:actWorkshop(state,{type:'fitPiece',part:id,piece,socket},now)};
+  state=actWorkshop(state,{type:'fitPiece',part:id,piece,socket},now);
+ }
+ throw new Error('Missing fitting pieces');
+}
 describe('完成の見せ方は実際の生産を観測するだけ',()=>{
  it('新規完成だけを取り出し、基本値・実稼働分・倍率込みの合計を混同しない',()=>{
-  const before=createFixture('stage8a-part-common-button-step-3-era0',now)!;
-  const after=actWorkshop(before,{type:'test',part:'common-button',interaction:'press'},now),copy=structuredClone(after);
+  const {before,after}=lastPiece(createFixture('stage8a-part-common-button-step-0-era0',now)!,'common-button'),copy=structuredClone(after);
   const event=completionFeedback(before,after,'common-button',1,100)!;
   expect(event.partRate).toBe(BALANCE.workshop.partRates['common-button']);expect(event.activePartRate).toBeGreaterThan(0);
   expect(event.rateBefore).toBe(passivePixelsPerSecond(before));expect(event.rateAfter).toBe(passivePixelsPerSecond(after));
@@ -19,8 +34,8 @@ describe('完成の見せ方は実際の生産を観測するだけ',()=>{
   const nextRun=structuredClone(after);nextRun.run.version='v1';expect(completionFeedback(before,nextRun,'common-button',2,101)).toBeNull();
  });
  it('未採用の配信材料は、実績が合計を増やす場合でも現在の稼働源に見せない',()=>{
-  const before=createFixture('stage8b-stream-draft-era0',now)!;before.persistent.progress.records={};
-  const after=structuredClone(actWorkshop(before,{type:'test',part:'stream-preview',interaction:'select'},now));after.persistent.progress.records={'first-pixel':now};
+  const prepared=createFixture('stage8b-stream-draft-era0',now)!;prepared.persistent.progress.records={};
+  const finished=lastPiece(prepared,'stream-preview'),before=finished.before,after=structuredClone(finished.after);after.persistent.progress.records={'first-pixel':now};
   const event=completionFeedback(before,after,'stream-preview',1,100)!;
   expect(event.partRate).toBeGreaterThan(0);expect(event.activePartRate).toBe(0);expect(event.rateAfter).toBeGreaterThan(event.rateBefore);
  });

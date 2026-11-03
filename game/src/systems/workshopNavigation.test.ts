@@ -1,6 +1,6 @@
 import { describe,expect,it } from 'vitest';
 import { BALANCE } from '../config/balance';
-import { partsForSet } from '../content/workshopCatalog';
+import { fittingPartsForSet as partsForSet } from '../content/workshopFitting';
 import { completeWorkshopPartFixture,createFixture } from './fixtures';
 import { actWorkshop,advanceWorkshop,enterWorkshop } from './workshop';
 import { createSeedVersion } from './seed';
@@ -10,7 +10,7 @@ const now=1_800_000_000_000;
 const entry=()=>createFixture('stage8a-entry-era0',now)!;
 
 describe('TP2：必須ルートで次に作るものを1つだけ示す',()=>{
- it('購入と完成を区別し、選択中のセットや財布に左右されず本線22パーツを案内する',()=>{
+ it('購入と完成を区別し、選択中のセットや財布に左右されず本線21パーツを案内する',()=>{
   let s=entry();expect(nextWorkshopTarget(s)).toEqual({kind:'set',set:'common'});
   for(const set of WORKSHOP_MAINLINE){
    expect(nextWorkshopTarget(s)).toEqual({kind:'set',set});
@@ -42,7 +42,7 @@ describe('TP2：初回購入の説明と手動ヘルプ',()=>{
   expect(purchased.resources.pixels).toBe(pixels-BALANCE.workshop.setCosts.common);
   expect(purchased.run.workshop.helpTarget).toEqual({set:'common'});
   expect(purchased.persistent.testplay.helpSeen).toEqual(['common']);
-  expect(Object.values(purchased.run.workshop.parts).every(part=>part?.step===0)).toBe(true);
+  expect(Object.values(purchased.run.workshop.parts).every(part=>part?.step===1&&Object.keys(part.fitting!.sockets).length===0)).toBe(true);
   expect(actWorkshop(purchased,{type:'buySet',set:'common'},now+1)).toBe(purchased);
   expect(decodeSave(encodeSave(purchased))).toEqual(purchased);
   const closed=actWorkshop(purchased,{type:'help',target:null},now+1);
@@ -58,7 +58,7 @@ describe('TP2：初回購入の説明と手動ヘルプ',()=>{
   const pixels=s.resources.pixels;s=actWorkshop(s,{type:'skill',id:'extraParts'},now);
   expect(s.resources).toMatchObject({pixels,tokens:0});
   expect(s.run.workshop.helpTarget).toEqual({set:'extras'});expect(s.persistent.testplay.helpSeen).toEqual(['extras']);
-  for(const part of partsForSet('extras'))expect(s.run.workshop.parts[part.id]).toMatchObject({step:0,completedAt:null});
+  for(const part of partsForSet('extras'))expect(s.run.workshop.parts[part.id]).toMatchObject({step:1,completedAt:null});
   s=actWorkshop(s,{type:'help',target:null},now+1);expect(actWorkshop(s,{type:'skill',id:'extraParts'},now+2)).toBe(s);
   let next=createSeedVersion(s,'v2',now+1000);next.run.seed.built=BALANCE.w1.items.map(item=>item.id);
   const before=next.resources;next=enterWorkshop(next);

@@ -1,6 +1,7 @@
 import { describe,expect,it } from 'vitest';
 import { BALANCE } from '../config/balance';
-import { getWorkshopPart } from '../content/workshopCatalog';
+import { fittingDefinition } from '../content/workshopFitting';
+import { defaultPieceSocket } from './workshopFitting';
 import { actDesktop,advanceDesktopTime,buyDesktopApp,observeTesseraAction,takeScreenshot } from './desktop';
 import { nextDesktopOffer } from './desktopOffers';
 import { registerCaptureGeometry,type CaptureGeometry } from './captureEvaluation';
@@ -10,16 +11,17 @@ import { decodeSave,encodeSave } from './save';
 const now=1_800_000_000_000;
 
 describe('第3版の制作と依頼の接続',()=>{
- it('制作途中の材料の依頼を出し、実際の仕上げだけで一度完了する',()=>{
+ it('制作途中の材料の依頼を出し、最後のピースをはめたとき一度だけ完了する',()=>{
   let s=createFixture('stage8b-economy-before-era0',now)!;
   s=advanceDesktopTime(s,BALANCE.spec.network[s.persistent.specs.network]!.mailIntervalSeconds*1000,now);
   const request=s.run.desktop.feedback.find(item=>item.kind==='part')!;
   expect(request.target).toBe('photo-crop');
-  const before=s,definition=getWorkshopPart('photo-crop'),tokens=s.resources.tokens;
-  s=observeTesseraAction(before,actWorkshop(before,{type:'test',part:'photo-crop',interaction:definition.testInteraction},now),'test',now);
+  const before=s,piece=fittingDefinition('photo-crop').pieces.at(-1)!,tokens=s.resources.tokens;
+  const socket=defaultPieceSocket(fittingDefinition('photo-crop'),s.run.workshop.parts['photo-crop']!.fitting!,piece)!;
+  s=observeTesseraAction(before,actWorkshop(before,{type:'fitPiece',part:'photo-crop',piece,socket},now),'fitPiece',now);
   expect(s.run.desktop.feedback.find(item=>item.id===request.id)!.completedAt).toBe(now);
   expect(s.resources.tokens-tokens).toBe(BALANCE.w3.feedbackTokens);
-  expect(observeTesseraAction(s,actWorkshop(s,{type:'test',part:'photo-crop',interaction:definition.testInteraction},now+1),'test',now+1)).toBe(s);
+  expect(observeTesseraAction(s,actWorkshop(s,{type:'fitPiece',part:'photo-crop',piece,socket},now+1),'fitPiece',now+1)).toBe(s);
   expect(decodeSave(encodeSave(s))).toEqual(s);
  });
  it('標準の素材から同じ保存色を明示選択しても、実際の見た目の変更として色の依頼に応える',()=>{

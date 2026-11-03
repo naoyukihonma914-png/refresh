@@ -18,13 +18,14 @@ describe('段階8b：入れたアプリの窓枠は採用時点の作品を保�
   expect(producedWindowChrome(s,'files')).toBeNull();
   s=actAppBuild(s,{type:'app-install',app:'files'});expect(producedWindowChrome(s,'files')).not.toBeNull();
  });
- it('元素材の色・記号順・左右を変えても、読込とinstallが済むまで既存の窓へ波及しない',()=>{
+ it('元素材の色・はめた記号順を変えても、読込とinstallが済むまで既存の窓へ波及しない',()=>{
   let s=createFixture('desktop-ready',now)!;const files=structuredClone(producedWindowChrome(s,'files')),mail=structuredClone(producedWindowChrome(s,'mail'));
   expect(files).not.toBeNull();expect(mail).not.toBeNull();
-  s=actWorkshop(s,{type:'addElement',part:'common-frame',element:'close',index:0,side:'start'},now+1);
+  for(const piece of ['minimize','maximize','close'])s=actWorkshop(s,{type:'removePiece',part:'common-frame',piece},now+1);
+  for(const [index,piece] of ['close','minimize','maximize'].entries())s=actWorkshop(s,{type:'fitPiece',part:'common-frame',piece,socket:`control-${index}`},now+1);
   s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:'#1f3f7a',textColor:'#ffffff',radius:8,symbolShape:'square',controlColors:{close:'#f6d27a'}}},now+1);
   const current=producedWindowChrome(s)!;expect(current.symbols[0]).toBe('close');expect(current.design.color).toBe('#1f3f7a');expect(current.customColors).toBe(true);
-  expect(producedControlSide(current,'close')).toBe('start');expect(producedControlSide(current,'minimize')).toBe('end');
+  expect(producedControlSide(current,'close')).toBe('end');expect(producedControlSide(current,'minimize')).toBe('end');
   expect(producedWindowChrome(s,'files')).toEqual(files);expect(producedWindowChrome(s,'mail')).toEqual(mail);
   // The editor and native windows use the current work; installed apps retain their own material.
   expect(producedWindowChrome(s,'tessera')).toEqual(current);expect(producedWindowChrome(s,'note')).toEqual(current);
@@ -36,7 +37,7 @@ describe('段階8b：入れたアプリの窓枠は採用時点の作品を保�
   const frozen=structuredClone(installedAssembly(s,'files')!.common.find(material=>material.source==='common-frame'));
   s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{controlColors:{close:'#ffffff'},controlSides:{close:'end'}}},now+2);
   expect(installedAssembly(s,'files')!.common.find(material=>material.source==='common-frame')).toEqual(frozen);
-  expect(producedControlSide(producedWindowChrome(s,'files')!,'close')).toBe('start');
+  expect(producedControlSide(producedWindowChrome(s,'files')!,'close')).toBe('end');
  });
 });
 

@@ -17,25 +17,27 @@ describe('お手本の実操作用固定状態',()=>{
    expect(decodeSave(encodeSave(state)),name).toEqual(state);
   }
  });
- it('ON/OFFの比較は設定以外の工程・所持量・作品が同じ状態から始まる',()=>{
+ it('ON/OFFの比較は設定以外のピース・所持量・作品が同じ状態から始まる',()=>{
   for(const era of [0,1,2])for(const mode of ['seed','seed-layout','seed-custom','route','place','adjust','finish']){
    const on=createFixture(`examples-${mode}-on-era${era}`,now)!,off=createFixture(`examples-${mode}-off-era${era}`,now)!;
    expect(on.persistent.examplesEnabled).toBe(true);expect(off.persistent.examplesEnabled).toBe(false);
    expect({...on,persistent:{...on.persistent,examplesEnabled:false}}).toEqual(off);
   }
  });
- it('配置は未着手、調整は工程2、仕上げは工程3で、以前の作品は完成を保つ',()=>{
-  for(const era of [0,1,2])for(const [mode,step] of [['place-on',0],['adjust-on',2],['finish-on',3]] as const){
+ it('旧工程URLは殻から最後のピースの直前までを表し、以前の作品は完成を保つ',()=>{
+  for(const era of [0,1,2])for(const mode of ['place-on','adjust-on','finish-on']){
    const state=createFixture(`examples-${mode}-era${era}`,now)!;
-   expect(state.run.workshop.activePart).toBe('common-button');expect(state.run.workshop.parts['common-button']!.step).toBe(step);
-   expect(completedParts(state)).toEqual(['common-frame','common-scrollbar']);
+   expect(state.run.workshop.activePart).toBe('common-button');expect(state.run.workshop.parts['common-button']!.step).toBe(1);
+   expect(state.run.workshop.parts['common-button']!.fitting!.sockets).toEqual({});
+   expect(state.run.workshop.parts['common-button']!.fitting!.spawned).toEqual(mode==='place-on'?[]:['label']);
+   expect(completedParts(state)).toEqual(['common-frame','common-heading']);
    expect(state.run.workshop.parts['common-button']!.tested).toBe(false);
   }
  });
- it('自由配置と非標準designを持つ調整の途中が有効である',()=>{
+ it('殻を動かさず非標準designを持つ調整の途中が有効である',()=>{
   for(const era of [0,1,2]){
    const state=createFixture(`examples-adjust-custom-era${era}`,now)!,p=state.run.workshop.parts['common-button']!,standard=getWorkshopPart('common-button').defaultRect;
-   expect(p.step).toBe(2);expect(p.rect.x).toBe(standard.x+32);expect(p.rect.y).toBe(standard.y+32);
+   expect(p.step).toBe(1);expect(p.rect).toEqual(standard);
    expect(p.design).toMatchObject({radius:8,shadow:true});expect(partRectValid(state,'common-button',p.rect,p.design)).toBe(true);
   }
  });

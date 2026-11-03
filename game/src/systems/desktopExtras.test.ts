@@ -2,6 +2,7 @@ import { describe,expect,it } from 'vitest';
 import type { DesktopUpgrade } from '../config/balance';
 import { BALANCE } from '../config/balance';
 import { createI18n } from '../content/i18n';
+import { fittingDefinition } from '../content/workshopFitting';
 import { captureStore } from '../platform/captures';
 import { actAppBuild,hasAppPart } from './appBuild';
 import { evaluateCapture } from './captureEvaluation';
@@ -64,16 +65,16 @@ describe('段階8b：アプリとジョブ',()=>{
   const previousColor=s.persistent.specs.color,beforeColor=jobCursorRate(s,'files');s.persistent.specs.color=2;
   expect(jobCursorRate(s,'files')).toBeCloseTo(beforeColor*BALANCE.spec.color[2].multiplier/BALANCE.spec.color[previousColor]!.multiplier);
  });
- it('受動生成とエディタの有限な工程払いを分け、完成・トークンは手で確かめるまで増やさない',()=>{
+ it('受動生成と有限のピース払いを分け、完成してもエクスポートまでトークンを増やさない',()=>{
   let s=actWorkshop(fixture('stage8b-economy-before-era2'),{type:'skill',id:'extraParts'},now);s=actWorkshop(s,{type:'selectPart',part:'plugin-tabs'},now);s=action(s,{type:'job-assign',app:'tessera'});s=action(s,{type:'job-buy',app:'tessera'});
   const part=s.run.workshop.parts['plugin-tabs']!,rate=passivePixelsPerSecond(s),pixels=s.resources.pixels,tokens=s.resources.tokens;
-  expect(part.step).toBe(0);expect(s.run.desktop.jobs.tessera).toMatchObject({assigned:true,cursors:1,updates:0});
+  expect(part.step).toBe(1);expect(part.fitting!.sockets).toEqual({});expect(s.run.desktop.jobs.tessera).toMatchObject({assigned:true,cursors:1,updates:0});
   const result=advanceActiveTime(s,BALANCE.workshop.assistStepMs),passive=rate*BALANCE.workshop.assistStepMs/1000;
   expect(result.pixels).toBeCloseTo(passive,4);expect(result.state.run.workshop.parts['plugin-tabs']!.step).toBe(1);
-  expect(result.state.resources.pixels-pixels).toBeCloseTo(passive+BALANCE.workshop.categoryStepRewards.small[0]*productionCreditMultiplier(s),4);
+  expect(result.state.resources.pixels-pixels).toBeCloseTo(passive+BALANCE.workshop.categoryStepRewards.small.reduce((sum,value)=>sum+value,0)/fittingDefinition('plugin-tabs').pieces.length*productionCreditMultiplier(s),4);
   expect(result.state.resources.tokens).toBe(tokens);expect(result.state.run.workshop.parts['plugin-tabs']!.completedAt).toBeNull();
   const later=advanceActiveTime(result.state,BALANCE.workshop.assistStepMs*10).state;
-  expect(later.run.workshop.parts['plugin-tabs']!.step).toBe(3);expect(later.run.workshop.parts['plugin-tabs']!.tested).toBe(false);expect(later.resources.tokens).toBe(tokens);
+  expect(later.run.workshop.parts['plugin-tabs']!.step).toBe(4);expect(later.run.workshop.parts['plugin-tabs']!.tested).toBe(true);expect(later.run.workshop.parts['plugin-tabs']!.exportedAt).toBeNull();expect(later.resources.tokens).toBe(tokens);
  });
  it('写真・テーマ・書類の表示操作を保存し、日付の並べ替えと日本語・英語の検索を完了する',()=>{
   let s=request(fixture(),'sort');s=action(s,{type:'sort',by:'date'});expect(s.run.desktop.feedback.at(-1)!.completedAt).toBe(now);

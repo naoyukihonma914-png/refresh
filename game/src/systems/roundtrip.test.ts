@@ -2,7 +2,9 @@ import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import {describe,it,expect} from 'vitest';
 import {BALANCE} from '../config/balance';
-import {partsForSet,type UiSetId,type WorkshopPartId} from '../content/workshopCatalog';
+import {type UiSetId,type WorkshopPartId} from '../content/workshopCatalog';
+import {fittingDefinition,fittingPartsForSet as partsForSet} from '../content/workshopFitting';
+import {expectFittingMigration} from './workshopFitting.testSupport';
 import {SCHEMA_VERSION,createInitialState,isGameState,type GameState} from './state';
 import {createSeedVersion,buildSeed} from './seed';
 import {actWorkshop,advanceWorkshop,canAssembleDesktop,canBuyWorkshopSet,enterWorkshop,prototypeConditions} from './workshop';
@@ -17,11 +19,12 @@ function workshop(version:GameState['run']['version']='v0.1'):GameState {
  return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);
 }
 function complete(s:GameState,id:WorkshopPartId):GameState {
- const descriptor=partsForSet(id.startsWith('stream-')?'stream':id.split('-')[0] as UiSetId).find(part=>part.id===id)!;
- s=actWorkshop(s,{type:'place',part:id,rect:descriptor.defaultRect},now);
- for(const element of descriptor.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
- s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);
- return actWorkshop(s,{type:'test',part:id,interaction:descriptor.testInteraction},now);
+ for(const piece of fittingDefinition(id).pieces){
+  s=actWorkshop(s,{type:'spawnPiece',part:id,piece},now);
+  const fitting=s.run.workshop.parts[id]!.fitting!,socket=fittingDefinition(id).sockets.find(socket=>socket.accepts.includes(piece)&&(socket.stacked||!Object.values(fitting.sockets).includes(socket.id)))!;
+  s=actWorkshop(s,{type:'fitPiece',part:id,piece,socket:socket.id},now);
+ }
+ return s;
 }
 function completeSet(s:GameState,set:UiSetId):GameState {
  s=actWorkshop(s,{type:'buySet',set},now);
@@ -76,11 +79,11 @@ describe('段階8b：世界4は制作と格納と性能の判定まで',()=>{
   early.run.world='desktop';early.run.desktop.entered=true;expect(canBuyWorkshopSet(early,'stream')).toBe(true);
   const purchased=actWorkshop(early,{type:'buySet',set:'stream'},now);
   expect(early.resources.pixels-purchased.resources.pixels).toBe(BALANCE.workshop.setCosts.stream);
-  expect(partsForSet('stream').every(part=>purchased.run.workshop.parts[part.id]?.step===0)).toBe(true);expect(world4Preparation(purchased).ready).toBe(false);
+  expect(partsForSet('stream').every(part=>purchased.run.workshop.parts[part.id]?.step===1&&purchased.run.workshop.parts[part.id]?.elements.length===0)).toBe(true);expect(world4Preparation(purchased).ready).toBe(false);
   const premature=structuredClone(purchased);premature.run.version='v1';expect(isGameState(premature)).toBe(false);
   const outsideDesktop=structuredClone(purchased);outsideDesktop.run.world='kumiki';outsideDesktop.run.desktop.entered=false;expect(isGameState(outsideDesktop)).toBe(false);
  });
- it('4工程で完成した現版の書類と60Hzが両方必要で、旧版書類では代替できない',()=>{
+ it('全ピースではめ終えた現版の書類と60Hzが両方必要で、旧版書類では代替できない',()=>{
   let s=workshop('v2');s.run.world='desktop';s.run.desktop.entered=true;s=completeSet(s,'stream');
   expect(s.persistent.setDocuments.find(document=>document.id==='v2:stream')).toBeDefined();
   const low=world4Preparation(s);expect(low).toMatchObject({versionAllowed:true,desktopAvailable:true,completedSets:['stream'],storedSets:['stream'],requiredHz:60,currentHz:30,ready:false});
@@ -97,7 +100,8 @@ describe('公開済み8aの保存形式14を現形式へ移行する',()=>{
   const raw=gunzipSync(readFileSync(new URL(`./testdata/v14-stage8a-${name}.json.gz`,import.meta.url))).toString();
   const original=JSON.parse(raw),frozen=JSON.stringify(original),next=decodeSave(raw);
   expect(next.schemaVersion).toBe(SCHEMA_VERSION);expect(next.resources).toEqual(original.resources);expect(next.run.totalPixelsGenerated).toBe(original.run.totalPixelsGenerated);
-  expect(next.run.workshop).toEqual({...original.run.workshop,editorStageAtEntry:original.persistent.appearance.editor,helpTarget:null,combo:{count:0,lastCompletedAt:null}});expect(next.persistent.setDocuments).toEqual(original.persistent.setDocuments);
+  expectFittingMigration(next.run.workshop.parts,original.run.workshop.parts,original.lastTickAt);
+  expect({...next.run.workshop,parts:original.run.workshop.parts}).toEqual({...original.run.workshop,editorStageAtEntry:original.persistent.appearance.editor,helpTarget:null,combo:{count:0,lastCompletedAt:null}});expect(next.persistent.setDocuments).toEqual(original.persistent.setDocuments);
   expect(next.run.desktop.windows).toEqual(original.run.desktop.windows);expect(next.run.desktop.jobs).toEqual(original.run.desktop.jobs);expect(next.run.desktop.apps).toEqual(original.run.desktop.apps);
   expect(next.persistent.screenshots).toEqual(original.persistent.screenshots);expect(next.persistent.products).toEqual(original.persistent.products);expect(next.persistent.productionNote).toBe(original.persistent.productionNote);
   expect(isGameState(next)).toBe(true);expect(decodeSave(encodeSave(next))).toEqual(next);

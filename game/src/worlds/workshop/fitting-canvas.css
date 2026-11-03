@@ -1,0 +1,53 @@
+.workshop-root .wf-workbench-scroll {display:block;position:relative;padding:24px;overflow:auto;min-height:0;background:var(--ws-workbench-bg,#5d6f7d);}
+.workshop-root .wf-board-sizer {position:relative;margin:0 auto;flex:none;}
+.workshop-root .wf-board {position:relative;transform-origin:top left;touch-action:none;user-select:none;color:#101010;font:12px 'Refresh Pixel','Refresh UI',sans-serif;}
+.workshop-root .wf-destination-window {position:absolute;min-width:0;min-height:0;background:#c0c0c0;border:2px solid #26221c;box-shadow:inset 2px 2px #fff,inset -2px -2px #808080,5px 5px #0004;}
+.workshop-root .wf-destination-surface {position:absolute;left:0;right:0;overflow:visible;background:#fffdf7;}
+.workshop-root .wf-target-title {display:flex;align-items:center;gap:8px;padding:3px 6px;background:#000080;color:#fff;font-weight:bold;}
+.workshop-root .wf-target-title>span {flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.workshop-root .wf-target-controls {display:flex;gap:3px;}
+.workshop-root .wf-target-controls>button {display:grid;place-items:center;min-height:0;width:24px;height:24px;padding:0;border:2px outset #eee;background:#c0c0c0;color:#101010;}
+.workshop-root .wf-part-shell {position:absolute;min-width:0;min-height:0;background:#dad6c9;border:1px solid #a19b8b;box-shadow:inset 1px 1px #fffa,inset -1px -1px #0002;overflow:visible;}
+.workshop-root .wf-part-shell.is-active {outline:1px solid #26221c;outline-offset:2px;}
+.workshop-root .wf-frame-shell {background:#fffdf7;border:2px outset #c0c0c0;box-shadow:inset 1px 1px #fff;}
+.workshop-root .wf-frame-title-surface {position:absolute;top:0;left:0;right:0;background:#000080;}
+.workshop-root .wf-frame-content {position:absolute;left:4px;bottom:4px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:#fffdf7;color:#222;overscroll-behavior:contain;}
+.workshop-root .wf-frame-content::-webkit-scrollbar {display:none;}
+.workshop-root .wf-frame-content>button {display:flex;align-items:center;gap:6px;width:100%;height:28px;min-height:28px;margin:0;border:0;padding:2px 8px;background:none;text-align:left;color:inherit;box-shadow:none;}
+.workshop-root .wf-frame-content>button[aria-pressed=true] {background:#000080;color:#fff;}
+.workshop-root .wf-frame-content>button .ws-glyph {width:16px;height:16px;}
+.workshop-root .wf-frame-note {margin:0;padding:14px;font:14px/1.8 'Refresh Pixel','Refresh UI',sans-serif;white-space:pre-wrap;user-select:text;}
+.workshop-root .wf-socket {position:absolute;z-index:1;min-width:0;min-height:0;border:1px solid #877f6e;background:#bbb6a780;box-shadow:inset 3px 3px #0005,inset -1px -1px #fff9;pointer-events:none;}
+.workshop-root .wf-frame-shell>.wf-socket {background:#c8c4b6;}
+.workshop-root .wf-frame-shell>.wf-socket[data-fitting-socket=title],.workshop-root .wf-frame-shell>.wf-socket[data-fitting-socket^=control] {background:#08085c;border-color:#08084b;box-shadow:inset 3px 3px #0009,inset -1px -1px #ffffff50;}
+.workshop-root .wf-socket.is-filled {box-shadow:inset 1px 1px #0005;}
+.workshop-root .wf-socket.is-near {outline:3px solid #f0c060;outline-offset:2px;}
+.workshop-root .wf-socket.is-next:not(.is-filled) {border-style:dashed;border-color:#ebc27a;}
+.workshop-root .wf-fitted-piece {position:absolute;z-index:2;min-width:0;min-height:0;overflow:visible;touch-action:none;color:var(--wf-part-fg,#111);background:var(--wf-part-bg,#c0c0c0);}
+.workshop-root .wf-fitted-piece.is-draggable {cursor:grab;}
+.workshop-root .wf-fitted-piece.is-draggable:active {cursor:grabbing;}
+.workshop-root .wf-fitted-piece.wf-piece-image,.workshop-root .wf-fitted-piece.wf-piece-surface {z-index:1;}
+.workshop-root .wf-fitted-piece.wf-piece-thumb,.workshop-root .wf-fitted-piece.wf-piece-crop-frame,.workshop-root .wf-fitted-piece.wf-piece-selection,.workshop-root .wf-fitted-piece.wf-piece-fit,.workshop-root .wf-fitted-piece.wf-piece-percent {z-index:3;background:transparent;}
+.workshop-root .wf-piece-grip {position:absolute;z-index:8;right:-5px;top:-5px;min-height:0;width:15px;height:15px;padding:0;opacity:0;background:#d6cfc0;color:#26221c;border:1px solid #26221c;cursor:grab;touch-action:none;}
+.workshop-root .wf-piece-grip>.ws-glyph {width:11px;height:11px;}
+.workshop-root .wf-fitted-piece:hover>.wf-piece-grip,.workshop-root .wf-fitted-piece:focus-within>.wf-piece-grip {opacity:1;}
+.workshop-root .wf-piece-tray {position:absolute;padding:20px 8px 8px;background:#45556370;border:1px solid #3e4a54;box-shadow:inset 1px 1px #0003;color:#f4efe4;}
+.workshop-root .wf-piece-tray>span {position:absolute;left:8px;top:3px;max-width:calc(100% - 16px);overflow:hidden;white-space:nowrap;font-size:11px;color:#f5eee0;}
+.workshop-root .wf-tray-pieces {display:flex;align-items:flex-start;justify-content:flex-end;gap:8px;flex-wrap:wrap;height:100%;overflow:visible;}
+.workshop-root .wf-loose-piece {position:relative;display:flex;min-width:0;min-height:0;color:#101010;background:#d6cfc0;border:2px solid #26221c;box-shadow:inset 2px 2px #f4efe4,inset -2px -2px #8f8574,3px 3px #0005;outline:1px dashed #f0c060;outline-offset:3px;cursor:grab;touch-action:none;}
+.workshop-root .wf-loose-piece:focus-visible {outline:2px solid #f0c060;}
+.workshop-root .wf-loose-piece>* {pointer-events:none;}
+.workshop-root .wf-piece-tray.is-return-target {outline:2px dashed #f0c060;outline-offset:3px;}
+.workshop-root .wf-drag-ghost {position:absolute;z-index:50;pointer-events:none;min-width:0;background:#d6cfc0;color:#101010;border:2px solid #26221c;box-shadow:inset 2px 2px #f4efe4,inset -2px -2px #8f8574,4px 4px #0005;opacity:.95;}
+.workshop-root .wf-restore-target {position:absolute;left:0;top:0;z-index:10;}
+.workshop-root .wf-empty-canvas {position:absolute;inset:40% 10% auto;text-align:center;color:#766f61;}
+.workshop-root .wf-snap-response {position:absolute;z-index:9;pointer-events:none;outline:2px solid #f0c060;animation:wf-snap steps(5) both;}
+@keyframes wf-snap {0% {outline-offset:5px;filter:brightness(1.5);}60% {outline-offset:0;}100% {outline-offset:0;outline-color:transparent;filter:none;}}
+.workshop-root .wf-board[data-reduced-motion=true] .wf-snap-response {animation:none;outline-offset:1px;}
+.workshop-root .wf-frame-scroll-rail {display:flex;flex-direction:column;height:100%;min-height:0;border:1px inset #ddd;background:#c0c0c0;}
+.workshop-root .wf-frame-scroll-rail>button {display:grid;place-items:center;width:100%;height:16px;min-height:16px;padding:0;border:2px outset #ddd;background:#c0c0c0;color:#111;}
+.workshop-root .wf-frame-scroll-rail>button .ws-glyph {width:10px;height:10px;}
+.workshop-root .wf-frame-scroll-track {position:relative;flex:1;min-height:0;background:repeating-conic-gradient(#bbb 0% 25%,#eee 0% 50%) 0 0/2px 2px;}
+.workshop-root .wf-frame-scroll-thumb {position:absolute;left:0;width:100%;min-height:12px;padding:0;border:2px outset #ddd;background:#c0c0c0;touch-action:none;}
+.workshop-root .editor-stage-1 .wf-loose-piece {border-width:1px;box-shadow:inset 1px 1px #e1d8c4,inset -1px -1px #383432,2px 2px #0005;}
+@media(prefers-reduced-motion:reduce) {.workshop-root .wf-snap-response {animation:none;}}

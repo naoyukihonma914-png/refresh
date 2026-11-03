@@ -8,9 +8,11 @@ import type { GameState } from './state';
 /** A source is a produced component identity, never a rectangle or a screenshot. */
 export interface ComponentSource { id:string; baseRate:number }
 export const componentBaseRate=(id:WorkshopPartId):number=>BALANCE.workshop.partRates[id as keyof typeof BALANCE.workshop.partRates]??0;
+// Historical standalone scrollbars stop producing separately once their new frame is acquired.
+const activeComponent=(s:GameState,id:WorkshopPartId):boolean=>s.run.workshop.parts[id]?.step===4&&!(id==='common-scrollbar'&&s.run.workshop.parts['common-frame']?.fitting&&s.run.workshop.parts['common-frame']?.step===4);
 export const seedComponentSources=(s:GameState):ComponentSource[]=>BALANCE.w1.items.flatMap(item=>s.run.seed.built.includes(item.id)?[{id:`seed:${item.id}`,baseRate:item.perSecond}]:[]);
-export const completedComponentSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>s.run.workshop.parts[part.id]?.step===4?[{id:part.id,baseRate:componentBaseRate(part.id)}]:[]);
-const commonSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>part.set==='common'&&s.run.workshop.parts[part.id]?.step===4?[{id:part.id,baseRate:componentBaseRate(part.id)}]:[]);
+export const completedComponentSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>activeComponent(s,part.id)?[{id:part.id,baseRate:componentBaseRate(part.id)}]:[]);
+const commonSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>part.set==='common'&&activeComponent(s,part.id)?[{id:part.id,baseRate:componentBaseRate(part.id)}]:[]);
 export const editorPartSources=(s:GameState):ComponentSource[]=>[...seedComponentSources(s),...commonSources(s)];
 export const desktopFoundationSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>part.set==='foundation'&&s.run.workshop.parts[part.id]?.step===4?[{id:part.id,baseRate:componentBaseRate(part.id)}]:[]);
 export const installedAppSources=(s:GameState,app:BuiltApp):ComponentSource[]=>appIsOperational(s,app)?[...new Set(adoptedPartIds(s,app))].map(id=>({id,baseRate:componentBaseRate(id)})):[];

@@ -9,6 +9,7 @@ import { pageColors } from './pageDesign';
 import { advanceShipping, buySpec, showShipping, startNextVersion } from './release';
 import { getWorkshopPart } from '../content/workshopCatalog';
 import { createComponentDesign, effectiveEditorBackground, type PartProduction } from './workshopState';
+import { migrateFittingProduction } from './workshopFitting';
 
 const savedState = () => {
   const state = createInitialState(1_000);
@@ -209,7 +210,10 @@ describe('第14版への保存データ移行', () => {
     const state=savedState(),definition=getWorkshopPart('common-button');state.run.workshop.entered=true;state.run.workshop.purchasedSets=['common'];
     const part:PartProduction={step,rect:{...definition.defaultRect},elements:step>=2?[...definition.elements]:[],design:{...createComponentDesign(),radius:3},completedAt:step===4?1_500:null,exportedAt:step===4?1_600:null,tested:step===4};
     state.run.workshop.parts['common-button']=part;state.run.workshop.activePart='common-button';
-    expect(decodeSave(encodeSave(state))).toEqual(state);
+    const next=decodeSave(encodeSave(state));
+    expect(next.resources).toEqual(state.resources);expect(next.run.totalPixelsGenerated).toBe(state.run.totalPixelsGenerated);
+    expect(next.run.workshop.parts['common-button']).toEqual(migrateFittingProduction(part,'common-button',state.lastTickAt));
+    expect(decodeSave(encodeSave(next))).toEqual(next);
   });
 });
 
@@ -217,7 +221,7 @@ describe('制作中の配置だけを局所修復する', () => {
   function geometryState(ids: readonly Parameters<typeof getWorkshopPart>[0][]) {
     const state=savedState();state.run.workshop.entered=true;
     state.run.workshop.purchasedSets=[...new Set(ids.map(id=>getWorkshopPart(id).set))];
-    for(const id of ids){const d=getWorkshopPart(id);state.run.workshop.parts[id]={step:4,rect:{...d.defaultRect},elements:[...d.elements],design:createComponentDesign(),tested:true,completedAt:100,exportedAt:200};}
+    for(const id of ids){const d=getWorkshopPart(id);state.run.workshop.parts[id]=migrateFittingProduction({step:4,rect:{...d.defaultRect},elements:[...d.elements],design:createComponentDesign(),tested:true,completedAt:100,exportedAt:200},id,state.lastTickAt);}
     return state;
   }
   it('壊れた一つの座標を直し、財布・他の部品・完成と書き出し記録を変えない', () => {

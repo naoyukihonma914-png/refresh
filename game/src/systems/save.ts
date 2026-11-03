@@ -11,6 +11,7 @@ import { migrateStage8bSave } from './stage8bMigration';
 import { migrateTestplaySave } from './testplayMigration';
 import { migrateExampleSave } from './exampleMigration';
 import { migratePageLayoutSave } from './pageLayoutMigration';
+import { migrateFittingProduction } from './workshopFitting';
 import type { SaveStorage } from '../platform/storage';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
@@ -119,6 +120,17 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
     if (version !== SCHEMA_VERSION) throw new Error('保存データの変換に失敗しました');
   }
   const candidate=data as GameState;
+  // schema18 fitting fields are optional so immutable screens remain unchanged.
+  if(candidate.run?.workshop?.parts&&typeof candidate.run.workshop.parts==='object'&&!Array.isArray(candidate.run.workshop.parts)){
+    for(const [id,production] of Object.entries(candidate.run.workshop.parts)){
+      const descriptor=WORKSHOP_PARTS.find(part=>part.id===id);
+      if(production&&descriptor&&!production.fitting){
+        const reference=normalizeWorkshopRect(candidate,descriptor.id,descriptor.defaultRect);
+        if(!reference||!isPartProduction({...production,rect:reference},descriptor.id))throw new Error('保存データの内容が不正です');
+        candidate.run.workshop.parts[descriptor.id]=migrateFittingProduction(production,descriptor.id,candidate.lastTickAt);
+      }
+    }
+  }
   if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
   if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
   if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();

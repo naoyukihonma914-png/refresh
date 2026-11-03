@@ -4,8 +4,9 @@ import { WORKSHOP_PARTS, type WorkshopPartId } from '../content/workshopCatalog'
 import type { BuiltApp, Rect } from './desktopState';
 import type { GameState } from './state';
 import { isComponentDesign, type ComponentDesign } from './workshopState';
+import { fittedPieces, isPartFitting, type PartFitting } from './workshopFitting';
 
-export interface AssemblyMaterial { source:WorkshopPartId; design:ComponentDesign; elements:string[] }
+export interface AssemblyMaterial { source:WorkshopPartId; design:ComponentDesign; elements:string[]; fitting?:PartFitting }
 export interface AssemblySlot extends AssemblyMaterial { role:AppSlotRole; rect:Rect }
 export interface AppAssembly {
  app:BuiltApp; version:GameState['run']['version']; width:number; height:number;
@@ -15,7 +16,12 @@ const obj=(x:unknown):x is Record<string,unknown>=>!!x&&typeof x==='object'&&!Ar
 const finite=(x:unknown):x is number=>typeof x==='number'&&Number.isFinite(x);
 const ids=new Set(WORKSHOP_PARTS.map(p=>p.id));
 export function validAssemblyMaterial(p:unknown,legacy=false):p is AssemblyMaterial {
- return obj(p)&&typeof p.source==='string'&&ids.has(p.source as WorkshopPartId)&&Array.isArray(p.elements)&&p.elements.every(e=>typeof e==='string'&&WORKSHOP_PARTS.find(def=>def.id===p.source)?.elements.includes(e))&&new Set(p.elements).size===p.elements.length&&WORKSHOP_PARTS.find(def=>def.id===p.source)!.elements.every(element=>(p.elements as string[]).includes(element))&&(isComponentDesign(p.design)||legacy&&obj(p.design)&&finite(p.design.fontSize)&&p.design.fontSize>=10&&p.design.fontSize<=BALANCE.pageDesign.buttonFontMax&&isComponentDesign({...p.design,fontSize:BALANCE.workshop.design.fontSize}));
+ if(!obj(p)||typeof p.source!=='string'||!ids.has(p.source as WorkshopPartId)||!Array.isArray(p.elements)||!p.elements.every(e=>typeof e==='string')||new Set(p.elements).size!==p.elements.length)return false;
+ const id=p.source as WorkshopPartId,definition=WORKSHOP_PARTS.find(def=>def.id===id)!;
+ if(p.fitting!==undefined){
+  if(!isPartFitting(p.fitting,id)||!p.fitting.completionPaid||JSON.stringify(fittedPieces({elements:p.elements as string[],fitting:p.fitting},id))!==JSON.stringify(p.elements))return false;
+ }else if(!p.elements.every(element=>definition.elements.includes(element as string))||!definition.elements.every(element=>(p.elements as string[]).includes(element)))return false;
+ return isComponentDesign(p.design)||legacy&&obj(p.design)&&finite(p.design.fontSize)&&p.design.fontSize>=10&&p.design.fontSize<=BALANCE.pageDesign.buttonFontMax&&isComponentDesign({...p.design,fontSize:BALANCE.workshop.design.fontSize});
 }
 export function validAppAssembly(x:unknown,app:BuiltApp):x is AppAssembly {
  if(!obj(x)||x.app!==app||!['v0.1','v1','v2'].includes(x.version as string)||!finite(x.width)||!finite(x.height)||x.width<BALANCE.appBuild.minWidth||x.height<BALANCE.appBuild.minHeight||x.width>BALANCE.appBuild.maxWidth||x.height>BALANCE.appBuild.maxHeight||!Array.isArray(x.common)||!Array.isArray(x.slots)||(x.legacy!==undefined&&typeof x.legacy!=='boolean'))return false;

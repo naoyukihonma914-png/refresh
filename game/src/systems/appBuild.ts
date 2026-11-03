@@ -36,7 +36,7 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
  if(a.type==='app-fit'){const draft=fitAppLayout(project.draft,project.draft.width,project.draft.height,a.metrics);return JSON.stringify(draft)===JSON.stringify(project.draft)?s:update({...project,draft,draftAssembly:assemblyWithLayout(draftAssembly,draft)});}
  if(a.type==='app-refresh'){
   const refreshed=createAppAssembly(s,a.app,project.draft.parts.map(p=>p.id),a.metrics);
-  const slots=draftAssembly.slots.map(slot=>{const latest=refreshed.slots.find(p=>p.role===slot.role);return latest?{...slot,design:latest.design,elements:latest.elements}:slot;});
+  const slots=draftAssembly.slots.map(slot=>{const latest=refreshed.slots.find(p=>p.role===slot.role);return latest?{...structuredClone(latest),rect:slot.rect}:slot;});
   const assembly={...draftAssembly,common:[...draftAssembly.common.map(old=>refreshed.common.find(next=>next.source===old.source)??old),...refreshed.common.filter(next=>!draftAssembly.common.some(old=>old.source===next.source))],slots};
   const draft=fitAppLayout(assemblyLayout(assembly,project.draft),assembly.width,assembly.height,a.metrics);
   return edit(draft,assemblyWithLayout(assembly,draft));
@@ -62,7 +62,8 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
   if(!source||production?.step!==4&&!legacyMaterial)return s;
   const draft=placeAppPart(project.draft,a.part,a.metrics,a.rect);if(draft===project.draft)return s;
   const placed=draft.parts.find(p=>p.id===a.part)!;
-  const assembly={...draftAssembly,slots:[...draftAssembly.slots,{role:a.part,source,rect:{x:placed.x,y:placed.y,width:placed.width,height:placed.height},design:structuredClone(production?.step===4?production.design:legacyMaterial!.design),elements:[...(production?.step===4?production.elements:legacyMaterial!.elements)]}]};
+  const material=production?.step===4?production:legacyMaterial!;
+  const assembly={...draftAssembly,slots:[...draftAssembly.slots,{role:a.part,source,rect:{x:placed.x,y:placed.y,width:placed.width,height:placed.height},design:structuredClone(material.design),elements:[...material.elements],...(material.fitting?{fitting:structuredClone(material.fitting)}:{})}]};
   return edit(assemblyLayout(assembly,draft),assembly);
  }
  if(a.type==='app-remove'){

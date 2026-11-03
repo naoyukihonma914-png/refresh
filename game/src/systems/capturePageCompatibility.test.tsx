@@ -15,6 +15,7 @@ import {createPageDesign,isPageDesign,PAGE_PARTS,recommendedPage} from './pageDe
 import {isProductRecord} from './releaseState';
 import {decodeSave,encodeSave} from './save';
 import {SCHEMA_VERSION} from './state';
+import {expectFittingMigration} from './workshopFitting.testSupport';
 
 const now=1_800_000_000_000;
 function published(){
@@ -88,10 +89,10 @@ describe('TP-1：旧ページ配置を含む写真と製品は過去の契約で
   expect(capturedContentSummary(currentShot)).toEqual(capturedContentSummary(legacyShot));
   expect(photoContentQuality(currentShot)).toBe(photoContentQuality(legacyShot));
  });
- it('実形式15の財布・制作・撮影11を保ち、現在のページだけを移行できる',()=>{
+ it('実形式15の財布・撮影11を保ち、現在のページと制作表現だけを移行できる',()=>{
   const old=published().save,data=JSON.stringify(old),s=decodeSave(data);
   expect(old.schemaVersion).toBe(15);expect(s.schemaVersion).toBe(SCHEMA_VERSION);
-  expect(s.resources).toEqual(old.resources);expect(s.run.workshop.parts).toEqual(old.run.workshop.parts);
+  expect(s.resources).toEqual(old.resources);expectFittingMigration(s.run.workshop.parts,old.run.workshop.parts,old.lastTickAt);
   expect(s.persistent.setDocuments).toEqual(old.persistent.setDocuments);
   expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
   expect(isPageDesign(s.run.seed.page)).toBe(true);

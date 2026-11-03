@@ -264,7 +264,7 @@ describe('保存した部品工房の静的な配置と材質',()=>{
  it('現在の完成数を使い、まだ追加していない要素や架空の半分完成・架空の行を描かない',()=>{
   const snapshot=props(),w=snapshot.workshop;w.activePart='common-progress';
   const markup=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
-  expect(markup).toContain(snapshot.i18n.t('ws.productionProgress',{count:'22',total:'22'}));expect(markup).not.toContain('width:50%');expect(markup).not.toContain(snapshot.i18n.t('ws.preview.line',{count:1}));
+  expect(markup).toContain(snapshot.i18n.t('ws.productionProgress',{count:'21',total:'21'}));expect(markup).not.toContain('width:50%');expect(markup).not.toContain(snapshot.i18n.t('ws.preview.line',{count:1}));
   w.parts['common-button']!.step=1;w.parts['common-button']!.elements=[];
   const partial=renderToStaticMarkup(createElement(WorkshopSnapshot,snapshot));
   const content=partial.match(/<div [^>]*data-static-part-content="common-button"[^>]*>(.*?)<\/div>/s)!;

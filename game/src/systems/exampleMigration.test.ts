@@ -5,6 +5,7 @@ import { migrateExampleSave } from './exampleMigration';
 import { migratePageLayoutSave } from './pageLayoutMigration';
 import { decodeSave,encodeSave } from './save';
 import { isGameState } from './state';
+import {expectFittingMigration} from './workshopFitting.testSupport';
 
 const fixtures=['seed-customized','workshop-step2','workshop-step3-free','desktop-records','next-run','shipping'] as const;
 const oldSave=(name:typeof fixtures[number])=>JSON.parse(gunzipSync(readFileSync(new URL(`./testdata/examples-v16-7005674-${name}.json.gz`,import.meta.url))).toString());
@@ -18,7 +19,13 @@ describe('真正TP3形式16から17のお手本移行',()=>{
   const restored=structuredClone(migrated) as unknown as {schemaVersion:number;persistent:{examplesEnabled?:boolean};run:{workshop:{combo?:unknown}}};
   restored.schemaVersion=16;delete restored.persistent.examplesEnabled;delete restored.run.workshop.combo;
   expect(restored).toEqual(source);expect(JSON.stringify(source)).toBe(original);
-  const loaded=decodeSave(original);expect(isGameState(loaded)).toBe(true);expect(loaded.schemaVersion).toBe(18);expect(loaded).toEqual(migratePageLayoutSave(migrated));expect(decodeSave(encodeSave(loaded))).toEqual(loaded);
+  const loaded=decodeSave(original),pageMigrated=migratePageLayoutSave(migrated) as ReturnType<typeof decodeSave>;
+  expect(isGameState(loaded)).toBe(true);expect(loaded.schemaVersion).toBe(18);
+  expectFittingMigration(loaded.run.workshop.parts,pageMigrated.run.workshop.parts,pageMigrated.lastTickAt);
+  const {parts:_parts,...workshop}=loaded.run.workshop,{parts:_oldParts,...oldWorkshop}=pageMigrated.run.workshop;
+  expect(workshop).toEqual(oldWorkshop);
+  expect({...loaded,run:{...loaded.run,workshop:pageMigrated.run.workshop}}).toEqual(pageMigrated);
+  expect(decodeSave(encodeSave(loaded))).toEqual(loaded);
  });
  it('境界違いと骨格の壊れた入力は変換しない',()=>{
   const source=oldSave('workshop-step2');

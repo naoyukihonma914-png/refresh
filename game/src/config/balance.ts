@@ -399,6 +399,13 @@ export const BALANCE = {
   // World2 naming retained only for generic integration settings during 8a.
   w2: { desktopCost: 200_000, hintMs: 300_000, enterMs: 1_200, upgradeMs: 2_000, maxName: 80 },
   workshop: {
+    fitting: {
+      pieceRewardTotals: { small:115, medium:230, large:460 },
+      snapDistance:28, dragThreshold:5, snapPulseMs:480,
+      boardInset:32, trayWidth:292, trayHeight:184, trayGap:12, trayColumns:3,
+      looseMaxWidth:150, looseMaxHeight:104, frameTitleHeight:32, frameControlSize:26, frameControlGap:3,
+      tray: { width:272, height:112, gap:12, pieceGap:8 },
+    },
     feedback: { flightMs:650, pulseMs:1100, messageMs:1800, frameMs:33, originLift:12, maxWidth:260, queueLimit:4 },
     // 4.2 お手本/連続制作: 付録Cに具体値がないため一括で置いた仮値。
     examples: { snapDistance: 16, snapPulseMs: 480, comboWindowMs: 15_000, comboStepBonus: .02, comboMaxBonus: .10 },
@@ -419,7 +426,7 @@ export const BALANCE = {
       photo: 180_000, bin: 35_000, clock: 8_000, theme: 80_000,
       terminal: 1_400_000, manager: 12_000, extras: 0, stream: 2_000_000 },
     partRates: {
-      'common-frame': 12, 'common-scrollbar': 8, 'common-button': 10, 'common-heading': 6, 'common-progress': 9,
+      'common-frame': 20, 'common-scrollbar': 8, 'common-button': 10, 'common-heading': 6, 'common-progress': 9,
       'foundation-taskbar': 25, 'foundation-desktop': 20, 'foundation-icons': 22,
       'foundation-notification': 18, 'foundation-wallpaper': 16, 'foundation-upgrades': 24,
       'files-list': 40, 'files-back': 28, 'files-sort': 38, 'files-search': 45, 'files-large': 34, 'files-storage': 36,

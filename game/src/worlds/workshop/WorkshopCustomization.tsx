@@ -1,5 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
-import { WorkshopGlyph } from './WorkshopGlyph';
 import { BALANCE, type EditorSkill } from '../../config/balance';
 import type { I18n, MessageKey } from '../../content/i18n';
 import type { WorkshopPartDefinition } from '../../content/workshopCatalog';
@@ -8,12 +6,12 @@ import type { WorkshopAction } from '../../systems/workshop';
 
 export type WorkshopDispatch=(action:WorkshopAction)=>void;
 export function ColorChoices({label,value,colors,onChange,against,native=false,nativeLabel,onNative,pairable=false,unavailableLabel}:{label:string;value:string;colors:readonly string[];onChange:(color:string)=>void;against?:string;native?:boolean;nativeLabel?:string;onNative?:()=>void;pairable?:boolean;unavailableLabel?:string}){
- return <fieldset className="ws-colors"><legend>{label}</legend>{onNative&&<button type="button" className="ws-native-colors" data-workshop-action="nativeColor" aria-pressed={native} onClick={onNative}>{nativeLabel}</button>}<div>{colors.map(color=><button type="button" key={color} aria-label={`${label} ${color}`} aria-pressed={!native&&value.toLowerCase()===color.toLowerCase()} disabled={against!==undefined&&colorContrast(color,against)<BALANCE.workshop.design.minContrast||pairable&&!colors.some(text=>colorContrast(color,text)>=BALANCE.workshop.design.minContrast)} title={pairable&&!colors.some(text=>colorContrast(color,text)>=BALANCE.workshop.design.minContrast)?unavailableLabel:undefined} style={{background:color}} onClick={()=>onChange(color)}><span aria-hidden="true" style={{color:colorContrast(color,'#000000')>=4.5?'#000000':'#ffffff'}}>{!native&&value.toLowerCase()===color.toLowerCase()?'✓':''}</span></button>)}</div></fieldset>;
+ return <fieldset className="ws-colors"><legend>{label}</legend>{onNative&&<button type="button" className="ws-native-colors" data-workshop-action="nativeColor" aria-pressed={native} onClick={onNative}>{nativeLabel}</button>}<div>{colors.map(color=><button type="button" key={color} aria-label={`${label} ${color}`} aria-pressed={!native&&value.toLowerCase()===color.toLowerCase()} disabled={against!==undefined&&colorContrast(color,against)<BALANCE.workshop.design.minContrast||pairable&&!colors.some(text=>colorContrast(color,text)>=BALANCE.workshop.design.minContrast)} title={pairable&&!colors.some(text=>colorContrast(color,text)>=BALANCE.workshop.design.minContrast)?unavailableLabel:undefined} style={{background:color}} onClick={()=>onChange(color)}><span aria-hidden="true" style={{color:colorContrast(color,'#000000')>=BALANCE.workshop.design.minContrast?'#000000':'#ffffff'}}>{!native&&value.toLowerCase()===color.toLowerCase()&&<svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor"><path d="m2 6 3 3 5-6"/></svg>}</span></button>)}</div></fieldset>;
 }
 export function PartInspector({part,production,stage,colors,skills,customization,dispatch,i18n}:{part:WorkshopPartDefinition;production:PartProduction;stage:number;colors:readonly string[];skills:readonly EditorSkill[];customization:EditorCustomization;dispatch:WorkshopDispatch;i18n:I18n}){
  const t=i18n.t,d=production.design,limits=BALANCE.workshop.design;
  const defaults=createComponentDesign();
- const adjustmentCount=(Object.keys(defaults) as Array<keyof ComponentDesign>).filter(key=>key!=='nativeColors'&&JSON.stringify(d[key])!==JSON.stringify(defaults[key])).length+(!usesNativeComponentColors(d)&&d.color===defaults.color&&d.textColor===defaults.textColor&&Object.keys(d.controlColors).length===0?1:0)+(production.step>=2&&JSON.stringify(production.elements)!==JSON.stringify(part.elements)?1:0);
+ const adjustmentCount=(Object.keys(defaults) as Array<keyof ComponentDesign>).filter(key=>!['nativeColors','controlSide','controlSides'].includes(key)&&JSON.stringify(d[key])!==JSON.stringify(defaults[key])).length+(!usesNativeComponentColors(d)&&d.color===defaults.color&&d.textColor===defaults.textColor&&Object.keys(d.controlColors).length===0?1:0);
  const patch=(patch:Partial<ComponentDesign>)=>dispatch({type:'adjust',part:part.id,patch});
  const range=(key:'radius'|'fontSize'|'scrollbarWidth'|'progressHeight',min:number,max:number)=><label>{t(`ws.${key}`)}<input data-workshop-adjust={key} title={key==='fontSize'?t('ws.fontFitHint'):undefined} type="range" min={min} max={max} value={d[key]} onChange={e=>patch({[key]:Number(e.target.value)})}/><output>{i18n.number(d[key])}</output></label>;
  const checkbox=(key:'shadow'|'arrows'|'separator'|'showPercent')=><label className="ws-check"><input data-workshop-adjust={key} type="checkbox" checked={d[key]} onChange={e=>patch({[key]:e.target.checked})}/>{t(`ws.${key}`)}</label>;
@@ -26,13 +24,11 @@ export function PartInspector({part,production,stage,colors,skills,customization
   {part.id==='common-frame'&&<>
    <label>{t('ws.titleAlign')}<select value={d.titleAlign} onChange={e=>patch({titleAlign:e.target.value as ComponentDesign['titleAlign']})}>{(['start','center','end'] as const).map(v=><option key={v} value={v}>{t(`ws.${v}`)}</option>)}</select></label>
    <label>{t('ws.symbolShape')}<select value={d.symbolShape} onChange={e=>patch({symbolShape:e.target.value as ComponentDesign['symbolShape']})}><option value="line">{t('ws.line')}</option><option value="square">{t('ws.square')}</option></select></label>
-   <div className="ws-window-controls-editor">{production.elements.filter(e=>['minimize','maximize','close'].includes(e)).map((element,index,controls)=><fieldset key={element}><legend>{t(`ws.element.${element}` as MessageKey)}</legend>
-    <div className="ws-order-controls"><button type="button" disabled={index===0} aria-label={t('ws.moveUp')} onClick={()=>dispatch({type:'addElement',part:part.id,element,index:Math.max(0,production.elements.indexOf(element)-1)})}><WorkshopGlyph name="up"/></button><button type="button" disabled={index===controls.length-1} aria-label={t('ws.moveDown')} onClick={()=>dispatch({type:'addElement',part:part.id,element,index:production.elements.indexOf(element)+1})}><WorkshopGlyph name="down"/></button>
-    <select aria-label={t('ws.controlSide')} value={d.controlSides[element]??d.controlSide} onChange={e=>patch({controlSides:{...d.controlSides,[element]:e.target.value as 'start'|'end'}})}><option value="start">{t('ws.start')}</option><option value="end">{t('ws.end')}</option></select></div>
+   <div className="ws-window-controls-editor">{['minimize','maximize','close'].map(element=><fieldset key={element}><legend>{t(`ws.element.${element}` as MessageKey)}</legend>
     <ColorChoices label={t('ws.controlColor',{name:t(`ws.element.${element}` as MessageKey)})} value={d.controlColors[element]??d.textColor} colors={colors} native={usesNativeComponentColors(d)&&d.controlColors[element]===undefined} against={d.color} onChange={color=>patch({controlColors:{...d.controlColors,[element]:color}})}/>
    </fieldset>)}</div>
   </>}
-  {part.id==='common-scrollbar'&&<>{range('scrollbarWidth',limits.scrollbarMin,limits.scrollbarMax)}{checkbox('arrows')}</>}
+  {(part.id==='common-frame'||part.id==='common-scrollbar')&&<>{range('scrollbarWidth',limits.scrollbarMin,limits.scrollbarMax)}{checkbox('arrows')}</>}
   {part.id==='common-progress'&&<>{range('progressHeight',limits.progressHeightMin,limits.progressHeightMax)}<label>{t('ws.progressStyle')}<select value={d.progressStyle} onChange={e=>patch({progressStyle:e.target.value as ComponentDesign['progressStyle']})}><option value="solid">{t('ws.solid')}</option><option value="striped">{t('ws.striped')}</option></select></label>{checkbox('showPercent')}</>}
   {stage>=2&&<label>{t('ws.motion')}<select value={d.motion} onChange={e=>patch({motion:e.target.value as ComponentDesign['motion']})}>{(['plain','press','smooth'] as const).map(v=><option key={v} value={v}>{t(`ws.motion.${v}`)}</option>)}</select></label>}
   {skills.includes('presets')&&<fieldset><legend>{t('ws.presets')}</legend><button type="button" disabled={customization.presets.length>=BALANCE.workshop.customization.maxPresets} onClick={()=>dispatch({type:'customize',patch:{presets:[...customization.presets,d]}})}>{t('ws.savePreset')}</button>{customization.presets.map((preset,index)=><button type="button" key={index} onClick={()=>patch(preset)}>{t('ws.applyPreset',{count:index+1})}</button>)}</fieldset>}
@@ -53,10 +49,4 @@ export function EditorCustomizationPanel({customization,colors,dispatch,i18n}:{c
   </>
   <button type="button" data-workshop-action="resetCustomization" onClick={()=>patch({...createEditorCustomization(),presets:c.presets,panelPositions:c.panelPositions,panelWidths:c.panelWidths})}>{t('ws.reset')}</button>
  </section>;
-}
-
-export function DimensionInput({field,value,min,step,onCommit}:{field:string;value:number;min:number;step:number;onCommit:(value:number)=>void}){
- const [draft,setDraft]=useState(String(value)),cancelled=useRef(false);
- useEffect(()=>setDraft(String(value)),[value]);
- return <input data-workshop-dimension={field} type="number" min={min} step={step} value={draft} onChange={e=>setDraft(e.target.value)} onBlur={()=>{if(cancelled.current){cancelled.current=false;setDraft(String(value));return;}const number=Number(draft);if(draft.trim()&&Number.isFinite(number))onCommit(number);setDraft(String(value));}} onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur();else if(e.key==='Escape'){cancelled.current=true;setDraft(String(value));e.currentTarget.blur();}}}/>;
 }

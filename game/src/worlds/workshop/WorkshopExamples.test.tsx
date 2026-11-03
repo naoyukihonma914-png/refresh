@@ -1,67 +1,65 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe,expect,it} from 'vitest';
 import {BALANCE} from '../../config/balance';
-import {createI18n,type MessageKey} from '../../content/i18n';
-import {getWorkshopPart,partsForSet,type WorkshopPartId} from '../../content/workshopCatalog';
+import {createI18n} from '../../content/i18n';
+import {fittingDefinition,fittingPartsForSet} from '../../content/workshopFitting';
 import type {Platform} from '../../platform/types';
 import {createFixture} from '../../systems/fixtures';
 import {actWorkshop,completedParts} from '../../systems/workshop';
 import type {GameRuntime,RuntimeSnapshot} from '../../systems/runtime';
 import type {GameState} from '../../systems/state';
-import {finishTrialFor} from '../../content/workshopTrials';
-import {WorkshopCanvas} from './WorkshopCanvas';
 import {workshopExampleHand,WorkshopExamples} from './WorkshopExamples';
 import {WorkshopNavigator} from './WorkshopNavigator';
 const now=1_800_000_000_000;
 const platform={clock:{wallNow:()=>now,monotonicNow:()=>0},animation:{reducedMotion:()=>false}} as Platform;
 const runtime={platform,actWorkshop:()=>{},requestPrototypeRelease:()=>{}} as unknown as GameRuntime;
-function navigator(state:GameState,language='ja') {return renderToStaticMarkup(<WorkshopNavigator runtime={runtime} snapshot={{state} as RuntimeSnapshot} i18n={createI18n(language)} finishHint={id=>finishTrialFor(id)?.hintKey}/>);}
-function canvas(state:GameState,language='ja') {const id=state.run.workshop.activePart,part=id?getWorkshopPart(id):null;return renderToStaticMarkup(<WorkshopCanvas state={state} workshop={state.run.workshop} part={part} production={id?state.run.workshop.parts[id]:undefined} zoom={1} platform={platform} dispatch={()=>{}} i18n={createI18n(language)} picking={false} onPick={()=>{}}/>);}
-function adjustReady() {let s=createFixture('tp2-route-era0',now)!;s=actWorkshop(s,{type:'buySet',set:'common'},now);s=actWorkshop(s,{type:'place',part:'common-frame',rect:getWorkshopPart('common-frame').defaultRect,example:true},now);for(const element of getWorkshopPart('common-frame').elements)s=actWorkshop(s,{type:'addElement',part:'common-frame',element},now);return s;}
+function navigator(state:GameState,language='ja') {return renderToStaticMarkup(<WorkshopNavigator runtime={runtime} snapshot={{state} as RuntimeSnapshot} i18n={createI18n(language)}/>);}
+function started(){let s=createFixture('tp2-route-era0',now)!;s=actWorkshop(s,{type:'buySet',set:'common'},now);return s;}
 
-describe('お手本の組み立てと自由制作の二層',()=>{
- it('具体的な次の1手だけで、標準のまま本線22パーツと書き出しから出口まで進める',()=>{
-  let s=createFixture('tp2-route-era0',now)!,operations=0;const initialTokens=s.resources.tokens,finished:WorkshopPartId[]=[];
+describe('殻とピースの案内と制作パネル',()=>{
+ it('お手本の次の手は出現と実際のはめ込みを分け、本線全21パーツから出口まで進める',()=>{
+  let s=createFixture('tp2-route-era0',now)!,operations=0;const initialTokens=s.resources.tokens;
   while(operations++<250){
    const hand=workshopExampleHand(s);
    if(hand.kind==='exit')break;
    switch(hand.kind){
     case 'buySet':s=actWorkshop(s,{type:'buySet',set:hand.set},now);break;
     case 'selectPart':s=actWorkshop(s,{type:'selectPart',part:hand.part},now);break;
-    case 'place':s=actWorkshop(s,{type:'place',part:hand.part,rect:getWorkshopPart(hand.part).defaultRect,example:true},now);break;
-    case 'addElement':s=actWorkshop(s,{type:'addElement',part:hand.part,element:hand.element},now);break;
-    case 'addAll':for(const element of hand.elements)s=actWorkshop(s,{type:'addElement',part:hand.part,element},now);break;
-    case 'useExample':s=actWorkshop(s,{type:'useExample',part:hand.part},now);break;
-    case 'finish':s=actWorkshop(s,{type:'test',part:hand.part,interaction:getWorkshopPart(hand.part).testInteraction},now);finished.push(hand.part);break;
+    case 'spawnPiece':s=actWorkshop(s,{type:'spawnPiece',part:hand.part,piece:hand.piece},now);break;
+    case 'fitPiece':{const p=s.run.workshop.parts[hand.part]!,socket=fittingDefinition(hand.part).sockets.find(socket=>socket.accepts.includes(hand.piece)&&(socket.stacked||!Object.values(p.fitting!.sockets).includes(socket.id)))!;s=actWorkshop(s,{type:'fitPiece',part:hand.part,piece:hand.piece,socket:socket.id},now);break;}
     case 'export':s=actWorkshop(s,{type:'export',part:hand.part},now);break;
     default:throw new Error(`Unexpected ${hand.kind}`);
    }
   }
-  expect(operations).toBeLessThan(250);expect(finished).toEqual(['common','foundation','files','mail'].flatMap(set=>partsForSet(set as 'common').map(p=>p.id)));
-  expect(completedParts(s)).toHaveLength(22);expect(s.resources.tokens-initialTokens).toBe(22*BALANCE.workshop.exportTokens);
+  expect(operations).toBeLessThan(250);
+  expect(completedParts(s)).toHaveLength(['common','foundation','files','mail'].flatMap(set=>fittingPartsForSet(set as 'common')).length);
+  expect(s.resources.tokens-initialTokens).toBe(21*BALANCE.workshop.exportTokens);
   expect(workshopExampleHand(s)).toEqual({kind:'exit'});
  });
- it.each(['ja','en','en-XA'])('%s：ONでは具体的指示は1つ、こだわりは工程中も完成後も開け、描画は状態を変えない',language=>{
-  let s=adjustReady();s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{radius:4}},now);const before=structuredClone(s),html=navigator(s,language);
-  expect((html.match(/data-workshop-next-hand=/g)??[])).toHaveLength(1);expect(html).toContain('data-workshop-next-hand="useExample"');expect(html).toContain('data-workshop-example-action="useExample"');
-  expect(html).toContain('<details class="ws-custom-work" data-workshop-customization="true">');expect(html).toContain('data-workshop-action="confirmAdjustment"');expect(html).toContain('data-workshop-inspector="true"');expect(s).toEqual(before);
-  s=actWorkshop(s,{type:'confirmAdjustment',part:'common-frame'},now);s=actWorkshop(s,{type:'test',part:'common-frame',interaction:'press'},now);
-  expect(navigator(s,language)).toContain('data-workshop-customization="true"');expect(s.run.workshop.parts['common-frame']!.design.radius).toBe(4);
+ it.each(['ja','en','en-XA'])('%s：制作中はピース一覧と任意調整への入口だけを出す',language=>{
+  const s=started(),before=structuredClone(s),html=navigator(s,language);
+  expect((html.match(/data-workshop-next-hand=/g)??[])).toHaveLength(1);
+  expect(html).toContain('data-workshop-next-hand="spawnPiece"');
+  expect(html).toContain('data-workshop-piece="scrollbar"');expect(html).toContain('data-workshop-action="openAdjustments"');
+  expect(html).toContain('data-workshop-action="backToParts"');expect(html).toContain('ws-fitting-part-chips');
+  for(const legacy of ['ws-steps','data-workshop-inspector','data-workshop-dimension','confirmAdjustment','data-workshop-action="place"','data-workshop-action="element"','ws-test-hint'])expect(html).not.toContain(legacy);
+  expect(s).toEqual(before);
  });
- it('OFFでも本線の唯一の印とヘルプを保ち、調整を直接表示し、ON/OFF表示だけでデザインは戻らない',()=>{
-  let s=adjustReady();s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{radius:4}},now);s.persistent.examplesEnabled=false;const before=structuredClone(s),html=navigator(s);
-  expect(html).not.toContain('data-workshop-next-hand');expect(html).not.toContain('data-workshop-customization');expect(html).toContain('data-workshop-inspector="true"');expect(html).toContain('data-workshop-action="confirmAdjustment"');
-  expect((html.match(/class="ws-next-indicator"/g)??[])).toHaveLength(1);expect(html).toContain('data-workshop-help-part="common-button"');expect(s).toEqual(before);
+ it('ピースを出す案内もドラッグの案内も、代わりにはめるボタンを持たない',()=>{
+  let s=started();const render=()=>renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} i18n={createI18n('ja')}/>);
+  expect(render()).toContain('data-workshop-next-hand="spawnPiece"');expect(render()).not.toContain('<button');
+  s=actWorkshop(s,{type:'spawnPiece',part:'common-frame',piece:'title'},now);
+  expect(render()).toContain('data-workshop-next-hand="fitPiece"');expect(render()).not.toContain('<button');
  });
- it.each([0,1,2])('段%s：最初の配置だけに薄い輪郭を出し、自由操作や完成品には残さない',era=>{
-  let s=createFixture(`tp2-route-era${era}`,now)!;s=actWorkshop(s,{type:'buySet',set:'common'},now);const before=structuredClone(s);
-  const html=canvas(s);expect(html).toContain('data-workshop-example-outline="common-frame"');expect(s).toEqual(before);
-  s.persistent.examplesEnabled=false;expect(canvas(s)).not.toContain('data-workshop-example-outline');
-  s.persistent.examplesEnabled=true;s=actWorkshop(s,{type:'place',part:'common-frame',rect:getWorkshopPart('common-frame').defaultRect,example:true},now);
-  expect(canvas(s)).not.toContain('data-workshop-example-outline');expect(canvas(s)).toContain('data-workshop-custom-placement="true"');
+ it('OFFで誘導だけを隠し、同じピース一覧と調整への入口を残す',()=>{
+  const s=started();s.persistent.examplesEnabled=false;const before=structuredClone(s),html=navigator(s);
+  expect(html).not.toContain('data-workshop-next-hand');expect(html).not.toContain('data-example-next');expect(html).not.toContain('ws-next-indicator');
+  expect(html).toContain('data-workshop-piece="title"');expect(html).toContain('data-workshop-action="openAdjustments"');expect(html).not.toContain('data-workshop-inspector');expect(s).toEqual(before);
  });
- it('工程4は本物の仕上げ操作を案内し、代わりに完成させるボタンは置かない',()=>{
-  const s=createFixture('tp3-finish-common-scrollbar-era0',now)!,html=renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} i18n={createI18n('ja')} finishHint={id=>finishTrialFor(id)?.hintKey}/>);
-  expect(html).toContain('data-workshop-next-hand="finish"');expect(html).not.toContain('<button');expect(html).toContain(createI18n('ja').t(finishTrialFor('common-scrollbar')!.hintKey as MessageKey));
+ it('はめ済みと出現中を区別し、出現中の名前をもう一度出すボタンにしない',()=>{
+  let s=started();s=actWorkshop(s,{type:'spawnPiece',part:'common-frame',piece:'title'},now);
+  expect(navigator(s)).toMatch(/data-workshop-piece="title" data-piece-status="spawned"[^>]*disabled/);
+  s=actWorkshop(s,{type:'fitPiece',part:'common-frame',piece:'title',socket:'title'},now);
+  expect(navigator(s)).toMatch(/data-workshop-piece="title" data-piece-status="fitted"[^>]*disabled/);
  });
 });

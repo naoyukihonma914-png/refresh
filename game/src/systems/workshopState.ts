@@ -1,5 +1,7 @@
 import { BALANCE, type EditorSkill } from '../config/balance';
 import { SET_IDS, WORKSHOP_PARTS, getWorkshopPart, type UiSetId, type WorkshopPartId, type WorkshopRect } from '../content/workshopCatalog';
+import { fittingPartsForSet } from '../content/workshopFitting';
+import { fittedPieces, fittingComplete, isPartFitting, type PartFitting } from './workshopFitting';
 export type { EditorSkill } from '../config/balance';
 export type { WorkshopRect } from '../content/workshopCatalog';
 export const WORKSHOP_GUIDE_IDS = ['entered','place','elements','adjust','test','complete','export','wall','hint'] as const;
@@ -23,6 +25,7 @@ export interface EditorCustomization {
   panelWidths: Record<'palette'|'tools'|'parts',number>;
 }
 export interface PartProduction {
+  fitting?: PartFitting;
   step: 0|1|2|3|4; rect: WorkshopRect; elements: string[]; design: ComponentDesign;
   completedAt: number|null; exportedAt: number|null; tested: boolean;
 }
@@ -156,6 +159,13 @@ export function isPartProduction(x:unknown,id:WorkshopPartId):x is PartProductio
   const descriptor=getWorkshopPart(id);
   const min=minimumPartSize(id,x.design);
   if(x.rect.width<min.width||x.rect.height<min.height)return false;
+  if(x.fitting!==undefined){
+    if(!isPartFitting(x.fitting,id)||![1,4].includes(x.step as number))return false;
+    const production=x as unknown as PartProduction;
+    if(JSON.stringify(x.elements)!==JSON.stringify(fittedPieces(production,id)))return false;
+    if(x.step===4?!x.fitting.completionPaid||!amount(x.completedAt)||!x.tested:x.fitting.completionPaid||fittingComplete(production,id)||x.completedAt!==null||x.tested)return false;
+    return x.exportedAt===null||x.step===4&&amount(x.exportedAt)&&x.exportedAt>=Number(x.completedAt);
+  }
   if(!x.elements.every(e=>descriptor.elements.includes(e as string)))return false;
   if(Number(x.step)>=2&&!descriptor.elements.every(e=>(x.elements as unknown[]).includes(e)))return false;
   if(x.step===0&&(x.elements.length>0||x.tested))return false;
@@ -209,6 +219,7 @@ export function isSetDocument(x:unknown):x is SetDocument {
 }
 /** Partial exports are records, but do not satisfy a completed-set requirement. */
 export function isCompleteSetDocument(document:SetDocument):boolean {
-  return WORKSHOP_PARTS.filter(part=>part.set===document.set).every(part=>document.parts[part.id]?.step===4);
+  const definitions=Object.values(document.parts).some(part=>part?.fitting)?fittingPartsForSet(document.set):WORKSHOP_PARTS.filter(part=>part.set===document.set);
+  return definitions.every(part=>document.parts[part.id]?.step===4);
 }
 export const isEditorSkill=(x:unknown):x is EditorSkill=>BALANCE.workshop.skills.some(s=>s.id===x);

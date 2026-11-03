@@ -13,9 +13,14 @@ import { advanceDesktopTime,takeScreenshot } from './desktop';
 import { ACHIEVEMENTS,actCommon,activeContract,advanceStray,bulkVisible,createProgress,globalMultiplier,isPlay,isProgress,previousWorldMultiplier,reconcileProgress } from './longPlay';
 import { decodeSave,encodeSave } from './save';
 import { buildSeed,canBuildSeed,createSeedVersion,freshMomentum,pressSeed,seedCursorQuote,visibleSeedItems } from './seed';
-import { createInitialState } from './state';
+import { createInitialState,type GameState } from './state';
 import { advanceActiveTime,advanceOfflineTime } from './time';
 const now=1800000000000;
+function fitBasicButton(s:GameState,time=now):GameState {
+ s=actWorkshop(s,{type:'spawnPiece',part:'common-button',piece:'label'},time);
+ return actWorkshop(s,{type:'fitPiece',part:'common-button',piece:'label',socket:'label'},time);
+}
+
 describe('段階6.5：永続の記録と生成量',()=>{
  it('28件を同じ表で扱い、初期状態の隠し要素や未達の実績は獲得しない',()=>{const s=reconcileProgress(createInitialState(now),now);expect(ACHIEVEMENTS.length).toBeGreaterThanOrEqual(25);expect(s.persistent.progress.records).toEqual({});expect(globalMultiplier(s)).toBe(1);expect(isProgress(createProgress())).toBe(true);});
  it('達成の日時と+1%を一度だけ記録し、リリース後も保持する',()=>{let s=createInitialState(now);s=pressSeed(s,freshMomentum(),0).state;s=reconcileProgress(s,now);expect(s.persistent.progress.records).toEqual({'first-pixel':now});expect(manualClickValue(s)).toBe(1.01);expect(reconcileProgress(s,now+1000)).toBe(s);const next=createSeedVersion(s,'v1',now+1000);expect(next.persistent.progress.records).toEqual(s.persistent.progress.records);expect(decodeSave(encodeSave(next)).persistent.progress.records).toEqual(s.persistent.progress.records);});
@@ -48,10 +53,8 @@ describe('第3版：朱色の部品の隠し要素',()=>{
   let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s.persistent.specs.color=1;
   s=advanceWorkshop(enterWorkshop(creditPixels(s,10_000)),BALANCE.workshop.enterMs);
   s=actWorkshop(s,{type:'buySet',set:'common'},now);const definition=getWorkshopPart('common-button');
-  s=actWorkshop(s,{type:'place',part:definition.id,rect:definition.defaultRect},now);
-  for(const element of definition.elements)s=actWorkshop(s,{type:'addElement',part:definition.id,element},now);
+
   s=actWorkshop(s,{type:'adjust',part:definition.id,patch:{color,textColor:'#000000'}},now);
-  s=actWorkshop(s,{type:'confirmAdjustment',part:definition.id},now);
   return s;
  };
  it('朱色は256色から選べ、16色と過去の撮影パレットを書き換えない',()=>{
@@ -62,7 +65,7 @@ describe('第3版：朱色の部品の隠し要素',()=>{
  });
  it('朱色の部品を完成させても未書出なら手紙は来ず、書き出しで一度だけ記録する',()=>{
   let s=readyPart(BALANCE.longPlay.secretPartColor);expect(s.run.workshop.parts['common-button']!.design.color).toBe(BALANCE.longPlay.secretPartColor);
-  let before=s;s=observeProgress(before,actWorkshop(before,{type:'test',part:'common-button',interaction:'press'},now));
+  let before=s;s=observeProgress(before,fitBasicButton(before));
   s=reconcileProgress(s,now);expect(s.persistent.progress.secretPart).toBe(false);expect(s.persistent.progress.records['secret-art']).toBeUndefined();
   before=s;const beforeTokens=s.resources.tokens;s=observeProgress(before,actWorkshop(before,{type:'export',part:'common-button'},now+1));
   s=reconcileProgress(s,now+1);expect(s.persistent.progress.secretPart).toBe(true);expect(s.persistent.progress.records['secret-art']).toBe(now+1);expect(s.resources.tokens-beforeTokens).toBe(1);
@@ -72,13 +75,13 @@ describe('第3版：朱色の部品の隠し要素',()=>{
   expect(actCommon(desktop,{type:'letter-open'},now+3).run.play.letterOpen).toBe(true);
  });
  it('保存色が朱色でも標準材質を使っている間は見た目の色として発見しない',()=>{
-  let s=readyPart(BALANCE.longPlay.secretPartColor);s=actWorkshop(s,{type:'test',part:'common-button',interaction:'press'},now);
+  let s=readyPart(BALANCE.longPlay.secretPartColor);s=fitBasicButton(s);
   s.run.workshop.parts['common-button']!.design.nativeColors=true;
   const before=s;s=reconcileProgress(observeProgress(before,actWorkshop(before,{type:'export',part:'common-button'},now+1)),now+1);
   expect(s.persistent.progress.secretPart).toBe(false);expect(s.persistent.progress.records['secret-art']).toBeUndefined();
  });
  it('普通の赤では発見せず、既に書き出したものを後から朱色へ変えても再度は書き出せない',()=>{
-  let s=readyPart('#d0523a');expect(s.run.workshop.parts['common-button']!.design.color).toBe('#d0523a');s=actWorkshop(s,{type:'test',part:'common-button',interaction:'press'},now);
+  let s=readyPart('#d0523a');expect(s.run.workshop.parts['common-button']!.design.color).toBe('#d0523a');s=fitBasicButton(s);
   let before=s;s=observeProgress(before,actWorkshop(before,{type:'export',part:'common-button'},now));
   s=reconcileProgress(s,now);expect(s.persistent.progress.secretPart).toBe(false);expect(s.persistent.progress.records['secret-art']).toBeUndefined();
   before=s;s=observeProgress(before,actWorkshop(before,{type:'adjust',part:'common-button',patch:{color:BALANCE.longPlay.secretPartColor}},now+1));
@@ -88,12 +91,12 @@ describe('第3版：朱色の部品の隠し要素',()=>{
 
 
 describe('段階8b：現在の制作と写真の永続記録',()=>{
- it('積み上げは未書出でも完成した現周回の部品だけを数え、旧アイコン数や未完成の工程を数えない',()=>{
+ it('積み上げは未書出でも全ピースをはめた現周回のパーツだけを数え、旧アイコン数を数えない',()=>{
   let s=createFixture('stage8a-part-common-button-step-3-era0',now)!;
   s.run.seed.autoCursors=7;s.persistent.progress=createProgress();s.persistent.progress.counts.icons=10000;
   const cursorFactor=1+7*BALANCE.longPlay.cursorBonus;
   expect(previousWorldMultiplier(s)).toBeCloseTo(cursorFactor);
-  s=actWorkshop(s,{type:'test',part:'common-button',interaction:'press'},now+1);
+  s=fitBasicButton(s,now+1);
   expect(s.run.workshop.parts['common-button']!.exportedAt).toBeNull();
   expect(previousWorldMultiplier(s)).toBeCloseTo((1+BALANCE.longPlay.partBonus)*cursorFactor);
   const before=previousWorldMultiplier(s);s=actWorkshop(s,{type:'export',part:'common-button'},now+2);

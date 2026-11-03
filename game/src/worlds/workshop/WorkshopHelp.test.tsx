@@ -44,10 +44,10 @@ describe('TP2：同じ行き先を示すカタログと説明図',()=>{
   const render=()=>renderToStaticMarkup(<WorkshopNavigator runtime={{platform:{clock:{wallNow:()=>now}}} as GameRuntime} snapshot={{state:s} as RuntimeSnapshot} i18n={createI18n('ja')}/>);
   let markup=render();expect((markup.match(/class="ws-next-indicator"/g)??[]).length).toBe(1);expect(markup).toContain('data-workshop-next="common"');
   s=actWorkshop(s,{type:'buySet',set:'common'},now);markup=render();
-  expect(markup).toContain('data-workshop-next="common-frame"');expect((markup.match(/data-workshop-part="common-frame"/g)??[]).length).toBe(1);
-  expect(markup).toContain('data-status="ready"');
+  expect(markup).toContain('data-workshop-next-hand="spawnPiece"');expect(markup).toContain('data-example-next="title"');expect((markup.match(/data-workshop-part="common-frame"/g)??[]).length).toBe(1);
+  expect(markup).toContain('data-piece-status="notSpawned"');expect(markup).not.toContain('data-piece-status="fitted"');
   for(const part of partsForSet('common'))s=completeWorkshopPartFixture(s,part.id,now,false);
-  markup=render();expect(markup).toContain('data-workshop-next="foundation"');expect((markup.match(/class="ws-next-indicator"/g)??[]).length).toBe(1);
+  s.run.workshop.activePart=null;markup=render();expect(markup).toContain('data-workshop-next="foundation"');expect((markup.match(/class="ws-next-indicator"/g)??[]).length).toBe(1);
  });
  it('完成予想図は渡した完成パーツだけを実線にし、試運転の対象を分ける',()=>{
   const html=renderToStaticMarkup(<WorkshopSchematic set="common" completedParts={['common-frame']} trialPart="common-frame" trialOpen i18n={createI18n('ja')} highlight={false}/>);

@@ -23,6 +23,7 @@ import { LineIcon } from './desktop-icons';
 import type { DesktopProps as Props } from './desktopTypes';
 import { PhotoSurface } from './PhotoSurface';
 import {ExampleSettings} from '../components/ExampleSettings';
+import { installedAssembly } from '../systems/appAssembly';
 import {UiScaleControl} from '../components/UiScaleControl';
 import {PhotoAdjustment} from '../components/PhotoAdjustment';
 // The second original photo is bundled, like the coast, and is never fetched at runtime.
@@ -67,8 +68,12 @@ export function WorkingCursors({app,...props}:Props&{app:JobId}){
 export function PhotoApp(props:Props){
  const {snapshot,runtime,i18n}=props,s=snapshot.state,d=s.run.desktop,edit=d.photo;
  const change=(patch:Partial<PhotoEdit>)=>runtime.actDesktop({type:'photo',edit:patch});
- return <div className="photo-app"><div className="app-toolbar"><AppPart id="source"><label>{i18n.t('photo.source')}<select aria-label={i18n.t('photo.source')} value={edit.source} onChange={e=>change({source:e.target.value})}>
- {(['coast','night'] as const).map(id=><option value={id} key={id}>{i18n.t(`photo.${id}`)}</option>)}{activeScreenshots(s).map(shot=><option key={shot.id} value={`shot:${shot.id}`}>{i18n.t('files.shot',{count:shot.id})}</option>)}</select></label></AppPart>
+ const source=installedAssembly(s,'photo')?.slots.find(slot=>slot.role==='source');
+ const navigation=source?.fitting?source.elements.filter((piece):piece is 'previous'|'next'=>piece==='previous'||piece==='next'):null;
+ const photographs=['coast','night',...activeScreenshots(s).map(shot=>`shot:${shot.id}`)];
+ const navigate=(piece:'previous'|'next')=>{const index=Math.max(0,photographs.indexOf(edit.source)),delta=piece==='previous'?-1:1;change({source:photographs[(index+delta+photographs.length)%photographs.length]!});};
+ return <div className="photo-app"><div className="app-toolbar"><AppPart id="source">{navigation?<div className="app-toolbar">{navigation.map(piece=><button key={piece} type="button" className="win-button" data-photo-navigation={piece} aria-label={i18n.t(piece==='previous'?'ws.preview.previousPhoto':'ws.preview.nextPhoto')} onClick={()=>navigate(piece)}><LineIcon kind={piece==='previous'?'back':'forward'}/></button>)}</div>:<label>{i18n.t('photo.source')}<select aria-label={i18n.t('photo.source')} value={edit.source} onChange={e=>change({source:e.target.value})}>
+ {(['coast','night'] as const).map(id=><option value={id} key={id}>{i18n.t(`photo.${id}`)}</option>)}{activeScreenshots(s).map(shot=><option key={shot.id} value={`shot:${shot.id}`}>{i18n.t('files.shot',{count:shot.id})}</option>)}</select></label>}</AppPart>
  {hasUpgrade(s,'compare')&&<AppPart id="compare"><button className="win-button" aria-pressed={d.compare} onClick={()=>runtime.actDesktop({type:'compare'})}>{i18n.t('photo.compare')}</button></AppPart>}
  <AppPart id="wallpaper"><button className="win-button accent" onClick={()=>runtime.actDesktop({type:'wallpaper'})}>{i18n.t('photo.wallpaper')}</button></AppPart></div>
  <AppPart id="image"><div className="photo-workbench">{d.compare&&hasUpgrade(s,'compare')&&<figure><figcaption>{i18n.t('photo.before')}</figcaption><Photograph {...props} edit={{...edit,brightness:1,tone:0,crop:0}}/></figure>}<figure><figcaption>{i18n.t('photo.after')}</figcaption><Photograph {...props} edit={edit}/></figure></div></AppPart>
