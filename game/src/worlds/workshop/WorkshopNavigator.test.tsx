@@ -28,6 +28,14 @@ function zonesPresent(html:string){
 }
 
 describe('World 2 keeps its navigation zones in place',()=>{
+ it('piece selection is independent of fitting status and dims only within its own zone',()=>{
+  const state=createFixture('fitting-frame-era0',now)!;
+  const html=renderToStaticMarkup(<WorkshopNavigator runtime={runtime} snapshot={{state} as RuntimeSnapshot} i18n={createI18n('ja')} selectedPiece="close"/>);
+  expect(zone(html,'parts')).toContain('data-has-selection="true"');
+  expect(zone(html,'pieces')).toContain('data-has-selection="true"');
+  expect(zone(html,'pieces')).toMatch(/data-workshop-piece="close"[^>]*aria-pressed="true"/);
+  expect(zone(html,'pieces')).toMatch(/data-workshop-piece="minimize"[^>]*aria-pressed="false"/);
+ });
  it.each(['ja','en','en-XA'])('%s: entry shows categories, the common set and locked parts without acquiring anything',language=>{
   const state=createFixture('fitting-entry-era0',now)!,before=structuredClone(state),html=render(state,language);
   zonesPresent(html);expect(html).toContain('data-workshop-category="shared" aria-selected="true"');

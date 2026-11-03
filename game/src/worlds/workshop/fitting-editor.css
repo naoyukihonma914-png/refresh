@@ -51,7 +51,7 @@
 .workshop-root .fitting-editor .fe-palette-index {flex:none;background:#26221c;color:#f0c060;text-align:center;padding:3px 1px;font-size:12px;overflow:hidden;white-space:nowrap;}
 .workshop-root .fitting-editor .fe-workspace {position:relative;display:flex;flex-direction:column;flex:1;min-inline-size:0;min-block-size:0;overflow:hidden;background:var(--ws-workbench-bg,#5d6f7d);}
 .workshop-root .fitting-editor .fe-production-area {position:relative;display:block;flex:1;min-inline-size:0;min-block-size:0;inline-size:100%;block-size:100%;overflow:hidden;}
-.workshop-root .fitting-editor .fe-production-area>.wf-workbench-scroll {display:flex;align-items:center;justify-content:center;inline-size:100%;block-size:100%;padding:28px;}
+.workshop-root .fitting-editor .fe-production-area>.wf-workbench-scroll {display:flex;align-items:safe center;justify-content:safe center;inline-size:100%;block-size:100%;padding:28px;}
 .workshop-root .fitting-editor .fe-production-area>.wf-workbench-scroll>.wf-board-sizer {margin:0;}
 .workshop-root .fitting-editor .fe-parts {flex:0 0 var(--fe-parts-width);inline-size:var(--fe-parts-width);min-inline-size:0;min-block-size:0;overflow:hidden;background:var(--editor-panel);border-inline-start:2px solid var(--editor-edge-dark);}
 .workshop-root .fitting-editor .fe-parts>.ws-fitting-panel {font:inherit;min-block-size:0;block-size:100%;}
@@ -79,6 +79,7 @@
 .workshop-root .fitting-editor .fe-page-scroll {flex:1;block-size:100%;max-inline-size:100%;font-size:var(--fe-custom-font);}
 /* The projection is a small native preview window floating over the workbench. */
 .workshop-root .fitting-editor .fitting-preview {position:absolute;z-index:35;inset-block-start:14px;inset-inline-end:18px;inline-size:250px;block-size:180px;max-inline-size:40%;overflow:hidden;background:var(--editor-panel);border:2px solid #26221c;box-shadow:4px 4px #0005;color:var(--editor-ink);font:13px 'Refresh Pixel','Refresh UI',sans-serif;}
+.workshop-root .fitting-editor .fitting-preview[data-collapsed=true] {block-size:auto;}
 .workshop-root .fitting-editor .fitting-preview>header {display:flex;align-items:center;justify-content:space-between;gap:5px;block-size:25px;padding:2px 5px;background:#8b98a3;box-shadow:inset 1px 1px #c3ced6;}
 .workshop-root .fitting-editor .fitting-preview>header>strong {font:inherit;min-inline-size:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .workshop-root .fitting-editor .fitting-preview>header>button {display:grid;place-items:center;inline-size:18px;block-size:18px;min-block-size:0;padding:0;}

@@ -108,7 +108,10 @@ class PanelReview(FittingReview):
         selected = panel.locator('[data-workshop-select-set][aria-pressed="true"]')
         expect(selected).to_have_count(1)
         style = selected.evaluate('node=>{const s=getComputedStyle(node);return {top:s.borderTopColor,bottom:s.borderBottomColor}}')
-        assert rgb(style['top']) == [200, 85, 61] and rgb(style['bottom']) == [200, 85, 61], style
+        assert luminance(style['top']) > luminance(style['bottom']), style
+        assert selected.evaluate('node=>getComputedStyle(node.closest("[data-navigation-set]")).filter') == 'none'
+        other_tabs = panel.locator('[data-workshop-category][aria-selected="false"]')
+        assert all('brightness(0.72)' in value for value in other_tabs.evaluate_all('nodes=>nodes.map(node=>getComputedStyle(node).filter)'))
         disabled = panel.locator('[data-workshop-action="exit"]')
         if disabled.count():
             expect(disabled).to_be_disabled()

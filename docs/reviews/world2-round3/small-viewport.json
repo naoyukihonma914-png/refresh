@@ -1,0 +1,144 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8184/",
+  "buildSha256": "3e5f68eaa2611c5aa562f20a01fa7bcd4549032d134c92f0235f1186c762fa6a",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-修正指示書-第3ラウンド.md"
+  ],
+  "cases": [
+    {
+      "id": "zooms",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "sizes": [
+        {
+          "zoom": "0.5",
+          "piece": "title",
+          "width": 175,
+          "height": 8
+        },
+        {
+          "zoom": "0.5",
+          "piece": "minimize",
+          "width": 8.66668701171875,
+          "height": 8.666656494140625
+        },
+        {
+          "zoom": "0.5",
+          "piece": "maximize",
+          "width": 8.66668701171875,
+          "height": 8.666656494140625
+        },
+        {
+          "zoom": "0.5",
+          "piece": "close",
+          "width": 8.6666259765625,
+          "height": 8.666656494140625
+        },
+        {
+          "zoom": "0.5",
+          "piece": "scrollbar",
+          "width": 5.33331298828125,
+          "height": 121.33331298828125
+        },
+        {
+          "zoom": "1",
+          "piece": "title",
+          "width": 350.0000305175781,
+          "height": 16
+        },
+        {
+          "zoom": "1",
+          "piece": "minimize",
+          "width": 17.333343505859375,
+          "height": 17.333343505859375
+        },
+        {
+          "zoom": "1",
+          "piece": "maximize",
+          "width": 17.33331298828125,
+          "height": 17.333343505859375
+        },
+        {
+          "zoom": "1",
+          "piece": "close",
+          "width": 17.333343505859375,
+          "height": 17.333343505859375
+        },
+        {
+          "zoom": "1",
+          "piece": "scrollbar",
+          "width": 10.666656494140625,
+          "height": 242.66665649414062
+        },
+        {
+          "zoom": "1.5",
+          "piece": "title",
+          "width": 525.0000305175781,
+          "height": 24
+        },
+        {
+          "zoom": "1.5",
+          "piece": "minimize",
+          "width": 26,
+          "height": 26
+        },
+        {
+          "zoom": "1.5",
+          "piece": "maximize",
+          "width": 26,
+          "height": 26
+        },
+        {
+          "zoom": "1.5",
+          "piece": "close",
+          "width": 26,
+          "height": 26
+        },
+        {
+          "zoom": "1.5",
+          "piece": "scrollbar",
+          "width": 16,
+          "height": 364
+        },
+        {
+          "maximized": true,
+          "piece": "title",
+          "width": 577.5000305175781,
+          "height": 26.390625
+        },
+        {
+          "maximized": true,
+          "piece": "minimize",
+          "width": 28.59375,
+          "height": 28.59375
+        },
+        {
+          "maximized": true,
+          "piece": "close",
+          "width": 28.59375,
+          "height": 28.59375
+        },
+        {
+          "maximized": true,
+          "piece": "scrollbar",
+          "width": 17.59375,
+          "height": 400.390625
+        }
+      ]
+    }
+  ],
+  "languages": [
+    "en"
+  ],
+  "passed": 1,
+  "failed": 0
+}

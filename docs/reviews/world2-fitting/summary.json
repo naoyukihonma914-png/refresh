@@ -5,8 +5,8 @@
   },
   "language": "ja",
   "reducedMotion": false,
-  "baseUrl": "http://127.0.0.1:8183/",
-  "buildSha256": "bc52d727aafe03e5d9e13f9fa9e82b46c964b986b7784052cc2805fa8f9ad0b7",
+  "baseUrl": "http://127.0.0.1:8184/",
+  "buildSha256": "3e5f68eaa2611c5aa562f20a01fa7bcd4549032d134c92f0235f1186c762fa6a",
   "setup": "public fixed fixtures; real controls; frozen browser clock; debug export is read-only",
   "references": [
     "docs/mockups/02-1-tessera-aseprite-old.html",

@@ -8,6 +8,7 @@ import { createFixture } from '../../systems/fixtures';
 import { actWorkshop } from '../../systems/workshop';
 import type { Platform } from '../../platform/types';
 import { FittingCanvas } from './FittingCanvas';
+import { fittingPieceTray } from './fittingPieceLayout';
 
 const platform={every:()=>()=>{}} as unknown as Platform;
 function render(examples=true){
@@ -18,6 +19,21 @@ function render(examples=true){
 }
 
 describe('殻とピースの実寸キャンバス',()=>{
+ it('全52パーツの置き場は、最大化時も全ピースを座と同寸で重ねずに収める',()=>{
+  for(const part of FITTING_PARTS)for(const scale of [1,1.1]){
+   const definition=fittingDefinition(part.id),geometry=fittingSocketRects(part,part.defaultRect);
+   const sizes=definition.pieces.map(piece=>{const r=geometry[definition.sockets.find(socket=>socket.accepts.includes(piece))!.id]!;return {piece,width:r.width*scale,height:r.height*scale};});
+   const tray=fittingPieceTray(sizes),placed=Object.values(tray.rects);
+   expect(placed).toHaveLength(sizes.length);
+   for(const size of sizes){
+    const r=tray.rects[size.piece]!;
+    expect([r.width,r.height]).toEqual([size.width,size.height]);
+    expect(r.x).toBeGreaterThanOrEqual(0);expect(r.y).toBeGreaterThanOrEqual(20);
+    expect(r.x+r.width).toBeLessThanOrEqual(tray.width);expect(r.y+r.height).toBeLessThanOrEqual(tray.height);
+    for(const other of placed.filter(other=>other!==r))expect(r.x+r.width<=other.x||other.x+other.width<=r.x||r.y+r.height<=other.y||other.y+other.height<=r.y).toBe(true);
+   }
+  }
+ });
  it('全52パーツの専用座が殻の内側に収まる',()=>{
   for(const part of FITTING_PARTS){
    const rect=part.defaultRect,sockets=fittingSocketRects(part,rect);
