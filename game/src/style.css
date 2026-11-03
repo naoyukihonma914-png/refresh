@@ -10,6 +10,9 @@ html,body,#root { margin: 0; inline-size: 100%; block-size: 100%; }
 body { overflow: hidden; }
 #root { display: flex; align-items: center; justify-content: center; }
 .stage-frame { position: relative; flex: none; }
+.viewport-shell.ui-magnified {overflow:auto;align-items:flex-start;justify-content:flex-start;}
+.viewport-shell.ui-magnified>.stage-frame {margin:auto;}
+.ui-scale-control {display:inline-flex;align-items:center;gap:8px;margin:8px 0;}
 .stage { position: absolute; inset-block-start: 0; inset-inline-start: 0; transform-origin: 0 0; background: #fff; overflow: hidden; }
 .foundation,.system-message { padding: 8px; font: 16px 'Times New Roman', 'Refresh Serif', serif; }
 .foundation p { margin: 16px 0; }

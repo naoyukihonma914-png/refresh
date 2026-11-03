@@ -5,6 +5,7 @@ import { FilesRibbon } from '../components/FilesRibbon';
 import { LanguageSelect } from '../components/LanguageSelect';
 import { ReleaseProgress } from '../components/ReleaseProgress';
 import { StatusBar } from '../components/StatusBar';
+import {DesktopNextHand} from '../components/DesktopNextHand';
 import { AdviceHistory,AdviceMessage } from '../components/WorldAdvice';
 import type { DesktopUpgrade } from '../config/balance';
 import { BALANCE } from '../config/balance';
@@ -154,7 +155,25 @@ function DesktopScene(props: Props): React.ReactElement {
   const [shotOpen,setShotOpen]=useState(false);
   const [shotHint,setShotHint]=useState(false);
   useEffect(()=>{if(preview||!snapshot.shotHintSerial)return;setShotHint(true);shotToggle.current?.focus();const stop=runtime.platform.every(4000,()=>{setShotHint(false);stop();});return stop;},[snapshot.shotHintSerial,preview,runtime]);
-  const taskbar=useRef<HTMLElement>(null);
+  const taskbar=useRef<HTMLElement>(null),taskbarApps=useRef<HTMLDivElement>(null);
+  // Reveal only inside the taskbar's local scroller; never scroll the scaled desktop or the page.
+  const revealTaskbarApp=(node:HTMLElement)=>{
+    const host=taskbarApps.current;if(!host||!host.contains(node))return;
+    const a=host.getBoundingClientRect(),b=node.getBoundingClientRect(),scale=a.width/host.offsetWidth||1;
+    const left=(b.left-a.left)/scale-host.clientLeft,right=(b.right-a.left)/scale-host.clientLeft;
+    if(left<0)host.scrollLeft+=left;else if(right>host.clientWidth)host.scrollLeft+=right-host.clientWidth;
+  };
+  useLayoutEffect(()=>{
+    const host=taskbarApps.current;if(preview||!host)return;
+    const reveal=()=>{const focused=host.contains(host.ownerDocument.activeElement)?host.ownerDocument.activeElement as HTMLElement:null;const active=host.querySelector<HTMLElement>('button.active');if(focused||active)revealTaskbarApp((focused||active)!);};
+    const wheel=(event:WheelEvent)=>{
+      if(host.scrollWidth<=host.clientWidth||Math.abs(event.deltaX)>Math.abs(event.deltaY)||!event.deltaY)return;
+      const unit=event.deltaMode===WheelEvent.DOM_DELTA_LINE?host.clientHeight:event.deltaMode===WheelEvent.DOM_DELTA_PAGE?host.clientWidth:1,before=host.scrollLeft;
+      host.scrollLeft+=event.deltaY*unit;if(host.scrollLeft!==before){event.preventDefault();event.stopPropagation();}
+    };
+    const observer=new ResizeObserver(reveal);observer.observe(host);host.addEventListener('wheel',wheel,{passive:false});reveal();
+    return()=>{observer.disconnect();host.removeEventListener('wheel',wheel);};
+  },[preview,d.active,d.screen.width,apps.length,state.persistent.examplesEnabled]);
   useLayoutEffect(()=>{
     const root=taskbar.current;if(!root)return;
     const apps=root.querySelector<HTMLElement>('.taskbar-apps')!,right=root.querySelector<HTMLElement>('.taskbar-right')!;
@@ -230,7 +249,7 @@ function DesktopScene(props: Props): React.ReactElement {
       {JOB_IDS.filter(id=>id==='tessera'||d.apps.includes(id)).map(app=><button key={app} role="menuitemcheckbox" aria-checked={d.jobs[app].assigned} disabled={!d.jobs[app].assigned&&JOB_IDS.filter(id=>d.jobs[id].assigned).length>=jobCapacity(state)} onClick={()=>{runtime.actDesktop({type:'job-assign',app});if(!d.jobs[app].assigned)runtime.actDesktop({type:'open',app});setAssignments(false);jobSource.current?.focus();}}><AppIcon app={app} state={state}/><span>{appName(snapshot.state,app,i18n)}</span><small>{i18n.t(d.jobs[app].assigned?'jobs.remove':'jobs.assign')}</small></button>)}
     </section>}
     <footer ref={taskbar} className="desktop-taskbar" {...shellPartProps(state,'foundation-taskbar')}>{!legacy&&<button className="taskbar-product" aria-label={i18n.t('appearance.productMenu')} title={productLabel(i18n,state.persistent.productName)} aria-expanded={conditions} onClick={()=>setConditions(!conditions)}><ProductGlyph/><span>{productLabel(i18n,state.persistent.productName)}</span></button>}{hasUpgrade(state,'jobs')&&<button ref={jobSource} className="taskbar-job-source" aria-label={i18n.t('jobs.drag')} aria-expanded={assignments} aria-haspopup="menu" draggable title={i18n.t('jobs.drag')} onDragStart={e=>{setAssignments(false);e.dataTransfer.setData('text/refresh-job','cursor');}} onKeyDown={event=>{if(event.key==='ArrowDown'){event.preventDefault();setAssignments(true);}}} onClick={()=>setAssignments(!assignments)}><CursorGlyph/><span>{i18n.t('jobs.cursor')}<small>{i18n.t('jobs.capacity',{used:JOB_IDS.filter(id=>d.jobs[id].assigned).length,capacity:jobCapacity(state)})}</small></span></button>}
-      {hasDesktopSkill(state,'virtual')&&<nav className="taskbar-workspaces">{([0,1] as const).map(workspace=><button key={workspace} aria-label={i18n.t('desktop.workspace',{count:workspace+1})} aria-pressed={d.workspace===workspace} onClick={()=>runtime.actDesktop({type:'workspace',workspace})}>{i18n.integer(workspace+1)}</button>)}</nav>}<div className="taskbar-apps">{apps.filter(app=>legacy?!['note','settings'].includes(app)||d.windows[app].open:era===2?app!=='note'||d.windows[app].open:d.windows[app].open).map(app=><button key={app} aria-label={appName(snapshot.state,app,i18n)} title={appName(snapshot.state,app,i18n)} className={`${d.windows[app].open?'running':''} ${d.active===app&&!d.windows[app].minimized?'active':''}`} onClick={()=>runtime.actDesktop({type:'taskbar',app})}><AppIcon app={app} state={state} palette={props.capture?.palette} frame={frame}/><span className="taskbar-app-name">{appName(state,app,i18n,legacy)}</span></button>)}</div>
+      {hasDesktopSkill(state,'virtual')&&<nav className="taskbar-workspaces">{([0,1] as const).map(workspace=><button key={workspace} aria-label={i18n.t('desktop.workspace',{count:workspace+1})} aria-pressed={d.workspace===workspace} onClick={()=>runtime.actDesktop({type:'workspace',workspace})}>{i18n.integer(workspace+1)}</button>)}</nav>}{!preview&&!legacy&&<DesktopNextHand state={state} runtime={runtime} i18n={i18n} onOffer={()=>{setUpgrades(true);setConditions(false);}} onConditions={()=>{setConditions(true);setUpgrades(false);}}/>}<div ref={taskbarApps} className="taskbar-apps" style={!preview?{'--example-taskbar-glass-app-width':`${BALANCE.examples.desktopTaskbarGlassAppWidth}px`,'--example-taskbar-flat-app-min':`${BALANCE.examples.desktopTaskbarFlatAppMinWidth}px`} as React.CSSProperties:undefined} onFocusCapture={event=>{if(!preview){const target=(event.target as HTMLElement).closest<HTMLElement>('button');if(target)revealTaskbarApp(target);}}}>{apps.filter(app=>legacy?!['note','settings'].includes(app)||d.windows[app].open:era===2?app!=='note'||d.windows[app].open:d.windows[app].open).map(app=><button key={app} aria-label={appName(snapshot.state,app,i18n)} title={appName(snapshot.state,app,i18n)} className={`${d.windows[app].open?'running':''} ${d.active===app&&!d.windows[app].minimized?'active':''}`} onClick={()=>runtime.actDesktop({type:'taskbar',app})}><AppIcon app={app} state={state} palette={props.capture?.palette} frame={frame}/><span className="taskbar-app-name">{appName(state,app,i18n,legacy)}</span></button>)}</div>
       <div className="taskbar-right">{(legacy||era!==2)&&resourceControls}{!legacy&&era===2&&(!props.capture||props.capture.version>=9)&&releaseControl}
         {!legacy&&era===2&&<button className="taskbar-pixels taskbar-balance" title={i18n.t('desktop.pixels',{pixels:i18n.pixels(state.resources.pixels)})} aria-expanded={upgrades} onClick={()=>{setUpgrades(!upgrades);setConditions(false);}}><i className="pixel-resource"/><span><b data-taskbar-pixels={state.resources.pixels}>{i18n.pixels(state.resources.pixels)}</b><small>{i18n.t('desktop.rateCompact',{pixels:i18n.rate(props.capture?.display.rate??passivePixelsPerSecond(state))})}</small></span></button>}
         {hasAppPart(state,'clock','time')&&<button className="taskbar-clock" onClick={()=>runtime.common({type:'clock-click'})}><span>{i18n.time(wallTime)}</span><span>{i18n.date(wallTime)}</span></button>}

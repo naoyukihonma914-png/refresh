@@ -11,9 +11,11 @@ import { useWorkshopTarget, targetPhotoFilter, type TargetFileSort } from './Wor
 import { partVisual } from './partVisual';
 import { OptionalPart } from './OptionalParts';
 import { StreamingPart } from './StreamingPart';
+import { finishTrialFor } from '../../content/workshopTrials';
+import { FinishTrial } from './FinishTrial';
 
 /** The placed controls are pieces of the same destination app, not separate demonstrations. */
-export function DestinationPart({part,production,state,i18n,onInteract,disabled=false,dispatch}:{part:WorkshopPartDefinition;production:PartProduction;state:GameState;i18n:I18n;onInteract:(interaction:TestInteraction)=>void;disabled?:boolean;dispatch:WorkshopDispatch}){
+export function DestinationPart({part,production,state,i18n,onInteract,disabled=false,dispatch,reducedMotion=false,active=true}:{part:WorkshopPartDefinition;production:PartProduction;state:GameState;i18n:I18n;onInteract:(interaction:TestInteraction)=>void;disabled?:boolean;dispatch:WorkshopDispatch;reducedMotion?:boolean;active?:boolean}){
  const {files,mail,photo,foundation,actions}=useWorkshopTarget(),t=i18n.t,p=production,d=p.design,P=BALANCE.workshop.preview;
  const [collapsed,setCollapsed]=useState(false);
  const has=(element:string)=>p.elements.includes(element);
@@ -24,6 +26,7 @@ export function DestinationPart({part,production,state,i18n,onInteract,disabled=
  const testCrop=()=>{if(state.run.workshop.activePart==='photo-crop'&&state.run.workshop.parts['photo-crop']?.step===3)dispatch({type:'test',part:'photo-crop',interaction:'resize'});};
  const cropFrame=<div className="ws-destination-crop-frame" data-workshop-test-part="photo-crop" style={{width:`${photo.crop}%`,height:`${photo.crop}%`}}><button type="button" data-workshop-preview-resize aria-label={t('ws.preview.crop')} onPointerDown={e=>e.currentTarget.setPointerCapture(e.pointerId)} onPointerMove={e=>{if(e.buttons===1){actions.setCrop(photo.crop+e.movementX);testCrop();}}} onKeyDown={e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();actions.setCrop(photo.crop+(e.key==='ArrowRight'?P.cropKeyStep:-P.cropKeyStep));testCrop();}}}/></div>;
  const currentPhoto=<img className="ws-destination-photo" src={photo.current.src} alt={photo.current.label} style={{filter:photo.filter,objectFit:photo.crop<P.rangeMax?'cover':'contain',clipPath:photo.crop<P.rangeMax?`inset(${(P.rangeMax-photo.crop)/2}%)`:undefined}}/>;
+ if(active&&p.step===3&&!disabled&&part.id!=='common-frame'&&finishTrialFor(part.id))return <div className={`ws-destination-part ws-destination-${part.id}`} data-progress-style={d.progressStyle} data-has-thumb={has('thumb')} data-scroll-arrows={has('arrows')&&d.arrows} data-workshop-preview={part.kind} data-workshop-test-part={part.id} style={styles}><FinishTrial part={part} production={production} state={state} i18n={i18n} onInteract={onInteract} reducedMotion={reducedMotion}/></div>;
  let contents;
  switch(part.id){
   case 'common-frame':return null;

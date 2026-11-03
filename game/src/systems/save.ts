@@ -8,6 +8,8 @@ import { captureStore } from '../platform/captures';
 import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
 import { migrateLegacySave } from './legacySave';
 import { migrateStage8bSave } from './stage8bMigration';
+import { migrateTestplaySave } from './testplayMigration';
+import { migrateExampleSave } from './exampleMigration';
 import type { SaveStorage } from '../platform/storage';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
@@ -109,6 +111,8 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   if (version < SCHEMA_VERSION) {
     if(version<14)data=migrateLegacySave(data);
     if(versionOf(data)===14)data=migrateStage8bSave(data);
+    if(versionOf(data)===15)data=migrateTestplaySave(data);
+    if(versionOf(data)===16)data=migrateExampleSave(data);
     version = versionOf(data);
     if (version !== SCHEMA_VERSION) throw new Error('保存データの変換に失敗しました');
   }

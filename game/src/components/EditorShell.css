@@ -39,3 +39,8 @@
 .window-content > .workshop-root.is-embedded > .editor-shell {min-inline-size:760px;min-block-size:480px;}
 .window-content > .workshop-root.is-embedded > .editor-shell > .editor-shell-top {overflow-x:auto;white-space:nowrap;}
 .window-content > .workshop-root.is-embedded > .editor-shell > .editor-shell-top > * {min-inline-size:max-content;}
+
+.editor-shell-fixed-top {flex:none;min-inline-size:0;background:var(--editor-panel);color:var(--editor-ink);border-block-end:1px solid var(--editor-edge-dark);}
+.window-content>.workshop-root.is-embedded>.editor-shell>.editor-shell-fixed-top {overflow-x:auto;}
+.window-content>.workshop-root.is-embedded>.editor-shell>.editor-shell-fixed-top>.ws-menu {min-inline-size:760px;}
+.window-content>.workshop-root.is-embedded>.editor-shell>.editor-shell-fixed-top>.ws-app-title {min-inline-size:760px;}

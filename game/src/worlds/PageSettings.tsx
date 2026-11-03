@@ -1,4 +1,7 @@
+import {ExampleSettings} from '../components/ExampleSettings';
 import {GuideHistory} from '../components/GuideHistory';
+import {UiScaleControl} from '../components/UiScaleControl';
+import {PagePartControls} from '../components/PagePartControls';
 import {Records,SoundSettings} from '../components/LongPlaySettings';
 import { PAGE_FONTS,PAGE_MOTIONS,pageColors,contrast } from '../systems/pageDesign';
 import { paletteFor } from '../content/palette';
@@ -26,7 +29,10 @@ export function PageSettings({ state, runtime, i18n, onClose }: {
   return <section className="page-settings">
     <h1>{i18n.t('seed.settings')}</h1>
     <button className="text-button" onClick={onClose}>{i18n.t('settings.back')}</button>
+    <ExampleSettings state={state} runtime={runtime} i18n={i18n}/>
+    <UiScaleControl runtime={runtime} i18n={i18n}/>
     <section className="page-design-settings">
+    {state.run.seed.built.includes('layout')&&<PagePartControls state={state} runtime={runtime} i18n={i18n}/>}
     {state.run.seed.built.includes('color')&&<fieldset><legend>{i18n.t('page.colors')}</legend>{(['background','button','text'] as const).map(slot=><label key={slot}>{i18n.t(`page.color.${slot}`)}<select aria-label={i18n.t(`page.color.${slot}`)} value={slot==='background'?(usesNativeEditorBackground(state.persistent.editorCustomization)?'':state.persistent.editorCustomization.background):state.run.seed.page[slot]??''} onChange={e=>runtime.actPage({type:'color',slot,color:e.target.value||null})}><option value="">{i18n.t('page.standard')}</option>{paletteFor(state.persistent.specs.color).map(c=><option key={c} value={c} disabled={slot==='text'&&contrast(pageColors(state.run.seed.page,state.persistent.specs.color,state.persistent.editorCustomization,editorStage(state)).background,c)<4.5}>{c}</option>)}</select></label>)}</fieldset>}
     {state.run.seed.built.includes('font')&&<fieldset><legend>{i18n.t('page.fonts')}</legend>{(['headingFont','bodyFont'] as const).map(slot=><label key={slot}>{i18n.t(`page.${slot}`)}<select aria-label={i18n.t(`page.${slot}`)} value={state.run.seed.page[slot]} onChange={e=>runtime.actPage({type:'font',slot,font:e.target.value as typeof state.run.seed.page.bodyFont})}>{PAGE_FONTS.map(id=><option key={id} value={id}>{i18n.t(`page.font.${id}`)}</option>)}</select></label>)}</fieldset>}
     {state.run.seed.built.includes('font')&&<p><label>{i18n.t('seed8.heading')}<input aria-label={i18n.t('seed8.heading')} value={state.run.seed.page.heading} onChange={e=>runtime.actPage({type:'heading',heading:e.target.value})}/></label></p>}

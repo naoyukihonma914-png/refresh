@@ -26,7 +26,13 @@ export interface PartProduction {
   step: 0|1|2|3|4; rect: WorkshopRect; elements: string[]; design: ComponentDesign;
   completedAt: number|null; exportedAt: number|null; tested: boolean;
 }
+export interface WorkshopHelpTarget {set:UiSetId;part?:WorkshopPartId}
+export interface WorkshopCombo {count:number;lastCompletedAt:number|null}
 export interface WorkshopState {
+  /** Absent in historical workshop pictures; completion chains belong only to this run. */
+  combo?:WorkshopCombo;
+  /** UI hints are optional in historical workshop presentation documents. */
+  helpTarget?:WorkshopHelpTarget|null;
   /** The layout era this version entered with; later upgrades reset inherited panel placement. */
   editorStageAtEntry?:0|1|2;
   assistance?: {part:WorkshopPartId|null;elapsedMs:number};
@@ -59,6 +65,8 @@ export const createEditorCustomization = (stage:0|1|2=0): EditorCustomization =>
   panelWidths: { palette:BALANCE.workshop.customization.panelWidth,tools:BALANCE.workshop.customization.panelWidth,parts:BALANCE.workshop.customization.panelWidth },
 });
 export const createWorkshopState = (): WorkshopState => ({
+  combo:{count:0,lastCompletedAt:null},
+  helpTarget:null,
   editorStageAtEntry:0,
   assistance:{part:null,elapsedMs:0},
   entered:false,enteredAt:0,enterMs:0,purchasedSets:[],parts:{},activePart:null,
@@ -154,7 +162,16 @@ export function isPartProduction(x:unknown,id:WorkshopPartId):x is PartProductio
   if(x.step===4?(!amount(x.completedAt)||!x.tested):x.completedAt!==null||x.tested)return false;
   return x.exportedAt===null||x.step===4&&amount(x.exportedAt)&&x.exportedAt>=Number(x.completedAt);
 }
+export function isWorkshopHelpTarget(value:unknown):value is WorkshopHelpTarget {
+ return record(value)&&SET_IDS.includes(value.set as UiSetId)&&(value.part===undefined||WORKSHOP_PARTS.some(part=>part.id===value.part&&part.set===value.set));
+}
+export function isWorkshopCombo(x:unknown):x is WorkshopCombo {
+  return record(x)&&Number.isSafeInteger(x.count)&&Number(x.count)>=0
+    &&(x.count===0?x.lastCompletedAt===null:amount(x.lastCompletedAt));
+}
 export function isWorkshopState(x:unknown):x is WorkshopState {
+  if(record(x)&&x.combo!==undefined&&!isWorkshopCombo(x.combo))return false;
+  if(record(x)&&x.helpTarget!==undefined&&x.helpTarget!==null&&!isWorkshopHelpTarget(x.helpTarget))return false;
   if(!record(x)||(x.editorStageAtEntry!==undefined&&![0,1,2].includes(x.editorStageAtEntry as number))||typeof x.entered!=='boolean'||!amount(x.enteredAt)||!between(x.enterMs,0,BALANCE.workshop.enterMs)
     ||!Array.isArray(x.purchasedSets)||!unique(x.purchasedSets)||!x.purchasedSets.every(s=>SET_IDS.includes(s as UiSetId))
     ||!record(x.parts)||!['workbench','settings','exports'].includes(x.view as string)

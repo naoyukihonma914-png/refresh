@@ -7,7 +7,9 @@ import { activeScreenshots, desktopConditions } from './desktop';
 import { defaultNote, desktopFiles, screenshotBytes, type DesktopFile } from './desktopFiles';
 import { decodeCapture, encodeCapture, type Screenshot, type WindowState } from './desktopState';
 import { passivePixelsPerSecond, producerLedger } from './economy';
-import { isPageDesign, type PageDesign } from './pageDesign';
+import type { PageDesign } from './pageDesign';
+import { isCapturePageDesignV12 } from './capturePageDesign';
+import { isLegacyPageDesign, type LegacyPageDesign } from './legacyPageDesign';
 import type { GameState } from './state';
 import { isWorkshopState, isEditorCustomization, isSetDocument, type WorkshopState, type EditorCustomization, type EditorSkill, type SetDocument } from './workshopState';
 import { evaluateCapture, isCaptureEvaluation, type CaptureEvaluation } from './captureEvaluation';
@@ -29,7 +31,7 @@ export interface FrozenFeedback {id:number;kind:string;target:string;at:number;c
 export interface FrozenNotice {id:string;title:string;text:string;sender?:string}
 export interface FrozenProducer {id:string;kind:string;app?:string;name:string;sourceIds:string[];baseRate:number;count:number;perSecond:number;multipliers:Record<string,number>}
 export interface CaptureScene {
-  version:1|2|3|4|5|6|7|8|9|10|11;
+  version:1|2|3|4|5|6|7|8|9|10|11|12;
   /** Marks a normalized historical presentation, without the discarded editable artwork. */
   archived?:true;
   display:{resources:GameState['resources'];specs:Record<SpecKey,number>;productName:string|null;runVersion:'v0.1'|'v1'|'v2';notation:'compact'|'scientific';savedAt:number|null;rate:number;parts:number;reward:number;cooldown:number;checks:boolean[];shotCount:number;shotBytes:number;fileCount:number;wallTime:number;managerShotRate:number;managerTokenRate:number};
@@ -38,14 +40,18 @@ export interface CaptureScene {
   appearance:{editor:0|1|2;desktop:0|1|2|3|4|5};screen:{width:number;height:number};
   note:string;files:FrozenFile[];palette:string[];
   workshop?:WorkshopState;editorCustomization?:EditorCustomization;editorSkills?:EditorSkill[];
-  page?:PageDesign;appProjects?:AppProjects;editingApp?:string|null;
+  page?:LegacyPageDesign|PageDesign;appProjects?:AppProjects;editingApp?:string|null;
   common?:{progress:unknown;play:unknown;settingsPage:string};
   evaluation?:CaptureEvaluation;selectedSetDocument?:SetDocument;
   notices?:FrozenNotice[];
   production?:FrozenProducer[];
 }
-export interface CaptureSceneV10 extends CaptureScene {version:10;workshop:WorkshopState;editorCustomization:EditorCustomization;editorSkills:EditorSkill[];page:PageDesign}
-export interface CaptureSceneV11 extends CaptureScene {version:11;workshop:WorkshopState;editorCustomization:EditorCustomization;editorSkills:EditorSkill[];page:PageDesign;evaluation:CaptureEvaluation}
+export interface CaptureSceneV10 extends CaptureScene {version:10;workshop:WorkshopState;editorCustomization:EditorCustomization;editorSkills:EditorSkill[];page:LegacyPageDesign}
+export interface CaptureSceneV11 extends CaptureScene {version:11;workshop:WorkshopState;editorCustomization:EditorCustomization;editorSkills:EditorSkill[];page:LegacyPageDesign;evaluation:CaptureEvaluation}
+export interface CaptureSceneV12 extends CaptureScene {version:12;workshop:WorkshopState;editorCustomization:EditorCustomization;editorSkills:EditorSkill[];page:PageDesign;evaluation:CaptureEvaluation}
+
+/** Published 11 and current 12 share native rendering, while their page schemas remain distinct. */
+export const hasNativeCapturePresentation=(scene:Pick<CaptureScene,'version'>)=>scene.version===11||scene.version===12;
 
 const record=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const number=(v:unknown):v is number=>typeof v==='number'&&Number.isFinite(v)&&v>=0;
@@ -84,7 +90,7 @@ function preferencesValid(v:unknown):boolean {
   return record(v)&&strings(v.skills)&&strings(v.disabled)&&['light','dark'].includes(String(v.mode))&&color(v.accent)&&number(v.radius)&&v.radius<=8&&[32,48,64].includes(v.iconSize as number)&&typeof v.slideshow==='boolean'&&(v.wallpaper===null||photo(v.wallpaper))&&integer(v.lastShotId)&&(v.radiusCustom===undefined||typeof v.radiusCustom==='boolean');
 }
 function commonValid(v:Record<string,unknown>,legacy:boolean):boolean {
-  if(!displayValid(v.display)||!desktopValid(v.desktop,v.version===11)||!text(v.note)||!filesValid(v.files,legacy)||!strings(v.palette)||v.palette.length>256||!v.palette.every(color))return false;
+  if(!displayValid(v.display)||!desktopValid(v.desktop,v.version===11||v.version===12)||!text(v.note)||!filesValid(v.files,legacy)||!strings(v.palette)||v.palette.length>256||!v.palette.every(color))return false;
   if(v.screen!==undefined&&(!record(v.screen)||![[800,600],[1024,768],[1366,768],[1920,1080]].some(([w,h])=>record(v.screen)&&v.screen.width===w&&v.screen.height===h)))return false;
   if(v.appearance!==undefined&&(!record(v.appearance)||![0,1,2].includes(v.appearance.editor as number)||![0,1,2,3,4,5].includes(v.appearance.desktop as number)))return false;
   if(Number(v.version)!==1&&(!record(v.view)||!preferencesValid(v.view.preferences)||!photo(v.view.photo)||!record(v.view.desktop)))return false;
@@ -108,9 +114,9 @@ function legacyValid(v:Record<string,unknown>):boolean {
 }
 export function isCaptureScene(v:unknown):v is CaptureScene {
   if(!record(v))return false;
-  if(v.version!==10&&v.version!==11)return legacyValid(v);
+  if(v.version!==10&&v.version!==11&&v.version!==12)return legacyValid(v);
   return v.archived===undefined&&commonValid(v,false)&&record(v.display)&&['wallTime','managerShotRate','managerTokenRate'].every(k=>number((v.display as Record<string,unknown>)[k]))&&record(v.view)&&preferencesValid(v.view.preferences)&&photo(v.view.photo)&&v.view.photo.source!=='sketch'&&record(v.view.preferences)&&typeof v.view.preferences.radiusCustom==='boolean'&&(v.view.preferences.wallpaper===null||photo(v.view.preferences.wallpaper)&&v.view.preferences.wallpaper.source!=='sketch')&&record(v.appearance)&&record(v.screen)
-    &&isWorkshopState(v.workshop)&&isEditorCustomization(v.editorCustomization)&&strings(v.editorSkills)&&v.editorSkills.every(id=>BALANCE.workshop.skills.some(s=>s.id===id))&&isPageDesign(v.page)
+    &&isWorkshopState(v.workshop)&&isEditorCustomization(v.editorCustomization)&&strings(v.editorSkills)&&v.editorSkills.every(id=>BALANCE.workshop.skills.some(s=>s.id===id))&&(v.version===12?isCapturePageDesignV12(v.page):isLegacyPageDesign(v.page))
     &&(v.version===10||isCaptureEvaluation(v.evaluation)&&projectsValid(v.appProjects)&&(v.selectedSetDocument===undefined||isSetDocument(v.selectedSetDocument))
       &&(v.notices===undefined||Array.isArray(v.notices)&&v.notices.length<=BALANCE.w3.maxPending&&v.notices.every(notice=>record(notice)&&text(notice.id)&&text(notice.title)&&text(notice.text)&&(notice.sender===undefined||text(notice.sender))))
       &&(v.production===undefined||Array.isArray(v.production)&&v.production.length<=BALANCE.capture.maxElements&&v.production.every(row=>record(row)&&text(row.id)&&text(row.kind)&&text(row.name)&&(row.app===undefined||text(row.app))&&strings(row.sourceIds)&&row.sourceIds.length<=BALANCE.capture.maxElements&&amountNumberFields(row,['baseRate','count','perSecond'])&&record(row.multipliers)&&Object.values(row.multipliers).every(number))));
@@ -132,7 +138,7 @@ export function normalizeCapture(value:unknown):CaptureScene {
     appearance:(v.appearance as CaptureScene['appearance']|undefined)??{editor:0,desktop:0},screen:(v.screen as CaptureScene['screen']|undefined)??{width:1920,height:1080},
     note:String(v.note),files,palette:v.palette as string[],
     ...(value.version>=10?{workshop:value.workshop,editorCustomization:value.editorCustomization,editorSkills:value.editorSkills,page:value.page,appProjects:value.appProjects,editingApp:value.editingApp,common:value.common}:{}),
-    ...(value.version===11?{evaluation:value.evaluation,selectedSetDocument:value.selectedSetDocument,notices:value.notices,production:value.production}:{}),
+    ...(hasNativeCapturePresentation(value)?{evaluation:value.evaluation,selectedSetDocument:value.selectedSetDocument,notices:value.notices,production:value.production}:{}),
   });
 }
 const decoded=new WeakMap<Screenshot,{data:string;id:number;scene:CaptureScene}>();
@@ -146,7 +152,7 @@ export function encodeScene(scene:CaptureScene):string {
   if(!isCaptureScene(scene))throw new Error('Invalid screenshot scene');
   return encodeCapture(scene);
 }
-export function projectCapture(state:GameState,language:string):CaptureSceneV11 {
+export function projectCapture(state:GameState,language:string):CaptureSceneV12 {
   const d=state.run.desktop,p=state.persistent;
   const i18n=createI18n(language,{numberNotation:p.numberNotation});
   const allFiles=d.windows.files.open&&!d.windows.files.minimized?desktopFiles(state,createI18n(language)):[];
@@ -160,7 +166,7 @@ export function projectCapture(state:GameState,language:string):CaptureSceneV11 
   const production=d.windows.manager.open&&!d.windows.manager.minimized?producerLedger(state).map(entry=>({...entry,name:producerName(entry,state,i18n)})):undefined;
   const {assistance:_assistance,...workshopPresentation}=state.run.workshop;
   const {upgrades,builtAt,jobs,workspace,workspaces,fileSort,fileDescending,fileSearch,largeIcons,mailFolder,photo:photoEdit,compare,trash,reservation,terminal,stalled,settingsPage,managerTab,managerProcess,calendarMonth}=d;
-  return clone({version:11,evaluation,notices,...(production?{production}:{}),...(selectedSetDocument?{selectedSetDocument}:{}),display:{resources:state.resources,specs:p.specs,productName:p.productName,runVersion:state.run.version,notation:p.numberNotation,savedAt:state.lastSavedAt,rate:passivePixelsPerSecond(state),parts:evaluation.visibleCount,reward:evaluation.reward,cooldown:BALANCE.spec.graphics[p.specs.graphics]!.shotCooldownSeconds*1000,checks:desktopConditions(state),shotCount:activeScreenshots(state).length,shotBytes:activeScreenshots(state).reduce((sum,s)=>sum+screenshotBytes(s),0),fileCount:allFiles.length,wallTime:state.lastTickAt,managerShotRate:d.shotHistory.filter(h=>h.at>=state.lastTickAt-BALANCE.w3.historyMs).reduce((n,h)=>n+h.pixels,0)/(BALANCE.w3.historyMs/1000),managerTokenRate:d.feedback.filter(f=>f.completedAt!==null&&f.completedAt>=state.lastTickAt-BALANCE.w3.historyMs).reduce((n,f)=>n+(f.reward??BALANCE.w3.feedbackTokens),0)/(BALANCE.w3.historyMs/60000)},
+  return clone({version:12,evaluation,notices,...(production?{production}:{}),...(selectedSetDocument?{selectedSetDocument}:{}),display:{resources:state.resources,specs:p.specs,productName:p.productName,runVersion:state.run.version,notation:p.numberNotation,savedAt:state.lastSavedAt,rate:passivePixelsPerSecond(state),parts:evaluation.visibleCount,reward:evaluation.reward,cooldown:BALANCE.spec.graphics[p.specs.graphics]!.shotCooldownSeconds*1000,checks:desktopConditions(state),shotCount:activeScreenshots(state).length,shotBytes:activeScreenshots(state).reduce((sum,s)=>sum+screenshotBytes(s),0),fileCount:allFiles.length,wallTime:state.lastTickAt,managerShotRate:d.shotHistory.filter(h=>h.at>=state.lastTickAt-BALANCE.w3.historyMs).reduce((n,h)=>n+h.pixels,0)/(BALANCE.w3.historyMs/1000),managerTokenRate:d.feedback.filter(f=>f.completedAt!==null&&f.completedAt>=state.lastTickAt-BALANCE.w3.historyMs).reduce((n,f)=>n+(f.reward??BALANCE.w3.feedbackTokens),0)/(BALANCE.w3.historyMs/60000)},
     desktop:{apps:d.apps,windows:d.windows,active:d.active,icons:d.icons,cooldownMs:d.cooldownMs,fileFolder:d.fileFolder,fileSelection:d.fileSelection,mailSelection:d.mailSelection,notice:d.notice,success:d.success,feedback},
     view:{preferences:{...p.desktopPrefs,lastShotId:0},photo:photoEdit,desktop:{upgrades,builtAt,jobs,workspace,workspaces,fileSort,fileDescending,fileSearch,largeIcons,mailFolder,photo:photoEdit,compare,trash:trash.slice(0,30),reservation,terminal,stalled,settingsPage,managerTab,managerProcess,calendarMonth}},
     appearance:{editor:editorStage(state),desktop:desktopStage(state)},screen:{...d.screen},note:p.productionNote??defaultNote(createI18n(language)),files,palette:[],

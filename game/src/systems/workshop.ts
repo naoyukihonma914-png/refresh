@@ -5,14 +5,16 @@ import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
 import { productionCreditMultiplier } from './productionModel';
 import type { GameState } from './state';
-import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId } from './workshopState';
+import { completionCombo, examplePlacement, workshopComboMultiplier } from './workshopExamples';
+import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId, type WorkshopHelpTarget, isWorkshopHelpTarget } from './workshopState';
 
 export type WorkshopAction =
+  | {type:'help';target:WorkshopHelpTarget|null}
   | {type:'buySet';set:UiSetId} | {type:'selectPart';part:WorkshopPartId}
-  | {type:'place';part?:WorkshopPartId;rect:WorkshopRect}
+  | {type:'place';part?:WorkshopPartId;rect:WorkshopRect;example?:boolean}
   | {type:'addElement';part?:WorkshopPartId;element:string;index?:number;side?:'start'|'end'}
   | {type:'adjust';part?:WorkshopPartId;patch:Partial<ComponentDesign>}
-  | {type:'confirmAdjustment';part?:WorkshopPartId}
+  | {type:'confirmAdjustment'|'useExample';part?:WorkshopPartId}
   | {type:'test';part?:WorkshopPartId;interaction:TestInteraction}
   | {type:'export';part?:WorkshopPartId}
   | {type:'customize';patch:Partial<EditorCustomization>}
@@ -66,6 +68,10 @@ function showGuide(s:GameState,id:WorkshopGuideId):GameState {
   if(g.seen.includes(id))return s;
   return {...s,run:{...s.run,workshop:{...s.run.workshop,guide:{seen:[...g.seen,id],current:id,collapsed:false}}}};
 }
+function showFirstSetHelp(s:GameState,set:UiSetId):GameState {
+  if(s.persistent.testplay.helpSeen.includes(set))return s;
+  return {...s,persistent:{...s.persistent,testplay:{...s.persistent.testplay,helpSeen:[...s.persistent.testplay.helpSeen,set]}},run:{...s.run,workshop:{...s.run.workshop,helpTarget:{set}}}};
+}
 function grantExtraMaterials(s:GameState):GameState {
   const w=s.run.workshop;
   if(!w.entered||!s.persistent.editorSkills.includes('extraParts'))return s;
@@ -73,7 +79,7 @@ function grantExtraMaterials(s:GameState):GameState {
   if(w.purchasedSets.includes('extras')&&definitions.every(d=>w.parts[d.id]))return s;
   const parts={...w.parts};
   for(const d of definitions)if(!parts[d.id])parts[d.id]={step:0,rect:{...d.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
-  return {...s,run:{...s.run,workshop:{...w,purchasedSets:w.purchasedSets.includes('extras')?w.purchasedSets:[...w.purchasedSets,'extras'],parts,activePart:w.activePart??definitions[0]!.id}}};
+  return showFirstSetHelp({...s,run:{...s.run,workshop:{...w,purchasedSets:w.purchasedSets.includes('extras')?w.purchasedSets:[...w.purchasedSets,'extras'],parts,activePart:w.activePart??definitions[0]!.id}}},'extras');
 }
 export function enterWorkshop(s:GameState):GameState {
   if(s.run.workshop.entered)return grantExtraMaterials(s);
@@ -103,9 +109,9 @@ function designAllowed(s:GameState,d:ComponentDesign):boolean {
     &&Object.values(d.controlColors).every(c=>paletteAllows(s,c))
     &&(editorStage(s)>=2||d.motion==='plain');
 }
-function payStep(s:GameState,id:WorkshopPartId,index:0|1|2|3,finish=false):GameState {
+function payStep(s:GameState,id:WorkshopPartId,index:0|1|2|3,now:number,finish=false):GameState {
   const category=getWorkshopPart(id).category,efficiency=s.persistent.editorSkills.includes('efficiency')?BALANCE.workshop.efficiencyMultiplier:1;
-  return creditPixels(s,(BALANCE.workshop.categoryStepRewards[category][index]*efficiency+(finish?BALANCE.workshop.finishRewards[category]:0))*productionCreditMultiplier(s));
+  return creditPixels(s,(BALANCE.workshop.categoryStepRewards[category][index]*efficiency*workshopComboMultiplier(s,now)+(finish?BALANCE.workshop.finishRewards[category]:0))*productionCreditMultiplier(s));
 }
 function buySkill(s:GameState,id:EditorSkill):GameState {
   const skill=BALANCE.workshop.skills.find(p=>p.id===id);
@@ -136,6 +142,10 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
   state=grantExtraMaterials(state);
   let s=state;
   const w=s.run.workshop;
+  if(action.type==='help'){
+    if(action.target!==null&&!isWorkshopHelpTarget(action.target))return s;
+    return {...s,run:{...s.run,workshop:{...w,helpTarget:action.target?{...action.target}:null}}};
+  }
   if(action.type==='guide'){
     if(action.id==='close')return {...s,run:{...s.run,workshop:{...w,guide:{...w.guide,current:null,collapsed:true}}}};
     if(!w.guide.seen.includes(action.id))return s;
@@ -148,6 +158,7 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     for(const d of partsForSet(action.set))parts[d.id]={step:0,rect:{...d.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
     s={...s,resources:{...s.resources,pixels:s.resources.pixels-BALANCE.workshop.setCosts[action.set]},run:{...s.run,workshop:{...w,purchasedSets:[...w.purchasedSets,action.set],parts,activePart:partsForSet(action.set)[0]!.id,view:'workbench'}}};
     s=showGuide(s,'place');
+    s=showFirstSetHelp(s,action.set);
   }else if(action.type==='selectPart'){
     if(!w.parts[action.part])return s;
     s={...s,run:{...s.run,workshop:{...w,activePart:action.part,view:'workbench'}}};
@@ -174,10 +185,11 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     const id=action.part??w.activePart;if(!id||!w.parts[id])return s;
     const p=w.parts[id]!,descriptor=getWorkshopPart(id);
     if(action.type==='place'){
-      const rect=normalizeWorkshopRect(s,id,action.rect);
+      const placement=action.example===true?examplePlacement(s,id,action.rect).rect:action.rect;
+      const rect=normalizeWorkshopRect(s,id,placement);
       if(!rect||!partRectValid(s,id,rect))return s;
       s=writePart(s,id,{...p,rect,step:p.step===0?1:p.step});
-      if(p.step===0)s=showGuide(payStep(s,id,0),'elements');
+      if(p.step===0)s=showGuide(payStep(s,id,0,now),'elements');
     }else if(action.type==='addElement'){
       if(p.step===0||!descriptor.elements.includes(action.element)||action.side!==undefined&&!['start','end'].includes(action.side)||action.index!==undefined&&(!Number.isSafeInteger(action.index)||action.index<0||action.index>descriptor.elements.length))return s;
       const elements=p.elements.filter(e=>e!==action.element),index=action.index??elements.length;
@@ -185,18 +197,24 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
       const design=action.side&&['minimize','maximize','close'].includes(action.element)?{...p.design,controlSides:{...p.design.controlSides,[action.element]:action.side}}:p.design;
       const ready=descriptor.elements.every(e=>elements.includes(e)),nextStep=p.step===1&&ready?2:p.step;
       s=writePart(s,id,{...p,elements,design,step:nextStep});
-      if(p.step===1&&ready)s=showGuide(payStep(s,id,1),'adjust');
+      if(p.step===1&&ready)s=showGuide(payStep(s,id,1,now),'adjust');
     }else if(action.type==='adjust'){
       if(p.step<2)return s;
       const design=adjustComponentDesign(p.design,action.patch,paletteFor(s.persistent.specs.color));
       if(!design||!designAllowed(s,design)||!partRectValid(s,id,p.rect,design))return s;
       s=writePart(s,id,{...p,design:structuredClone(design)});
+    }else if(action.type==='useExample'){
+      if(!s.persistent.examplesEnabled||p.step!==2)return s;
+      const design=defaultComponentDesign(s);
+      if(!designAllowed(s,design)||!partRectValid(s,id,p.rect,design))return s;
+      s=showGuide(payStep(writePart(s,id,{...p,design,step:3}),id,2,now),'test');
     }else if(action.type==='confirmAdjustment'){
       if(p.step!==2)return s;
-      s=showGuide(payStep(writePart(s,id,{...p,step:3}),id,2),'test');
+      s=showGuide(payStep(writePart(s,id,{...p,step:3}),id,2,now),'test');
     }else if(action.type==='test'){
       if(p.step!==3||action.interaction!==descriptor.testInteraction&&!descriptor.testAlternatives.includes(action.interaction))return s;
-      s=payStep(writePart(s,id,{...p,step:4,completedAt:now,tested:true}),id,3,true);
+      s=payStep(writePart(s,id,{...p,step:4,completedAt:now,tested:true}),id,3,now,true);
+      s={...s,run:{...s.run,workshop:{...s.run.workshop,combo:completionCombo(s,now)}}};
       if(setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now);
       s=showGuide(s,'complete');
     }

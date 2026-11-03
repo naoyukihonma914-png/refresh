@@ -7,6 +7,7 @@ import { LegacyCapturePreview, WorkshopSnapshot } from '../worlds/LegacyCaptureP
 import { createI18n } from '../content/i18n';
 import { isProductRecord, normalizeArchivedProduct } from './releaseState';
 import { BALANCE } from '../config/balance';
+import { createLegacyPageDesign } from './legacyPageDesign';
 import { captureStore, CAPTURE_PREFIX } from '../platform/captures';
 import type { SaveStorage } from '../platform/storage';
 import { createFixture } from './fixtures';
@@ -15,7 +16,7 @@ import { decodeCapture,encodeCapture } from './desktopState';
 import { isCaptureScene,projectCapture,readCapture } from './captureScene';
 import { registerCaptureGeometry } from './captureEvaluation';
 import { clearGame,decodeSave,encodeSave,loadGame,SAVE_KEYS,saveGame } from './save';
-import { isGameState } from './state';
+import { isGameState,SCHEMA_VERSION } from './state';
 import { actWorkshop } from './workshop';
 const now=1800000000000;
 function disk(limit=Infinity){
@@ -31,7 +32,7 @@ describe('新しい撮影は採用した部品と表示された位置を読み�
   const render=()=>renderToStaticMarkup(createElement(LegacyCapturePreview,{shot,catalog:[shot],i18n})),before=render();
   expect(before).toContain('data-color-steps="6"');expect(before).toContain('data-photo-resolution="2"');expect(before).toContain('type="discrete" tableValues="0 .2 .4 .6 .8 1"');
   s.persistent.specs.color=3;s.persistent.specs.resolution=3;expect(render()).toBe(before);
-  const older={...scene,version:10 as const};delete (older as {evaluation?:unknown}).evaluation;
+  const older={...scene,version:10 as const,page:createLegacyPageDesign()};delete (older as {evaluation?:unknown}).evaluation;
   const legacyShot={...shot,data:encodeCapture(older)},legacy=renderToStaticMarkup(createElement(LegacyCapturePreview,{shot:legacyShot,catalog:[legacyShot],i18n}));
   expect(legacy).not.toContain('data-color-steps');expect(legacy).not.toContain('data-photo-resolution');
  });
@@ -80,7 +81,7 @@ describe('新しい撮影は採用した部品と表示された位置を読み�
 describe('場面の保存形式と独立した記録',()=>{
  it('表示に必要な場面だけを持ち、製品・報酬台帳・過去の会話・全生成履歴をコピーしない',()=>{
   const s=shotState(),scene=readCapture(s.persistent.screenshots[0]!);
-  expect(scene.version).toBe(11);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
+  expect(scene.version).toBe(12);expect(scene).not.toHaveProperty('schemaVersion');expect(scene).not.toHaveProperty('persistent');
   expect(scene).not.toHaveProperty('products');expect(scene).not.toHaveProperty('guideArchive');expect(scene).not.toHaveProperty('editor');expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('wallpaper');
   const {assistance:_budget,...workshopPresentation}=s.run.workshop;
   expect(scene.workshop).toEqual(workshopPresentation);expect(JSON.stringify(scene)).not.toContain('frames');
@@ -103,7 +104,7 @@ describe('場面の保存形式と独立した記録',()=>{
  it('実際の第6版の2枚入りセーブを移行し、資源・製品・窓・撮影時の本文とパレットを保つ',()=>{
   const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString();
   const old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(15);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products.map(p=>[p.id,p.revenue,p.generatedPixels])).toEqual(old.persistent.products.map((p:{id:number;revenue:number;generatedPixels:number})=>[p.id,p.revenue,p.generatedPixels]));expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
+  expect(s.schemaVersion).toBe(SCHEMA_VERSION);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products.map(p=>[p.id,p.revenue,p.generatedPixels])).toEqual(old.persistent.products.map((p:{id:number;revenue:number;generatedPixels:number})=>[p.id,p.revenue,p.generatedPixels]));expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
   expect(s.persistent.screenshots).toHaveLength(2);
   const oldFrame=decodeCapture(old.persistent.screenshots[0].data) as typeof s;
   const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('editor');

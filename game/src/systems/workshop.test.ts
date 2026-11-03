@@ -11,6 +11,7 @@ import { decodeSave, encodeSave } from './save';
 import { createSeedVersion } from './seed';
 import { beginPrototypeRelease } from './release';
 import { paletteFor } from '../content/palette';
+import { workshopComboMultiplier } from './workshopExamples';
 import { creditPixels, cursorPixelsPerSecond, manualClickValue, passivePixelsPerSecond, seedPartsPixelsPerSecond, workshopPartsPixelsPerSecond } from './economy';
 
 const now=1_800_000_000_000;
@@ -258,11 +259,11 @@ describe('第3版：工房の制作と経済',()=>{
     expect(definition.testInteraction).toBe('scroll');expect(definition.testAlternatives).toEqual(['select']);
     s=actWorkshop(s,{type:'place',part:id,rect:{x:8,y:8,width:624,height:400}},now);
     for(const element of definition.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
-    s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);const before=s.resources.pixels;
+    s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);const before=s.resources.pixels,combo=workshopComboMultiplier(s,now);
     expect(actWorkshop(s,{type:'test',part:id,interaction:'press'},now)).toBe(s);
     s=actWorkshop(s,{type:'test',part:id,interaction:'select'},now);
     expect(s.run.workshop.parts[id]).toMatchObject({step:4,tested:true});
-    expect(s.resources.pixels-before).toBe(BALANCE.workshop.categoryStepRewards.large[3]+BALANCE.workshop.finishRewards.large);
+    expect(s.resources.pixels-before).toBe(BALANCE.workshop.categoryStepRewards.large[3]*combo+BALANCE.workshop.finishRewards.large);
     expect(actWorkshop(s,{type:'test',part:id,interaction:'select'},now)).toBe(s);
     expect(actWorkshop(s,{type:'test',part:id,interaction:'scroll'},now)).toBe(s);expect(isGameState(s)).toBe(true);
     expect(getWorkshopPart('common-button').testAlternatives).toEqual([]);

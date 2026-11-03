@@ -19,9 +19,12 @@ import { createFixture } from './fixtures';
 import { clearGame, decodeSave, encodeSave, loadGame, saveGame } from './save';
 import { canSave, createInitialState, type GameState } from './state';
 import { advanceActiveTime, advanceOfflineTime, isInactiveGap, type TimeResult } from './time';
-import { applySeedSkills, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
+import { applySeedSkills, buildKnownSeed, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
 import type { GuideId } from './state';
 import { actWorkshop, enterWorkshop, canAssembleDesktop, type WorkshopAction } from './workshop';
+import type { WorkshopPartId } from '../content/workshopCatalog';
+import { examplePlacement, setExamplesEnabled } from './workshopExamples';
+import { completionFeedback, workshopFeedbackRun, workshopVisible, type WorkshopCompletionFeedbackEvent } from './workshopFeedback';
 import { enterDesktop } from './desktop';
 import { archiveGuide, beginProductRelease, buySpec, canRelease, shippingComplete, showShipping, startNextVersion } from './release';
 
@@ -30,7 +33,10 @@ export interface RuntimeSnapshot {
   frozenRate?: number;
   tesseraIntent?:{serial:number;kind:'color'|'part'};
   shotHintSerial?: number;
+  workshopSnap?:{part:WorkshopPartId;at:number};
+  workshopCompletion?:WorkshopCompletionFeedbackEvent;
   language: string;
+  uiScale?: number;
   status: 'starting' | 'ready' | 'blocked' | 'corrupt';
   notice: MessageKey | null;
   offline: Omit<TimeResult, 'state'> | null;
@@ -56,6 +62,7 @@ export class GameRuntime {
   private disposed = false;
   private momentum = freshMomentum();
   private pressSerial = 0;
+  private workshopCompletionSerial = 0;
   readonly fixture: boolean;
   readonly platform: Platform;
 
@@ -66,7 +73,7 @@ export class GameRuntime {
     this.platform = fixture ? platform.createPreview() : platform;
     const language = chooseLanguage(this.platform.settings.read().language, platform.preferredLanguages);
     this.snapshot = {
-      state: fixture ?? createInitialState(now), language,
+      state: fixture ?? createInitialState(now), language, uiScale: this.platform.settings.read().uiScale ?? BALANCE.accessibility.defaultUiScale,
       status: 'starting', notice: null, offline: null, press: null, introVisible: false, releaseConfirmation: false,
     };
     this.platform.setDocumentLanguage(language, createI18n(language).direction);
@@ -82,7 +89,7 @@ export class GameRuntime {
     const sound=state.persistent.progress.sound;if(!sound.enabled||this.suspended||this.platform.visibility.isHidden())return;
     try{this.platform.audio.play({kind,world:state.run.world==='release'?'kumiki':state.run.world,volume:sound.volume});}catch{}
   }
-  private publish(update: Partial<RuntimeSnapshot>,bookkeeping=true) {
+  private publish(update: Partial<RuntimeSnapshot>,bookkeeping=true,completedPart?:WorkshopPartId) {
     if(update.state&&bookkeeping){
       const previous=this.snapshot.state;let state=reconcileProgress(observeProgress(previous,update.state),this.platform.clock.wallNow());
       const additions=(Object.keys(state.persistent.progress.records) as AchievementId[]).filter(id=>previous.persistent.progress.records[id]===undefined);
@@ -96,6 +103,11 @@ export class GameRuntime {
       update.state=state;
     }
     if(update.state?.run.play.achievement&&this.platform.clock.wallNow()>=update.state.run.play.achievement.until)update.state={...update.state,run:{...update.state.run,play:{...update.state.run.play,achievement:null}}};
+    if(update.state&&workshopFeedbackRun(update.state)!==workshopFeedbackRun(this.snapshot.state)){update.workshopSnap=undefined;update.workshopCompletion=undefined;}
+    if(completedPart&&update.state&&workshopVisible(update.state)){
+      const feedback=completionFeedback(this.snapshot.state,update.state,completedPart,this.workshopCompletionSerial+1,this.platform.clock.monotonicNow());
+      if(feedback){this.workshopCompletionSerial=feedback.serial;update.workshopCompletion=feedback;}
+    }
     const before=this.snapshot.state.run.world==='desktop'?this.snapshot.state.run.desktop.screen:VIEWPORT;
     this.snapshot = { ...this.snapshot, ...update };
     const after=this.snapshot.state.run.world==='desktop'?this.snapshot.state.run.desktop.screen:VIEWPORT;
@@ -239,6 +251,20 @@ export class GameRuntime {
 
   reload = () => { this.platform.reload(); };
 
+  changeUiScale = (uiScale: number) => {
+    if (!this.canOperate() || !(BALANCE.accessibility.uiScales as readonly number[]).includes(uiScale)) return;
+    const stored=this.platform.settings.write({...this.platform.settings.read(),uiScale});
+    this.publish({uiScale,notice:stored?this.snapshot.notice:'settings.failed'},false);
+  };
+
+  setExamplesEnabled = (enabled:boolean) => {
+    if(!this.canOperate()||this.snapshot.introVisible||this.suspended||this.platform.visibility.isHidden())return;
+    this.advanceForeground();
+    const state=setExamplesEnabled(this.snapshot.state,enabled);
+    if(state===this.snapshot.state)return;
+    this.publish({state,workshopSnap:undefined});this.persist();
+  };
+
   startGame = () => {
     if (!this.canOperate() || !this.snapshot.introVisible) return;
     this.lastActiveAt = this.platform.clock.monotonicNow();
@@ -270,16 +296,34 @@ export class GameRuntime {
     this.sound('build',state);
   };
 
+  buildKnownSeed = () => {
+    if (!this.canOperate() || this.snapshot.introVisible || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    const previous=this.snapshot.state,state=buildKnownSeed(previous,this.platform.clock.wallNow());
+    if(state===previous)return;
+    this.publish({state});
+    this.persist();
+    this.sound('build',state);
+  };
+
   actWorkshop = (action: WorkshopAction) => {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
     const previous = this.snapshot.state;
+    const part=action.type==='place'||action.type==='test'?action.part??previous.run.workshop.activePart:null;
+    const placement=action.type==='place'&&action.example===true&&part?examplePlacement(previous,part,action.rect):null;
     let state = observeTesseraAction(previous, actWorkshop(previous, action, this.platform.clock.wallNow()), action.type, this.platform.clock.wallNow());
     if (action.type === 'exit' && canAssembleDesktop(state)) state = enterDesktop(state);
     if (previous === state) return;
-    this.publish({ state });
-    if (['buySet','place','skill','test'].includes(action.type)) this.sound('build',state);
-    if (action.type === 'export') this.sound('export',state);
+    const rect=part?state.run.workshop.parts[part]?.rect:null;
+    const snapped=Boolean(placement?.snapped&&rect&&(['x','y','width','height'] as const).every(key=>rect[key]===placement.rect[key]));
+    const visible=workshopVisible(previous);
+    this.publish({ state,...(snapped&&visible&&part?{workshopSnap:{part,at:this.platform.clock.monotonicNow()}}:{}) },true,action.type==='test'&&part?part:undefined);
+    if(visible){
+      if(snapped)this.sound('press',state);
+      else if (['buySet','place','skill','test'].includes(action.type)) this.sound('build',state);
+      if (action.type === 'export') this.sound('export',state);
+    }
     this.persist();
   };
 
@@ -412,7 +456,7 @@ export class GameRuntime {
       this.activeRemainderMs = 0;
       this.momentum = freshMomentum();
       this.lastActiveAt = this.platform.clock.monotonicNow();
-      this.publish({ state: {...result.state,run:{...result.state.run,advice:{...result.state.run.advice,current:null,fingerprint:'',idleMs:0}}}, offline: offlineNotice(result), notice: null, press: null, introVisible: false, releaseConfirmation: false },false);
+      this.publish({ state: {...result.state,run:{...result.state.run,advice:{...result.state.run.advice,current:null,fingerprint:'',idleMs:0}}}, offline: offlineNotice(result), notice: null, press: null, workshopSnap:undefined, workshopCompletion:undefined, introVisible: false, releaseConfirmation: false },false);
       this.persist();
       return true;
     } catch {
@@ -431,7 +475,7 @@ export class GameRuntime {
     if (this.disposed || !this.lease?.isOwner()) return;
     if (this.snapshot.status !== 'ready' && this.snapshot.status !== 'corrupt') return;
     if (!clearGame(this.platform.storage)) { this.publish({ notice: 'save.failed' }); return; }
-    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null, press: null, introVisible: true, releaseConfirmation: false });
+    this.publish({ state: createInitialState(this.platform.clock.wallNow()), status: 'ready', notice: null, offline: null, press: null, workshopSnap:undefined, workshopCompletion:undefined, introVisible: true, releaseConfirmation: false });
     this.momentum = freshMomentum();
     this.activeRemainderMs = 0;
     this.lastActiveAt = this.platform.clock.monotonicNow();

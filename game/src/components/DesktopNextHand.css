@@ -1,0 +1,21 @@
+/* Part of the taskbar, below the maximized work area. It never covers applications or the capture tab. */
+.desktop[class*='desktop-era-'] .taskbar-next-hand {flex:0 0 var(--example-next-width);inline-size:var(--example-next-width);max-inline-size:var(--example-next-width);block-size:calc(var(--desktop-taskbar) - 5px);min-block-size:0;display:flex;align-items:center;gap:4px;padding:1px 5px;color:inherit;background:transparent;border:0;border-inline-start:1px solid currentColor;border-radius:0;box-shadow:none;font:inherit;line-height:1;overflow:hidden;text-align:start;}
+.desktop .taskbar-next-hand>.example-next-label {flex:none;font-weight:bold;}
+.desktop .taskbar-next-hand>.example-next-action {display:block;min-inline-size:0;max-block-size:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:normal;line-height:1.1;}
+.desktop.desktop-era-0 .taskbar-next-hand {box-shadow:inset 1px 1px #808080,inset -1px -1px #fff;border:0;}
+.desktop.desktop-era-1 .taskbar-next-hand {color:#fff;border-inline-start-color:#ffffff80;}
+.desktop.desktop-era-2 .taskbar-next-hand {color:#fff;border-inline-start-color:#b7d0df80;}
+.desktop.desktop-era-3 .taskbar-next-hand {color:#fff;border-inline-start-color:#ffffff50;}
+.desktop .taskbar-next-hand:hover,.desktop .taskbar-next-hand:focus-visible {background:#ffffff20;}
+
+/* The shared 40px game-button minimum must not exceed a native 28/30/40px taskbar. */
+.desktop.desktop-live:is(.desktop-era-0,.desktop-era-1,.desktop-era-3) .desktop-taskbar .desktop-resources {block-size:100%;min-block-size:0;max-block-size:100%;}
+.desktop.desktop-live .desktop-taskbar .taskbar-progress {block-size:100%;min-block-size:0;max-block-size:100%;}
+.desktop.desktop-live .desktop-taskbar .notification-button {min-block-size:0;max-block-size:100%;}
+
+/* Keep every running app reachable when the fixed guidance and resources leave a short taskbar. */
+.desktop.desktop-live .desktop-taskbar .taskbar-apps {overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-inline:contain;}
+.desktop.desktop-live .desktop-taskbar .taskbar-apps::-webkit-scrollbar {display:none;}
+.desktop.desktop-live.desktop-era-2 .desktop-taskbar .taskbar-apps>button {flex:0 0 var(--example-taskbar-glass-app-width);min-inline-size:var(--example-taskbar-glass-app-width);}
+.desktop.desktop-live.desktop-era-3 .desktop-taskbar .taskbar-apps>button {min-inline-size:var(--example-taskbar-flat-app-min);}
+.desktop.desktop-live .desktop-taskbar .taskbar-apps>button {block-size:100%;min-block-size:0;max-block-size:100%;}

@@ -5,11 +5,12 @@ import type { CaptureGeometry } from './captureEvaluation';
 import { TEST_LANGUAGE } from '../content/i18n';
 import { createMemoryStorage,createSettingsStorage,SETTINGS_KEY } from '../platform/storage';
 import type { Platform } from '../platform/types';
-import { manualClickValue,passivePixelsPerSecond } from './economy';
+import { creditPixels,manualClickValue,passivePixelsPerSecond } from './economy';
 import { createFixture } from './fixtures';
 import { GameRuntime } from './runtime';
 import { encodeSave,loadGame,SAVE_KEYS } from './save';
 import { seedCursorQuote } from './seed';
+import { getWorkshopPart } from '../content/workshopCatalog';
 
 const debugBase=1+BALANCE.w1.items.filter(item=>item.id==='border'||item.id==='save').reduce((n,item)=>n+item.perSecond,0);
 const hour = BALANCE.time.millisecondsPerHour;
@@ -293,13 +294,14 @@ describe('段階2の操作と保存', () => {
     expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(.09);
     expect(loadGame(storage).kind).toBe('empty');
     for (let i = 0; i < 20; i++) runtime.pressSeed();
+    const beforeSave=runtime.getSnapshot().state.resources.pixels;
     runtime.buildSeed('save');
     const saved = loadGame(storage);
     expect(saved.kind).toBe('loaded');
     if (saved.kind === 'loaded') {
       expect(saved.state.run.seed.built).toEqual(['border', 'save']);
       expect(saved.state.run.seed.history.map(entry => entry.item)).toEqual(['border', 'save']);
-      expect(saved.state.resources.pixels).toBeCloseTo(.49);
+      expect(saved.state.resources.pixels).toBeCloseTo(beforeSave-BALANCE.w1.items.find(item=>item.id==='save')!.cost);
     }
     for (let i = 0; i < 8; i++) runtime.pressSeed();
     runtime.buildSeed('cursor');
@@ -517,6 +519,58 @@ it('制作工程をすぐ保存し、再読込・再配置で工程払いを重�
  expect(runtime.getSnapshot().state.resources.pixels).toBe(paid);
 });
 
+describe('お手本と完成の一時的な反応',()=>{
+ it('お手本の入り切りを保存し、非所有・非表示中には変えない',async()=>{
+  storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('foundation-saved',clock.wall)!));await start();
+  runtime.setExamplesEnabled(false);expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
+  runtime.dispose();await start();expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
+  clock.hidden=true;runtime.setExamplesEnabled(true);expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
+  clock.hidden=false;clock.owned=false;runtime.setExamplesEnabled(true);expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
+ });
+ it('成功した最初の吸着だけクリック音1回と単調時計の反応を出し、工程払いを二重にしない',async()=>{
+  const fixture=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!;
+  storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();vi.mocked(platform.audio.play).mockClear();clock.mono=123;
+  const rect=getWorkshopPart('common-button').defaultRect;
+  runtime.actWorkshop({type:'place',part:'common-button',rect:{...rect,x:rect.x+8},example:true});
+  expect(runtime.getSnapshot().state.run.workshop.parts['common-button']!.rect).toEqual(rect);
+  expect(runtime.getSnapshot().workshopSnap).toEqual({part:'common-button',at:123});
+  const sounds=vi.mocked(platform.audio.play).mock.calls.map(([sound])=>sound.kind);expect(sounds.filter(kind=>kind==='press')).toHaveLength(1);expect(sounds).not.toContain('build');
+  const pixels=runtime.getSnapshot().state.resources.pixels;runtime.actWorkshop({type:'place',part:'common-button',rect,example:true});
+  expect(runtime.getSnapshot().state.resources.pixels).toBe(pixels);
+  runtime.dispose();await start();expect(runtime.getSnapshot().workshopSnap).toBeUndefined();
+ });
+ it('音OFF・音量を守り、自由制作や裏のエディタでは吸着音を鳴らさない',async()=>{
+  const fixture=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!,rect=getWorkshopPart('common-button').defaultRect;
+  fixture.persistent.progress.sound={enabled:false,volume:.4};storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
+  runtime.actWorkshop({type:'place',part:'common-button',rect,example:true});expect(platform.audio.play).not.toHaveBeenCalled();
+  const fresh=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!;fresh.persistent.progress.sound={enabled:true,volume:.4};
+  expect(runtime.importData(encodeSave(fresh))).toBe(true);vi.mocked(platform.audio.play).mockClear();runtime.actWorkshop({type:'place',part:'common-button',rect,example:true});
+  expect(vi.mocked(platform.audio.play).mock.calls.some(([sound])=>sound.kind==='press'&&sound.volume===.4)).toBe(true);
+  expect(runtime.importData(encodeSave(fresh))).toBe(true);runtime.setExamplesEnabled(false);vi.mocked(platform.audio.play).mockClear();
+  runtime.actWorkshop({type:'place',part:'common-button',rect:{...rect,x:rect.x+8},example:true});expect(runtime.getSnapshot().workshopSnap).toBeUndefined();expect(vi.mocked(platform.audio.play).mock.calls.some(([sound])=>sound.kind==='press')).toBe(false);
+  const behind=createFixture('stage8b-stream-draft-era0',clock.wall)!;behind.run.desktop.active='files';
+  expect(runtime.importData(encodeSave(behind))).toBe(true);vi.mocked(platform.audio.play).mockClear();runtime.actWorkshop({type:'test',part:'stream-preview',interaction:'select'});
+  expect(platform.audio.play).not.toHaveBeenCalled();expect(runtime.getSnapshot().workshopCompletion).toBeUndefined();
+ });
+ it('完成だけで実合計を含む反応を1度発行し、再調整・書き出し・取り込み・再読込では再発行しない',async()=>{
+  const fixture=createFixture('stage8a-part-common-button-step-3-era0',clock.wall)!;storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
+  const before=runtime.getSnapshot().state;runtime.actWorkshop({type:'test',part:'common-button',interaction:'press'});
+  const completed=runtime.getSnapshot(),event=completed.workshopCompletion!;
+  expect(event).toMatchObject({serial:1,part:'common-button',partRate:BALANCE.workshop.partRates['common-button'],rateBefore:passivePixelsPerSecond(before),rateAfter:passivePixelsPerSecond(completed.state)});
+  expect(event.activePartRate).toBeGreaterThan(0);
+  runtime.actWorkshop({type:'test',part:'common-button',interaction:'press'});expect(runtime.getSnapshot().workshopCompletion).toBe(event);
+  runtime.actWorkshop({type:'adjust',part:'common-button',patch:{shadow:true}});expect(runtime.getSnapshot().workshopCompletion).toBe(event);
+  runtime.actWorkshop({type:'export'});expect(runtime.getSnapshot().workshopCompletion).toBe(event);
+  const encoded=encodeSave(runtime.getSnapshot().state);expect(runtime.importData(encoded)).toBe(true);expect(runtime.getSnapshot().workshopCompletion).toBeUndefined();
+  runtime.dispose();await start();expect(runtime.getSnapshot().workshopCompletion).toBeUndefined();
+ });
+ it('世界4の未稼働材料が完成しても、その部品を現在の毎秒へ入金した反応を作らない',async()=>{
+  storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('stage8b-stream-draft-era0',clock.wall)!));await start();
+  runtime.actWorkshop({type:'test',part:'stream-preview',interaction:'select'});const event=runtime.getSnapshot().workshopCompletion!;
+  expect(event.partRate).toBe(BALANCE.workshop.partRates['stream-preview']);expect(event.activePartRate).toBe(0);expect(event.rateAfter).toBe(passivePixelsPerSecond(runtime.getSnapshot().state));
+ });
+});
+
 describe('段階5の保存と製品名',()=>{
   it('撮影の保存が失敗したら報酬・クールダウン・撮影記録を進めず、再試行で一度だけ保存する',async()=>{
     storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('desktop-early',clock.wall)!));await start();
@@ -601,12 +655,54 @@ describe('段階8bの実画面撮影',()=>{
   expect(runtime.takeScreenshot(geometry)).toBe(true);
   const shot=runtime.getSnapshot().state.persistent.screenshots.at(-1)!;
   const scene=readCapture(shot);
-  expect(scene.version).toBe(11);
-  if(scene.version!==11||!scene.evaluation)throw new Error('expected format 11 evaluation');
+  expect(scene.version).toBe(12);
+  if(scene.version!==12||!scene.evaluation)throw new Error('expected format 11 evaluation');
   expect(scene.evaluation.origin).toBe('dom');
   expect(scene.evaluation.visibleCount).toBe(1);
   expect(scene.evaluation.parts.filter(part=>part.visible).map(part=>part.id)).toEqual(['visible-source']);
   runtime.actDesktop({type:'close',app:'files'});
   expect(readCapture(shot)).toEqual(scene);
+ });
+});
+
+
+describe('UI倍率は端末の設定',()=>{
+ it('ゲームの財布・配置・未解放セーブを変えず、言語変更と再起動をまたいで倍率を保持する',async()=>{
+  await start();const before=runtime.getSnapshot().state;
+  runtime.changeUiScale(1.25);
+  expect(runtime.getSnapshot().uiScale).toBe(1.25);expect(runtime.getSnapshot().state).toBe(before);
+  expect(loadGame(storage).kind).toBe('empty');expect(platform.settings.read().uiScale).toBe(1.25);
+  runtime.changeLanguage('en');expect(platform.settings.read()).toMatchObject({language:'en',uiScale:1.25});
+  runtime.dispose();runtime=new GameRuntime(platform);await runtime.start();expect(runtime.getSnapshot().uiScale).toBe(1.25);
+ });
+ it('壊れた倍率は読み捨て、選択肢に無い倍率を操作からも受け付けない',async()=>{
+  storage.setItem(SETTINGS_KEY,JSON.stringify({uiScale:999,language:'ja'}));
+  await start();expect(runtime.getSnapshot().uiScale).toBe(BALANCE.accessibility.defaultUiScale);
+  const before=runtime.getSnapshot();for(const value of [0,-1,NaN,Infinity,999]){runtime.changeUiScale(value);expect(runtime.getSnapshot()).toBe(before);}
+ });
+});
+
+
+describe('TP-3：runtimeから既知UIをまとめて作る',()=>{
+ it('普通の起動・保存・一度の購入音を通し、次版の9つから工房だけを起動する',async()=>{
+  const cost=BALANCE.w1.items.reduce((sum,item)=>sum+item.cost,0),fixture=creditPixels(createFixture('stage7-v2',clock.wall)!,cost+3);
+  storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
+  const before=runtime.getSnapshot().state;vi.mocked(platform.audio.play).mockClear();
+  runtime.buildKnownSeed();const after=runtime.getSnapshot().state;
+  expect(after.run.world).toBe('kumiki');expect(after.run.workshop.enterMs).toBe(BALANCE.workshop.enterMs);
+  expect(after.run.seed.built).toEqual(BALANCE.w1.items.map(item=>item.id));expect(after.resources.pixels).toBe(3);
+  expect(after.run.seed.autoCursors).toBe(0);expect(after.resources.tokens).toBe(before.resources.tokens);expect(after.persistent.setDocuments).toEqual(before.persistent.setDocuments);
+  expect(after.run.workshop.purchasedSets).toEqual([]);expect(after.run.workshop.parts).toEqual({});
+  const saved=loadGame(storage);expect(saved.kind).toBe('loaded');if(saved.kind==='loaded'){expect(saved.state.run.seed.built).toEqual(after.run.seed.built);expect(saved.state.run.world).toBe('kumiki');}
+  const payments=vi.mocked(platform.audio.play).mock.calls.filter(([sound])=>sound.kind==='build');expect(payments).toHaveLength(1);
+  const funds={...after.resources};runtime.buildKnownSeed();expect(runtime.getSnapshot().state.resources).toEqual(funds);
+ });
+ it('初回・導入中・裏のタブ・所有権を失ったタブから一括購入しない',async()=>{
+  runtime=new GameRuntime(platform);await runtime.start();const intro=runtime.getSnapshot().state;
+  runtime.buildKnownSeed();expect(runtime.getSnapshot().state).toBe(intro);runtime.startGame();runtime.addDebugPixels();
+  const fresh=runtime.getSnapshot().state;runtime.buildKnownSeed();expect(runtime.getSnapshot().state.run.seed.built).toEqual(fresh.run.seed.built);expect(runtime.getSnapshot().state.resources).toEqual(fresh.resources);
+  runtime.dispose();const fixture=creditPixels(createFixture('stage7-v2',clock.wall)!,1e9);storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
+  const before=runtime.getSnapshot().state;clock.hidden=true;runtime.buildKnownSeed();expect(runtime.getSnapshot().state).toBe(before);clock.hidden=false;clock.owned=false;
+  runtime.buildKnownSeed();expect(runtime.getSnapshot().state).toBe(before);expect(runtime.getSnapshot().status).toBe('blocked');
  });
 });
