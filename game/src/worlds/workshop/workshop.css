@@ -297,3 +297,5 @@
 .workshop-root .ws-world4-preparation ul {padding-left:18px;margin:6px 0;}
 .workshop-root .ws-world4-preparation p {margin:6px 0;line-height:1.5;}
 .workshop-root .ws-world4-preparation>button {width:100%;}
+.workshop-root .data-settings {margin-block-start:24px;border-block-start:1px solid #aaa;padding-block-start:12px;}
+.workshop-root .data-settings button {margin-inline-end:8px;}
