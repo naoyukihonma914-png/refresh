@@ -8,6 +8,10 @@ export function setExamplesEnabled(state:GameState,enabled:boolean):GameState {
  return typeof enabled!=='boolean'||enabled===state.persistent.examplesEnabled?state:{...state,persistent:{...state.persistent,examplesEnabled:enabled}};
 }
 
+export function setDoubleClickFit(state:GameState,enabled:boolean):GameState {
+ return typeof enabled!=='boolean'||enabled===state.persistent.doubleClickFit?state:{...state,persistent:{...state.persistent,doubleClickFit:enabled}};
+}
+
 /** Only an explicitly requested first placement can use the optional example. */
 export function examplePlacement(state:GameState,id:WorkshopPartId,rect:WorkshopRect):{rect:WorkshopRect;snapped:boolean} {
  if(!state.persistent.examplesEnabled||state.run.workshop.parts[id]?.step!==0||!WORKSHOP_PARTS.some(part=>part.id===id)

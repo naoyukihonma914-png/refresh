@@ -4,6 +4,7 @@ import {gunzipSync} from 'node:zlib';
 import {createFixture,FIXTURE_NAMES,completeWorkshopPartFixture} from './fixtures';
 import {isGameState,SCHEMA_VERSION} from './state';
 import {encodeSave,decodeSave} from './save';
+import {mergeLegacyScrollbarIntoFrame} from './workshopState';
 import {adoptedPartIds} from './appAssembly';
 import {producerLedger} from './economy';
 import {rawDesktopFiles} from './desktopFiles';
@@ -25,16 +26,16 @@ describe('第3版：ブラウザ固定状態の整合性',()=>{
   expect(repeated.resources).toEqual(state.resources);expect(isGameState(repeated)).toBe(true);
  });
  it('新制作全段階と旧公開名が新スキーマで保存復元できる',()=>{
-  for(const name of FIXTURE_NAMES){const state=createFixture(name,now);expect(state,name).not.toBeNull();expect(isGameState(state),name).toBe(true);expect(decodeSave(encodeSave(state!)),name).toEqual(state);}
+  for(const name of FIXTURE_NAMES){const state=createFixture(name,now);expect(state,name).not.toBeNull();expect(isGameState(state),name).toBe(true);const expected=structuredClone(state!);const ec=expected.persistent.editorCustomization;if(ec.panelWidth===BALANCE.workshop.customization.panelWidth)ec.panelWidth=BALANCE.workshop.customization.panelWidthByStage[expected.persistent.appearance?.editor??0]??ec.panelWidth;expect(decodeSave(encodeSave(state!)),name).toEqual(expected);}
  },30_000);
- it('セットの材料購入と完成を区別し、必須22部品の書類を格納する',()=>{
+ it('セットの材料購入と完成を区別し、必須21部品の書類を格納する',()=>{
   const empty=createFixture('stage8a-main',now)!;expect(Object.values(empty.run.workshop.parts).every(p=>p?.step===0)).toBe(true);
   expect(empty.persistent.setDocuments).toHaveLength(0);
   const ready=createFixture('stage8a-required-complete-16color',now)!;
-  expect(Object.values(ready.run.workshop.parts).filter(p=>p?.step===4)).toHaveLength(22);
+  expect(Object.values(ready.run.workshop.parts).filter(p=>p?.step===4)).toHaveLength(21);
   expect(ready.persistent.setDocuments.map(d=>d.set)).toEqual(['common','foundation','files','mail']);
   expect(ready.persistent.specs.color).toBe(0);
-  expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras'&&p.set!=='stream')).toHaveLength(47);
+  expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras'&&p.set!=='stream')).toHaveLength(46);
  });
  it('ファイル完成の固定状態は6パーツの書類ができたエクスポート直前を示す',()=>{
   const state=createFixture('stage8a-files-complete-era0',now)!;
@@ -99,7 +100,7 @@ describe('TP：実操作の固定状態と真正v15入力',()=>{
   expect(s.run.world).toBe('kumiki');expect(s.run.workshop.purchasedSets).toEqual([]);expect(completedParts(s)).toEqual([]);
   expect(canBuyWorkshopSet(s,'common')).toBe(true);expect(canBuyWorkshopSet(s,'foundation')).toBe(false);
   const purchased=actWorkshop(s,{type:'buySet',set:'common'},now);
-  expect(completedParts(purchased)).toEqual([]);expect(Object.keys(purchased.run.workshop.parts)).toHaveLength(5);
+  expect(completedParts(purchased)).toEqual([]);expect(Object.keys(purchased.run.workshop.parts)).toHaveLength(4);
   expect(purchased.run.workshop.helpTarget).toEqual({set:'common'});
   expect(purchased.persistent.testplay.helpSeen).toContain('common');
   const closed=actWorkshop(purchased,{type:'help',target:null},now);
@@ -110,21 +111,21 @@ describe('TP：実操作の固定状態と真正v15入力',()=>{
    let s=createFixture(`tp1-workshop-shell-era${era}`,now)!;
    expect(s.resources.tokens).toBe(0);expect(s.run.workshop.tokenDiscovered).toBe(false);
    expect(s.run.workshop.parts['common-button']).toMatchObject({step:3,tested:false,exportedAt:null});
-   expect(completedParts(s)).toHaveLength(2);expect(s.persistent.progress.records['first-export']).toBeUndefined();
+   expect(completedParts(s)).toHaveLength(1);expect(s.persistent.progress.records['first-export']).toBeUndefined();
    s=actWorkshop(s,{type:'test',part:'common-button',interaction:'press'},now);
    s=actWorkshop(s,{type:'export',part:'common-button'},now);
    expect(s.resources.tokens).toBe(BALANCE.workshop.exportTokens);expect(s.run.workshop.tokenDiscovered).toBe(true);
   }
  });
- it('完成プレビューの5節目は本線の実4工程で正確に0/5/11/17/22を作る',()=>{
-  for(const era of [0,1,2])for(const count of [0,5,11,17,22]){
+ it('完成プレビューの5節目は本線の実4工程で正確に0/5/11/17/21を作る',()=>{
+  for(const era of [0,1,2])for(const count of [0,5,11,17,21]){
    const s=createFixture(`tp3-progress-${count}-era${era}`,now)!;
    expect(completedParts(s)).toHaveLength(count);
    expect(completedParts(s).every(id=>UI_SETS.find(set=>set.id===WORKSHOP_PARTS.find(part=>part.id===id)!.set)?.mainline)).toBe(true);
    expect(s.run.workshop.helpTarget).toBeNull();
   }
  });
- it('22個の固有仕上げURLは、前の作品を残し、対象だけ工程4の直前で止まる',()=>{
+ it('21個の固有仕上げURLは、前の作品を残し、対象だけ工程4の直前で止まる',()=>{
   const parts=WORKSHOP_PARTS.filter(part=>UI_SETS.find(set=>set.id===part.set)?.mainline);
   for(const era of [0,1,2])for(const [index,part] of parts.entries()){
    const s=createFixture(`tp3-finish-${part.id}-era${era}`,now)!;
@@ -132,12 +133,12 @@ describe('TP：実操作の固定状態と真正v15入力',()=>{
    expect(completedParts(s)).toHaveLength(index);expect(isGameState(s)).toBe(true);
   }
  });
- it('ヘルプ全量URLは本線22完成と任意材料の未完成を分離する',()=>{
+ it('ヘルプ全量URLは本線21完成と任意材料の未完成を分離する',()=>{
   for(const era of [0,1,2]){
    const s=createFixture(`tp2-help-catalog-era${era}`,now)!;
    expect(s.run.world).toBe('desktop');expect(s.run.version).toBe('v2');
    expect(new Set(s.run.workshop.purchasedSets)).toEqual(new Set(UI_SETS.map(set=>set.id)));
-   expect(completedParts(s)).toHaveLength(22);
+   expect(completedParts(s)).toHaveLength(21);
    for(const part of WORKSHOP_PARTS.filter(part=>!UI_SETS.find(set=>set.id===part.set)?.mainline))expect(s.run.workshop.parts[part.id]?.step).toBe(0);
    expect(s.run.workshop.helpTarget).toBeNull();
   }
@@ -159,8 +160,10 @@ describe('TP：実操作の固定状態と真正v15入力',()=>{
    expect(old.schemaVersion).toBe(15);
    const migrated=decodeSave(text);expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);expect(isGameState(migrated)).toBe(true);
    expect(migrated.resources).toEqual(old.resources);
-   for(const key of ['specs','seedSkills','editorSkills','products','setDocuments','screenshots'] as const)expect(migrated.persistent[key],name+':'+key).toEqual(old.persistent[key]);
-   expect(migrated.run.workshop.parts).toEqual(old.run.workshop.parts);
+   for(const key of ['specs','seedSkills','editorSkills','products','screenshots'] as const)expect(migrated.persistent[key],name+':'+key).toEqual(old.persistent[key]);
+   const foldParts=(parts:Record<string,unknown>)=>{const copy=structuredClone(parts);mergeLegacyScrollbarIntoFrame(copy);return copy;};
+   expect(migrated.persistent.setDocuments).toEqual(old.persistent.setDocuments.map((doc:{parts:Record<string,unknown>})=>({...doc,parts:foldParts(doc.parts)})));
+   expect(migrated.run.workshop.parts).toEqual(foldParts(old.run.workshop.parts));
    expect(decodeSave(encodeSave(migrated))).toEqual(migrated);
    if(old.run.seed.page.layout)expect(Object.keys(migrated.run.seed.page.layout!.parts)).toHaveLength(6);
    if(name==='seed-inherited-layout')expect(migrated.persistent.testplay.layoutGuideSeen).toBe(true);

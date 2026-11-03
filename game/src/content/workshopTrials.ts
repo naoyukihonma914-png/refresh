@@ -4,7 +4,6 @@ export type FinishTrialKind = 'window'|'scroll-page'|'apply'|'heading'|'progress
 export interface FinishTrialDefinition { part:WorkshopPartId;kind:FinishTrialKind;interaction:TestInteraction;hintKey:string }
 const definitions = {
  'common-frame':['window','press'],
- 'common-scrollbar':['scroll-page','scroll'],
  'common-button':['apply','press'],
  'common-heading':['heading','select'],
  'common-progress':['progress','select'],

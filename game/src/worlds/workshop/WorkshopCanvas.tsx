@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } fr
 import { BALANCE } from '../../config/balance';
 import type { I18n, MessageKey } from '../../content/i18n';
 import { partsForSet, type WorkshopPartDefinition, type WorkshopPartId, type WorkshopRect } from '../../content/workshopCatalog';
-import type { PartProduction, WorkshopState } from '../../systems/workshopState';
+import type { ComponentDesign, PartProduction, WorkshopState } from '../../systems/workshopState';
 import { partRectValid, partMinimumSize } from '../../systems/workshop';
 import type { GameState } from '../../systems/state';
 import type { Platform } from '../../platform/types';
@@ -20,8 +20,23 @@ import { advanceFinishTrial, createFinishTrialState } from '../../systems/worksh
 interface CanvasProps {platform:Platform;workshopSnap?:RuntimeSnapshot['workshopSnap'];state:GameState;workshop:WorkshopState;part:WorkshopPartDefinition|null;production:PartProduction|undefined;zoom:number;dispatch:WorkshopDispatch;i18n:I18n;picking:boolean;layerSelection?:string|null;onSelectLayer?:(value:string|null)=>void;onPick:(color:string)=>void;reducedMotion?:boolean}
 interface Gesture {mode:'create'|'move'|'resize';start:{x:number;y:number};initial:WorkshopRect;id:WorkshopPartId}
 export function WorkshopCanvas(props:CanvasProps){return <WorkshopTargetProvider gameState={props.state} i18n={props.i18n}><OptionalTargetProvider gameState={props.state} i18n={props.i18n} onExport={()=>props.dispatch({type:'export'})}><DestinationCanvas {...props}/></OptionalTargetProvider></WorkshopTargetProvider>;}
+/** The frame's own scrollbar: a working scroll pane docked to the window's right edge. */
+function FrameScrollPane({design,elements,entries,upLabel,downLabel}:{design:ComponentDesign;elements:string[];entries:{id:string;name:string}[];upLabel:string;downLabel:string}){
+ const list=useRef<HTMLDivElement>(null),[thumb,setThumb]=useState({height:100,top:0});
+ const update=()=>{const el=list.current;if(!el)return;const ratio=Math.min(1,el.clientHeight/Math.max(1,el.scrollHeight));setThumb({height:ratio*100,top:el.scrollHeight>el.clientHeight?el.scrollTop/(el.scrollHeight-el.clientHeight)*(100-ratio*100):0});};
+ useEffect(update,[]);
+ const page=(direction:number)=>{const el=list.current;if(el)el.scrollBy({top:direction*el.clientHeight});};
+ return <div className="ws-frame-scrollpane" data-workshop-control="track" style={{width:BALANCE.workshop.preview.frameScrollWidth}}>
+  <div ref={list} className="ws-frame-scroll-list" tabIndex={0} onScroll={update}><ul>{entries.map(entry=><li key={entry.id}>{entry.name}</li>)}</ul></div>
+  <div className="ws-frame-scroll-rail" style={{width:design.scrollbarWidth}}>
+   {elements.includes('arrows')&&design.arrows&&<button type="button" aria-label={upLabel} onClick={()=>page(-1)}><WorkshopGlyph name="up"/></button>}
+   <div className="ws-frame-scroll-track">{elements.includes('thumb')&&<div className="ws-frame-scroll-thumb" style={{height:`${thumb.height}%`,top:`${thumb.top}%`}} onPointerDown={e=>e.currentTarget.setPointerCapture(e.pointerId)} onPointerMove={e=>{const el=list.current;if(e.buttons===1&&el)el.scrollTop+=e.movementY*(el.scrollHeight/Math.max(1,el.clientHeight));}}/>}</div>
+   {elements.includes('arrows')&&design.arrows&&<button type="button" aria-label={downLabel} onClick={()=>page(1)}><WorkshopGlyph name="down"/></button>}
+  </div>
+ </div>;
+}
 function DestinationCanvas({state,workshop,part,production,zoom,dispatch,i18n,picking,onPick,layerSelection,onSelectLayer,reducedMotion=false,platform,workshopSnap}:CanvasProps){
- const canvas=useRef<HTMLDivElement>(null),gesture=useRef<Gesture|null>(null),{photo}=useWorkshopTarget(),{theme}=useOptionalTarget();
+ const canvas=useRef<HTMLDivElement>(null),gesture=useRef<Gesture|null>(null),{photo,files}=useWorkshopTarget(),{theme}=useOptionalTarget();
  const [draft,setDraft]=useState<WorkshopRect|null>(null),[invalid,setInvalid]=useState(false),[localSelectedElement,setLocalSelectedElement]=useState<string|null>(null),[editingPlacement,setEditingPlacement]=useState(false),[windowMode,setWindowMode]=useState<'normal'|'minimized'|'closed'|'maximized'>('normal');
  const [frameTrial,setFrameTrial]=useState(createFinishTrialState);
  const snapKey=workshopSnap?`${state.createdAt}:${state.run.version}:${workshopSnap.part}:${workshopSnap.at}`:undefined;
@@ -70,6 +85,7 @@ function DestinationCanvas({state,workshop,part,production,zoom,dispatch,i18n,pi
      <div className={`ws-destination ${custom.grid&&showConstruction?'has-grid':''} ${invalid?'has-invalid-placement':''}`} data-workshop-canvas ref={canvas} style={{width:appRect.width,height:windowMode==='minimized'?0:appRect.height,borderRadius:frameDesign?.radius?`0 0 ${frameDesign.radius}px ${frameDesign.radius}px`:undefined,'--ws-grid':`${custom.gridSpacing}px`,backgroundColor:themed('theme-mode')?(theme.mode==='dark'?'#222222':'#ffffff'):undefined,color:themed('theme-mode')?(theme.mode==='dark'?'#ffffff':'#111111'):undefined,backgroundImage:selectedSet==='foundation'&&photo.wallpaperSource?`url(${photo.wallpaperSource.src})`:undefined,backgroundSize:photo.wallpaperSource?'cover':undefined} as CSSProperties} onPointerDown={e=>{if(production?.step===0)begin(e,'create');}}>
       {selectedSet==='foundation'&&photo.wallpaperSource&&photo.wallpaper&&<div className="ws-destination-wallpaper" aria-hidden="true" style={{backgroundImage:`url(${photo.wallpaperSource.src})`,filter:targetPhotoFilter(photo.wallpaper),backgroundSize:`${BALANCE.workshop.preview.percentDivisor/photo.wallpaper.crop*BALANCE.workshop.preview.percentDivisor}% auto`}}/>}{!part&&<p className="ws-empty-canvas">{t('ws.selectPart')}</p>}
       {exampleRect&&part&&!activeFrame&&<div className={`ws-example-outline ${!partRectValid(state,part.id,exampleRect)?'is-blocked':''} ${nearExample?'is-near':''}`} data-workshop-example-outline={part.id} role="img" aria-label={t('examples.workshop.outline' as MessageKey,{name:t(part.labelKey as MessageKey)})} style={{left:exampleRect.x-appRect.x,top:exampleRect.y-appRect.y,width:exampleRect.width,height:exampleRect.height}}/>}
+      {exampleRect&&part&&partsForSet(part.set).filter(d=>d.id!=='common-frame'&&d.id!==part.id).map(d=>{const p=workshop.parts[d.id];if(!p||p.step!==0)return null;const r=d.defaultRect;return <div key={d.id} className={`ws-example-outline ws-example-sibling ${!partRectValid(state,d.id,r)?'is-blocked':''}`} data-workshop-example-outline={d.id} role="img" aria-label={t('examples.workshop.outline' as MessageKey,{name:t(d.labelKey as MessageKey)})} style={{left:r.x-appRect.x,top:r.y-appRect.y,width:r.width,height:r.height}}/>;})}
       {examples&&snap&&snap.part!=='common-frame'&&snapRect&&<div key={snap.at} className="ws-snap-response" data-workshop-snap={snap.part} data-reduced-motion={reducedMotion||undefined} role="status" aria-label={t('examples.workshop.snap' as MessageKey)} style={{left:snapRect.x-appRect.x,top:snapRect.y-appRect.y,width:snapRect.width,height:snapRect.height,'--ws-snap-duration':`${BALANCE.workshop.examples.snapPulseMs}ms`} as CSSProperties}/>}
       {selectedSet&&partsForSet(selectedSet).filter(d=>d.id!=='common-frame').map(descriptor=>{const p=workshop.parts[descriptor.id];if(!p||p.step===0&&descriptor.id!==part?.id)return null;const selected=descriptor.id===part?.id,rect=selected?activeRect:p.rect;if(!rect||p.step===0&&!draft)return null;const editing=selected&&(p.step<3||editingPlacement),interactive=p.step>=3&&!editingPlacement||state.persistent.editorSkills.includes('motion')&&p.step===2&&!editingPlacement;
        return <div key={descriptor.id} data-workshop-canvas-part={descriptor.id} data-component-motion={p.design.motion} data-layer-selected={showConstruction&&selected&&selectedElement||undefined} className={`ws-canvas-part ${editing?'is-selected':''} ${p.step===0?'is-construction':''} ${selected&&invalid?'is-invalid':''}`} style={{left:rect.x-appRect.x,top:rect.y-appRect.y,width:rect.width,height:rect.height}}>
@@ -78,6 +94,7 @@ function DestinationCanvas({state,workshop,part,production,zoom,dispatch,i18n,pi
        </div>;
       })}
 
+      {frame&&frameDesign&&frameElements.includes('track')&&windowMode!=='minimized'&&<FrameScrollPane design={frameDesign} elements={frameElements} entries={files.entries} upLabel={t('ws.moveUp')} downLabel={t('ws.moveDown')}/>}
       {state.persistent.editorSkills.includes('snap')&&activeRect&&showConstruction&&<div className="ws-dimensions" style={{left:activeRect.x-appRect.x,top:Math.max(0,activeRect.y-appRect.y-18),width:activeRect.width}}>{t('ws.dimensions',{width:i18n.integer(activeRect.width),height:i18n.integer(activeRect.height)})}</div>}
      </div>
      {activeFrame&&production&&(production.step<3||editingPlacement)&&handles}

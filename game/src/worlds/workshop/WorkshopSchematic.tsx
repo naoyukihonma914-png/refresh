@@ -20,14 +20,13 @@ function PartArtwork({id,rect}:{id:WorkshopPartId;rect:WorkshopHelpRegion}){
  const panel=<rect x="0" y="0" width={w} height={h} className="ws-schematic-panel"/>;
  const lines=(rows:number,columns=false)=>Array.from({length:rows},(_,index)=><path key={index} d={`M4 ${4+(h-8)*(index+1)/(rows+1)}H${w-4}${columns?`M${w*.42} 3V${h-3}`:''}`}/>);
  const button=<>{panel}<path d={`M${w*.25} ${h/2}H${w*.75}`}/></>;
- if(id==='common-frame')return <><rect width={w} height={h} className="ws-schematic-frame"/><rect x="1" y="1" width={w-2} height="20" className="ws-schematic-title"/><path d={`M${w-46} 9h9m5-5h9v9h-9zm15 0 9 9m0-9-9 9`}/></>;
+ if(id==='common-frame')return <><rect width={w} height={h} className="ws-schematic-frame"/><rect x="1" y="1" width={w-2} height="20" className="ws-schematic-title"/><path d={`M${w-46} 9h9m5-5h9v9h-9zm15 0 9 9m0-9-9 9`}/><rect x={w-9} y={24} width={6} height={Math.max(0,h-28)} className="ws-schematic-panel"/><rect x={w-9} y={24+(h-28)*.3} width={6} height={Math.max(2,(h-28)*.3)} className="ws-schematic-thumb"/></>;
  if(id==='foundation-desktop')return <rect width={w} height={h} className="ws-schematic-desktop"/>;
  if(id==='foundation-wallpaper'||id==='photo-display'||id==='stream-preview')return <>{panel}<path d={`M2 ${h-3} ${w*.28} ${h*.32} ${w*.51} ${h*.7} ${w*.72} ${h*.4} ${w-2} ${h-3}Z`} className="ws-schematic-landscape"/><circle cx={w*.76} cy={h*.22} r={Math.min(w,h)*.08}/></>;
  if(id==='foundation-icons')return <>{Array.from({length:4},(_,index)=><g key={index} transform={`translate(5 ${6+index*(h-18)/4})`}><rect width="15" height="13" className="ws-schematic-panel"/><path d="M0 18H21"/></g>)}</>;
  if(id==='foundation-taskbar')return <>{panel}<path d={`M3 3H17V${h-3}H3ZM23 4H39V${h-4}H23ZM45 4H61V${h-4}H45ZM${w-54} 5H${w-5}M${w-54} 11H${w-18}`}/></>;
  if(id==='foundation-notification')return <>{panel}<path d={`M3 14H${w-3}M6 7H${w*.7}M6 23H${w-6}M6 31H${w*.7}`}/></>;
  if(id==='mail-unread')return <rect width={w} height={h} className="ws-schematic-mark"/>;
- if(id==='common-scrollbar')return <>{panel}<path d={`m2 5 ${w/2-2} -3 ${w/2-2} 3m-${w-4} ${h-10} ${w/2-2} 3 ${w/2-2} -3`}/><rect x="2" y={h*.3} width={w-4} height={h*.3} className="ws-schematic-thumb"/></>;
  if(kind==='button')return button;
  if(kind==='heading')return <><path d={`M0 ${h*.3}H${w*.65}`} strokeWidth="4"/><path d={`M0 ${h-2}H${w}`}/></>;
  if(kind==='progress')return <>{panel}<rect x="3" y="3" width={w*.62} height={Math.max(1,h-6)} className="ws-schematic-thumb"/></>;

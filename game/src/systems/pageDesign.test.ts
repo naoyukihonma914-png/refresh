@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { BALANCE } from '../config/balance';
 import { BASE_PALETTE } from '../content/palette';
-import { creditPixels, passivePixelsPerSecond } from './economy';
+import { creditPixels, homePixelsPerSecond, passivePixelsPerSecond } from './economy';
 import { buildSeed, createSeedVersion } from './seed';
 import { actWorkshop } from './workshop';
 import { createInitialState, isGameState } from './state';
-import { actPageDesign, contrast, createPageDesign, fitPageLayout, isPageDesign, isRecommendedPage, pageColors, PAGE_PARTS, recommendedPage, validPagePlacement } from './pageDesign';
+import { actPageDesign, contrast, createPageDesign, effectiveFitted, fitPageLayout, isPageDesign, isRecommendedPage, nextPieceToFit, pageColors, PAGE_PARTS, piecesToFit, recommendedPage, validPagePlacement } from './pageDesign';
+import { nextSeedHand } from './nextHand';
 import { decodeSave, encodeSave } from './save';
 const now=1_800_000_000_000;
 function ready(){let s=creditPixels(createInitialState(now),100_000);for(const id of ['border','save','color','font','layout','motion'] as const)s=buildSeed(s,id,now);return s;}
@@ -25,6 +26,38 @@ describe('組み立て中のエディタを安全に設計する',()=>{
   expect(decodeSave(encodeSave(s)).run.seed.page).toEqual(s.run.seed.page);
   expect(isPageDesign(s.run.seed.page)).toBe(true);
   expect(isPageDesign({...s.run.seed.page,partColors:{heading:{background:'red',text:null}}})).toBe(false);
+ });
+ it('お手本ONでは全部品がピースとして現れ、好きな順番で嵌められる',()=>{
+  let s=createInitialState(now);
+  expect(piecesToFit(s.run.seed.page,true,0)).toEqual(['heading','notice','upgrades']);
+  expect(nextPieceToFit(s.run.seed.page,true,0)).toBe('heading');
+  s=actPageDesign(s,{type:'piece-move',part:'notice',x:99999,y:-5});
+  expect(s.run.seed.page.piecePositions?.notice?.x).toBeLessThanOrEqual(1920);
+  expect(s.run.seed.page.piecePositions?.notice?.y).toBe(0);
+  s=actPageDesign(s,{type:'fit',part:'notice'});
+  expect(s.run.seed.page.piecePositions?.notice).toBeUndefined();
+  expect(piecesToFit(s.run.seed.page,true,0)).toEqual(['heading','upgrades']);
+  s=actPageDesign(s,{type:'fit',part:'upgrades'});
+  s=actPageDesign(s,{type:'fit',part:'heading'});
+  expect(piecesToFit(s.run.seed.page,true,0)).toEqual([]);
+  expect(nextPieceToFit(s.run.seed.page,true,0)).toBeNull();
+  expect(piecesToFit(s.run.seed.page,true,3)).toEqual(['cursors']);
+  expect(nextPieceToFit(s.run.seed.page,true,3)).toBe('cursors');
+  expect(nextPieceToFit(s.run.seed.page,false,3)).toBeNull();
+  expect(effectiveFitted(s.run.seed.page,false)).toEqual(PAGE_PARTS);
+  const legacy=createInitialState(now);delete legacy.run.seed.page.fitted;
+  expect(nextPieceToFit(legacy.run.seed.page,true,3)).toBeNull();
+  expect(decodeSave(encodeSave(s)).run.seed.page.fitted).toEqual(s.run.seed.page.fitted);
+ });
+ it('カーソル置き場を嵌めるまでオートカーソルは働かない',()=>{
+  let s=creditPixels(createInitialState(now),100_000);
+  for(const part of ['heading','notice','upgrades'] as const)s=actPageDesign(s,{type:'fit',part});
+  s=buildSeed(s,'border',now);s=buildSeed(s,'save',now);s=buildSeed(s,'cursor',now);
+  expect(s.run.seed.autoCursors).toBeGreaterThan(0);
+  expect(nextSeedHand(s)?.kind).toBe('seed-fit');
+  expect(homePixelsPerSecond(s)).toBe(0);
+  s=actPageDesign(s,{type:'fit',part:'cursors'});
+  expect(homePixelsPerSecond(s)).toBeGreaterThan(0);
  });
  it('おすすめは中央カードでなく作業面と右の一覧を分け、狭い面でも全領域を保つ',()=>{
   const l=recommendedPage();expect(l.parts.upgrades.x).toBeGreaterThan(l.parts.generator.x+l.parts.generator.width);expect(l.parts.generator.width).toBe(BALANCE.pageDesign.partSizes.generator.extraLarge.width);expect(l.parts.generator.height).toBe(BALANCE.pageDesign.partSizes.generator.extraLarge.height);expect(l.parts.generator.x-l.parts.heading.x).toBe(l.parts.heading.x+l.parts.heading.width-(l.parts.generator.x+l.parts.generator.width));expect(l.parts.upgrades.y).toBe(l.parts.heading.y);expect(isRecommendedPage(l)).toBe(true);

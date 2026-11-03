@@ -2,7 +2,7 @@ import { BALANCE, type SpecKey } from '../config/balance';
 import { createI18n } from '../content/i18n';
 import { editorStage, desktopStage } from './appearance';
 import { isBuildable, validLayout, type AppProjects } from './appLayout';
-import { validAppAssembly } from './appAssemblySchema';
+import { validFrozenAppAssembly } from './appAssemblySchema';
 import { activeScreenshots, desktopConditions } from './desktop';
 import { defaultNote, desktopFiles, screenshotBytes, type DesktopFile } from './desktopFiles';
 import { decodeCapture, encodeCapture, type Screenshot, type WindowState } from './desktopState';
@@ -11,7 +11,7 @@ import type { PageDesign } from './pageDesign';
 import { isCapturePageDesignV12 } from './capturePageDesign';
 import { isLegacyPageDesign, type LegacyPageDesign } from './legacyPageDesign';
 import type { GameState } from './state';
-import { isWorkshopState, isEditorCustomization, isSetDocument, type WorkshopState, type EditorCustomization, type EditorSkill, type SetDocument } from './workshopState';
+import { isFrozenWorkshopState, isEditorCustomization, isSetDocument, type WorkshopState, type EditorCustomization, type EditorSkill, type SetDocument } from './workshopState';
 import { evaluateCapture, isCaptureEvaluation, type CaptureEvaluation } from './captureEvaluation';
 import { feedbackBodyText, feedbackSubject } from '../content/feedback';
 import { producerName } from '../content/production';
@@ -99,8 +99,8 @@ function commonValid(v:Record<string,unknown>,legacy:boolean):boolean {
 function projectsValid(value:unknown):boolean {
   return value===undefined||record(value)&&Object.entries(value).every(([id,project])=>isBuildable(id)&&record(project)
     &&validLayout(project.draft,id)&&(project.installed===null||validLayout(project.installed,id))
-    &&(project.draftAssembly===undefined||validAppAssembly(project.draftAssembly,id))
-    &&(project.installedAssembly===undefined||project.installedAssembly===null||validAppAssembly(project.installedAssembly,id)));
+    &&(project.draftAssembly===undefined||validFrozenAppAssembly(project.draftAssembly,id))
+    &&(project.installedAssembly===undefined||project.installedAssembly===null||validFrozenAppAssembly(project.installedAssembly,id)));
 }
 /** Old drawing DTOs are checked only here, never imported into the live state or UI. */
 function legacyValid(v:Record<string,unknown>):boolean {
@@ -116,7 +116,7 @@ export function isCaptureScene(v:unknown):v is CaptureScene {
   if(!record(v))return false;
   if(v.version!==10&&v.version!==11&&v.version!==12)return legacyValid(v);
   return v.archived===undefined&&commonValid(v,false)&&record(v.display)&&['wallTime','managerShotRate','managerTokenRate'].every(k=>number((v.display as Record<string,unknown>)[k]))&&record(v.view)&&preferencesValid(v.view.preferences)&&photo(v.view.photo)&&v.view.photo.source!=='sketch'&&record(v.view.preferences)&&typeof v.view.preferences.radiusCustom==='boolean'&&(v.view.preferences.wallpaper===null||photo(v.view.preferences.wallpaper)&&v.view.preferences.wallpaper.source!=='sketch')&&record(v.appearance)&&record(v.screen)
-    &&isWorkshopState(v.workshop)&&isEditorCustomization(v.editorCustomization)&&strings(v.editorSkills)&&v.editorSkills.every(id=>BALANCE.workshop.skills.some(s=>s.id===id))&&(v.version===12?isCapturePageDesignV12(v.page):isLegacyPageDesign(v.page))
+    &&isFrozenWorkshopState(v.workshop)&&isEditorCustomization(v.editorCustomization)&&strings(v.editorSkills)&&v.editorSkills.every(id=>BALANCE.workshop.skills.some(s=>s.id===id))&&(v.version===12?isCapturePageDesignV12(v.page):isLegacyPageDesign(v.page))
     &&(v.version===10||isCaptureEvaluation(v.evaluation)&&projectsValid(v.appProjects)&&(v.selectedSetDocument===undefined||isSetDocument(v.selectedSetDocument))
       &&(v.notices===undefined||Array.isArray(v.notices)&&v.notices.length<=BALANCE.w3.maxPending&&v.notices.every(notice=>record(notice)&&text(notice.id)&&text(notice.title)&&text(notice.text)&&(notice.sender===undefined||text(notice.sender))))
       &&(v.production===undefined||Array.isArray(v.production)&&v.production.length<=BALANCE.capture.maxElements&&v.production.every(row=>record(row)&&text(row.id)&&text(row.kind)&&text(row.name)&&(row.app===undefined||text(row.app))&&strings(row.sourceIds)&&row.sourceIds.length<=BALANCE.capture.maxElements&&amountNumberFields(row,['baseRate','count','perSecond'])&&record(row.multipliers)&&Object.values(row.multipliers).every(number))));

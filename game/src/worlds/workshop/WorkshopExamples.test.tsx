@@ -20,7 +20,7 @@ function canvas(state:GameState,language='ja') {const id=state.run.workshop.acti
 function adjustReady() {let s=createFixture('tp2-route-era0',now)!;s=actWorkshop(s,{type:'buySet',set:'common'},now);s=actWorkshop(s,{type:'place',part:'common-frame',rect:getWorkshopPart('common-frame').defaultRect,example:true},now);for(const element of getWorkshopPart('common-frame').elements)s=actWorkshop(s,{type:'addElement',part:'common-frame',element},now);return s;}
 
 describe('お手本の組み立てと自由制作の二層',()=>{
- it('具体的な次の1手だけで、標準のまま本線22パーツと書き出しから出口まで進める',()=>{
+ it('具体的な次の1手だけで、標準のまま本線21パーツと書き出しから出口まで進める',()=>{
   let s=createFixture('tp2-route-era0',now)!,operations=0;const initialTokens=s.resources.tokens,finished:WorkshopPartId[]=[];
   while(operations++<250){
    const hand=workshopExampleHand(s);
@@ -38,7 +38,7 @@ describe('お手本の組み立てと自由制作の二層',()=>{
    }
   }
   expect(operations).toBeLessThan(250);expect(finished).toEqual(['common','foundation','files','mail'].flatMap(set=>partsForSet(set as 'common').map(p=>p.id)));
-  expect(completedParts(s)).toHaveLength(22);expect(s.resources.tokens-initialTokens).toBe(22*BALANCE.workshop.exportTokens);
+  expect(completedParts(s)).toHaveLength(21);expect(s.resources.tokens-initialTokens).toBe(21*BALANCE.workshop.exportTokens);
   expect(workshopExampleHand(s)).toEqual({kind:'exit'});
  });
  it.each(['ja','en','en-XA'])('%s：ONでは具体的指示は1つ、こだわりは工程中も完成後も開け、描画は状態を変えない',language=>{
@@ -51,17 +51,17 @@ describe('お手本の組み立てと自由制作の二層',()=>{
  it('OFFでも本線の唯一の印とヘルプを保ち、調整を直接表示し、ON/OFF表示だけでデザインは戻らない',()=>{
   let s=adjustReady();s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{radius:4}},now);s.persistent.examplesEnabled=false;const before=structuredClone(s),html=navigator(s);
   expect(html).not.toContain('data-workshop-next-hand');expect(html).not.toContain('data-workshop-customization');expect(html).toContain('data-workshop-inspector="true"');expect(html).toContain('data-workshop-action="confirmAdjustment"');
-  expect((html.match(/class="ws-next-indicator"/g)??[])).toHaveLength(1);expect(html).toContain('data-workshop-help-part="common-button"');expect(s).toEqual(before);
+  expect((html.match(/class="ws-next-indicator"/g)??[])).toHaveLength(1);expect(html).toContain('data-workshop-help-part="common-frame"');expect(s).toEqual(before);
  });
  it.each([0,1,2])('段%s：最初の配置だけに薄い輪郭を出し、自由操作や完成品には残さない',era=>{
   let s=createFixture(`tp2-route-era${era}`,now)!;s=actWorkshop(s,{type:'buySet',set:'common'},now);const before=structuredClone(s);
-  const html=canvas(s);expect(html).toContain('data-workshop-example-outline="common-frame"');expect(s).toEqual(before);
+  const html=canvas(s);expect(html).toContain('data-workshop-example-outline="common-frame"');expect(html).toContain('data-workshop-example-outline="common-button"');expect(html).toContain('data-workshop-example-outline="common-heading"');expect(html).toContain('data-workshop-example-outline="common-progress"');expect(s).toEqual(before);
   s.persistent.examplesEnabled=false;expect(canvas(s)).not.toContain('data-workshop-example-outline');
   s.persistent.examplesEnabled=true;s=actWorkshop(s,{type:'place',part:'common-frame',rect:getWorkshopPart('common-frame').defaultRect,example:true},now);
   expect(canvas(s)).not.toContain('data-workshop-example-outline');expect(canvas(s)).toContain('data-workshop-custom-placement="true"');
  });
  it('工程4は本物の仕上げ操作を案内し、代わりに完成させるボタンは置かない',()=>{
-  const s=createFixture('tp3-finish-common-scrollbar-era0',now)!,html=renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} i18n={createI18n('ja')} finishHint={id=>finishTrialFor(id)?.hintKey}/>);
-  expect(html).toContain('data-workshop-next-hand="finish"');expect(html).not.toContain('<button');expect(html).toContain(createI18n('ja').t(finishTrialFor('common-scrollbar')!.hintKey as MessageKey));
+  const s=createFixture('tp3-finish-mail-body-era0',now)!,html=renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} i18n={createI18n('ja')} finishHint={id=>finishTrialFor(id)?.hintKey}/>);
+  expect(html).toContain('data-workshop-next-hand="finish"');expect(html).not.toContain('<button');expect(html).toContain(createI18n('ja').t(finishTrialFor('mail-body')!.hintKey as MessageKey));
  });
 });

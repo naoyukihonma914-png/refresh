@@ -1,7 +1,7 @@
 import { BALANCE, type SpecKey } from '../config/balance';
 import { isScreenshot, type Screenshot } from './desktopState';
 import { isReleasePresentation, type ReleasePresentation } from './releasePresentation';
-import { isWorkshopState, isEditorCustomization, type WorkshopState, type EditorCustomization } from './workshopState';
+import { isFrozenWorkshopState, isEditorCustomization, type WorkshopState, type EditorCustomization } from './workshopState';
 
 /** Published metadata is independent of the current game's part/catalog identifiers. */
 export interface ProductScreen {
@@ -30,7 +30,7 @@ const frozenSpecCounts:Record<SpecKey,number>={color:4,storage:5,memory:5,resolu
 export function isProductScreen(s:unknown):s is ProductScreen {
   return obj(s)&&amount(s.pixels)&&count(s.cursors)&&strings(s.built)&&obj(s.specs)
     &&specKeys.every(key=>count((s.specs as Record<string,unknown>)[key])&&Number((s.specs as Record<string,unknown>)[key])<frozenSpecCounts[key])
-    &&(s.workshop===undefined||isWorkshopState(s.workshop))&&(s.editorCustomization===undefined||isEditorCustomization(s.editorCustomization))
+    &&(s.workshop===undefined||isFrozenWorkshopState(s.workshop))&&(s.editorCustomization===undefined||isEditorCustomization(s.editorCustomization))
     &&(s.editorStage===undefined||[0,1,2].includes(s.editorStage as number))&&(s.legacy===undefined||typeof s.legacy==='boolean');
 }
 export function isProductRecord(x:unknown):x is ProductRecord {

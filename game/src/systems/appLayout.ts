@@ -2,7 +2,7 @@ import { BALANCE } from '../config/balance';
 import type { BuiltApp, Rect } from './desktopState';
 import type { DesktopUpgrade } from '../config/balance';
 import type { AppSlotRole } from '../content/appRecipes';
-import {validAppAssembly,validLegacyMaterials,type AppAssembly,type AssemblyMaterial} from './appAssemblySchema';
+import {foldLegacyAssemblyMaterials,validAppAssembly,validLegacyMaterials,type AppAssembly,type AssemblyMaterial} from './appAssemblySchema';
 
 export const BUILDABLE_APPS = ['files','mail','photo','bin','clock','theme','terminal','manager'] as const satisfies readonly BuiltApp[];
 export const APP_PARTS = {
@@ -94,18 +94,31 @@ export function repairAppProjects(raw:unknown,apps:BuiltApp[],upgrades:DesktopUp
  const fallback=migrateAppProjects(apps,upgrades,skills);if(!obj(raw))return fallback;
  for(const app of BUILDABLE_APPS){const p=raw[app];if(!fallback[app]||!obj(p)||!Array.isArray(p.crafted)||!p.crafted.every(id=>allAppParts(app).includes(id as AppPartId))||new Set(p.crafted).size!==p.crafted.length||!validLayout(p.draft,app)||!(p.installed===null&&!apps.includes(app)||validLayout(p.installed,app))||!Array.isArray(p.undo)||!Array.isArray(p.redo)||p.undo.length>BALANCE.appBuild.history||p.redo.length>BALANCE.appBuild.history||![...p.undo,...p.redo].every(l=>validLayout(l,app)))continue;
   if(p.legacyMaterials!==undefined&&!validLegacyMaterials(p.legacyMaterials,app))continue;
+  const foldAssembly=(raw:unknown):AppAssembly|null=>{
+   if(validAppAssembly(raw,app))return raw;
+   if(!obj(raw)||!Array.isArray(raw.common)||!raw.common.some(m=>obj(m)&&(m.source as string)==='common-scrollbar'))return null;
+   const folded={...raw,common:foldLegacyAssemblyMaterials(raw.common as AssemblyMaterial[])};
+   return validAppAssembly(folded,app)?folded as AppAssembly:null;
+  };
   const repairAssemblyGeometry=(raw:unknown,layout:AppLayout|null):AppAssembly|null=>{
    if(!layout)return null;
    if(validAppAssembly(raw,app))return raw;
-   if(!obj(raw)||!Array.isArray(raw.slots)||!raw.slots.every(slot=>obj(slot)&&layout.parts.some(part=>part.id===slot.role)))return null;
-   const candidate={...raw,width:layout.width,height:layout.height,slots:raw.slots.map(slot=>{const part=layout.parts.find(part=>part.id===slot.role)!;return {...slot,rect:{x:part.x,y:part.y,width:part.width,height:part.height}};})};
+   const folded=foldAssembly(raw);const source=folded??raw;
+   if(!obj(source)||!Array.isArray(source.slots)||!source.slots.every(slot=>obj(slot)&&layout.parts.some(part=>part.id===slot.role)))return null;
+   const candidate={...source,width:layout.width,height:layout.height,slots:source.slots.map(slot=>{const part=layout.parts.find(part=>part.id===slot.role)!;return {...slot,rect:{x:part.x,y:part.y,width:part.width,height:part.height}};})};
    return validAppAssembly(candidate,app)?candidate:null;
+  };
+  const foldHistory=(list:unknown):AppAssembly[]|null=>{
+   if(!Array.isArray(list)||list.length>BALANCE.appBuild.history)return null;
+   let changed=false;const out:AppAssembly[]=[];for(const entry of list){const folded=foldAssembly(entry);if(!folded)return null;if(folded!==entry)changed=true;out.push(folded);}return changed?out:list as AppAssembly[];
   };
   if(p.installedAssembly!==undefined&&(p.installed===null)!==(p.installedAssembly===null))continue;
   const draftAssembly=p.draftAssembly===undefined?undefined:repairAssemblyGeometry(p.draftAssembly,p.draft as AppLayout);
   const installedAssembly=p.installedAssembly===undefined?undefined:p.installedAssembly===null?null:repairAssemblyGeometry(p.installedAssembly,p.installed as AppLayout);
-  if(p.draftAssembly!==undefined&&!draftAssembly||p.installedAssembly!==undefined&&p.installedAssembly!==null&&!installedAssembly||p.assemblyUndo!==undefined&&(!Array.isArray(p.assemblyUndo)||p.assemblyUndo.length>BALANCE.appBuild.history||!p.assemblyUndo.every(a=>validAppAssembly(a,app)))||p.assemblyRedo!==undefined&&(!Array.isArray(p.assemblyRedo)||p.assemblyRedo.length>BALANCE.appBuild.history||!p.assemblyRedo.every(a=>validAppAssembly(a,app))))continue;
-  const project=(draftAssembly!==p.draftAssembly||installedAssembly!==p.installedAssembly?{...p,draftAssembly,installedAssembly}:p) as unknown as AppProject;
+  const assemblyUndo=p.assemblyUndo===undefined?undefined:foldHistory(p.assemblyUndo);
+  const assemblyRedo=p.assemblyRedo===undefined?undefined:foldHistory(p.assemblyRedo);
+  if(p.draftAssembly!==undefined&&!draftAssembly||p.installedAssembly!==undefined&&p.installedAssembly!==null&&!installedAssembly||p.assemblyUndo!==undefined&&!assemblyUndo||p.assemblyRedo!==undefined&&!assemblyRedo)continue;
+  const project=(draftAssembly!==p.draftAssembly||installedAssembly!==p.installedAssembly||assemblyUndo!==p.assemblyUndo||assemblyRedo!==p.assemblyRedo?{...p,draftAssembly,installedAssembly,...(assemblyUndo!==undefined?{assemblyUndo}:{}),...(assemblyRedo!==undefined?{assemblyRedo}:{})}:p) as unknown as AppProject;
   if([project.draft,...(project.installed?[project.installed]:[]),...project.undo,...project.redo].some(l=>l.parts.some(part=>!project.crafted.includes(part.id))))continue;
   fallback[app]=project;
  }

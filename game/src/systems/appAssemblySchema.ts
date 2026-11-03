@@ -17,6 +17,21 @@ const ids=new Set(WORKSHOP_PARTS.map(p=>p.id));
 export function validAssemblyMaterial(p:unknown,legacy=false):p is AssemblyMaterial {
  return obj(p)&&typeof p.source==='string'&&ids.has(p.source as WorkshopPartId)&&Array.isArray(p.elements)&&p.elements.every(e=>typeof e==='string'&&WORKSHOP_PARTS.find(def=>def.id===p.source)?.elements.includes(e))&&new Set(p.elements).size===p.elements.length&&WORKSHOP_PARTS.find(def=>def.id===p.source)!.elements.every(element=>(p.elements as string[]).includes(element))&&(isComponentDesign(p.design)||legacy&&obj(p.design)&&finite(p.design.fontSize)&&p.design.fontSize>=10&&p.design.fontSize<=BALANCE.pageDesign.buttonFontMax&&isComponentDesign({...p.design,fontSize:BALANCE.workshop.design.fontSize}));
 }
+/** The scrollbar material merged into the frame (2026-11): fold a legacy common-material list into the frame's. */
+export function foldLegacyAssemblyMaterials(common:AssemblyMaterial[]):AssemblyMaterial[] {
+ const scroll=common.find(p=>(p.source as string)==='common-scrollbar');if(!scroll)return common;
+ const rest=common.filter(p=>(p.source as string)!=='common-scrollbar');
+ const frame=rest.find(p=>p.source==='common-frame');
+ if(frame)return rest.map(p=>p===frame?{...frame,elements:[...WORKSHOP_PARTS.find(d=>d.id==='common-frame')!.elements],design:{...frame.design,scrollbarWidth:scroll.design.scrollbarWidth,arrows:scroll.design.arrows}}:p);
+ const frameDef=WORKSHOP_PARTS.find(p=>p.id==='common-frame')!;
+ return [...rest,{source:'common-frame' as WorkshopPartId,design:scroll.design,elements:[...frameDef.elements]}];
+}
+/** Frozen recordings keep the legacy scrollbar material; validate them through a virtual fold. */
+export function validFrozenAppAssembly(x:unknown,app:BuiltApp):x is AppAssembly {
+ if(validAppAssembly(x,app))return true;
+ if(!obj(x)||!Array.isArray(x.common)||!x.common.some(p=>obj(p)&&(p.source as string)==='common-scrollbar'))return false;
+ return validAppAssembly({...x,common:foldLegacyAssemblyMaterials(x.common as AssemblyMaterial[])},app);
+}
 export function validAppAssembly(x:unknown,app:BuiltApp):x is AppAssembly {
  if(!obj(x)||x.app!==app||!['v0.1','v1','v2'].includes(x.version as string)||!finite(x.width)||!finite(x.height)||x.width<BALANCE.appBuild.minWidth||x.height<BALANCE.appBuild.minHeight||x.width>BALANCE.appBuild.maxWidth||x.height>BALANCE.appBuild.maxHeight||!Array.isArray(x.common)||!Array.isArray(x.slots)||(x.legacy!==undefined&&typeof x.legacy!=='boolean'))return false;
  if(x.common.length>WORKSHOP_PARTS.filter(p=>p.set==='common').length||new Set(x.common.map(p=>obj(p)?p.source:null)).size!==x.common.length)return false;

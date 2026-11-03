@@ -299,3 +299,12 @@
 .workshop-root .ws-world4-preparation>button {width:100%;}
 .workshop-root .data-settings {margin-block-start:24px;border-block-start:1px solid #aaa;padding-block-start:12px;}
 .workshop-root .data-settings button {margin-inline-end:8px;}
+.workshop-root .ws-frame-scrollpane {position:absolute;right:0;top:0;bottom:0;display:flex;background:#fff;border-inline-start:1px solid #999;z-index:4;}
+.workshop-root .ws-frame-scroll-list {flex:1;overflow-y:auto;scrollbar-width:none;min-inline-size:0;}
+.workshop-root .ws-frame-scroll-list::-webkit-scrollbar {display:none;}
+.workshop-root .ws-frame-scroll-list ul {list-style:none;margin:0;padding:4px 6px;display:flex;flex-direction:column;gap:5px;font-size:12px;}
+.workshop-root .ws-frame-scroll-list li {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.workshop-root .ws-frame-scroll-rail {display:flex;flex-direction:column;background:#e8e4da;border-inline-start:1px solid #bbb;flex:none;}
+.workshop-root .ws-frame-scroll-rail>button {flex:none;display:grid;place-items:center;padding:1px 0;background:none;border:none;cursor:pointer;color:#333;}
+.workshop-root .ws-frame-scroll-track {flex:1;position:relative;}
+.workshop-root .ws-frame-scroll-thumb {position:absolute;inset-inline:1px;background:#a49a83;border-radius:2px;cursor:grab;touch-action:none;min-block-size:16px;}

@@ -16,7 +16,7 @@ import { creditPixels, cursorPixelsPerSecond, manualClickValue, passivePixelsPer
 
 const now=1_800_000_000_000;
 function workshop():GameState {
-  let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(x=>x.id);
+  let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(x=>x.id);s.run.seed.page.fitted=['pixels','generator','heading','notice','upgrades','cursors'];
   s=creditPixels(s,10_000_000);return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);
 }
 function complete(s:GameState,id:WorkshopPartId):GameState {
@@ -34,14 +34,14 @@ function completeSet(s:GameState,set:UiSetId):GameState {
 }
 
 describe('第3版：工房の制作と経済',()=>{
-  it('47部品は本線22と任意25、2つのプラグインは別枠で個別の毎秒を持つ',()=>{
-    expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras'&&p.set!=='stream')).toHaveLength(47);
-    expect(WORKSHOP_PARTS.filter(p=>['common','foundation','files','mail'].includes(p.set))).toHaveLength(22);
+  it('46部品は本線21と任意25、2つのプラグインは別枠で個別の毎秒を持つ',()=>{
+    expect(WORKSHOP_PARTS.filter(p=>p.set!=='extras'&&p.set!=='stream')).toHaveLength(46);
+    expect(WORKSHOP_PARTS.filter(p=>['common','foundation','files','mail'].includes(p.set))).toHaveLength(21);
     expect(WORKSHOP_PARTS.filter(p=>p.set==='extras')).toHaveLength(2);
-    expect(new Set(WORKSHOP_PARTS.map(p=>p.id)).size).toBe(53);expect(WORKSHOP_PARTS.filter(p=>p.set==='stream')).toHaveLength(4);
+    expect(new Set(WORKSHOP_PARTS.map(p=>p.id)).size).toBe(52);expect(WORKSHOP_PARTS.filter(p=>p.set==='stream')).toHaveLength(4);
     expect(new Set(Object.values(BALANCE.workshop.partRates)).size).toBeGreaterThan(10);
   });
-  it('未来用4つを含む53部品すべての標準配置は同時に置いても最小寸法・刻み・包含・非重複を満たす',()=>{
+  it('未来用4つを含む52部品すべての標準配置は同時に置いても最小寸法・刻み・包含・非重複を満たす',()=>{
     const s=workshop();s.run.version='v2';s.run.world='desktop';s.run.desktop.entered=true;s.persistent.specs.color=1;s.persistent.editorSkills=['extraParts'];s.run.workshop.purchasedSets=UI_SETS.map(set=>set.id);
     for(const definition of WORKSHOP_PARTS)s.run.workshop.parts[definition.id]={step:1,rect:{...definition.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
     for(const definition of WORKSHOP_PARTS){const min=partMinimumSize(s,definition.id);expect(definition.defaultRect.width).toBeGreaterThanOrEqual(min.width);expect(definition.defaultRect.height).toBeGreaterThanOrEqual(min.height);expect(partRectValid(s,definition.id,definition.defaultRect)).toBe(true);}
@@ -132,7 +132,7 @@ describe('第3版：工房の制作と経済',()=>{
   });
   it('セットは完成した時点で書類になり、あとから書き出しても同じ書類を更新する',()=>{
     let s=completeSet(workshop(),'common');expect(s.persistent.setDocuments).toHaveLength(1);expect(completedSets(s)).toEqual(['common']);
-    expect(Object.values(s.persistent.setDocuments[0]!.parts)).toHaveLength(5);
+    expect(Object.values(s.persistent.setDocuments[0]!.parts)).toHaveLength(4);
     s=actWorkshop(s,{type:'export'},now);expect(s.persistent.setDocuments).toHaveLength(1);
     expect(Object.values(s.persistent.setDocuments[0]!.parts).every(p=>p!.exportedAt===now)).toBe(true);
   });
@@ -169,9 +169,9 @@ describe('第3版：工房の制作と経済',()=>{
     expect(next.persistent.setDocuments.find(entry=>entry.id==='v0.1:common')).toBe(oldSet);expect(oldSet).toEqual(oldCopy);
     expect(next.persistent.products).toBe(products);expect(product).toEqual(productCopy);expect(decodeSave(encodeSave(next))).toEqual(next);
   });
-  it('全47部品を固有の実操作で仕上げ、写真7つも完成・保存できる',()=>{
+  it('全46部品を固有の実操作で仕上げ、写真7つも完成・保存できる',()=>{
     let s=workshop();for(const set of ['common','foundation','files','mail','photo','bin','clock','theme','terminal','manager'] as const){s=actWorkshop(s,{type:'buySet',set},now);expect(isGameState(s)).toBe(true);for(const part of partsForSet(set))s=complete(s,part.id);}
-    expect(completedParts(s)).toHaveLength(47);expect(completedSets(s)).toHaveLength(10);expect(s.persistent.setDocuments).toHaveLength(10);
+    expect(completedParts(s)).toHaveLength(46);expect(completedSets(s)).toHaveLength(10);expect(s.persistent.setDocuments).toHaveLength(10);
     expect(partsForSet('photo').every(p=>s.run.workshop.parts[p.id]!.tested)).toBe(true);expect(isGameState(s)).toBe(true);
   });
   it('出口は必須セット・200000ピクセル・256色を満たすまで開かず、確認は状態だけを残す',()=>{

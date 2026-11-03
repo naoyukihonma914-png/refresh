@@ -56,7 +56,6 @@ function StaticPart({id,production:p,workshop,i18n,now,rows,pixels}:{id:Workshop
   const fileRows=(showDates:boolean)=>rows.map(row=><tr key={row.id}><td>{row.name}</td>{showDates&&<td>{row.at===null?'':i18n.legacyDate(row.at)}</td>}</tr>);
   let content:ReactNode;
   switch(id){
-    case 'common-scrollbar':content=has('track')&&<div className="capture-part-scrollbar" data-static-thumb={has('thumb')} data-static-arrows={has('arrows')&&d.arrows} style={{scrollbarWidth:d.scrollbarWidth<BALANCE.workshop.design.scrollbarWidth?'thin':'auto'}}><ul>{rows.map(row=><li key={row.id}>{row.name}</li>)}</ul></div>;break;
     case 'common-button':content=button('label',i18n.t('ws.preview.press'));break;
     case 'common-heading':content=has('label')&&<strong style={{borderBottom:has('separator')&&d.separator?'1px solid currentColor':undefined}}>{i18n.t('ws.preview.folderHeading')}</strong>;break;
     case 'common-progress':content=has('track')&&<div className="capture-progress-group"><div className={`capture-part-progress ${d.progressStyle}`} style={{height:d.progressHeight}}>{has('fill')&&<i style={{width:`${progress}%`}}/>}</div>{has('percent')&&d.showPercent&&<output>{i18n.t('ws.productionProgress',{count:i18n.integer(complete),total:i18n.integer(total)})}</output>}</div>;break;

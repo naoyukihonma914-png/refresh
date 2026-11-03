@@ -46,6 +46,7 @@ export interface GameState {
   };
   persistent: {
     examplesEnabled:boolean;
+    doubleClickFit:boolean;
     testplay:{layoutGuideSeen:boolean;helpSeen:UiSetId[]};
     progress:Progress;
     appearance:Appearance;
@@ -77,13 +78,14 @@ export function createInitialState(now: number): GameState {
     run: {
       advice:createAdviceState(),play:createPlay(),version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
       seed: {
-        page:createPageDesign(),built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
+        page:{...createPageDesign(),fitted:['pixels','generator']},built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
       },
       workshop: createWorkshopState(), desktop: createDesktopState(),
     },
     persistent: {
       examplesEnabled:true,
+      doubleClickFit:false,
       testplay:{layoutGuideSeen:false,helpSeen:[]},
       progress:createProgress(),appearance:createAppearance(),
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
@@ -133,6 +135,7 @@ export function isGameState(value: unknown): value is GameState {
     || run.shipping.phase==='store'&&(run.shipping.storeElapsedMs===undefined||run.shipping.elapsedMs!==0)))return false;
   if(!isProgress(persistent.progress)||!isPlay(run.play))return false;
   if(typeof persistent.examplesEnabled!=='boolean')return false;
+  if(typeof persistent.doubleClickFit!=='boolean')return false;
   if(!isRecord(persistent.testplay)||typeof persistent.testplay.layoutGuideSeen!=='boolean'||!Array.isArray(persistent.testplay.helpSeen)||new Set(persistent.testplay.helpSeen).size!==persistent.testplay.helpSeen.length||!persistent.testplay.helpSeen.every(id=>SET_IDS.includes(id as UiSetId)))return false;
   if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;

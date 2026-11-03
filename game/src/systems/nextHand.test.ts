@@ -5,12 +5,17 @@ import {createFixture} from './fixtures';
 import {desktopConditions} from './desktop';
 import {nextDesktopHand,nextSeedHand} from './nextHand';
 import {buildSeed} from './seed';
+import {actPageDesign} from './pageDesign';
 import {createInitialState} from './state';
 
 const now=1_800_000_000_000;
 describe('お手本：世界1と世界3の次の手',()=>{
  it('新規開始から生成→買う→次の生成を、実際の価格と制作の順序で案内する',()=>{
   let state=createInitialState(now);
+  for(const part of ['heading','notice','upgrades'] as const){
+   expect(nextSeedHand(state)).toEqual({kind:'seed-fit',part});
+   state=actPageDesign(state,{type:'fit',part});
+  }
   for(const item of BALANCE.w1.items){
    expect(nextSeedHand(state)).toMatchObject({kind:'seed-generate',item:item.id});
    const before=structuredClone(state),hand=nextSeedHand(state)!;expect(state).toEqual(before);
@@ -22,7 +27,7 @@ describe('お手本：世界1と世界3の次の手',()=>{
   expect(state.run.world).toBe('kumiki');expect(nextSeedHand(state)).toBeNull();
  });
  it('16色の案件でカラーを作るよう案内せず、世界外やOFFで出さない',()=>{
-  const state=createFixture('contract-no-color',now)!;state.run.world='seed';state.run.seed.built=['border','save'];
+  const state=createFixture('contract-no-color',now)!;state.run.world='seed';state.run.seed.built=['border','save'];state.run.seed.page.fitted=['pixels','generator','heading','notice','upgrades','cursors'];
   expect(nextSeedHand(state)).toMatchObject({item:'font'});
   state.persistent.examplesEnabled=false;expect(nextSeedHand(state)).toBeNull();
   const desktop=createFixture('desktop-early',now)!;desktop.persistent.examplesEnabled=false;expect(nextDesktopHand(desktop)).toBeNull();

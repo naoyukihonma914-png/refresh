@@ -23,7 +23,7 @@ import { applySeedSkills, buildKnownSeed, buildSeed, freshMomentum, pressSeed, r
 import type { GuideId } from './state';
 import { actWorkshop, enterWorkshop, canAssembleDesktop, type WorkshopAction } from './workshop';
 import type { WorkshopPartId } from '../content/workshopCatalog';
-import { examplePlacement, setExamplesEnabled } from './workshopExamples';
+import { examplePlacement, setDoubleClickFit, setExamplesEnabled } from './workshopExamples';
 import { completionFeedback, workshopFeedbackRun, workshopVisible, type WorkshopCompletionFeedbackEvent } from './workshopFeedback';
 import { enterDesktop } from './desktop';
 import { archiveGuide, beginProductRelease, buySpec, canRelease, shippingComplete, showShipping, startNextVersion } from './release';
@@ -265,6 +265,14 @@ export class GameRuntime {
     this.publish({state,workshopSnap:undefined});this.persist();
   };
 
+  setDoubleClickFit = (enabled:boolean) => {
+    if(!this.canOperate()||this.snapshot.introVisible||this.suspended||this.platform.visibility.isHidden())return;
+    this.advanceForeground();
+    const state=setDoubleClickFit(this.snapshot.state,enabled);
+    if(state===this.snapshot.state)return;
+    this.publish({state});this.persist();
+  };
+
   startGame = () => {
     if (!this.canOperate() || !this.snapshot.introVisible) return;
     this.lastActiveAt = this.platform.clock.monotonicNow();
@@ -392,7 +400,10 @@ export class GameRuntime {
 
   actPage = (action:PageAction) => {
     if(!this.canOperate()||this.snapshot.state.run.world==='release')return;
-    this.advanceForeground();const previous=this.snapshot.state;this.publish({state:observeTesseraAction(previous,actPageDesign(previous,action),action.type==='color'&&action.slot==='button'?'design':'page',this.platform.clock.wallNow())});this.persist();
+    this.advanceForeground();const previous=this.snapshot.state,next=actPageDesign(previous,action);
+    this.publish({state:observeTesseraAction(previous,next,action.type==='color'&&action.slot==='button'?'design':'page',this.platform.clock.wallNow())});
+    if(action.type==='fit'&&next!==previous)this.sound('build',next);
+    this.persist();
   };
 
   applySeedSettings = (selected: readonly SeedSkill[], pattern: GameState['persistent']['seedAppearance']['pattern'], marquee: boolean) => {
@@ -415,7 +426,7 @@ export class GameRuntime {
     this.advanceForeground();
     const state = this.snapshot.state;
     if (canSave(state)) return;
-    this.publish({ state: { ...state, run: { ...state.run, seed: { ...state.run.seed, built: ['border', 'save'], autoCursors: 1 } } } });
+    this.publish({ state: { ...state, run: { ...state.run, seed: { ...state.run.seed, built: ['border', 'save'], autoCursors: 1, page: { ...state.run.seed.page, fitted: ['pixels', 'generator', 'heading', 'notice', 'upgrades', 'cursors'] } } } } });
     this.persist();
   };
 

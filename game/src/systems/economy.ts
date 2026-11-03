@@ -2,6 +2,7 @@ import { BALANCE } from '../config/balance';
 import { JOB_IDS, type AppId } from './desktopState';
 import { jobProduction, jobsRate } from './desktopJobs';
 import { globalMultiplier } from './longPlay';
+import { effectiveFitted } from './pageDesign';
 import { appBasePixelsPerSecond, appUpdateMultiplier, completedComponentSources, desktopFoundationSources, editorPartSources, installedAppSources, productionColorMultiplier, productionCreditMultiplier, seedComponentSources, sourceTotal } from './productionModel';
 import type { GameState } from './state';
 
@@ -21,7 +22,7 @@ export function manualClickValue(state:GameState):number {
 }
 export const cursorPressesPerSecond=(s:GameState):number=>BALANCE.w1.cursor_press_per_sec*(s.run.seed.built.includes('color')?BALANCE.w1.color_cursor_mult:1)*BALANCE.spec.refresh[s.persistent.specs.refresh]!.multiplier;
 export const cursorPixelsPerSecond=(s:GameState):number=>s.run.world==='release'?0:manualClickValue(s)*cursorPressesPerSecond(s);
-export const homePixelsPerSecond=(s:GameState):number=>s.run.seed.autoCursors*cursorPixelsPerSecond(s);
+export const homePixelsPerSecond=(s:GameState):number=>effectiveFitted(s.run.seed.page,s.persistent.examplesEnabled).includes('cursors')?s.run.seed.autoCursors*cursorPixelsPerSecond(s):0;
 const componentMultiplier=productionCreditMultiplier;
 export const seedPartsPixelsPerSecond=(s:GameState):number=>['seed','kumiki'].includes(s.run.world)?sourceTotal(seedComponentSources(s))*componentMultiplier(s):0;
 export const workshopPartsPixelsPerSecond=(s:GameState):number=>['seed','kumiki'].includes(s.run.world)?sourceTotal(completedComponentSources(s))*componentMultiplier(s):0;

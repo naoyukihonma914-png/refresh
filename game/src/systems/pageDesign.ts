@@ -22,6 +22,25 @@ export interface PageDesign {
  headingFont:PageFont;bodyFont:PageFont;motion:typeof PAGE_MOTIONS[number];heading:string;
  layout:PageLayout|null;partFonts:Record<PagePart,PageTextSize>;
  partColors?:Partial<Record<PagePart,{background:string|null;text:string|null}>>;
+ fitted?:PagePart[];piecePositions?:Partial<Record<PagePart,{x:number;y:number}>>;
+}
+/** With the guide (お手本) on, seed parts arrive as pieces fitted into background recesses; all of them are out at once and can be fitted in any order. FIT_ORDER only orders the guidance hint. */
+export const FIT_ORDER:PagePart[]=['heading','notice','upgrades','cursors'];
+export const effectiveFitted=(page:PageDesign,examplesEnabled:boolean):PagePart[]=>!examplesEnabled?[...PAGE_PARTS]:page.fitted?[...page.fitted]:[...PAGE_PARTS];
+export function piecesToFit(page:PageDesign,examplesEnabled:boolean,autoCursors:number):PagePart[] {
+ if(!examplesEnabled)return [];const fitted=effectiveFitted(page,true);
+ return FIT_ORDER.filter(id=>!fitted.includes(id)&&(id!=='cursors'||autoCursors>0));
+}
+export function nextPieceToFit(page:PageDesign,examplesEnabled:boolean,autoCursors:number):PagePart|null {
+ return piecesToFit(page,examplesEnabled,autoCursors)[0]??null;
+}
+/** Display layout while pieces wait: each piece hovers beside its socket; fitted parts sit at their layout rects. */
+export function socketLayout(page:PageDesign,base:PageLayout,examplesEnabled:boolean,autoCursors:number):PageLayout {
+ const pieces=piecesToFit(page,examplesEnabled,autoCursors);if(!pieces.length)return base;
+ const parts={...base.parts},off=BALANCE.pageDesign.socketSpawnOffset;
+ for(const piece of pieces){const socket=base.parts[piece],stored=page.piecePositions?.[piece];
+  parts[piece]={...socket,x:stored?.x??Math.max(0,Math.min(base.width-socket.width,socket.x+off)),y:stored?.y??Math.max(0,Math.min(base.height-socket.height,socket.y+off))};}
+ return {...base,parts};
 }
 export const pagePartColors=(page:PageDesign,id:PagePart):{background:string|null;text:string|null}=>page.partColors?.[id]??{background:null,text:null};
 export const createPageDesign=():PageDesign=>({background:null,text:null,button:null,headingFont:'sans',bodyFont:'sans',motion:'push',heading:'',layout:null,partFonts:Object.fromEntries(PAGE_PARTS.map(id=>[id,'normal'])) as PageDesign['partFonts']});
@@ -144,6 +163,10 @@ export function isPageDesign(value:unknown):value is PageDesign {
   ||!PAGE_FONTS.includes(value.headingFont as PageFont)||!PAGE_FONTS.includes(value.bodyFont as PageFont)||!PAGE_MOTIONS.includes(value.motion as PageDesign['motion'])||typeof value.heading!=='string'||[...value.heading].length>80
   ||!obj(value.partFonts)||Object.keys(value.partFonts).length!==PAGE_PARTS.length||!PAGE_PARTS.every(id=>PAGE_TEXT_SIZES.includes((value.partFonts as Record<string,unknown>)[id] as PageTextSize)))return false;
  if(value.background&&value.text&&contrast(value.background as string,value.text as string)<4.5)return false;
+ const fittedList=(value as {fitted?:unknown}).fitted;
+ if(fittedList!==undefined&&(!Array.isArray(fittedList)||!fittedList.every(id=>PAGE_PARTS.includes(id as PagePart))||new Set(fittedList).size!==fittedList.length))return false;
+ const piecePositions=(value as {piecePositions?:unknown}).piecePositions;
+ if(piecePositions!==undefined&&(!obj(piecePositions)||!Object.keys(piecePositions).every(key=>PAGE_PARTS.includes(key as PagePart)&&obj((piecePositions as Record<string,unknown>)[key])&&['x','y'].every(axis=>{const v=((piecePositions as Record<string,Record<string,unknown>>)[key]!)[axis];return typeof v==='number'&&Number.isFinite(v)&&v>=0;}))))return false;
  const partColors=(value as {partColors?:unknown}).partColors;
  if(partColors!==undefined&&(!obj(partColors)||!Object.keys(partColors).every(key=>PAGE_PARTS.includes(key as PagePart)&&obj((partColors as Record<string,unknown>)[key])&&['background','text'].every(slot=>{const v=((partColors as Record<string,Record<string,unknown>>)[key]!)[slot];return v===null||typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v);}))))return false;
  if(value.layout===null)return true;
@@ -157,6 +180,7 @@ export type PageAction=
  |{type:'motion';motion:PageDesign['motion']}|{type:'layout';layout:PageLayout}
  |{type:'part-size';part:PagePart;size:PagePartSize}|{type:'part-font';part:PagePart;size:PageTextSize}
  |{type:'part-color';part:PagePart;slot:'background'|'text';color:string|null}
+ |{type:'fit';part:PagePart}|{type:'piece-move';part:PagePart;x:number;y:number}
  |{type:'recommended'|'reset'|'layout-guide-seen'}|{type:'heading';heading:string};
 export function actPageDesign(s:GameState,a:PageAction):GameState {
  if(a.type==='layout-guide-seen')return s.run.seed.built.includes('layout')&&!s.persistent.testplay.layoutGuideSeen?{...s,persistent:{...s.persistent,testplay:{...s.persistent.testplay,layoutGuideSeen:true}}}:s;
@@ -174,7 +198,7 @@ export function actPageDesign(s:GameState,a:PageAction):GameState {
  if(a.type==='motion'){if(!b.includes('motion')||!PAGE_MOTIONS.includes(a.motion))return s;page.motion=a.motion;}
  if(a.type==='layout'){
   if(!b.includes('layout')||!isPageDesign({...p,layout:a.layout}))return s;
-  page.layout=structuredClone(a.layout);
+  page.layout=structuredClone(a.layout);page.piecePositions={};
  }
  if(a.type==='part-size'){
   if(!b.includes('layout')||!PAGE_PARTS.includes(a.part)||!PAGE_PART_SIZES.includes(a.size))return s;
@@ -192,7 +216,18 @@ export function actPageDesign(s:GameState,a:PageAction):GameState {
   else{current.background=a.color;const bg=a.color??colors.background;if(current.text&&contrast(bg,current.text)<4.5)current.text=readableText(bg);}
   page.partColors={...page.partColors,[a.part]:current};
  }
- if(a.type==='recommended'){if(!b.includes('layout'))return s;page.layout=recommendedPage();}
+ if(a.type==='fit'){
+  if(!piecesToFit(p,s.persistent.examplesEnabled,s.run.seed.autoCursors).includes(a.part))return s;
+  page.fitted=[...effectiveFitted(p,true),a.part];
+  if(page.piecePositions){page.piecePositions={...page.piecePositions};delete page.piecePositions[a.part];}
+ }
+ if(a.type==='piece-move'){
+  if(!piecesToFit(p,s.persistent.examplesEnabled,s.run.seed.autoCursors).includes(a.part))return s;
+  const base=p.layout??initialPageLayout(),rect=base.parts[a.part];
+  const x=Math.max(0,Math.min(base.width-rect.width,snap(Math.round(a.x)))),y=Math.max(0,Math.min(base.height-rect.height,snap(Math.round(a.y))));
+  page.piecePositions={...page.piecePositions,[a.part]:{x,y}};
+ }
+ if(a.type==='recommended'){if(!b.includes('layout'))return s;page.layout=recommendedPage();page.piecePositions={};}
  if(a.type==='reset')page={...createPageDesign(),heading:p.heading,layout:b.includes('layout')?recommendedPage():null};
  if(a.type==='heading'){if(!b.includes('font'))return s;page.heading=[...a.heading].slice(0,80).join('');}
  if(a.type==='color'&&a.slot==='button')editorCustomization.accent=a.color??BALANCE.workshop.customization.accent;
