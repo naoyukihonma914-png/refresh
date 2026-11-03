@@ -5,9 +5,10 @@ import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
 import { productionCreditMultiplier } from './productionModel';
 import type { GameState } from './state';
-import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId } from './workshopState';
+import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId, type WorkshopHelpTarget, isWorkshopHelpTarget } from './workshopState';
 
 export type WorkshopAction =
+  | {type:'help';target:WorkshopHelpTarget|null}
   | {type:'buySet';set:UiSetId} | {type:'selectPart';part:WorkshopPartId}
   | {type:'place';part?:WorkshopPartId;rect:WorkshopRect}
   | {type:'addElement';part?:WorkshopPartId;element:string;index?:number;side?:'start'|'end'}
@@ -66,6 +67,10 @@ function showGuide(s:GameState,id:WorkshopGuideId):GameState {
   if(g.seen.includes(id))return s;
   return {...s,run:{...s.run,workshop:{...s.run.workshop,guide:{seen:[...g.seen,id],current:id,collapsed:false}}}};
 }
+function showFirstSetHelp(s:GameState,set:UiSetId):GameState {
+  if(s.persistent.testplay.helpSeen.includes(set))return s;
+  return {...s,persistent:{...s.persistent,testplay:{...s.persistent.testplay,helpSeen:[...s.persistent.testplay.helpSeen,set]}},run:{...s.run,workshop:{...s.run.workshop,helpTarget:{set}}}};
+}
 function grantExtraMaterials(s:GameState):GameState {
   const w=s.run.workshop;
   if(!w.entered||!s.persistent.editorSkills.includes('extraParts'))return s;
@@ -73,7 +78,7 @@ function grantExtraMaterials(s:GameState):GameState {
   if(w.purchasedSets.includes('extras')&&definitions.every(d=>w.parts[d.id]))return s;
   const parts={...w.parts};
   for(const d of definitions)if(!parts[d.id])parts[d.id]={step:0,rect:{...d.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
-  return {...s,run:{...s.run,workshop:{...w,purchasedSets:w.purchasedSets.includes('extras')?w.purchasedSets:[...w.purchasedSets,'extras'],parts,activePart:w.activePart??definitions[0]!.id}}};
+  return showFirstSetHelp({...s,run:{...s.run,workshop:{...w,purchasedSets:w.purchasedSets.includes('extras')?w.purchasedSets:[...w.purchasedSets,'extras'],parts,activePart:w.activePart??definitions[0]!.id}}},'extras');
 }
 export function enterWorkshop(s:GameState):GameState {
   if(s.run.workshop.entered)return grantExtraMaterials(s);
@@ -136,6 +141,10 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
   state=grantExtraMaterials(state);
   let s=state;
   const w=s.run.workshop;
+  if(action.type==='help'){
+    if(action.target!==null&&!isWorkshopHelpTarget(action.target))return s;
+    return {...s,run:{...s.run,workshop:{...w,helpTarget:action.target?{...action.target}:null}}};
+  }
   if(action.type==='guide'){
     if(action.id==='close')return {...s,run:{...s.run,workshop:{...w,guide:{...w.guide,current:null,collapsed:true}}}};
     if(!w.guide.seen.includes(action.id))return s;
@@ -148,6 +157,7 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     for(const d of partsForSet(action.set))parts[d.id]={step:0,rect:{...d.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
     s={...s,resources:{...s.resources,pixels:s.resources.pixels-BALANCE.workshop.setCosts[action.set]},run:{...s.run,workshop:{...w,purchasedSets:[...w.purchasedSets,action.set],parts,activePart:partsForSet(action.set)[0]!.id,view:'workbench'}}};
     s=showGuide(s,'place');
+    s=showFirstSetHelp(s,action.set);
   }else if(action.type==='selectPart'){
     if(!w.parts[action.part])return s;
     s={...s,run:{...s.run,workshop:{...w,activePart:action.part,view:'workbench'}}};

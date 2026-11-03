@@ -4,24 +4,22 @@ import { BALANCE } from '../config/balance';
 import { GuideHistory } from '../components/GuideHistory';
 import { Estimate } from '../components/Estimate';
 import { Records, SoundSettings } from '../components/LongPlaySettings';
-import { DimensionInput } from './workshop/WorkshopCustomization';
 import { EditorShell } from '../components/EditorShell';
 import type { I18n, MessageKey } from '../content/i18n';
 import { paletteFor } from '../content/palette';
-import { UI_SETS, getWorkshopPart, partsForSet, type UiSetId } from '../content/workshopCatalog';
+import { getWorkshopPart, partsForSet, type UiSetId } from '../content/workshopCatalog';
 import { editorStage, canSwitchEditor } from '../systems/appearance';
 import { passivePixelsPerSecond, cursorPixelsPerSecond, cursorPressesPerSecond } from '../systems/economy';
 import { colorContrast, usesNativeComponentColors, effectiveEditorBackground } from '../systems/workshopState';
 import { canBuildSeed, seedCursorQuote } from '../systems/seed';
-import { canRelease } from '../systems/release';
 import { bulkVisible, contractBlocks } from '../systems/longPlay';
 import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
-import { canAssembleDesktop, canBuyWorkshopSet, canExportWorkshop, completedParts, nextWorkshopSet, partRectValid, partMinimumSize, canInspectDesktopExit, setComplete } from '../systems/workshop';
-import { EditorCustomizationPanel, PartInspector, type WorkshopDispatch } from './workshop/WorkshopCustomization';
+import { canExportWorkshop } from '../systems/workshop';
+import { EditorCustomizationPanel, type WorkshopDispatch } from './workshop/WorkshopCustomization';
 import { WorkshopCanvas } from './workshop/WorkshopCanvas';
-import { blueprintAppForSet } from '../systems/appAssembly';
 import type { BuiltApp } from '../systems/desktopState';
-import { World4Preparation } from './workshop/World4Preparation';
+import { WorkshopNavigator } from './workshop/WorkshopNavigator';
+import './workshop/workshop-navigation.css';
 import { fitWorkshopViewport } from './workshop/workshopZoom';
 import './workshop/workshop.css';
 import './workshop/workshop-fixed-shell.css';
@@ -31,12 +29,11 @@ export function Workshop({runtime,snapshot,i18n,embedded=false,onAssembleApp}:{r
  const {state}=snapshot,w=state.run.workshop,c=state.persistent.editorCustomization,stage=editorStage(state),skills=state.persistent.editorSkills,t=i18n.t;
  const dispatch:WorkshopDispatch=runtime.actWorkshop;
  const part=w.activePart?getWorkshopPart(w.activePart):null,production=part?w.parts[part.id]:undefined;
- const assembleApp=part?blueprintAppForSet(part.set):null;
  const [settingsTab,setSettingsTab]=useState<'editor'|'records'|'sound'>('editor');
  const [rightPanel,setRightPanel]=useState<'color'|'layers'|'history'>('color'),[selectedElement,setSelectedElement]=useState<string|null>(null);
- const [plugins,setPlugins]=useState(false),[optional,setOptional]=useState(false),[picking,setPicking]=useState(false);
+ const [plugins,setPlugins]=useState(false),[picking,setPicking]=useState(false);
  const container=useRef<HTMLDivElement>(null),[fitZoom,setFitZoom]=useState<number|null>(null);
- const colors=paletteFor(state.persistent.specs.color),nextSet=nextWorkshopSet(state),complete=completedParts(state),quote=seedCursorQuote(state);
+ const colors=paletteFor(state.persistent.specs.color),quote=seedCursorQuote(state);
  const held=useRef(false),lastHeld=useRef(0);
  const canUseKeyboard=state.persistent.seedSkills.some(id=>id==='keyboard'||id==='hold');
  const inputReady=w.enterMs===0&&w.view==='workbench'&&!w.helpTarget&&!plugins&&!picking&&!snapshot.releaseConfirmation&&(state.run.world!=='desktop'||state.run.desktop.active==='tessera'&&state.run.desktop.windows.tessera.open&&!state.run.desktop.windows.tessera.minimized);
@@ -48,28 +45,7 @@ export function Workshop({runtime,snapshot,i18n,embedded=false,onAssembleApp}:{r
  const tokenVisible=w.tokenDiscovered||state.resources.tokens>0||skills.length>0||state.persistent.progress.records['first-export']!==undefined;
  const setLabel=(set:UiSetId)=>t(`ws.set.${set}`),partLabel=part?t(part.labelKey as MessageKey):t('ws.untitled');
  const wrapPanel=(panel:'palette'|'parts'|'tools'|'info',children:ReactNode)=><div className={`ws-panel ws-panel-${panel}`}><div className="ws-panel-grip">{t(`ws.${panel}`)}</div>{children}</div>;
- const buySet=(set:UiSetId)=><button type="button" className="ws-set-purchase" data-workshop-set={set} disabled={!canBuyWorkshopSet(state,set)} onClick={()=>dispatch({type:'buySet',set})}><span>{setLabel(set)}</span><span>{t('ws.price',{count:i18n.price(BALANCE.workshop.setCosts[set])})}</span><Estimate cost={BALANCE.workshop.setCosts[set]} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} runtime={runtime} i18n={i18n}/></button>;
- const exit=state.run.world==='desktop'?<World4Preparation state={state} i18n={i18n} dispatch={dispatch}/>:<section className="ws-exit"><button type="button" data-workshop-action="exit" disabled={!canInspectDesktopExit(state)} title={!canInspectDesktopExit(state)?t('ws.requireParts'):undefined} onClick={()=>dispatch({type:'exit'})}>{t('ws.assemble')}</button><progress aria-label={t('ws.assemble')} max={UI_SETS.filter(set=>set.mainline).reduce((n,set)=>n+set.parts.length,0)} value={complete.filter(id=>['common','foundation','files','mail'].includes(getWorkshopPart(id).set)).length}/><small>{t('ws.price',{count:i18n.price(BALANCE.w2.desktopCost)})}</small>{w.exitInspected&&!canAssembleDesktop(state)&&<div className="ws-exit-requirements">{!setComplete(state,'files')||!setComplete(state,'mail')?<p>{t('ws.requireParts')}</p>:null}{state.persistent.specs.color<BALANCE.release.prototypeColorLevel&&<p>{t('ws.requireColor')}</p>}{canRelease(state)&&<button type="button" data-workshop-action="release" onClick={runtime.requestPrototypeRelease}>{t('ws.releaseReady')}</button>}</div>}</section>;
- const parts=wrapPanel('parts',<>
-  {w.purchasedSets.length>0&&<label className="ws-set-selector">{t('ws.set')}<select data-workshop-set-selection value={part?.set??w.purchasedSets[0]} onChange={e=>{const set=e.target.value as UiSetId;const target=partsForSet(set).find(d=>w.parts[d.id]?.step!==4)??partsForSet(set)[0]!;dispatch({type:'selectPart',part:target.id});}}>{w.purchasedSets.map(set=><option key={set} value={set}>{setLabel(set)}</option>)}</select></label>}
-  {part&&<>
-   <div className="ws-production-heading"><h2>{partLabel}</h2><span>{t(part.set==='stream'?'world4.partBaseRate':'ws.baseRate',{count:i18n.rate(BALANCE.workshop.partRates[part.id])})}</span></div>
-   <ol className="ws-steps" data-workshop-step={production?.step??0}>{[0,1,2,3].map(n=><li key={n} aria-current={production?.step===n?'step':undefined} className={(production?.step??0)>n?'is-done':''}>{t(`ws.step.${n}` as MessageKey)}</li>)}</ol>
-   {production?.step===0&&<div className="ws-stage-controls"><p>{t('ws.placementHint')}</p><button type="button" data-workshop-action="place" disabled={!partRectValid(state,part.id,part.defaultRect)} onClick={()=>dispatch({type:'place',part:part.id,rect:part.defaultRect})}>{t('ws.place')}</button>{!partRectValid(state,part.id,part.defaultRect)&&<small>{t('ws.placementBlocked')}</small>}</div>}
-   {production?.step===1&&<div className="ws-element-list">{part.elements.map(element=><button type="button" data-workshop-element={element} data-workshop-action="element" key={element} disabled={production.elements.includes(element)} onClick={()=>dispatch({type:'addElement',part:part.id,element})}>{production.elements.includes(element)?'✓ ':''}{t(`ws.element.${element}` as MessageKey)}</button>)}{skills.includes('batch')&&<button type="button" data-workshop-action="batch" onClick={()=>part.elements.filter(e=>!production.elements.includes(e)).forEach(element=>dispatch({type:'addElement',part:part.id,element}))}>{t('ws.batch')}</button>}</div>}
-   {production&&production.step>=2&&<PartInspector part={part} production={production} stage={stage} colors={colors} skills={skills} customization={c} dispatch={dispatch} i18n={i18n}/>}
-   {production?.step===2&&<button type="button" className="ws-primary" data-workshop-action="confirmAdjustment" onClick={()=>dispatch({type:'confirmAdjustment',part:part.id})}>{t('ws.confirmAdjustment')}</button>}
-   {production?.step===3&&<p className="ws-test-hint" role="status">{t(`ws.test.${part.testInteraction}`)}</p>}
-   {production?.step===4&&<div className="ws-completed" role="status"><strong>{t('ws.completed')}</strong><span>{t(production.exportedAt!==null?'ws.exported':'ws.notExported')}</span>{production.exportedAt===null&&<button type="button" data-workshop-action="exportPart" onClick={()=>dispatch({type:'export',part:part.id})}>{t('ws.export')}</button>}</div>}
-   {production&&production.step>0&&skills.includes('dimensions')&&<fieldset className="ws-numeric-dimensions"><legend>{t('ws.canvas')}</legend>{(['x','y','width','height'] as const).map(key=><label key={key}>{t(`ws.${key}`)}<DimensionInput field={key} value={production.rect[key]} min={key==='width'?partMinimumSize(state,part.id).width:key==='height'?partMinimumSize(state,part.id).height:BALANCE.workshop.canvas.inset} step={BALANCE.workshop.canvas.resolutionGrid[state.persistent.specs.resolution]??BALANCE.workshop.canvas.grid} onCommit={value=>dispatch({type:'place',part:part.id,rect:{...production.rect,[key]:value}})}/></label>)}</fieldset>}
-   <ul className="ws-part-list">{partsForSet(part.set).map(d=><li key={d.id}><button type="button" data-workshop-part={d.id} aria-pressed={part.id===d.id} onClick={()=>dispatch({type:'selectPart',part:d.id})}><span>{t(d.labelKey as MessageKey)}</span><small>{t(`ws.step.${w.parts[d.id]?.step??0}` as MessageKey)}{w.parts[d.id]?.exportedAt!==null&&w.parts[d.id]?.exportedAt!==undefined?' ↗':''}</small></button></li>)}</ul>
-  </>}
-  {state.run.world==='desktop'&&assembleApp&&onAssembleApp&&<button type="button" className="ws-assemble-app" data-workshop-assemble-app={assembleApp} onClick={()=>onAssembleApp(assembleApp)}>{t('ws.assembleApp')}</button>}
-  {nextSet&&<div className="ws-next-set"><h3>{t('ws.next')}</h3>{buySet(nextSet)}</div>}
-  <button type="button" className="ws-text-button" aria-expanded={optional} onClick={()=>setOptional(!optional)}>{t('ws.optional')}</button>
-  {optional&&<div className="ws-optional-sets">{UI_SETS.filter(set=>!set.mainline&&set.id!=='extras'&&set.id!=='stream'&&!w.purchasedSets.includes(set.id)).map(set=><div key={set.id}>{buySet(set.id)}</div>)}</div>}
-  {exit}
- </>);
+ const parts=<WorkshopNavigator runtime={runtime} snapshot={snapshot} i18n={i18n} onAssembleApp={onAssembleApp}/>;
  const fixedTop=<>
   <div className="ws-app-title"><strong>{name}</strong><span className="ws-version" data-workshop-version={state.run.version}>{state.run.version}</span><span>{t('ws.separator')} {part?`${setLabel(part.set)}: ${partLabel}`:t('ws.untitled')}</span><span className="ws-top-spacer"/><button type="button" data-workshop-action="export" disabled={!canExportWorkshop(state)} onClick={()=>dispatch({type:'export'})}>{t('ws.export')}</button></div>
   <div className="ws-menu">

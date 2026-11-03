@@ -7,10 +7,12 @@ import { desktopScreen, resizeDesktop, fitWindow, workHeight } from './desktopGe
 import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, takeScreenshot } from './desktop';
 import { createInitialState, type GameState } from './state';
 import { buildSeed, createSeedVersion, updateSeedGuide } from './seed';
+import { actPageDesign } from './pageDesign';
+import { advanceActiveTime } from './time';
 import { UI_SETS, WORKSHOP_PARTS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
 import { BASE_PALETTE } from '../content/palette';
 import { createComponentDesign, type PartProduction } from './workshopState';
-import { actWorkshop, enterWorkshop } from './workshop';
+import { actWorkshop, enterWorkshop, advanceWorkshop } from './workshop';
 import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion, releaseEstimate } from './release';
 import { softwarePresentation, type SoftwareStage } from './releasePresentation';
 
@@ -34,7 +36,16 @@ const LEGACY_FIXTURES = [
 ] as const;
 const STAGE8B_DESKTOP_VIEWS=['economy-before','economy-after','rates','capture-uncovered','capture-overlap','capture-covered','files-archive','note','editor','stream-draft','stream-ready','stream-spec-blocked','stream-gate'] as const;
 const STAGE8A_VIEWS = ['entry','set-shop','main','catalog','files-complete','required-complete-16color','common-custom','editor-custom'] as const;
+const TP_MAIN_PARTS=WORKSHOP_PARTS.filter(part=>UI_SETS.find(set=>set.id===part.set)?.mainline);
+const TP_SEED_VIEWS=['start','before-layout','first-layout','stable'] as const;
+const TP_WORKSHOP_VIEWS=['route','help-catalog'] as const;
 export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
+  ...TP_SEED_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp1-${view}-era${era}`)),
+  ...[0,1,2].map(era=>`tp1-workshop-shell-era${era}`),
+  ...TP_WORKSHOP_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp2-${view}-era${era}`)),
+  ...[0,5,11,17,22].flatMap(count=>[0,1,2].map(era=>`tp3-progress-${count}-era${era}`)),
+  ...TP_MAIN_PARTS.flatMap(part=>[0,1,2].map(era=>`tp3-finish-${part.id}-era${era}`)),
+  ...[0,1,2].map(era=>`tp3-second-run-era${era}`),
   ...STAGE8B_DESKTOP_VIEWS.flatMap(view=>[0,1,2,3].map(era=>`stage8b-${view}-era${era}`)),
   ...[0,1,2].map(era=>`stage8b-second-workshop-era${era}`),
   ...['stage8a-seed-ready','stage8a-seed-layout-before','stage8a-seed-workspace-before','stage8a-seed-export-before'].flatMap(name=>[name,`${name}-era1`,`${name}-era2`]),
@@ -111,6 +122,8 @@ function prototypeReady(now:number):GameState {
 export function createFixture(name:string|null,now:number):GameState|null {
  if(!name||!FIXTURE_NAMES.includes(name))return null;
  if(name==='intro')return createInitialState(now);
+ const testplay=/^tp([123])-(.+)-era([0-2])$/.exec(name);
+ if(testplay)return reconcileProgress(testplayFixture(Number(testplay[1]),testplay[2]!,Number(testplay[3]),now),now);
  const stage8b=/^stage8b-(.+)-era([0-3])$/.exec(name);
  if(stage8b)return stage8bFixture(stage8b[1]!,Number(stage8b[2]),now);
  const native=/^stage8a-desktop-common-custom-era([0-3])$/.exec(name);
@@ -299,4 +312,82 @@ function stage8bFixture(mode:string,era:number,now:number):GameState {
  if(mode==='note')return focusWindow(s,'note');
  if(mode==='editor')return focusWindow(s,'tessera');
  return focusWindow(s,mode==='files-archive'?'files':'photo');
+}
+
+
+/** TP visual fixtures use real construction/purchase/production actions; only their budget and prior visual era are supplied. */
+function testplaySeed(now:number,era:number,count:number,firstLayout=false,version?:'v1'|'v2'):GameState {
+ let s=fixtureBudget(createInitialState(now));
+ if(era>0||version){
+  for(const item of BALANCE.w1.items){s=buildSeed(s,item.id,now);if(item.id==='layout')s=actPageDesign(s,{type:'layout-guide-seen'});}
+  s=advanceWorkshop(s,BALANCE.workshop.enterMs);
+  if(era>0)s=actWorkshop(s,{type:'skill',id:'update'},now);
+  if(era===2){
+   // Prior desktop environment is visual setup, never a new app or a material grant.
+   s.persistent.desktopPrefs.skills=['major1','major2'];
+   s=actWorkshop(s,{type:'skill',id:'modern'},now);
+  }
+  s=createSeedVersion(s,version??(era===1?'v1':'v2'),now);
+  s=fixtureBudget(s);s.persistent.specs.color=1;
+ }
+ for(const item of BALANCE.w1.items.slice(0,count))s=buildSeed(s,item.id,now);
+ if(!firstLayout&&s.run.seed.built.includes('layout'))s=actPageDesign(s,{type:'layout-guide-seen'});
+ return s;
+}
+function testplayWorkshop(now:number,era:number,version?:'v1'|'v2'):GameState {
+ let s=testplaySeed(now,era,BALANCE.w1.items.length,false,version);
+ s=advanceWorkshop(s,BALANCE.workshop.enterMs);
+ s=actWorkshop(s,{type:'guide',id:'close'},now);
+ return s;
+}
+function testplayMainPrefix(state:GameState,count:number,now:number):GameState {
+ let s=state;
+ for(const definition of TP_MAIN_PARTS.slice(0,count)){
+  if(!s.run.workshop.purchasedSets.includes(definition.set))s=actWorkshop(s,{type:'buySet',set:definition.set},now);
+  s=completeWorkshopPartFixture(s,definition.id,now,false);
+ }
+ return actWorkshop(s,{type:'help',target:null},now);
+}
+function testplayFixture(step:number,mode:string,era:number,now:number):GameState {
+ if(step===1&&mode==='workshop-shell'){
+  const s=testplayFixture(3,'finish-common-button',era,now);
+  return {...s,resources:{...s.resources,tokens:0}};
+ }
+ if(step===1){
+  const count=mode==='start'?0:mode==='before-layout'?4:mode==='first-layout'?5:8;
+  const s=testplaySeed(now,era,count,mode==='first-layout');
+  return fixtureBudget(s);
+ }
+ if(step===2&&mode==='route')return testplayWorkshop(now,era);
+ if(step===2&&mode==='help-catalog'){
+  let s=testplayMainPrefix(testplayWorkshop(now,era,'v2'),TP_MAIN_PARTS.length,now);
+  s.persistent.specs.color=1;s=enterDesktop(s);
+  for(const set of UI_SETS.filter(set=>!set.mainline&&set.id!=='extras'))s=actWorkshop(s,{type:'buySet',set:set.id},now);
+  s=actWorkshop(s,{type:'skill',id:'extraParts'},now);
+  s=actWorkshop(s,{type:'help',target:null},now);
+  s=actWorkshop(s,{type:'guide',id:'close'},now);
+  s=actWorkshop(s,{type:'view',view:'workbench'},now);
+  return focusWindow(s,'tessera');
+ }
+ if(step===3&&mode.startsWith('progress-'))return testplayMainPrefix(testplayWorkshop(now,era),Number(mode.slice('progress-'.length)),now);
+ if(step===3&&mode.startsWith('finish-')){
+  const id=mode.slice('finish-'.length) as WorkshopPartId,index=TP_MAIN_PARTS.findIndex(part=>part.id===id),definition=getWorkshopPart(id);
+  let s=testplayMainPrefix(testplayWorkshop(now,era),index,now);
+  if(!s.run.workshop.purchasedSets.includes(definition.set))s=actWorkshop(s,{type:'buySet',set:definition.set},now);
+  s=actWorkshop(s,{type:'selectPart',part:id},now);
+  s=actWorkshop(s,{type:'place',part:id,rect:{...definition.defaultRect}},now);
+  for(const element of definition.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
+  s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);
+  s=actWorkshop(s,{type:'help',target:null},now);
+  return actWorkshop(s,{type:'guide',id:'close'},now);
+ }
+ if(step===3&&mode==='second-run'){
+  let s=createFixture(`stage7-ready${era}`,now)!;
+  s=actPageDesign(s,{type:'layout-guide-seen'});
+  s=showShipping(beginProductRelease(s,now,{language:'ja',reducedMotion:true}),true);
+  s=buySpec(s,'refresh');s=startNextVersion(s,now);
+  s=advanceActiveTime(s,BALANCE.release.restartMs).state;
+  return fixtureBudget(s);
+ }
+ throw new Error('Unknown testplay fixture: '+step+' '+mode);
 }

@@ -1,0 +1,62 @@
+.workshop-root .ws-navigator {padding-block-end:8px;}
+.workshop-root .ws-navigation-heading {padding:7px 8px 4px;font-size:.9em;}
+.workshop-root .ws-navigation-rows,.workshop-root .ws-navigation-parts {list-style:none;margin:0;padding:4px 7px;}
+.workshop-root .ws-navigation-row {display:grid;grid-template-columns:minmax(0,1fr) 27px;gap:4px;align-items:stretch;margin-block-end:4px;min-inline-size:0;}
+.workshop-root .ws-navigation-row>button {margin:0;min-inline-size:0;}
+.workshop-root .ws-navigation-row>.ws-navigation-target {display:grid;grid-template-columns:46px minmax(0,1fr);align-items:center;gap:6px;text-align:start;inline-size:100%;padding:4px;}
+.workshop-root .ws-navigation-target[data-workshop-next] {border-inline-start:3px solid #c8553d;}
+.workshop-root .ws-navigation-copy {display:flex;flex-direction:column;min-inline-size:0;gap:3px;}
+.workshop-root .ws-navigation-name {display:flex;align-items:center;gap:5px;min-inline-size:0;}
+.workshop-root .ws-navigation-name>span:last-child {min-inline-size:0;overflow-wrap:anywhere;}
+.workshop-root .ws-navigation-state {display:flex;gap:4px;align-items:center;font-size:.8em;line-height:1.35;}
+.workshop-root .ws-navigation-state>svg {inline-size:12px;block-size:12px;flex:none;}
+.workshop-root .ws-navigation-state[data-status=complete]>svg {color:#46724e;}
+.workshop-root .ws-navigation-price {font-size:.8em;line-height:1.35;}
+.workshop-root .ws-next-indicator {display:block;border-inline-start:3px solid #c8553d;font-weight:bold;padding-inline-start:5px;font-size:.85em;}
+.workshop-root .ws-next-row {padding:6px 7px 3px;border-block-end:1px solid var(--editor-edge-dark,#8f8574);}
+.workshop-root .ws-navigation-help {align-self:stretch;font-weight:bold;padding:2px;}
+.workshop-root .ws-destination-glyph {display:inline-flex;inline-size:18px;block-size:18px;flex:none;align-items:center;justify-content:center;color:#596c73;}
+.workshop-root .ws-destination-glyph>svg {display:block;inline-size:18px;block-size:18px;max-inline-size:18px;max-block-size:18px;flex:none;}
+.workshop-root .ws-navigation-preview {display:block;inline-size:46px;block-size:30px;border:1px solid var(--editor-edge-dark,#8f8574);overflow:hidden;pointer-events:none;}
+.workshop-root .ws-navigation-preview>.ws-workshop-schematic {display:block;inline-size:100%;block-size:100%;}
+.workshop-root .ws-navigation-parts {border-block:1px solid var(--editor-edge-dark,#8f8574);max-block-size:240px;overflow:auto;}
+.workshop-root .ws-navigation-current {display:flex;gap:5px;align-items:center;padding:5px 8px;}
+.workshop-root .ws-navigation-current>h2 {flex:1;min-inline-size:0;}
+.workshop-root .ws-navigation-current>button {flex:none;}
+.workshop-root .ws-help-backdrop {position:absolute;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:#0006;}
+.workshop-root .ws-help-dialog {inline-size:560px;max-inline-size:100%;max-block-size:100%;overflow:auto;background:#d6cfc0;color:#1f1c18;border:2px solid;border-color:#f4efe4 #8f8574 #8f8574 #f4efe4;font:14px/1.5 'Refresh Pixel','Refresh UI',sans-serif;box-shadow:2px 2px #0005;}
+.workshop-root .ws-help-dialog[data-editor-stage='1'] {background:#34343d;color:#e6e2d8;border:1px solid #6c6a70;font-size:12px;}
+.workshop-root .ws-help-dialog[data-editor-stage='2'] {background:#383838;color:#e4e4e4;border:1px solid #626262;font:13px/1.5 'Refresh UI',sans-serif;}
+.workshop-root .ws-help-dialog>header {display:flex;align-items:center;gap:8px;padding:6px 8px;border-block-end:1px solid #888;}
+.workshop-root .ws-help-dialog>header>h2 {min-inline-size:0;flex:1;font:inherit;font-weight:bold;}
+.workshop-root .ws-help-dialog>header>button {flex:none;min-inline-size:25px;inline-size:25px;block-size:25px;padding:2px;}
+.workshop-root .ws-help-dialog>p {padding:10px 12px;}
+.workshop-root .ws-help-dialog>.ws-workshop-schematic {display:block;inline-size:calc(100% - 24px);block-size:auto;margin:12px auto 0;max-block-size:300px;}
+.ws-workshop-schematic {--ws-help-highlight:#c8553d;display:block;max-inline-size:100%;stroke:#747c7b;stroke-width:1.1;fill:none;}
+.ws-workshop-schematic .ws-schematic-background {fill:#e0e6e4;stroke:#747c7b;}
+.ws-workshop-schematic .ws-schematic-panel {fill:#f4f2ed;}
+.ws-workshop-schematic .ws-schematic-frame {fill:#f9f8f4;stroke-width:2;}
+.ws-workshop-schematic .ws-schematic-title {fill:#c3cfce;}
+.ws-workshop-schematic .ws-schematic-desktop {fill:#dce5e2;}
+.ws-workshop-schematic .ws-schematic-landscape {fill:#c6d5cc;}
+.ws-workshop-schematic .ws-schematic-thumb,.ws-workshop-schematic .ws-schematic-mark {fill:#819e9b;}
+.ws-workshop-schematic .ws-schematic-input {fill:#fff;}
+.ws-workshop-schematic .ws-schematic-region.is-unbuilt {opacity:.24;stroke-dasharray:3 2;}
+.ws-workshop-schematic .ws-schematic-region[data-highlighted=true] {stroke:var(--ws-help-highlight);stroke-width:2.5;opacity:1;stroke-dasharray:none;}
+.ws-workshop-schematic .ws-schematic-region[data-highlighted=true] :is(.ws-schematic-panel,.ws-schematic-title,.ws-schematic-thumb,.ws-schematic-mark,.ws-schematic-landscape) {fill:#c8553d33;}
+.ws-workshop-schematic .ws-schematic-region[data-highlighted=true] .ws-schematic-frame {fill:#fff6f2;}
+.ws-workshop-schematic .ws-schematic-window-label {font:10px 'Refresh UI',sans-serif;fill:#303b3a;stroke:none;pointer-events:none;}
+.ws-workshop-schematic[data-trial-open=false] .ws-schematic-window {opacity:.45;transform:translate(4px,5px) scale(.94);transform-origin:50% 50%;}
+.ws-workshop-schematic[data-trial-open=true] .ws-schematic-window {animation:ws-schematic-open .24s ease-out;}
+@keyframes ws-schematic-open {from {opacity:.25;transform:translate(4px,6px) scale(.94);}to {opacity:1;transform:none;}}
+@media(prefers-reduced-motion:reduce) {.ws-workshop-schematic[data-trial-open=true] .ws-schematic-window {animation:none;}}
+
+.workshop-root .ws-navigation-target[data-workshop-next]:disabled {opacity:1;}
+.workshop-root .ws-help-dialog[data-editor-stage='1'] {--editor-panel:#34343d;--editor-edge-light:#6c6a70;--editor-edge-dark:#19191e;}
+.workshop-root .ws-help-dialog[data-editor-stage='2'] {--editor-panel:#383838;--editor-edge-light:#626262;--editor-edge-dark:#202020;}
+/* Keep the single route cue visible while the longer inspector scrolls below it. */
+.workshop-root .ws-next-row {position:sticky;inset-block-start:0;z-index:10;background:var(--editor-panel,#d6cfc0);}
+/* The legacy purchase row's last-span rule must not make this whole column nowrap. */
+.workshop-root .ws-navigation-row>.ws-navigation-target>.ws-navigation-copy {white-space:normal;font-size:inherit;overflow-wrap:anywhere;}
+.workshop-root .ws-navigation-state {min-inline-size:0;flex-wrap:wrap;}
+.workshop-root .ws-navigation-state>span {min-inline-size:0;overflow-wrap:anywhere;}
