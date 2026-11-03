@@ -30,7 +30,12 @@
 .workshop-root .ws-generator {position:relative;flex:none;}
 .workshop-root .ws-generator>button {min-width:90px;}
 .workshop-root .ws-auto-cursors {pointer-events:none;position:absolute;inset:0;overflow:visible;}
-.workshop-root .ws-auto-cursors span {position:absolute;right:calc(22px + var(--ws-cursor-index)*3px);top:14px;color:#fff;text-shadow:1px 1px #000,-1px -1px #000;font-size:18px;animation:ws-cursor-press 2s steps(8) infinite;animation-delay:calc(var(--ws-cursor-index)*-.12s);}
+.workshop-root .ws-auto-cursors span {position:absolute;right:22px;top:10px;color:#fff;text-shadow:1px 1px #000,-1px -1px #000;font-size:30px;animation:ws-cursor-press 2s steps(8) infinite;}
+.workshop-root .ws-auto-cursors span[data-cursor-tier="2"] {font-size:34px;}
+.workshop-root .ws-auto-cursors span[data-cursor-tier="3"] {font-size:38px;}
+.workshop-root .ws-auto-cursors span[data-cursor-tier="3"] .ws-glyph,.workshop-root .ws-auto-cursors span[data-cursor-tier="4"] .ws-glyph {fill:#c8553d;}
+.workshop-root .ws-auto-cursors span[data-cursor-tier="4"] {font-size:44px;}
+.workshop-root .ws-auto-cursors span[data-cursor-tier="4"] .ws-glyph {stroke:#ffd34d;}
 @keyframes ws-cursor-press {0%,65% {transform:translate(10px,12px);}75%,90% {transform:translate(0,0);}100% {transform:translate(10px,12px);}}
 .workshop-root .ws-tool-options {display:flex;align-items:center;gap:14px;min-height:34px;padding:3px 8px;border-top:1px solid var(--editor-edge-dark,#8f8574);font-size:.85em;}
 .workshop-root .ws-tool-options label {display:flex;align-items:center;gap:8px;}

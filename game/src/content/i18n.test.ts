@@ -11,8 +11,8 @@ describe('言語ファイルと表示', () => {
   it('目標の区切りは言語ファイルが持ち、日本語に余計な空白を入れない', () => {
     const ja = createI18n('ja');
     const en = createI18n('en');
-    expect(ja.t('foundation.goalLabel') + ja.t('foundation.goal')).toMatch(/^目標：この/);
-    expect(en.t('foundation.goalLabel') + en.t('foundation.goal')).toMatch(/^Goal: Finish/);
+    expect(ja.t('foundation.goalLabel') + ja.t('foundation.goal')).toMatch(/^長期目標：この/);
+    expect(en.t('foundation.goalLabel') + en.t('foundation.goal')).toMatch(/^Long-term goal: Finish/);
   });
 
   it('開発中の差し込み不足はエラーにする', () => {

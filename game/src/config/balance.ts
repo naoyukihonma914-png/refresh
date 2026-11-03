@@ -379,6 +379,7 @@ export const BALANCE = {
     momentum: { chainMs: 1_000, decayMs: 2_000, increment: 0.06, max: 1.6 },
     holdPressesPerSecond: 4,
     maxVisibleCursors: 20,
+    cursorTierCounts: [10, 30, 100],
     previewItems: 2,
     floatMs: 800,
     maxFloatingGains: 12,

@@ -36,8 +36,16 @@
 .seed-construction .page-part[data-page-part=cursors]>.page-part-content {overflow:visible;}
 .seed-construction .seed-cursor-parking {position:relative;inline-size:100%;block-size:100%;}
 .seed-construction .seed-cursor-parking>small {position:absolute;inset-inline-start:0;inset-block-end:0;font-size:.85em;}
-.seed-construction svg.seed-auto-cursor {position:absolute;inline-size:18px;block-size:24px;width:18px;height:24px;pointer-events:none;z-index:8;}
+.seed-construction svg.seed-auto-cursor {position:absolute;pointer-events:none;z-index:8;}
 .seed-construction .seed-notice-stack {block-size:100%;overflow:auto;padding:0 4px 0 0;}
+.seed-construction .page-part[data-page-part=pixels]>.page-part-content {border:1.5px solid;border-radius:3px;padding:6px 10px;}
+.seed-construction .seed-zone {border:1.5px solid;border-radius:3px;padding:4px 10px 8px;margin:0 0 8px;}
+.seed-construction .seed-zone-toggle {display:flex;align-items:center;gap:6px;inline-size:100%;background:none;border:0;margin:0;padding:2px 0;font:inherit;font-weight:700;color:inherit;cursor:pointer;text-align:start;}
+.seed-construction .seed-zone-toggle>svg {flex:none;}
+.seed-construction .seed-zone-chevron {margin-inline-start:auto;font-weight:400;}
+.seed-construction .seed-zone-body {margin-block-start:2px;}
+.seed-construction .seed-zone-body h1 {font-size:1.15em;margin:0;}
+.seed-construction .seed-zone .seed-next-hand {position:static;background:none;padding-block-end:0;}
 .seed-construction .seed-notice-stack section {margin:0 0 8px;}
 .seed-construction .seed-notice-stack h2 {font-size:1em;}
 .seed-construction .seed-construction-notice>p {white-space:pre-line;}

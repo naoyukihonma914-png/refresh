@@ -20,6 +20,6 @@ describe('お手本の設定と次の手は人物コメントと独立する',()
  it('世界3の次の手は画面を遮る別overlayを描かず、入口1個へ具体的な名前を付ける',()=>{
   const state=createFixture('stage7-ready0',now)!;state.run.desktop.editingApp=null;
   const markup=renderToStaticMarkup(<DesktopNextHand state={state} runtime={runtime} i18n={createI18n('ja')} onOffer={()=>{}} onConditions={()=>{}}/>);
-  expect(markup).toContain('data-example-next="desktop-release"');expect(markup).toContain('title="次の手: リリースする"');expect(markup).toContain('aria-label="次の手: リリースする"');expect(markup.match(/<button/g)).toHaveLength(1);expect(markup).not.toContain('<aside');
+  expect(markup).toContain('data-example-next="desktop-release"');expect(markup).toContain('title="短期目標: リリースする"');expect(markup).toContain('aria-label="短期目標: リリースする"');expect(markup.match(/<button/g)).toHaveLength(1);expect(markup).not.toContain('<aside');
  });
 });
