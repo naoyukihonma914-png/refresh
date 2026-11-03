@@ -152,3 +152,8 @@
 @keyframes seed-fit-pulse {0%{transform:scale(1);}35%{transform:scale(1.045);}100%{transform:scale(1);}}
 @media (prefers-reduced-motion:reduce) {.seed-construction .page-socket {animation:none;}.seed-construction .page-part.just-fitted {animation:none;}}
 .seed-construction .seed-fit-hint {font-weight:700;margin:0;}
+.seed-construction .seed-piece-tray {position:absolute;inset-inline-end:var(--tray-right);inset-block-start:var(--tray-top);inline-size:var(--tray-width);z-index:5;font-size:14px;}
+.seed-construction .seed-piece-tray h2 {margin:0 0 8px;font:inherit;font-weight:700;}
+.seed-construction .seed-tray-piece {display:block;inline-size:100%;margin-block-end:8px;padding:10px 12px;text-align:start;background:#fff;border:1.5px solid #0006;box-shadow:2px 2px 0 #0003;cursor:grab;font:inherit;color:inherit;}
+.seed-construction .seed-tray-piece:active {cursor:grabbing;}
+.seed-piece-ghost {position:fixed;z-index:60;pointer-events:none;background:var(--seed-background,#fff);border:1.5px solid #0007;box-shadow:4px 6px 14px #0005;overflow:hidden;opacity:.97;}

@@ -352,6 +352,7 @@ export const BALANCE = {
       { id: 'workspace', cost: 9_000, perSecond: 8 },
       { id: 'export', cost: 12_000, perSecond: 10 },
     ],
+    trayBelowPreview: 408,
     futurePreview: {
       width: 320, reservedWidth: 624, right: 288, top: 168, footerHeight: 88,
       schematicWidth: 320, schematicHeight: 264,

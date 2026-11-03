@@ -8,7 +8,7 @@ import type { I18n } from '../content/i18n';
 import { paletteFor } from '../content/palette';
 import { editorName, editorStage } from '../systems/appearance';
 import { manualClickValue, cursorPixelsPerSecond, cursorPressesPerSecond, passivePixelsPerSecond } from '../systems/economy';
-import { initialPageLayout, pageColors, pageFonts, pagePartColors, effectiveFitted, piecesToFit, socketLayout, PAGE_PARTS, type PagePart, type PageRect } from '../systems/pageDesign';
+import { initialPageLayout, pageColors, pageFonts, pagePartColors, effectiveFitted, piecesToFit, PAGE_PARTS, type PagePart } from '../systems/pageDesign';
 import type { GameRuntime, RuntimeSnapshot } from '../systems/runtime';
 import { canBuildSeed, knownSeedItems, seedCursorQuote, seedReplayQuote, visibleSeedItems } from '../systems/seed';
 import { nextSeedHand } from '../systems/nextHand';
@@ -66,6 +66,8 @@ export function Foundation({runtime,snapshot,i18n}:{runtime:GameRuntime;snapshot
  const [customPart,setCustomPart]=useState<PagePart|null>(null);
  const [snapPart,setSnapPart]=useState<PagePart|null>(null);
  useEffect(()=>{if(!snapPart)return;const timer=setTimeout(()=>setSnapPart(null),BALANCE.pageDesign.socketPulseMs);return()=>clearTimeout(timer);},[snapPart]);
+ const [trayDrag,setTrayDrag]=useState<{part:PagePart;x:number;y:number;width:number;height:number}|null>(null);
+ const trayMoved=useRef(false);
  const surface=useRef<PageLayoutHandle>(null),button=useRef<HTMLButtonElement>(null),parking=useRef<HTMLDivElement>(null),[flight,setFlight]=useState({x:0,y:0});
  const held=useRef(false),lastHeld=useRef(0),reduced=runtime.platform.animation.reducedMotion(),moving=has('motion')&&!reduced;
  const now=useAnimationClock(runtime,!reduced&&(moving||seed.autoCursors>0),state.persistent.specs.refresh),rate=passivePixelsPerSecond(state),generate=manualClickValue(state);
@@ -115,21 +117,39 @@ export function Foundation({runtime,snapshot,i18n}:{runtime:GameRuntime;snapshot
  const style={'--seed-future-reserve':`${BALANCE.w1.futurePreview.reservedWidth}px`,...(has('color')?{'--seed-background':colors.background,'--seed-text':colors.text,'--seed-button':colors.button}:{}),...(has('font')?{'--seed-font':pageFonts[page.bodyFont],'--seed-heading-font':pageFonts[page.headingFont]}:{})} as CSSProperties;
  const pieces=!arranging?piecesToFit(page,state.persistent.examplesEnabled,seed.autoCursors):[];
  const baseLayout=page.layout??initialPageLayout();
- const displayLayout=pieces.length?socketLayout(page,baseLayout,state.persistent.examplesEnabled,seed.autoCursors):baseLayout;
- const onPlace=(part:PagePart,rect:PageRect,snapped:boolean)=>{
-  if(snapped){runtime.actPage({type:'fit',part});setSnapPart(part);return;}
-  const measured=surface.current?.measure(),base=baseLayout;
-  const ratioX=measured&&measured.width>0?base.width/measured.width:1,ratioY=measured&&measured.height>0?base.height/measured.height:1;
-  runtime.actPage({type:'piece-move',part,x:rect.x*ratioX,y:rect.y*ratioY});
+ const fitNow=(part:PagePart)=>{runtime.actPage({type:'fit',part});setSnapPart(part);};
+ /** Pieces wait in the tray on the right; dragging one out shows it at its recess's exact size, and dropping it on the recess fits it. */
+ const trayStart=useRef({x:0,y:0});
+ const trayDown=(event:React.PointerEvent<HTMLButtonElement>,part:PagePart)=>{
+  if(event.button!==0)return;
+  event.currentTarget.setPointerCapture(event.pointerId);
+  trayStart.current={x:event.clientX,y:event.clientY};trayMoved.current=false;
+  const rect=surface.current?.socketClientRect(part);
+  setTrayDrag({part,x:event.clientX,y:event.clientY,width:rect?.width??240,height:rect?.height??64});
  };
+ const trayMove=(event:React.PointerEvent)=>{
+  if(!trayDrag)return;
+  if(Math.hypot(event.clientX-trayStart.current.x,event.clientY-trayStart.current.y)>6)trayMoved.current=true;
+  setTrayDrag(d=>d?{...d,x:event.clientX,y:event.clientY}:d);
+ };
+ const trayUp=(event:React.PointerEvent)=>{
+  if(!trayDrag)return;
+  const part=trayDrag.part,rect=surface.current?.socketClientRect(part);
+  if(trayMoved.current&&rect){const margin=BALANCE.pageDesign.socketSnapDistance*(rect.width/Math.max(1,baseLayout.parts[part].width));
+   if(event.clientX>=rect.x-margin&&event.clientX<=rect.x+rect.width+margin&&event.clientY>=rect.y-margin&&event.clientY<=rect.y+rect.height+margin)fitNow(part);}
+  setTrayDrag(null);
+ };
+ const partNodes:Record<PagePart,ReactNode>={heading,notice,pixels,generator,cursors,upgrades};
  const fittedList=effectiveFitted(page,state.persistent.examplesEnabled);
- const shown=(id:PagePart)=>fittedList.includes(id)||pieces.includes(id);
+ const shown=(id:PagePart)=>fittedList.includes(id);
  const canCustomize=!arranging&&(has('color')||has('layout'));
  const partActions=canCustomize?Object.fromEntries(PAGE_PARTS.map(id=>[id,pieces.includes(id)||!fittedList.includes(id)?null:<Fragment key={id}><button type="button" className="seed-customize-btn" data-customize={id} aria-label={`${i18n.t(`page.part.${id}`)} ${i18n.t('page.customize')}`} title={i18n.t('page.customize')} aria-expanded={customPart===id} onClick={()=>setCustomPart(customPart===id?null:id)}><svg viewBox="0 0 24 24" width={16} height={16} aria-hidden="true"><path d="M4 20L6 14L16 4L20 8L10 18Z M14 6L18 10" fill="none" stroke="currentColor" strokeWidth={1.8}/></svg></button>{customPart===id&&<PartCustomizePanel state={state} runtime={runtime} i18n={i18n} part={id} onClose={()=>setCustomPart(null)}/>}</Fragment>])) as Partial<Record<PagePart,ReactNode>>:undefined;
  return <EditorShell stage={stage} background={customization} construction className={`seed-construction ${seed.built.map(id=>`has-${id}`).join(' ')} ${moving?'has-motion':''} ${demo?'seed-layout-revealing':''}`} style={style} top={<div className="seed-shell-title-space" aria-hidden="true"/>} palette={palette} parts={has('workspace')?<div className="seed-panel-outline" aria-hidden="true"/>:undefined} tools={tools} bottom={has('bars')?<span>{i18n.t('seed8.progress',{done:seed.built.length,total:BALANCE.w1.items.length})}</span>:undefined} layers={stage>0&&has('workspace')?<div className="seed-construction-layers">{i18n.t('seed8.workbench')}</div>:undefined} widths={{parts:customization.panelWidth}}>
    {settings?<PageSettings state={state} runtime={runtime} i18n={i18n} onClose={()=>setSettings(false)}/>:<>
-    <PageLayoutSurface canvas measureRef={surface} layout={baseLayout} design={page} i18n={i18n} editing={arranging} allowArrangement={has('layout')} selectedPart={selected} onSelectPart={setSelected} onRequestEdit={()=>setArranging(true)} firstGuide={demo&&state.persistent.examplesEnabled} reducedMotion={reduced} onChange={layout=>runtime.actPage({type:'layout',layout})} parts={{heading:shown('heading')?heading:null,notice:shown('notice')?notice:null,pixels,generator,cursors:shown('cursors')?cursors:null,upgrades:shown('upgrades')?upgrades:null}} partActions={partActions} placing={pieces.length?{pieces,sockets:baseLayout,layout:displayLayout,snapPart}:undefined} onPlace={onPlace}/>
+    <PageLayoutSurface canvas measureRef={surface} layout={baseLayout} design={page} i18n={i18n} editing={arranging} allowArrangement={has('layout')} selectedPart={selected} onSelectPart={setSelected} onRequestEdit={()=>setArranging(true)} firstGuide={demo&&state.persistent.examplesEnabled} reducedMotion={reduced} onChange={layout=>runtime.actPage({type:'layout',layout})} parts={{heading:shown('heading')?heading:null,notice:shown('notice')?notice:null,pixels,generator,cursors:shown('cursors')?cursors:null,upgrades:shown('upgrades')?upgrades:null}} partActions={partActions} placing={pieces.length?{pieces,sockets:baseLayout,snapPart}:undefined}/>
     <SeedFuturePreview state={state} i18n={i18n}/>
+    {pieces.length>0&&<aside className="seed-piece-tray" data-seed-tray aria-label={i18n.t('examples.seed.tray')} style={{'--tray-right':`${BALANCE.w1.futurePreview.right}px`,'--tray-top':`${BALANCE.w1.futurePreview.top+BALANCE.w1.trayBelowPreview}px`,'--tray-width':`${BALANCE.w1.futurePreview.width}px`} as CSSProperties}><h2>{i18n.t('examples.seed.tray')}</h2>{pieces.map(id=><button key={id} type="button" className="seed-tray-piece" data-tray-piece={id} onPointerDown={event=>trayDown(event,id)} onPointerMove={trayMove} onPointerUp={trayUp} onPointerCancel={()=>setTrayDrag(null)} onClick={()=>{if(!trayMoved.current)fitNow(id);}}>{i18n.t(id==='heading'?'seed.zone.longTerm':id==='upgrades'?'seed8.upgrades':`page.part.${id}`)}</button>)}</aside>}
+    {trayDrag&&<div className="seed-piece-ghost" aria-hidden="true" style={{left:trayDrag.x-trayDrag.width/2,top:trayDrag.y-trayDrag.height/2,width:trayDrag.width,height:trayDrag.height}}><div className="page-part-content" inert>{partNodes[trayDrag.part]}</div></div>}
     {arranging&&<aside className="seed-arrange-inspector"><PagePartControls state={state} runtime={runtime} i18n={i18n} part={selected} onSelect={setSelected}/></aside>}
     <footer className="seed-construction-footer">{has('bars')&&<span data-seed-progress>{i18n.t('seed8.progress',{done:seed.built.length,total:BALANCE.w1.items.length})}</span>}{pieces.length>0&&<p className="seed-fit-hint" role="status">{i18n.t('examples.seed.fitRemaining',{count:pieces.length})}</p>}<p className="save-status">{canSave(state)&&state.lastSavedAt!==null?i18n.t('save.saved',{time:i18n.time(state.lastSavedAt)}):i18n.t('save.unavailableUntilBuilt')}</p>{has('layout')&&<div className="seed-layout-actions"><button type="button" data-page-action="arrange" aria-pressed={arranging} className={demo?'first-layout-cue':''} onClick={arrange}>{i18n.t('page.arrange')}</button>{arranging&&<button type="button" data-page-action="finish" onClick={()=>{setArranging(false);setDemo(false);}}>{i18n.t('page.finish')}</button>}<button type="button" data-page-action="recommended" onClick={()=>restore('recommended')}>{i18n.t('builder.recommended')}</button><button type="button" data-page-action="reset" onClick={()=>restore('reset')}>{i18n.t('page.reset')}</button></div>}{state.persistent.seedSkills.includes('history')&&<button type="button" className="seed-link" onClick={()=>setHistory(!history)}>{i18n.t('history.title')}</button>}<LanguageSelect i18n={i18n} onChange={runtime.changeLanguage}/></footer>
     {history&&<section className="seed-history-popup"><h2>{i18n.t('history.title')}</h2><button type="button" onClick={()=>setHistory(false)}>{i18n.t('guide.close')}</button><ul>{seed.history.map((entry,index)=><li key={index}>{i18n.t('history.entry',{date:i18n.date(entry.at),time:i18n.time(entry.at),name:i18n.t(entry.item==='cursor'?'seed.cursor':`item.${entry.item}`)})}</li>)}</ul></section>}
