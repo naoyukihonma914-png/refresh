@@ -14,11 +14,25 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlencode
+from urllib.request import urlopen
 
 from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = ('frame', 'era1', 'mail', 'entry', 'partial')
+
+
+def preflight(base_url):
+    """Fail once before launching a browser if the built-file server is unavailable."""
+    try:
+        with urlopen(base_url, timeout=8) as response:
+            served = response.read()
+    except Exception as error:
+        raise SystemExit(f'Build server is unavailable at {base_url}: {error}') from error
+    expected = hashlib.sha256((ROOT / 'game/dist/index.html').read_bytes()).hexdigest()
+    actual = hashlib.sha256(served).hexdigest()
+    if actual != expected:
+        raise SystemExit(f'Served HTML does not match game/dist/index.html: expected {expected}, received {actual}')
 
 
 class FittingReview:
@@ -215,11 +229,10 @@ class FittingReview:
         return geometry
 
     def frame(self, page, case):
-        page.locator('[data-workshop-action="backToParts"]').click()
-        page.locator('[data-workshop-action="backToSets"]').click()
-        expect(page.locator('[data-workshop-panel-view]')).to_have_attribute('data-workshop-panel-view', 'sets')
-        self.capture(page, case, '01-era0-set-list', '段①・UIセット一覧')
-        page.locator('[data-workshop-set="common"]').click()
+        for zone in ('sets', 'parts', 'pieces'):
+            expect(page.locator(f'[data-workshop-zone="{zone}"]')).to_have_count(1)
+        self.capture(page, case, '01-era0-set-list', '段①・セット、パーツ、ピースを常設したパネル')
+        page.locator('[data-workshop-select-set="common"]').click()
         self.select_part(page, 'common-frame')
         before = self.state(page)
         self.spawn(page, 'title')
@@ -384,7 +397,8 @@ class FittingReview:
         case['checks'] = {'dedicatedColumnSeats': True, 'fittedColumnSelectsRealMessage': True}
 
     def entry(self, page, case):
-        expect(page.locator('[data-workshop-panel-view]')).to_have_attribute('data-workshop-panel-view', 'sets')
+        for zone in ('sets', 'parts', 'pieces'):
+            expect(page.locator(f'[data-workshop-zone="{zone}"]')).to_have_count(1)
         expect(self.canvas(page).locator('[data-fitting-shell]')).to_have_count(0)
         expect(page.locator('[data-workshop-set="common"]')).to_be_visible()
         assert self.state(page)['run']['workshop']['purchasedSets'] == []
@@ -454,6 +468,7 @@ def main():
     parser.add_argument('--keep-going', action='store_true')
     args = parser.parse_args()
     args.base_url = args.base_url.rstrip('/') + '/'
+    preflight(args.base_url)
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(executable_path=args.chromium, headless=True, args=['--no-sandbox'])
         try:

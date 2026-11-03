@@ -1,0 +1,61 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8183/",
+  "buildSha256": "bc52d727aafe03e5d9e13f9fa9e82b46c964b986b7784052cc2805fa8f9ad0b7",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-パネル修正指示書.md",
+    "docs/spec.md §4.2",
+    "docs/デザインの決まり.md §4"
+  ],
+  "cases": [
+    {
+      "id": "ja:legacy-palette",
+      "language": "ja",
+      "fixture": "stage8a-entry-era2",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": true,
+      "checks": {
+        "backgroundWorksWithoutSelectedPart": true,
+        "normalImportAndReloadPreservesBackground": true,
+        "palettePreservesEveryPartDesignAndWallet": true,
+        "adjustmentChangesOnlySelectedPart": true,
+        "background": "#2f6b3a",
+        "legacyRenderer": true
+      }
+    },
+    {
+      "id": "en:legacy-palette",
+      "language": "en",
+      "fixture": "stage8a-entry-era2",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": true,
+      "checks": {
+        "backgroundWorksWithoutSelectedPart": true,
+        "normalImportAndReloadPreservesBackground": true,
+        "palettePreservesEveryPartDesignAndWallet": true,
+        "adjustmentChangesOnlySelectedPart": true,
+        "background": "#2f6b3a",
+        "legacyRenderer": true
+      }
+    }
+  ],
+  "languages": [
+    "ja",
+    "en"
+  ],
+  "passed": 2,
+  "failed": 0
+}

@@ -1674,6 +1674,19 @@
     "testplay.title": "Test play",
     "testplay.description": "Adds a big pile of pixels for checking. This button will be removed in the final version.",
     "testplay.addPixels": "Add lots of pixels (+{count})",
-    "testplay.balance": "Current pixels: {count}"
+    "testplay.balance": "Current pixels: {count}",
+    "fitting.category.shared": "Shared parts",
+    "fitting.category.required": "Required tools",
+    "fitting.category.optional": "Optional tools",
+    "fitting.zone.sets": "UI sets",
+    "fitting.zone.parts": "Parts",
+    "fitting.zone.pieces": "Pieces",
+    "fitting.selectPart": "Select a part to work on",
+    "fitting.lockedParts": "Buy this UI set to start crafting",
+    "fitting.optionalShow": "Show optional tools",
+    "fitting.optionalHide": "Hide optional tools",
+    "fe.paletteTargets": "Canvas background and adjustment color",
+    "fe.adjustmentColor": "Adjustment color",
+    "fe.paletteDefault": "Default background"
   }
 }
