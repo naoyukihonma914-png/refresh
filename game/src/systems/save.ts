@@ -135,6 +135,7 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
   if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
   if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();
+  if(candidate.persistent&&typeof candidate.persistent.doubleClickFit!=='boolean')(candidate.persistent as Record<string,unknown>).doubleClickFit=false;
   repairLegacyScrollbar(candidate);
   repairWorkshopRects(candidate);
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');

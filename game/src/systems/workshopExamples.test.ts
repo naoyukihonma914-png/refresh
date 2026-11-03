@@ -7,7 +7,7 @@ import { createSeedVersion } from './seed';
 import { decodeSave,encodeSave } from './save';
 import { createInitialState,isGameState,type GameState } from './state';
 import { actWorkshop,advanceWorkshop,enterWorkshop } from './workshop';
-import { completionCombo,examplePlacement,setExamplesEnabled,workshopComboMultiplier } from './workshopExamples';
+import { completionCombo,examplePlacement,setDoubleClickFit,setExamplesEnabled,workshopComboMultiplier } from './workshopExamples';
 import { createComponentDesign,isWorkshopState } from './workshopState';
 
 const now=1_800_000_000_000;
@@ -37,6 +37,15 @@ describe('お手本と自由制作',()=>{
   const next=createSeedVersion(complete(off,'common-button'),'v1',now+1);
   expect(next.persistent.examplesEnabled).toBe(false);expect(next.run.workshop.combo).toEqual({count:0,lastCompletedAt:null});
   expect(createSeedVersion(next,'v2',now+2).persistent.examplesEnabled).toBe(false);
+ });
+ it('ダブルクリック配置は初期値オフで、切り替えは保存に残り、欠けた保存ではオフに直る',()=>{
+  const initial=createInitialState(now);expect(initial.persistent.doubleClickFit).toBe(false);
+  const on=setDoubleClickFit(initial,true);expect(on.persistent.doubleClickFit).toBe(true);
+  expect(setDoubleClickFit(on,true)).toBe(on);expect(setDoubleClickFit(on,'true' as unknown as boolean)).toBe(on);
+  expect(decodeSave(encodeSave(on)).persistent.doubleClickFit).toBe(true);
+  const legacy=JSON.parse(encodeSave(initial)) as Record<string,unknown>;
+  delete (legacy.persistent as Record<string,unknown>).doubleClickFit;
+  expect(decodeSave(JSON.stringify(legacy)).persistent.doubleClickFit).toBe(false);
  });
  it('工程1だけ、近傍かつ安全な標準矩形に吸着する',()=>{
   const s=workshop(),id='common-button',target=getWorkshopPart(id).defaultRect;

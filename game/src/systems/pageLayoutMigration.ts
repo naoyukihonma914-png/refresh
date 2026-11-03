@@ -43,6 +43,7 @@ export function migratePageLayoutSave(value:unknown):unknown {
  if(!record(value)||value.schemaVersion!==17||!record(value.run)||!record(value.run.seed)||!record(value.run.seed.page))throw new Error('Invalid schema17 save');
  const next=structuredClone(value) as unknown as GameState;
  (next as unknown as {schemaVersion:number}).schemaVersion=18;
+ if(record(next.persistent)&&typeof next.persistent.doubleClickFit!=='boolean')(next.persistent as Record<string,unknown>).doubleClickFit=false;
  const layout=next.run.seed.page.layout;
  if(layout){
   if(sameLayout(layout,schema17RecommendedPage(layout.width,layout.height)))next.run.seed.page.layout=recommendedPage(layout.width,layout.height);

@@ -23,7 +23,7 @@ import { applySeedSkills, buildKnownSeed, buildSeed, freshMomentum, pressSeed, r
 import type { GuideId } from './state';
 import { actWorkshop, enterWorkshop, canAssembleDesktop, type WorkshopAction } from './workshop';
 import type { WorkshopPartId } from '../content/workshopCatalog';
-import { examplePlacement, setExamplesEnabled } from './workshopExamples';
+import { examplePlacement, setDoubleClickFit, setExamplesEnabled } from './workshopExamples';
 import { completionFeedback, workshopFeedbackRun, workshopVisible, type WorkshopCompletionFeedbackEvent } from './workshopFeedback';
 import { enterDesktop } from './desktop';
 import { archiveGuide, beginProductRelease, buySpec, canRelease, shippingComplete, showShipping, startNextVersion } from './release';
@@ -263,6 +263,14 @@ export class GameRuntime {
     const state=setExamplesEnabled(this.snapshot.state,enabled);
     if(state===this.snapshot.state)return;
     this.publish({state,workshopSnap:undefined});this.persist();
+  };
+
+  setDoubleClickFit = (enabled:boolean) => {
+    if(!this.canOperate()||this.snapshot.introVisible||this.suspended||this.platform.visibility.isHidden())return;
+    this.advanceForeground();
+    const state=setDoubleClickFit(this.snapshot.state,enabled);
+    if(state===this.snapshot.state)return;
+    this.publish({state});this.persist();
   };
 
   startGame = () => {

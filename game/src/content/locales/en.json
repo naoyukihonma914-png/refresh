@@ -1605,6 +1605,8 @@
     "examples.seed.fit": "Drag {name} into its recess",
     "examples.seed.fitRemaining": "Drag the parts into their recesses — {count} to go",
     "examples.seed.tray": "Parts tray",
+    "examples.seed.doubleClickFit": "Place with a double-click",
+    "examples.seed.doubleClickFitDescription": "Double-clicking a part in the tray fits it into its recess.",
     "examples.seed.generate": "Generate {pixels} more, then build {item}",
     "examples.seed.buy": "Build {item} with the build button",
     "examples.seed.launch": "The editor is starting",
