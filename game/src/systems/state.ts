@@ -9,7 +9,7 @@ import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/
 import { createWorkshopState, createEditorCustomization, isWorkshopState, isEditorCustomization, isSetDocument, isEditorSkill, workshopRectOnGrid, type WorkshopState, type EditorCustomization, type SetDocument, type EditorSkill } from './workshopState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 16;
+export const SCHEMA_VERSION = 17;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -45,6 +45,7 @@ export interface GameState {
     desktop: DesktopState;
   };
   persistent: {
+    examplesEnabled:boolean;
     testplay:{layoutGuideSeen:boolean;helpSeen:UiSetId[]};
     progress:Progress;
     appearance:Appearance;
@@ -82,6 +83,7 @@ export function createInitialState(now: number): GameState {
       workshop: createWorkshopState(), desktop: createDesktopState(),
     },
     persistent: {
+      examplesEnabled:true,
       testplay:{layoutGuideSeen:false,helpSeen:[]},
       progress:createProgress(),appearance:createAppearance(),
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
@@ -130,6 +132,7 @@ export function isGameState(value: unknown): value is GameState {
     || (run.shipping.storeElapsedMs!==undefined&&(!isAmount(run.shipping.storeElapsedMs)||run.shipping.storeElapsedMs>BALANCE.release.storeAnimationMs))
     || run.shipping.phase==='store'&&(run.shipping.storeElapsedMs===undefined||run.shipping.elapsedMs!==0)))return false;
   if(!isProgress(persistent.progress)||!isPlay(run.play))return false;
+  if(typeof persistent.examplesEnabled!=='boolean')return false;
   if(!isRecord(persistent.testplay)||typeof persistent.testplay.layoutGuideSeen!=='boolean'||!Array.isArray(persistent.testplay.helpSeen)||new Set(persistent.testplay.helpSeen).size!==persistent.testplay.helpSeen.length||!persistent.testplay.helpSeen.every(id=>SET_IDS.includes(id as UiSetId)))return false;
   if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;

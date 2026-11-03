@@ -18,7 +18,7 @@ describe('TP1: 真正main形式15から16への移行',()=>{
   const source=oldSave(name),untouched=JSON.stringify(source);
   expect(source.schemaVersion).toBe(15);expect(isLegacyPageDesign(source.run.seed.page)).toBe(true);
   const state=decodeSave(JSON.stringify(source));
-  expect(state.schemaVersion).toBe(16);expect(isGameState(state)).toBe(true);expect(isPageDesign(state.run.seed.page)).toBe(true);
+  expect(state.schemaVersion).toBe(17);expect(isGameState(state)).toBe(true);expect(isPageDesign(state.run.seed.page)).toBe(true);
   expect(state.resources).toEqual(source.resources);expect(state.run.totalPixelsGenerated).toBe(source.run.totalPixelsGenerated);
   expect(state.run.seed.built).toEqual(source.run.seed.built);expect(state.run.seed.history).toEqual(source.run.seed.history);expect(state.run.seed.autoCursors).toBe(source.run.seed.autoCursors);
   for(const field of ['background','text','button','headingFont','bodyFont','motion','heading'] as const)expect(state.run.seed.page[field]).toEqual(source.run.seed.page[field]);

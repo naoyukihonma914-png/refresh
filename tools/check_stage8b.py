@@ -12,6 +12,7 @@ controls, exports, imports, and domain-produced snapshots. No live state injecti
 import argparse
 import html
 import json
+import re
 import shutil
 import zipfile
 from datetime import datetime, timedelta, timezone
@@ -19,6 +20,7 @@ from pathlib import Path
 from playwright.sync_api import expect, sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
+CURRENT_SCHEMA_VERSION=int(re.search(r'SCHEMA_VERSION\s*=\s*(\d+)',(ROOT/'game/src/systems/state.ts').read_text()).group(1))
 LANGUAGES=['ja','en','en-XA']
 SIZES={1920:1080,1366:768}
 
@@ -83,7 +85,8 @@ class Review:
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'Horizontal viewport overflow'
         bad=scope.locator('button,th,td,label,h1,h2,h3,p,output').evaluate_all('''nodes=>nodes.flatMap(node=>{
           const s=getComputedStyle(node),r=node.getBoundingClientRect();
-          if(node.closest('[inert]')||s.display==='none'||s.visibility==='hidden'||r.width<=0||r.height<=0)return [];
+          const closed=node.closest('details:not([open])');
+          if(node.closest('[inert]')||closed&&!closed.querySelector(':scope>summary')?.contains(node)||s.display==='none'||s.visibility==='hidden'||r.width<=0||r.height<=0)return [];
           const x=node.clientWidth>0&&node.scrollWidth>node.clientWidth+2&&!['auto','scroll'].includes(s.overflowX);
           const y=node.clientHeight>0&&node.scrollHeight>node.clientHeight+2&&!['auto','scroll'].includes(s.overflowY);
           return x||y?[{tag:node.tagName,cls:node.className,text:node.textContent,x,y,client:[node.clientWidth,node.clientHeight],scroll:[node.scrollWidth,node.scrollHeight]}]:[];
@@ -353,7 +356,7 @@ class Review:
         state=self.state(page);custom=state['persistent']['editorCustomization'];note_text=state['persistent']['productionNote']
         assert [d for d in state['persistent']['setDocuments'] if d['version']!='v1']==olddocs,'Live editing must not mutate archived documents'
         imported=self.import_state(page,state,c)
-        assert imported['schemaVersion']==16 and imported['persistent']['editorCustomization']==custom and imported['persistent']['productionNote']==note_text
+        assert imported['schemaVersion']==CURRENT_SCHEMA_VERSION and imported['persistent']['editorCustomization']==custom and imported['persistent']['productionNote']==note_text
         self.navigate(page,None,c)
         reloaded=self.state(page)
         assert reloaded['persistent']['editorCustomization']==custom and reloaded['persistent']['productionNote']==note_text,'Save import and a true reload must preserve the customization and note'
@@ -412,7 +415,7 @@ class Review:
             legacy=json.loads(gzip.decompress(path.read_bytes()))
             assert legacy['schemaVersion']==14
             converted=self.import_state(page,legacy,c)
-            assert converted['schemaVersion']==16
+            assert converted['schemaVersion']==CURRENT_SCHEMA_VERSION
             for resource in ['pixels','tokens','dollars']:assert converted['resources'][resource]>=legacy['resources'][resource],(kind,resource)
             for key in ['specs','productionNote','seedSkills','editorSkills']:
                 assert converted['persistent'][key]==legacy['persistent'][key],(kind,key)
@@ -422,7 +425,7 @@ class Review:
                 if key in ['screenshots','products']:assert all(item in new for item in old),(kind,key)
             assert set(legacy['run']['desktop']['apps'])<=set(converted['run']['desktop']['apps'])
             self.navigate(page,None,c)
-            saved=self.state(page);assert saved['schemaVersion']==16
+            saved=self.state(page);assert saved['schemaVersion']==CURRENT_SCHEMA_VERSION
             assert saved['persistent']['screenshots']==converted['persistent']['screenshots']
             self.capture(page,c,'形式14の実データを移行した画面: '+kind,'migration-'+kind)
             samples.append({'source':path.name,'format':saved['schemaVersion'],'noLoss':True})

@@ -62,10 +62,10 @@ export function migrateLegacyPageDesign(value:unknown):PageDesign {
   layout:isLegacyPageDesign(value)&&legacy.layout?migrateLayout(legacy.layout):null};
 }
 /** No currencies, production, possessions, published products, or screenshot bytes change here. */
-export function migrateTestplaySave(value:unknown):GameState {
+export function migrateTestplaySave(value:unknown):unknown {
  if(!record(value)||value.schemaVersion!==15||!record(value.run)||!record(value.run.seed)||!record(value.run.workshop)||!record(value.run.desktop)||!record(value.persistent)||!Array.isArray(value.persistent.products)||!Array.isArray(value.persistent.setDocuments))throw new Error('Invalid schema15 save');
  const next=structuredClone(value) as unknown as GameState;
- next.schemaVersion=16;
+ (next as unknown as {schemaVersion:number}).schemaVersion=16;
  const oldPage=value.run.seed.page;
  next.run.seed.page=migrateLegacyPageDesign(oldPage);
  const hadLayout=Array.isArray(value.run.seed.built)&&value.run.seed.built.includes('layout')

@@ -17,11 +17,34 @@ import json
 from pathlib import Path
 from playwright.sync_api import sync_playwright,expect
 from check_testplay import TestplayChecks
-from check_stage8b import ROOT,LANGUAGES,SIZES
+from check_stage8b import ROOT,LANGUAGES,SIZES,CURRENT_SCHEMA_VERSION
 
 PARTS=['heading','notice','pixels','generator','cursors','upgrades']
 PRESETS=['small','large','extraLarge']
 FONTS=['small','normal','large']
+
+
+CLIPPED_RECT_SCRIPT = """n=>{
+                  const r=n.getBoundingClientRect();let clipped={left:r.left,top:r.top,right:r.right,bottom:r.bottom};
+                  for(let p=n.parentElement;p;p=p.parentElement){
+                    const style=getComputedStyle(p),b=p.getBoundingClientRect(),scale=p.offsetWidth?b.width/p.offsetWidth:1;
+                    if(['hidden','clip','auto','scroll'].includes(style.overflowX)){
+                      const hidden=['hidden','clip'].includes(style.overflowX);
+                      const left=hidden?b.left+parseFloat(style.borderLeftWidth)*scale:b.left+p.clientLeft*scale;
+                      const right=hidden?b.right-parseFloat(style.borderRightWidth)*scale:b.left+(p.clientLeft+p.clientWidth)*scale;
+                      clipped.left=Math.max(clipped.left,left);clipped.right=Math.min(clipped.right,right);
+                    }
+                    if(['hidden','clip','auto','scroll'].includes(style.overflowY)){
+                      // Hidden boxes have no scrollbar: preserve fractional padding-box edges rather than rounded clientHeight.
+                      const hidden=['hidden','clip'].includes(style.overflowY);
+                      const top=hidden?b.top+parseFloat(style.borderTopWidth)*scale:b.top+p.clientTop*scale;
+                      const bottom=hidden?b.bottom-parseFloat(style.borderBottomWidth)*scale:b.top+(p.clientTop+p.clientHeight)*scale;
+                      clipped.top=Math.max(clipped.top,top);clipped.bottom=Math.min(clipped.bottom,bottom);
+                    }
+                  }
+                  clipped.left=Math.max(clipped.left,0);clipped.top=Math.max(clipped.top,0);clipped.right=Math.min(clipped.right,innerWidth);clipped.bottom=Math.min(clipped.bottom,innerHeight);
+                  return {width:r.width,height:r.height,text:n.textContent,visible:clipped.right>clipped.left&&clipped.bottom>clipped.top?[Math.max(0,(clipped.left-r.left)/r.width),Math.max(0,(clipped.top-r.top)/r.height),Math.min(1,(clipped.right-r.left)/r.width),Math.min(1,(clipped.bottom-r.top)/r.height)]:null};
+                }"""
 
 
 def local_overflows(scope):
@@ -76,27 +99,7 @@ class ControlChecks(TestplayChecks):
         def snapshot():
             values={}
             for key,selector in targets.items():
-                value=rail.locator(selector).evaluate("""n=>{
-                  const r=n.getBoundingClientRect();let clipped={left:r.left,top:r.top,right:r.right,bottom:r.bottom};
-                  for(let p=n.parentElement;p;p=p.parentElement){
-                    const style=getComputedStyle(p),b=p.getBoundingClientRect(),scale=p.offsetWidth?b.width/p.offsetWidth:1;
-                    if(['hidden','clip','auto','scroll'].includes(style.overflowX)){
-                      const hidden=['hidden','clip'].includes(style.overflowX);
-                      const left=hidden?b.left+parseFloat(style.borderLeftWidth)*scale:b.left+p.clientLeft*scale;
-                      const right=hidden?b.right-parseFloat(style.borderRightWidth)*scale:b.left+(p.clientLeft+p.clientWidth)*scale;
-                      clipped.left=Math.max(clipped.left,left);clipped.right=Math.min(clipped.right,right);
-                    }
-                    if(['hidden','clip','auto','scroll'].includes(style.overflowY)){
-                      // Hidden boxes have no scrollbar: preserve fractional padding-box edges rather than rounded clientHeight.
-                      const hidden=['hidden','clip'].includes(style.overflowY);
-                      const top=hidden?b.top+parseFloat(style.borderTopWidth)*scale:b.top+p.clientTop*scale;
-                      const bottom=hidden?b.bottom-parseFloat(style.borderBottomWidth)*scale:b.top+(p.clientTop+p.clientHeight)*scale;
-                      clipped.top=Math.max(clipped.top,top);clipped.bottom=Math.min(clipped.bottom,bottom);
-                    }
-                  }
-                  clipped.left=Math.max(clipped.left,0);clipped.top=Math.max(clipped.top,0);clipped.right=Math.min(clipped.right,innerWidth);clipped.bottom=Math.min(clipped.bottom,innerHeight);
-                  return {width:r.width,height:r.height,text:n.textContent,visible:clipped.right>clipped.left&&clipped.bottom>clipped.top?[Math.max(0,(clipped.left-r.left)/r.width),Math.max(0,(clipped.top-r.top)/r.height),Math.min(1,(clipped.right-r.left)/r.width),Math.min(1,(clipped.bottom-r.top)/r.height)]:null};
-                }""")
+                value=rail.locator(selector).evaluate(CLIPPED_RECT_SCRIPT)
                 assert value['width']>1 and value['height']>1,('Resource must not collapse',key,value)
                 if value['visible']:coverage[key].append(value['visible'])
                 values[key]=value
@@ -127,6 +130,40 @@ class ControlChecks(TestplayChecks):
         expect(root.locator('[data-seed-resources]')).to_be_visible()
         c['resourceReachability']={'method':'native horizontal/vertical wheel and real settings click','metrics':metrics,'targetVisibleAreaFractions':areas,'sampleCount':len(samples),'counterWidth':samples[0]['targets']['pixels']['width'],'settingsOpenedAndReturned':True}
 
+    def notice_reachability(self,page,root,c):
+        rail=root.locator('.seed-notice-stack')
+        targets={'title':'[data-example-next]>h2','explanation':'[data-example-next]>p'}
+        for selector in targets.values():expect(rail.locator(selector)).to_have_count(1)
+        metrics=rail.evaluate('n=>({height:n.clientHeight,maxY:n.scrollHeight-n.clientHeight})')
+        intervals={key:[] for key in targets};samples=[]
+        step=max(16,int(metrics['height']*.6))
+        positions=list(dict.fromkeys([*range(0,int(metrics['maxY'])+1,step),metrics['maxY']]))
+        for y in positions:
+            rail.hover()
+            for _ in range(4):
+                current=rail.evaluate('n=>n.scrollTop')
+                if abs(current-y)<=1:break
+                page.mouse.wheel(0,y-current);page.wait_for_timeout(75);page.clock.run_for(60)
+            current=rail.evaluate('n=>n.scrollTop')
+            assert abs(current-y)<=2,('Notice scroller did not respond to native wheel',y,current)
+            current_sample={}
+            for key,selector in targets.items():
+                value=rail.locator(selector).evaluate(CLIPPED_RECT_SCRIPT)
+                assert value['width']>1 and value['height']>1,('Next hand text must not collapse',key,value)
+                if value['visible']:intervals[key].append((value['visible'][1],value['visible'][3]))
+                current_sample[key]=value
+            samples.append({'scrollTop':current,'targets':current_sample})
+        def coverage(spans):
+            total=end=0
+            for top,bottom in sorted(spans):
+                if bottom>end:total+=bottom-max(top,end);end=bottom
+            return total
+        areas={key:coverage(spans) for key,spans in intervals.items()}
+        assert all(area>=.98 for area in areas.values()),('Next hand text remains clipped after native scrolling',areas,samples)
+        self.capture(page,c,'お知らせ内のお手本も最後までスクロールできる','notice-scroll')
+        rail.hover();page.mouse.wheel(0,-100000);page.wait_for_timeout(75);page.clock.run_for(60)
+        c['noticeReachability']={'method':'native vertical wheel','metrics':metrics,'targetVisibleHeightFractions':areas,'sampleCount':len(samples)}
+
     def run_control(self,language,width,era,part,preset,font):
         identity=f'control-era{era}-{language}-{width}-{part}-{preset}-{font}'
         prior=next((c for c in self.report['cases'] if c['id']==identity),None)
@@ -137,6 +174,11 @@ class ControlChecks(TestplayChecks):
         try:
             context,page=self.open(f'tp1-stable-era{era}',c)
             root=self.seed(page);expect(root).to_be_visible()
+            initial=self.state(page)
+            assert initial['schemaVersion']==CURRENT_SCHEMA_VERSION,initial['schemaVersion']
+            assert initial['persistent']['examplesEnabled'] is True,'The current default must keep examples enabled'
+            expect(root.locator('[data-example-next]')).to_have_count(1)
+            c['schemaVersion']=initial['schemaVersion'];c['examplesEnabled']=initial['persistent']['examplesEnabled']
             root.locator('[data-page-action=arrange]').click()
             root.locator('[data-page-selected-part]').select_option(part)
             controls=root.locator(f'[data-page-part-setting={part}]')
@@ -154,6 +196,7 @@ class ControlChecks(TestplayChecks):
             self.geometry(page,selected)
             overflows=local_overflows(selected)
             assert not overflows,overflows
+            if part=='notice':self.notice_reachability(page,root,c)
             if part=='pixels':
                 self.resource_reachability(page,root,c)
                 returned=self.parts(root)
@@ -166,7 +209,10 @@ class ControlChecks(TestplayChecks):
                 assert measurement['scroll'][0]<=measurement['client'][0]+2 and measurement['scroll'][1]<=measurement['client'][1]+2,measurement
                 self.same_box(after_font[part],self.box(generator),'Generator hit box follows the selected part')
                 generator.click()
+                # Keep the operation check but photograph the settled label, after the 800ms gain feedback.
+                page.clock.run_for(1000)
                 c['generatorLabel']=measurement
+                c['generatorCapture']='settled after real click and 1000ms of game time'
             assert not c['pageErrors'],c['pageErrors'];assert not c['externalRequests'],c['externalRequests'];assert not c['console'],c['console']
             self.capture(page,c,'個別の大きさと文字を変えた画面','controls')
             c.update(status='passed',accepted=accepted,before=before,afterSize=after_size,afterFont=after_font)

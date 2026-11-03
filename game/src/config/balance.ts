@@ -333,6 +333,13 @@ export const BALANCE = {
       }
     }
   },
+  examples: {
+    "desktopNextWidth": 240,
+    "desktopNextCompactWidth": 160,
+    "desktopCompactScreenWidth": 1024,
+    "desktopTaskbarGlassAppWidth": 48,
+    "desktopTaskbarFlatAppMinWidth": 46
+  },
   w1: {
     items: [
       { id: 'border', cost: 10, perSecond: 0.05 },
@@ -391,6 +398,9 @@ export const BALANCE = {
   // World2 naming retained only for generic integration settings during 8a.
   w2: { desktopCost: 200_000, hintMs: 300_000, enterMs: 1_200, upgradeMs: 2_000, maxName: 80 },
   workshop: {
+    feedback: { flightMs:650, pulseMs:1100, messageMs:1800, frameMs:33, originLift:12, maxWidth:260, queueLimit:4 },
+    // 4.2 お手本/連続制作: 付録Cに具体値がないため一括で置いた仮値。
+    examples: { snapDistance: 16, snapPulseMs: 480, comboWindowMs: 15_000, comboStepBonus: .02, comboMaxBonus: .10 },
     testplay: {
       "fillMs": 900,
       "scrollOverflowPx": 160,
@@ -484,7 +494,7 @@ export const BALANCE = {
     measurement: { clicksPerSecond: 2.5, decisionSeconds: 4, guideSeconds: 15,
       partSeconds: [90, 135, 180], averageMomentum: 1.3, cursorPaybackSeconds: 120,
       maxSeconds: 86_400, targetMinutes: [40, 60] },
-    canvas: { width: 640, height: 416, frameExtraWidth: 8, frameExtraHeight: 32, inset: 8, minWidth: 72, minHeight: 32, grid: 8, resolutionGrid: [8, 4, 2, 1] },
+    canvas: { width: 640, height: 416, frameExtraWidth: 8, frameExtraHeight: 32, layerStripHeight: 40, layerStripButtonHeight: 28, inset: 8, minWidth: 72, minHeight: 32, grid: 8, resolutionGrid: [8, 4, 2, 1] },
     design: { color: '#3a3450', textColor: '#f4efe4', radius: 0, radiusMax: 24,
       fontSize: 14, fontSizeMin: 12, fontSizeMax: 28, scrollbarWidth: 16,
       scrollbarMin: 8, scrollbarMax: 32, progressHeight: 16, progressHeightMin: 8, progressHeightMax: 40, minContrast: 4.5 },
@@ -565,7 +575,7 @@ export const BALANCE = {
   },
   longPlay:{achievementNoticeMs:4000,achievementBonus:.01,contractBonus:.05,partBonus:.005,partCap:50,shotMilestone:50,cursorBonus:.001,bulkUnlock:10,cursorLimit:10000,strayMinMs:120000,strayMaxMs:240000,strayLifeMs:30000,straySeconds:20,secretPresses:100,secretPartColor:'#c8553d',secretClockClicks:10,clockChainMs:5000,refreshCooldownMs:30000,refreshSeconds:30,soundVolume:.15,soundPerSecond:8},
   pageDesign: {
-    guideDemoMs: 2200,
+    guideDemoMs: 2200, gripOffset: 22,
     buttonFontMin:12,buttonFontMax:36,buttonMinWidth:160,buttonMinHeight:40,
     width:1920,height:920,grid:8,minWidth:320,minCanvasWidth:352,minCanvasHeight:720,maxWidth:1920,maxHeight:1080,
     layoutBreakpoint:1000,gap:16,contentInset:80,sidebarFraction:.28,

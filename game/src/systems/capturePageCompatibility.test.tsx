@@ -90,7 +90,7 @@ describe('TP-1：旧ページ配置を含む写真と製品は過去の契約で
  });
  it('実形式15の財布・制作・撮影11を保ち、現在のページだけを移行できる',()=>{
   const old=published().save,data=JSON.stringify(old),s=decodeSave(data);
-  expect(old.schemaVersion).toBe(15);expect(s.schemaVersion).toBe(SCHEMA_VERSION);expect(SCHEMA_VERSION).toBe(16);
+  expect(old.schemaVersion).toBe(15);expect(s.schemaVersion).toBe(SCHEMA_VERSION);
   expect(s.resources).toEqual(old.resources);expect(s.run.workshop.parts).toEqual(old.run.workshop.parts);
   expect(s.persistent.setDocuments).toEqual(old.persistent.setDocuments);
   expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);

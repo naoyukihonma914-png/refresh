@@ -16,7 +16,7 @@ export function SeedFuturePreview({state,i18n}:Props){
  const background=built.includes('color')?effectiveEditorBackground(state.persistent.editorCustomization,editorStage(state)):'#ffffff';
  const app=editorName(state,i18n),palette=paletteFor(state.persistent.specs.color),grid=`seed-future-grid-${useId().replace(/:/g,'')}`;
  const attributes=(part:SeedItem)=>({'data-seed-ghost-part':part,'data-built':built.includes(part),className:`seed-future-piece ${built.includes(part)?'is-built':''}`});
- return <aside className="seed-future-preview" data-seed-future-preview data-seed-future-remaining={remaining} data-seed-future-next={next??''} data-seed-future-built={built.join(',')} aria-label={i18n.t('seed.future.title')} style={{'--seed-future-width':`${config.width}px`,'--seed-future-right':`${config.right}px`,'--seed-future-top':`${config.top}px`,'--seed-future-footer-clearance':`${config.footerHeight}px`,color:readableText(background)} as CSSProperties}>
+ return <aside className="seed-future-preview" data-seed-future-preview data-seed-future-remaining={remaining} data-seed-future-next={next??''} data-seed-future-built={built.join(',')} aria-label={i18n.t('seed.future.title')} style={{'--seed-future-width':`${config.width}px`,'--seed-future-right':`${config.right}px`,'--seed-future-top':`${config.top}px`,'--seed-future-footer-clearance':`${config.footerHeight}px`,backgroundColor:background,color:readableText(background)} as CSSProperties}>
   <h2>{i18n.t('seed.future.title')}</h2>
   <p className="seed-future-name">{i18n.t('seed.future.editor',{app})}</p>
   <svg viewBox={`0 0 ${config.schematicWidth} ${config.schematicHeight}`} width={config.schematicWidth} height={config.schematicHeight} className="seed-future-drawing" aria-hidden="true">

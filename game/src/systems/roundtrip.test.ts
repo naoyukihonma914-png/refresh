@@ -97,7 +97,7 @@ describe('公開済み8aの保存形式14を現形式へ移行する',()=>{
   const raw=gunzipSync(readFileSync(new URL(`./testdata/v14-stage8a-${name}.json.gz`,import.meta.url))).toString();
   const original=JSON.parse(raw),frozen=JSON.stringify(original),next=decodeSave(raw);
   expect(next.schemaVersion).toBe(SCHEMA_VERSION);expect(next.resources).toEqual(original.resources);expect(next.run.totalPixelsGenerated).toBe(original.run.totalPixelsGenerated);
-  expect(next.run.workshop).toEqual({...original.run.workshop,editorStageAtEntry:original.persistent.appearance.editor,helpTarget:null});expect(next.persistent.setDocuments).toEqual(original.persistent.setDocuments);
+  expect(next.run.workshop).toEqual({...original.run.workshop,editorStageAtEntry:original.persistent.appearance.editor,helpTarget:null,combo:{count:0,lastCompletedAt:null}});expect(next.persistent.setDocuments).toEqual(original.persistent.setDocuments);
   expect(next.run.desktop.windows).toEqual(original.run.desktop.windows);expect(next.run.desktop.jobs).toEqual(original.run.desktop.jobs);expect(next.run.desktop.apps).toEqual(original.run.desktop.apps);
   expect(next.persistent.screenshots).toEqual(original.persistent.screenshots);expect(next.persistent.products).toEqual(original.persistent.products);expect(next.persistent.productionNote).toBe(original.persistent.productionNote);
   expect(isGameState(next)).toBe(true);expect(decodeSave(encodeSave(next))).toEqual(next);

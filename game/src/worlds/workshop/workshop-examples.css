@@ -1,0 +1,36 @@
+.workshop-root .ws-example-hand {padding:7px 8px 8px;border-block-start:1px solid var(--editor-edge-dark,#8f8574);display:flex;flex-direction:column;gap:5px;min-inline-size:0;}
+.workshop-root .ws-example-hand>strong {font-size:.85em;}
+.workshop-root .ws-example-hand>p {font-size:.9em;line-height:1.45;overflow-wrap:anywhere;}
+.workshop-root .ws-example-hand>button {inline-size:100%;min-inline-size:0;white-space:normal;overflow-wrap:anywhere;}
+.workshop-root .ws-custom-work {margin:5px 7px;border:1px solid var(--editor-edge-dark,#8f8574);}
+.workshop-root .ws-custom-work>summary {padding:6px;cursor:pointer;overflow-wrap:anywhere;}
+.workshop-root .ws-custom-work[open]>summary {border-block-end:1px solid var(--editor-edge-dark,#8f8574);}
+.workshop-root .ws-custom-work>p {padding:8px;font-size:.85em;line-height:1.5;overflow-wrap:anywhere;min-inline-size:0;}
+.workshop-root .ws-custom-work>button {display:block;margin:6px;max-inline-size:calc(100% - 12px);white-space:normal;}
+.workshop-root .ws-placement-custom {max-inline-size:290px;background:var(--editor-panel,#d6cfc0);}
+.workshop-root .ws-placement-custom>summary {cursor:pointer;padding:4px 6px;}
+.workshop-root .ws-placement-custom[open] {border:1px solid var(--editor-edge-dark,#8f8574);}
+.workshop-root .ws-placement-custom>div {display:flex;flex-wrap:wrap;gap:5px;padding:5px;}
+.workshop-root .ws-example-outline {position:absolute;z-index:3;pointer-events:none;box-sizing:border-box;border:2px dashed var(--editor-accent,#c8553d);background:color-mix(in srgb,var(--editor-accent,#c8553d) 7%,transparent);opacity:.5;}
+.workshop-root .ws-example-outline.is-blocked {border-style:dotted;opacity:.3;}
+.workshop-root .ws-example-outline.is-near {border-style:solid;opacity:.8;}
+.workshop-root .ws-snap-response {position:absolute;z-index:20;pointer-events:none;box-sizing:border-box;border:3px solid var(--editor-accent,#c8553d);animation:ws-example-snap var(--ws-snap-duration) ease-out both;}
+@keyframes ws-example-snap {0% {opacity:.95;box-shadow:inset 0 0 0 4px color-mix(in srgb,var(--editor-accent,#c8553d) 32%,transparent);}65% {opacity:.7;}100% {opacity:0;box-shadow:inset 0 0 0 0 transparent;}}
+@media(prefers-reduced-motion:reduce) {.workshop-root .ws-snap-response {animation:none;opacity:.7;}}
+.workshop-root .ws-snap-response[data-reduced-motion=true] {animation:none;opacity:.7;}
+
+/* The frame itself is the product, including its native padding and border. */
+.workshop-root .ws-target-window.ws-frame-example-outline {z-index:3;pointer-events:none;background:transparent;border-color:transparent;box-shadow:none;border-radius:0;opacity:.5;}
+.workshop-root .ws-frame-example-outline::after {content:'';position:absolute;inset:0;box-sizing:border-box;border:2px dashed var(--editor-accent,#c8553d);background:color-mix(in srgb,var(--editor-accent,#c8553d) 7%,transparent);}
+.workshop-root .ws-frame-example-outline.is-blocked {opacity:.3;}
+.workshop-root .ws-frame-example-outline.is-blocked::after {border-style:dotted;}
+.workshop-root .ws-frame-example-outline.is-near {opacity:.8;}
+.workshop-root .ws-frame-example-outline.is-near::after {border-style:solid;}
+.workshop-root .ws-target-window[data-workshop-snap] {animation:ws-frame-snap var(--ws-snap-duration) ease-out both;}
+@keyframes ws-frame-snap {from {box-shadow:inset 0 0 0 3px var(--editor-accent,#c8553d);}to {box-shadow:inset 0 0 0 0 transparent;}}
+@media(prefers-reduced-motion:reduce) {.workshop-root .ws-target-window[data-workshop-snap] {animation:none;box-shadow:inset 0 0 0 3px var(--editor-accent,#c8553d);}}
+.workshop-root .ws-target-window[data-workshop-snap][data-reduced-motion=true] {animation:none;box-shadow:inset 0 0 0 3px var(--editor-accent,#c8553d);}
+
+/* Reserve the first layer button before it exists, so the centered workbench stays put. */
+.workshop-root .ws-layer-strip {block-size:var(--ws-layer-strip-height);min-block-size:var(--ws-layer-strip-height);max-block-size:var(--ws-layer-strip-height);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+.workshop-root .ws-layer-strip>button {block-size:var(--ws-layer-strip-button-height);min-block-size:var(--ws-layer-strip-button-height);max-block-size:var(--ws-layer-strip-button-height);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;}

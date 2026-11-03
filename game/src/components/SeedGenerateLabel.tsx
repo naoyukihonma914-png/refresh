@@ -8,7 +8,7 @@ export function seedGenerateLabelMode(available:LabelSize,full:LabelSize,compact
 }
 
 function PixelPlus(){
- return <svg className="seed-generate-pixel-plus" viewBox="0 0 30 20" width={30} height={20} aria-hidden="true" focusable="false"><path d="M2 3h6v6H2zM10 3h6v6h-6zM2 11h6v6H2zM10 11h6v6h-6z" fill="currentColor"/><path d="M23 5v10m-5-5h10" fill="none" stroke="currentColor" strokeWidth="2"/></svg>;
+ return <svg className="seed-generate-pixel-plus" viewBox="0 0 30 20" width={30} height={20} aria-hidden="true" focusable="false"><path d="M2 3h6v6H2zM10 3h6v6h-6zM2 11h6v6H2z" fill="currentColor"/><path d="M23 5v10m-5-5h10" fill="none" stroke="currentColor" strokeWidth="2"/></svg>;
 }
 interface Props {fullCaption:string;formattedGain:string;style?:CSSProperties}
 /** Keep the chosen font and press animation while adapting only the label's content. */

@@ -1,3 +1,4 @@
+import {ExampleSettings} from '../components/ExampleSettings';
 import {GuideHistory} from '../components/GuideHistory';
 import {UiScaleControl} from '../components/UiScaleControl';
 import {PagePartControls} from '../components/PagePartControls';
@@ -28,6 +29,7 @@ export function PageSettings({ state, runtime, i18n, onClose }: {
   return <section className="page-settings">
     <h1>{i18n.t('seed.settings')}</h1>
     <button className="text-button" onClick={onClose}>{i18n.t('settings.back')}</button>
+    <ExampleSettings state={state} runtime={runtime} i18n={i18n}/>
     <UiScaleControl runtime={runtime} i18n={i18n}/>
     <section className="page-design-settings">
     {state.run.seed.built.includes('layout')&&<PagePartControls state={state} runtime={runtime} i18n={i18n}/>}

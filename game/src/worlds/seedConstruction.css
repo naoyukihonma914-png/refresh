@@ -67,9 +67,10 @@
 .seed-construction .page-settings h1 {font-size:20px;font-weight:700;}
 .seed-construction .page-arranging .page-part {outline:1px dashed #8b311f;outline-offset:2px;}
 .seed-construction .page-arranging .page-part[data-page-selected=true] {outline:2px dashed #c8553d;}
-.seed-construction .page-part-grip {position:absolute;inset-inline-start:0;inset-block-start:-22px;block-size:20px;min-block-size:20px;display:flex;align-items:center;gap:4px;padding:0 4px;z-index:10;background:var(--editor-panel);color:var(--editor-ink);font:12px/1.1 'Refresh UI',sans-serif;cursor:move;}
-.seed-construction .page-part-grip svg {width:14px;height:14px;inline-size:14px;block-size:14px;fill:currentColor;}
-.seed-construction .page-quiet-grip {inset-inline-start:auto;inset-inline-end:0;inset-block-start:auto;inset-block-end:0;inline-size:16px;padding:0;opacity:.25;background:none;border:0;box-shadow:none;}
+.seed-construction .page-part-grip {position:absolute;inset-inline-start:0;block-size:20px;min-block-size:20px;display:flex;align-items:center;gap:4px;padding:0 4px;z-index:10;background:var(--editor-panel);color:var(--editor-ink);font:12px/1.1 'Refresh UI',sans-serif;cursor:move;}
+.seed-construction .page-part-grip>span {min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.seed-construction .page-part-grip svg {flex:none;width:14px;height:14px;inline-size:14px;block-size:14px;fill:currentColor;}
+.seed-construction .page-part-grip.page-quiet-grip {inset-inline-start:auto;inset-inline-end:0;inset-block-start:auto;inset-block-end:0;inline-size:16px;padding:0!important;justify-content:center;gap:0;opacity:.25;background:none;border:0;box-shadow:none;}
 .seed-construction .page-quiet-grip:hover,.seed-construction .page-quiet-grip:focus-visible {opacity:1;}
 .seed-construction .page-part-resize {position:absolute;inset-inline-end:-7px;inset-block-end:-7px;inline-size:16px;block-size:16px;min-block-size:16px;padding:0;border:1px solid currentColor;background:var(--editor-panel);cursor:nwse-resize;z-index:10;}
 .seed-construction .page-part.invalid {outline-color:#b00020;}
@@ -118,3 +119,8 @@
 .seed-construction .seed-generate-label-compact-probe {inline-size:max-content;max-inline-size:none;block-size:auto;}
 
 .seed-construction .seed-fixed-resources>.seed-link {flex:none;max-inline-size:none;white-space:nowrap;padding:0;line-height:1.3;}
+
+/* Stays inside the already reserved notice rectangle; new notices never move the generator. */
+.seed-construction .seed-next-hand {position:sticky;inset-block-start:0;z-index:1;background:var(--seed-background,#fff);color:inherit;padding-block-end:8px;}
+.seed-construction .seed-next-hand h2 {font:inherit;font-weight:bold;margin:0 0 4px;}
+.seed-construction .seed-next-hand p {margin:0;}

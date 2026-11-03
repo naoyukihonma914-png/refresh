@@ -41,7 +41,7 @@ describe('TP2：同じ行き先を示すカタログと説明図',()=>{
  });
  it('必須ルートの印は1つだけで、権利を買ってもパーツ行を完成表示にしない',()=>{
   let s=createFixture('stage8a-entry-era0',now)!;
-  const render=()=>renderToStaticMarkup(<WorkshopNavigator runtime={{} as GameRuntime} snapshot={{state:s} as RuntimeSnapshot} i18n={createI18n('ja')}/>);
+  const render=()=>renderToStaticMarkup(<WorkshopNavigator runtime={{platform:{clock:{wallNow:()=>now}}} as GameRuntime} snapshot={{state:s} as RuntimeSnapshot} i18n={createI18n('ja')}/>);
   let markup=render();expect((markup.match(/class="ws-next-indicator"/g)??[]).length).toBe(1);expect(markup).toContain('data-workshop-next="common"');
   s=actWorkshop(s,{type:'buySet',set:'common'},now);markup=render();
   expect(markup).toContain('data-workshop-next="common-frame"');expect((markup.match(/data-workshop-part="common-frame"/g)??[]).length).toBe(1);

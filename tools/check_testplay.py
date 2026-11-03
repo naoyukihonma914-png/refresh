@@ -18,7 +18,7 @@ import shutil
 import zipfile
 from datetime import datetime,timedelta,timezone
 from playwright.sync_api import sync_playwright,expect
-from check_stage8b import Review,ROOT,LANGUAGES,SIZES
+from check_stage8b import Review,ROOT,LANGUAGES,SIZES,CURRENT_SCHEMA_VERSION
 
 MAIN_SETS=['common','foundation','files','mail']
 PAGE_PARTS=['heading','notice','pixels','generator','cursors','upgrades']
@@ -162,6 +162,12 @@ class TestplayChecks(Review):
             root.locator('[data-page-action=arrange]').click()
         expect(root.locator('[data-page-layout-mode=true]')).to_be_visible()
         assert set(self.parts(root))==set(PAGE_PARTS)
+        canvas_box=self.box(root.locator('.page-layout-canvas'))
+        grip_boxes=root.locator('.page-part-grip').evaluate_all('nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {part:n.dataset.pagePartGrip,x:r.x,y:r.y,width:r.width,height:r.height,title:n.title,label:n.getAttribute("aria-label")}})')
+        assert len(grip_boxes)==6
+        for grip in grip_boxes:
+            assert grip['title'] and grip['label'],'A truncated visual grip name must keep its complete accessible explanation'
+            assert grip['x']>=canvas_box['x']-.5 and grip['y']>=canvas_box['y']-.5 and grip['x']+grip['width']<=canvas_box['x']+canvas_box['width']+.5 and grip['y']+grip['height']<=canvas_box['y']+canvas_box['height']+.5,('Placement grip outside canvas',grip,canvas_box)
         # Keyboard editing works without invoking a generation shortcut.
         before_edit=self.state(page)
         gen_part=root.locator('[data-page-part=generator]')
@@ -190,7 +196,7 @@ class TestplayChecks(Review):
         assert self.state(page)['run']['seed']['page']==stored['run']['seed']['page'],'UI scale must not rewrite saved page coordinates'
         root.locator('[data-ui-scale]').select_option('1')
         # Fixture preferences are isolated memory; prove persistence on a normal URL after real import.
-        migrated=self.import_state(page,stored,c);assert migrated['schemaVersion']==16
+        migrated=self.import_state(page,stored,c);assert migrated['schemaVersion']==CURRENT_SCHEMA_VERSION
         root=self.seed(page);assert root.locator('[data-page-first-guide]').count()==0
         root.locator('[data-page-action=settings]').click();root.locator('[data-ui-scale]').select_option('1.25')
         expect(page.locator('[data-stage-ui-scale]')).to_have_attribute('data-stage-ui-scale','1.25')
@@ -215,7 +221,7 @@ class TestplayChecks(Review):
             root.locator('[data-page-part-grip=generator]').focus();page.keyboard.press('Space')
             assert self.state(page)['resources']['pixels']==before_arrange,'Arrangement controls must not invoke generation shortcuts'
             root.locator('[data-page-action=finish]').first.click()
-        c['layout']={'fixedGeneratorBefore':before,'generatorOnlyBefore':parts_before,'generatorOnlyAfter':parts_after,'cursorLogicalSize':[18,24],'partFonts':stored['run']['seed']['page']['partFonts'],'firstGuideOnce':True,'uiScaleDoesNotRewriteLayout':True,'uiScaleSurvivesNormalReload':True,'realImportReload':True}
+        c['layout']={'fixedGeneratorBefore':before,'generatorOnlyBefore':parts_before,'generatorOnlyAfter':parts_after,'cursorLogicalSize':[18,24],'partFonts':stored['run']['seed']['page']['partFonts'],'firstGuideOnce':True,'uiScaleDoesNotRewriteLayout':True,'uiScaleSurvivesNormalReload':True,'realImportReload':True,'gripsInsideCanvas':True,'gripBounds':grip_boxes}
         self.navigate(page,f'tp1-stable-era{c["era"]}',c);root=self.seed(page);self.quiet(page)
         expect(root.locator('[data-seed-future-preview]')).to_have_attribute('data-seed-future-remaining','1')
         assert not root.locator('[data-page-first-guide]').count()
@@ -294,12 +300,21 @@ class TestplayChecks(Review):
 
     def prepare_part(self,page,w,part):
         step=w.locator('[data-workshop-step]')
-        if step.get_attribute('data-workshop-step')=='0':w.locator('[data-workshop-action=place]').click()
+        if step.get_attribute('data-workshop-step')=='0':
+            guided=w.locator('[data-workshop-example-action=place]')
+            if guided.count() and guided.is_visible():guided.click()
+            else:w.locator('[data-workshop-action=place]').first.click()
         if step.get_attribute('data-workshop-step')=='1':
-            for element in part['elements']:
-                control=w.locator(f'[data-workshop-element="{element}"]').first
-                if control.is_enabled():control.click()
-        if step.get_attribute('data-workshop-step')=='2':w.locator('[data-workshop-action=confirmAdjustment]').click()
+            batch=w.locator('[data-workshop-example-action=addAll]')
+            if batch.count() and batch.is_visible():batch.click()
+            else:
+                for element in part['elements']:
+                    control=w.locator(f'[data-workshop-element="{element}"]').first
+                    if control.is_enabled():control.click()
+        if step.get_attribute('data-workshop-step')=='2':
+            example=w.locator('[data-workshop-action=useExample]')
+            if example.count() and example.is_visible():example.click()
+            else:w.locator('[data-workshop-action=confirmAdjustment]').click()
         expect(step).to_have_attribute('data-workshop-step','3');self.quiet(page)
 
     def finish_part(self,page,w,part,c=None):
@@ -414,13 +429,13 @@ class TestplayChecks(Review):
         for name in ['seed-before-layout','seed-custom-layout','seed-inherited-layout','workshop-mid','desktop-records','shipping']:
             path=ROOT/f'game/src/systems/testdata/tp-v15-main-{name}.json.gz';old=json.loads(gzip.decompress(path.read_bytes()))
             assert old['schemaVersion']==15
-            migrated=self.import_state(page,old,c);assert migrated['schemaVersion']==16
+            migrated=self.import_state(page,old,c);assert migrated['schemaVersion']==CURRENT_SCHEMA_VERSION
             for key in ['pixels','tokens','dollars']:assert migrated['resources'][key]>=old['resources'][key],(name,key)
             for key in ['specs','seedSkills','editorSkills','products','setDocuments','screenshots']:assert migrated['persistent'][key]==old['persistent'][key],(name,key)
             assert migrated['run']['workshop']['parts']==old['run']['workshop']['parts']
             if old['run']['seed']['page']['layout']:assert set(migrated['run']['seed']['page']['layout']['parts'])==set(PAGE_PARTS)
             if name in ['seed-custom-layout','seed-inherited-layout']:assert migrated['persistent']['testplay']['layoutGuideSeen']
-            self.navigate(page,None,c);saved=self.state(page);assert saved['schemaVersion']==16
+            self.navigate(page,None,c);saved=self.state(page);assert saved['schemaVersion']==CURRENT_SCHEMA_VERSION
             assert saved['persistent']['screenshots']==old['persistent']['screenshots']
             self.capture(page,c,'本物のmain形式15を移行: '+name,'migration-'+name);cases.append(name)
         c['migration']={'sources':cases,'walletsAndWorksPreserved':True,'oldCaptureBytesPreserved':True}

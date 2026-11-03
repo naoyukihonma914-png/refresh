@@ -8,6 +8,7 @@ import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, takeScreensho
 import { createInitialState, type GameState } from './state';
 import { buildSeed, createSeedVersion, updateSeedGuide } from './seed';
 import { actPageDesign } from './pageDesign';
+import { setExamplesEnabled } from './workshopExamples';
 import { advanceActiveTime } from './time';
 import { UI_SETS, WORKSHOP_PARTS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
 import { BASE_PALETTE } from '../content/palette';
@@ -39,7 +40,10 @@ const STAGE8A_VIEWS = ['entry','set-shop','main','catalog','files-complete','req
 const TP_MAIN_PARTS=WORKSHOP_PARTS.filter(part=>UI_SETS.find(set=>set.id===part.set)?.mainline);
 const TP_SEED_VIEWS=['start','before-layout','first-layout','stable'] as const;
 const TP_WORKSHOP_VIEWS=['route','help-catalog'] as const;
+const EXAMPLES_VIEWS=['seed-on','seed-off','seed-layout-on','seed-layout-off','seed-custom-on','seed-custom-off','route-on','route-off','place-on','place-off','adjust-on','adjust-off','adjust-custom','finish-on','finish-off','replay-off'] as const;
 export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
+  ...EXAMPLES_VIEWS.flatMap(mode=>[0,1,2].map(era=>`examples-${mode}-era${era}`)),
+  ...['desktop','desktop-pending'].flatMap(mode=>[0,1,2,3].map(era=>`examples-${mode}-era${era}`)),
   ...TP_SEED_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp1-${view}-era${era}`)),
   ...[0,1,2].map(era=>`tp1-workshop-shell-era${era}`),
   ...TP_WORKSHOP_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp2-${view}-era${era}`)),
@@ -122,6 +126,8 @@ function prototypeReady(now:number):GameState {
 export function createFixture(name:string|null,now:number):GameState|null {
  if(!name||!FIXTURE_NAMES.includes(name))return null;
  if(name==='intro')return createInitialState(now);
+ const examples=/^examples-(.+)-era([0-3])$/.exec(name);
+ if(examples)return reconcileProgress(examplesFixture(examples[1]!,Number(examples[2]),now),now);
  const testplay=/^tp([123])-(.+)-era([0-2])$/.exec(name);
  if(testplay)return reconcileProgress(testplayFixture(Number(testplay[1]),testplay[2]!,Number(testplay[3]),now),now);
  const stage8b=/^stage8b-(.+)-era([0-3])$/.exec(name);
@@ -390,4 +396,46 @@ function testplayFixture(step:number,mode:string,era:number,now:number):GameStat
   return fixtureBudget(s);
  }
  throw new Error('Unknown testplay fixture: '+step+' '+mode);
+}
+
+/** Examples setup uses the real material/production reducers; no completed step is rewound. */
+function examplesFixture(mode:string,era:number,now:number):GameState {
+ if(mode.startsWith('desktop')){
+  let s=stage8bFixture(mode==='desktop-pending'?'economy-before':'editor',era,now);
+  s=focusWindow(s,'tessera');
+  return setExamplesEnabled(s,true);
+ }
+ if(mode==='replay-off'){
+  let s=setExamplesEnabled(createFixture(`stage7-ready${era}`,now)!,false);
+  s=actPageDesign(s,{type:'layout-guide-seen'});
+  s=showShipping(beginProductRelease(s,now,{language:'ja',reducedMotion:true}),true);
+  s=buySpec(s,'refresh');s=startNextVersion(s,now);
+  return fixtureBudget(advanceActiveTime(s,BALANCE.release.restartMs).state);
+ }
+ if(mode.startsWith('seed')){
+  const count=mode.startsWith('seed-layout')?4:mode.startsWith('seed-custom')?8:0;
+  let s=testplaySeed(now,era,count);
+  if(mode.startsWith('seed-custom')){
+   s=actPageDesign(s,{type:'part-size',part:'generator',size:'extraLarge'});
+   s=actPageDesign(s,{type:'part-font',part:'heading',size:'large'});
+   s=actPageDesign(s,{type:'font',slot:'headingFont',font:'mono'});
+  }
+  return setExamplesEnabled(s,!mode.endsWith('-off'));
+ }
+ if(mode.startsWith('route'))return setExamplesEnabled(testplayWorkshop(now,era),mode.endsWith('-on'));
+ let s=testplayMainPrefix(testplayWorkshop(now,era),2,now);
+ const part=getWorkshopPart('common-button');
+ s=actWorkshop(s,{type:'selectPart',part:part.id},now);
+ if(!mode.startsWith('place')){
+  s=actWorkshop(s,{type:'place',part:part.id,rect:{...part.defaultRect}},now);
+  for(const element of part.elements)s=actWorkshop(s,{type:'addElement',part:part.id,element},now);
+  if(mode==='adjust-custom'){
+   s=actWorkshop(s,{type:'place',part:part.id,rect:{...part.defaultRect,x:part.defaultRect.x+32,y:part.defaultRect.y+32}},now);
+   s=actWorkshop(s,{type:'adjust',part:part.id,patch:{radius:8,shadow:true}},now);
+  }
+  if(mode.startsWith('finish'))s=actWorkshop(s,{type:'confirmAdjustment',part:part.id},now);
+ }
+ s=actWorkshop(s,{type:'help',target:null},now);
+ s=actWorkshop(s,{type:'guide',id:'close'},now);
+ return setExamplesEnabled(s,!mode.endsWith('-off'));
 }
