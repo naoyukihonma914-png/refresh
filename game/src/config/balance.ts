@@ -203,7 +203,7 @@ export const BALANCE = {
     maxNote: 20_000, compactCursors: 8,
   },
   longPlay:{achievementNoticeMs:4000,achievementBonus:.01,contractBonus:.05,partBonus:.005,partCap:50,shotMilestone:50,cursorBonus:.001,bulkUnlock:10,cursorLimit:10000,strayMinMs:120000,strayMaxMs:240000,strayLifeMs:30000,straySeconds:20,secretPresses:100,secretPartColor:'#c8553d',secretClockClicks:10,clockChainMs:5000,refreshCooldownMs:30000,refreshSeconds:30,soundVolume:.15,soundPerSecond:8},
-  pageDesign:{buttonFontMin:12,buttonFontMax:36,buttonMinWidth:120,buttonMinHeight:32,width:1920,height:920,grid:8,cardWidth:800,minWidth:320,minHeights:{heading:64,notice:64,generator:160,upgrades:120},compactHeights:{heading:80,notice:80,generator:280,upgrades:160},recommendedHeights:{heading:112,notice:160,generator:176,upgrades:224}},
+  pageDesign:{buttonFontMin:12,buttonFontMax:36,buttonMinWidth:160,buttonMinHeight:40,width:1920,height:920,grid:8,cardWidth:800,minWidth:320,minHeights:{heading:64,notice:64,generator:160,upgrades:120},compactHeights:{heading:80,notice:80,generator:280,upgrades:160},recommendedHeights:{heading:112,notice:160,generator:176,upgrades:224}},
   legacyHome:{switchRefund:20_000,sliderRefund:32_000},
   appBuild:{minWidth:160,minHeight:100,maxWidth:1920,maxHeight:1080,fontSizes:[10,12,14,16,18,20,24,28],rowHeights:[20,24,28,32,40],width:640,height:416,grid:8,bodyMinWidth:112,bodyMinHeight:64,controlMinWidth:112,controlMinHeight:48,history:30},
   appearance:{transitionMs:2_000,gessoRequirement:2,screens:[{width:800,height:600},{width:1024,height:768},{width:1366,height:768},{width:1366,height:768}]},
