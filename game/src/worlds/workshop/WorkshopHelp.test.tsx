@@ -49,6 +49,13 @@ describe('TP2：同じ行き先を示すカタログと説明図',()=>{
   for(const part of partsForSet('common'))s=completeWorkshopPartFixture(s,part.id,now,false);
   markup=render();expect(markup).toContain('data-workshop-next="foundation"');expect((markup.match(/class="ws-next-indicator"/g)??[]).length).toBe(1);
  });
+ it('ドリルダウン：未選択ならセット階層、作業中パーツがあれば制作階層で開く',()=>{
+  let s=createFixture('stage8a-entry-era0',now)!;
+  const render=()=>renderToStaticMarkup(<WorkshopNavigator runtime={{platform:{clock:{wallNow:()=>now}}} as GameRuntime} snapshot={{state:s} as RuntimeSnapshot} i18n={createI18n('ja')}/>);
+  let markup=render();expect(markup).toContain('data-workshop-nav-level="sets"');expect(markup).toContain('data-workshop-set="common"');expect(markup).not.toContain('data-workshop-chip');
+  s=actWorkshop(s,{type:'buySet',set:'common'},now);markup=render();
+  expect(markup).toContain('data-workshop-nav-level="work"');expect(markup).toContain('data-workshop-chip="common-button"');expect(markup).toContain('data-workshop-nav="parts"');expect(markup).not.toContain('data-workshop-set-selection');
+ });
  it('完成予想図は渡した完成パーツだけを実線にし、試運転の対象を分ける',()=>{
   const html=renderToStaticMarkup(<WorkshopSchematic set="common" completedParts={['common-frame']} trialPart="common-frame" trialOpen i18n={createI18n('ja')} highlight={false}/>);
   expect(html).toContain('data-help-region="common-frame" data-highlighted="true" data-part-complete="true"');

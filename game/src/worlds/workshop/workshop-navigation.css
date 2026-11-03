@@ -63,3 +63,10 @@
 /* Icon-only close controls do not need an inline text baseline. */
 .workshop-root .ws-help-dialog>header>button {display:grid;place-items:center;line-height:1;}
 .workshop-root .ws-help-dialog>header>button>svg {display:block;inline-size:16px;block-size:16px;max-inline-size:100%;max-block-size:100%;}
+.workshop-root .ws-level-head {display:flex;align-items:center;gap:8px;padding:4px 7px;}
+.workshop-root .ws-level-head h4 {margin:0;font-size:1.02em;}
+.workshop-root .ws-level-set {font-weight:bold;}
+.workshop-root .ws-sibling-parts {display:flex;flex-wrap:wrap;gap:4px;padding:6px 7px;border-block-start:1px solid currentColor;}
+.workshop-root .ws-sibling-chip-wrap {display:inline-flex;align-items:stretch;gap:2px;}
+.workshop-root .ws-sibling-chip {display:inline-flex;align-items:center;gap:4px;padding:2px 7px;margin:0;}
+.workshop-root .ws-sibling-chip[aria-pressed="true"] {font-weight:bold;}
