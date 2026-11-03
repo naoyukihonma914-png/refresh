@@ -1603,6 +1603,7 @@
     "examples.next": "Short-term goal",
     "examples.nextCompact": "Next step",
     "examples.seed.fit": "Drag {name} into its recess",
+    "examples.seed.fitRemaining": "Drag the parts into their recesses — {count} to go",
     "examples.seed.generate": "Generate {pixels} more, then build {item}",
     "examples.seed.buy": "Build {item} with the build button",
     "examples.seed.launch": "The editor is starting",

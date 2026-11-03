@@ -24,19 +24,23 @@ export interface PageDesign {
  partColors?:Partial<Record<PagePart,{background:string|null;text:string|null}>>;
  fitted?:PagePart[];piecePositions?:Partial<Record<PagePart,{x:number;y:number}>>;
 }
-/** With the guide (お手本) on, seed parts arrive as pieces fitted into background recesses in this order. */
+/** With the guide (お手本) on, seed parts arrive as pieces fitted into background recesses; all of them are out at once and can be fitted in any order. FIT_ORDER only orders the guidance hint. */
 export const FIT_ORDER:PagePart[]=['heading','notice','upgrades','cursors'];
 export const effectiveFitted=(page:PageDesign,examplesEnabled:boolean):PagePart[]=>!examplesEnabled?[...PAGE_PARTS]:page.fitted?[...page.fitted]:[...PAGE_PARTS];
-export function nextPieceToFit(page:PageDesign,examplesEnabled:boolean,autoCursors:number):PagePart|null {
- if(!examplesEnabled)return null;const fitted=effectiveFitted(page,true);
- return FIT_ORDER.find(id=>!fitted.includes(id)&&(id!=='cursors'||autoCursors>0))??null;
+export function piecesToFit(page:PageDesign,examplesEnabled:boolean,autoCursors:number):PagePart[] {
+ if(!examplesEnabled)return [];const fitted=effectiveFitted(page,true);
+ return FIT_ORDER.filter(id=>!fitted.includes(id)&&(id!=='cursors'||autoCursors>0));
 }
-/** Display layout while a piece waits: the piece hovers beside its socket; everything else sits at its layout rect. */
+export function nextPieceToFit(page:PageDesign,examplesEnabled:boolean,autoCursors:number):PagePart|null {
+ return piecesToFit(page,examplesEnabled,autoCursors)[0]??null;
+}
+/** Display layout while pieces wait: each piece hovers beside its socket; fitted parts sit at their layout rects. */
 export function socketLayout(page:PageDesign,base:PageLayout,examplesEnabled:boolean,autoCursors:number):PageLayout {
- const piece=nextPieceToFit(page,examplesEnabled,autoCursors);if(!piece)return base;
- const socket=base.parts[piece],stored=page.piecePositions?.[piece],off=BALANCE.pageDesign.socketSpawnOffset;
- const spawned={x:Math.max(0,Math.min(base.width-socket.width,socket.x+off)),y:Math.max(0,Math.min(base.height-socket.height,socket.y+off))};
- return {...base,parts:{...base.parts,[piece]:{...socket,x:stored?.x??spawned.x,y:stored?.y??spawned.y}}};
+ const pieces=piecesToFit(page,examplesEnabled,autoCursors);if(!pieces.length)return base;
+ const parts={...base.parts},off=BALANCE.pageDesign.socketSpawnOffset;
+ for(const piece of pieces){const socket=base.parts[piece],stored=page.piecePositions?.[piece];
+  parts[piece]={...socket,x:stored?.x??Math.max(0,Math.min(base.width-socket.width,socket.x+off)),y:stored?.y??Math.max(0,Math.min(base.height-socket.height,socket.y+off))};}
+ return {...base,parts};
 }
 export const pagePartColors=(page:PageDesign,id:PagePart):{background:string|null;text:string|null}=>page.partColors?.[id]??{background:null,text:null};
 export const createPageDesign=():PageDesign=>({background:null,text:null,button:null,headingFont:'sans',bodyFont:'sans',motion:'push',heading:'',layout:null,partFonts:Object.fromEntries(PAGE_PARTS.map(id=>[id,'normal'])) as PageDesign['partFonts']});
@@ -213,12 +217,12 @@ export function actPageDesign(s:GameState,a:PageAction):GameState {
   page.partColors={...page.partColors,[a.part]:current};
  }
  if(a.type==='fit'){
-  if(nextPieceToFit(p,s.persistent.examplesEnabled,s.run.seed.autoCursors)!==a.part)return s;
+  if(!piecesToFit(p,s.persistent.examplesEnabled,s.run.seed.autoCursors).includes(a.part))return s;
   page.fitted=[...effectiveFitted(p,true),a.part];
   if(page.piecePositions){page.piecePositions={...page.piecePositions};delete page.piecePositions[a.part];}
  }
  if(a.type==='piece-move'){
-  if(nextPieceToFit(p,s.persistent.examplesEnabled,s.run.seed.autoCursors)!==a.part)return s;
+  if(!piecesToFit(p,s.persistent.examplesEnabled,s.run.seed.autoCursors).includes(a.part))return s;
   const base=p.layout??initialPageLayout(),rect=base.parts[a.part];
   const x=Math.max(0,Math.min(base.width-rect.width,snap(Math.round(a.x)))),y=Math.max(0,Math.min(base.height-rect.height,snap(Math.round(a.y))));
   page.piecePositions={...page.piecePositions,[a.part]:{x,y}};

@@ -55,7 +55,7 @@ describe('お手本の組み立てと自由制作の二層',()=>{
  });
  it.each([0,1,2])('段%s：最初の配置だけに薄い輪郭を出し、自由操作や完成品には残さない',era=>{
   let s=createFixture(`tp2-route-era${era}`,now)!;s=actWorkshop(s,{type:'buySet',set:'common'},now);const before=structuredClone(s);
-  const html=canvas(s);expect(html).toContain('data-workshop-example-outline="common-frame"');expect(s).toEqual(before);
+  const html=canvas(s);expect(html).toContain('data-workshop-example-outline="common-frame"');expect(html).toContain('data-workshop-example-outline="common-button"');expect(html).toContain('data-workshop-example-outline="common-heading"');expect(html).toContain('data-workshop-example-outline="common-progress"');expect(s).toEqual(before);
   s.persistent.examplesEnabled=false;expect(canvas(s)).not.toContain('data-workshop-example-outline');
   s.persistent.examplesEnabled=true;s=actWorkshop(s,{type:'place',part:'common-frame',rect:getWorkshopPart('common-frame').defaultRect,example:true},now);
   expect(canvas(s)).not.toContain('data-workshop-example-outline');expect(canvas(s)).toContain('data-workshop-custom-placement="true"');

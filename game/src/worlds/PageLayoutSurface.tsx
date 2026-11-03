@@ -8,7 +8,7 @@ interface Props {
  onChange(layout:PageLayout):void;i18n:I18n;measureRef:Ref<PageLayoutHandle>;allowArrangement?:boolean;
  selectedPart?:PagePart;onSelectPart?:(part:PagePart)=>void;onRequestEdit?:()=>void;firstGuide?:boolean;reducedMotion?:boolean;
  partActions?:Partial<Record<PagePart,ReactNode>>;
- placing?:{pieces:PagePart[];sockets:PageLayout;snapPart?:PagePart|null};
+ placing?:{pieces:PagePart[];sockets:PageLayout;layout:PageLayout;snapPart?:PagePart|null};
  onPlace?:(part:PagePart,rect:PageRect,snapped:boolean)=>void;
 }
 /** Coordinates belong to the whole page, independently of its evolving editor rails. */
@@ -20,10 +20,17 @@ export function PageLayoutSurface({layout,design=createPageDesign(),parts,editin
  const fitted=useMemo(()=>fitPageLayout(layout??recommendedPage(),size.width,size.height),[layout,size]);
  const fittedSockets=useMemo(()=>placing?fitPageLayout(placing.sockets,size.width,size.height):null,[placing,size]);
  useImperativeHandle(measureRef,()=>({measure:()=>structuredClone(fitted)}),[fitted]);
+ /** A waiting piece renders at its socket's exact size, shifted by its logical offset from the socket. */
+ const pieceRect=(id:PagePart):PageRect=>{
+  const socket=fittedSockets!.parts[id],logicalSocket=placing!.sockets.parts[id],logicalPiece=placing!.layout.parts[id];
+  const kx=logicalSocket.width>0?socket.width/logicalSocket.width:1,ky=logicalSocket.height>0?socket.height/logicalSocket.height:1;
+  return {x:socket.x+(logicalPiece.x-logicalSocket.x)*kx,y:socket.y+(logicalPiece.y-logicalSocket.y)*ky,width:socket.width,height:socket.height};
+ };
  const start=(event:React.PointerEvent<HTMLElement>,id:PagePart,resize:boolean)=>{
   const piece=!editing&&Boolean(placing?.pieces.includes(id));
   if((!editing&&!piece)||event.button!==0)return;event.preventDefault();event.stopPropagation();event.currentTarget.setPointerCapture(event.pointerId);
-  onSelectPart?.(id);drag.current={id,rect:{...fitted.parts[id]},x:event.clientX,y:event.clientY,scale:root.current!.getBoundingClientRect().width/root.current!.offsetWidth,resize,piece};setPreview({id,rect:fitted.parts[id],valid:true});
+  const startRect=piece&&fittedSockets?pieceRect(id):fitted.parts[id];
+  onSelectPart?.(id);drag.current={id,rect:{...startRect},x:event.clientX,y:event.clientY,scale:root.current!.getBoundingClientRect().width/root.current!.offsetWidth,resize,piece};setPreview({id,rect:startRect,valid:true});
  };
  const move=(event:React.PointerEvent)=>{const current=drag.current;if(!current)return;const grid=BALANCE.pageDesign.grid,dx=Math.round((event.clientX-current.x)/current.scale/grid)*grid,dy=Math.round((event.clientY-current.y)/current.scale/grid)*grid;
   const rect={...current.rect,...(current.resize?{width:current.rect.width+dx,height:current.rect.height+dy}:{x:current.rect.x+dx,y:current.rect.y+dy})};setPreview({id:current.id,rect,valid:current.piece?true:validPagePlacement(fitted,current.id,rect)});
@@ -40,7 +47,7 @@ export function PageLayoutSurface({layout,design=createPageDesign(),parts,editin
  return <div ref={root} className={`page-layout-surface ${editing?'page-arranging':''}`} data-page-layout-mode={editing}>
   <div className="page-layout-canvas" style={{width:fitted.width,height:fitted.height}}>
    {placing&&fittedSockets&&placing.pieces.map(id=>{const socket=fittedSockets.parts[id];return <div key={id} className="page-socket" data-page-socket={id} aria-hidden="true" style={{left:socket.x,top:socket.y,width:socket.width,height:socket.height}}/>;})}
-   {PAGE_PARTS.map(id=>{const rect=preview?.id===id?preview.rect:fitted.parts[id],partColor=design.partColors?.[id],isPiece=Boolean(!editing&&placing?.pieces.includes(id));return <section key={id} data-page-part={id} data-page-piece={isPiece||undefined} data-page-selected={selectedPart===id||undefined} className={`page-part ${preview?.id===id&&!preview.valid?'invalid':''} ${isPiece?'is-piece':''} ${placing?.snapPart===id?'just-fitted':''}`} style={{left:rect.x,top:rect.y,width:rect.width,height:rect.height,'--page-part-font':`${pagePartFontSize(design,id)}px`,...(partColor?.background?{'--page-part-background':partColor.background}:{}),...(partColor?.text?{'--page-part-text':partColor.text}:{})} as CSSProperties} onPointerDown={isPiece?event=>start(event,id,false):undefined} onPointerMove={isPiece?move:undefined} onPointerUp={isPiece?finish:undefined} onLostPointerCapture={isPiece?finish:undefined} onDoubleClick={isPiece?()=>{const socket=fittedSockets?.parts[id];if(socket)onPlace?.(id,{...socket},true);}:undefined}>
+   {PAGE_PARTS.map(id=>{const isPiece=Boolean(!editing&&placing?.pieces.includes(id)),rect=preview?.id===id?preview.rect:isPiece&&fittedSockets?pieceRect(id):fitted.parts[id],partColor=design.partColors?.[id];return <section key={id} data-page-part={id} data-page-piece={isPiece||undefined} data-page-selected={selectedPart===id||undefined} className={`page-part ${preview?.id===id&&!preview.valid?'invalid':''} ${isPiece?'is-piece':''} ${placing?.snapPart===id?'just-fitted':''}`} style={{left:rect.x,top:rect.y,width:rect.width,height:rect.height,'--page-part-font':`${pagePartFontSize(design,id)}px`,...(partColor?.background?{'--page-part-background':partColor.background}:{}),...(partColor?.text?{'--page-part-text':partColor.text}:{})} as CSSProperties} onPointerDown={isPiece?event=>start(event,id,false):undefined} onPointerMove={isPiece?move:undefined} onPointerUp={isPiece?finish:undefined} onLostPointerCapture={isPiece?finish:undefined} onDoubleClick={isPiece?()=>{const socket=fittedSockets?.parts[id];if(socket)onPlace?.(id,{...socket},true);}:undefined}>
     {allowArrangement&&!isPiece&&<button type="button" data-page-part-grip={id} className={`page-part-grip ${editing?'':'page-quiet-grip'}`} style={editing?{insetBlockStart:Math.max(-BALANCE.pageDesign.gripOffset,-rect.y)}:undefined} aria-label={i18n.t('page.movePart',{name:i18n.t(`page.part.${id}`)})} title={i18n.t('page.movePart',{name:i18n.t(`page.part.${id}`)})} onClick={()=>{onSelectPart?.(id);if(!editing)onRequestEdit?.();}} onPointerDown={event=>start(event,id,false)} onPointerMove={move} onPointerUp={finish} onLostPointerCapture={finish} onKeyDown={event=>keyboard(event,id)}><svg viewBox="0 0 14 14" width={14} height={14} aria-hidden="true"><path d="M3 2h2v2H3zM9 2h2v2H9zM3 6h2v2H3zM9 6h2v2H9zM3 10h2v2H3zM9 10h2v2H9z"/></svg>{editing&&<span>{i18n.t(`page.part.${id}`)}</span>}</button>}
     <div className="page-part-content" inert={editing||isPiece}>{parts[id]}</div>
     {!editing&&partActions?.[id]}

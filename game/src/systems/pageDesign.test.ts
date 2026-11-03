@@ -5,7 +5,7 @@ import { creditPixels, homePixelsPerSecond, passivePixelsPerSecond } from './eco
 import { buildSeed, createSeedVersion } from './seed';
 import { actWorkshop } from './workshop';
 import { createInitialState, isGameState } from './state';
-import { actPageDesign, contrast, createPageDesign, effectiveFitted, fitPageLayout, isPageDesign, isRecommendedPage, nextPieceToFit, pageColors, PAGE_PARTS, recommendedPage, validPagePlacement } from './pageDesign';
+import { actPageDesign, contrast, createPageDesign, effectiveFitted, fitPageLayout, isPageDesign, isRecommendedPage, nextPieceToFit, pageColors, PAGE_PARTS, piecesToFit, recommendedPage, validPagePlacement } from './pageDesign';
 import { nextSeedHand } from './nextHand';
 import { decodeSave, encodeSave } from './save';
 const now=1_800_000_000_000;
@@ -27,20 +27,21 @@ describe('組み立て中のエディタを安全に設計する',()=>{
   expect(isPageDesign(s.run.seed.page)).toBe(true);
   expect(isPageDesign({...s.run.seed.page,partColors:{heading:{background:'red',text:null}}})).toBe(false);
  });
- it('お手本ONでは部品が順番にピースとして現れ、嵌めるまで次へ進まない',()=>{
+ it('お手本ONでは全部品がピースとして現れ、好きな順番で嵌められる',()=>{
   let s=createInitialState(now);
+  expect(piecesToFit(s.run.seed.page,true,0)).toEqual(['heading','notice','upgrades']);
   expect(nextPieceToFit(s.run.seed.page,true,0)).toBe('heading');
-  expect(actPageDesign(s,{type:'fit',part:'notice'})).toBe(s);
-  s=actPageDesign(s,{type:'piece-move',part:'heading',x:99999,y:-5});
-  expect(s.run.seed.page.piecePositions?.heading?.x).toBeLessThanOrEqual(1920);
-  expect(s.run.seed.page.piecePositions?.heading?.y).toBe(0);
-  s=actPageDesign(s,{type:'fit',part:'heading'});
-  expect(nextPieceToFit(s.run.seed.page,true,0)).toBe('notice');
-  expect(s.run.seed.page.piecePositions?.heading).toBeUndefined();
+  s=actPageDesign(s,{type:'piece-move',part:'notice',x:99999,y:-5});
+  expect(s.run.seed.page.piecePositions?.notice?.x).toBeLessThanOrEqual(1920);
+  expect(s.run.seed.page.piecePositions?.notice?.y).toBe(0);
   s=actPageDesign(s,{type:'fit',part:'notice'});
-  expect(nextPieceToFit(s.run.seed.page,true,0)).toBe('upgrades');
+  expect(s.run.seed.page.piecePositions?.notice).toBeUndefined();
+  expect(piecesToFit(s.run.seed.page,true,0)).toEqual(['heading','upgrades']);
   s=actPageDesign(s,{type:'fit',part:'upgrades'});
+  s=actPageDesign(s,{type:'fit',part:'heading'});
+  expect(piecesToFit(s.run.seed.page,true,0)).toEqual([]);
   expect(nextPieceToFit(s.run.seed.page,true,0)).toBeNull();
+  expect(piecesToFit(s.run.seed.page,true,3)).toEqual(['cursors']);
   expect(nextPieceToFit(s.run.seed.page,true,3)).toBe('cursors');
   expect(nextPieceToFit(s.run.seed.page,false,3)).toBeNull();
   expect(effectiveFitted(s.run.seed.page,false)).toEqual(PAGE_PARTS);

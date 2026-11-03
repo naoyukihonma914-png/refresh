@@ -1566,6 +1566,7 @@
     "examples.next": "短期目標",
     "examples.nextCompact": "短期",
     "examples.seed.fit": "{name}をドラッグして、窪みにはめよう",
+    "examples.seed.fitRemaining": "部品をドラッグして、窪みにはめよう（残り{count}つ）",
     "examples.seed.generate": "［生成］であと{pixels}集め、{item}を作る",
     "examples.seed.buy": "［作る］で{item}を作る",
     "examples.seed.launch": "エディタが起動しています",
