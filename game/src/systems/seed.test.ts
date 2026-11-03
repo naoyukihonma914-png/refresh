@@ -51,7 +51,7 @@ describe('世界1は9つの部品を組み立てて工房を起動する', () =>
     expect(buildSeed(empty, 'border', now)).toBe(empty);
     expect(buildSeed(empty, 'missing' as 'border', now)).toBe(empty);
     const state = through('save');
-    expect(state.resources.pixels).toBe(99_950);
+    expect(state.resources.pixels).toBe(100_000 - BALANCE.w1.items.filter(item=>item.id==='border'||item.id==='save').reduce((sum,item)=>sum+item.cost,0));
     expect(state.run.totalPixelsGenerated).toBe(100_000);
     expect(buildSeed(state, 'border', now)).toBe(state);
   });

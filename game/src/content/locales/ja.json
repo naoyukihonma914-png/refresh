@@ -1514,6 +1514,25 @@
     "page.size.extraLarge": "特大",
     "page.text.small": "小",
     "page.text.normal": "標準",
-    "page.text.large": "大"
+    "page.text.large": "大",
+    "seed.replay": "作ったUIをまとめて作る",
+    "seed.replayBuy": "{count}個を {price} で作る",
+    "seed.replayWaiting": "まとめて作る",
+    "seed.replayHint": "前に作ったUIだけを、買える分だけ順番に作ります。",
+    "seed.future.title": "完成予想",
+    "seed.future.editor": "{app} の制作画面",
+    "seed.future.desktop": "その先のデスクトップ",
+    "seed.future.remaining": "あと{count}個で {app} が起動します",
+    "seed.future.ready": "{app} が起動します",
+    "seed.future.next": "次は{name}：{change}",
+    "seed.future.change.border": "ボタンと区切りに輪郭が付く",
+    "seed.future.change.save": "閉じても続きから作れる",
+    "seed.future.change.color": "配色とパレットが現れる",
+    "seed.future.change.font": "見出しと本文の書体を選べる",
+    "seed.future.change.layout": "作業の面を中心に並べ替えられる",
+    "seed.future.change.motion": "押したときの動きが付く",
+    "seed.future.change.bars": "上下の帯が付く",
+    "seed.future.change.workspace": "キャンバス・パーツ欄・道具が現れる",
+    "seed.future.change.export": "エディタが起動する"
   }
 }

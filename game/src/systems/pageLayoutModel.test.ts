@@ -65,6 +65,29 @@ describe('TP1: 独立した6つの配置部品',()=>{
   for(const width of [1920,1366,800,352]){const fitted=fitPageLayout(source,width,720);expect(isPageDesign({...createPageDesign(),layout:fitted})).toBe(true);expect(PAGE_PARTS.every(id=>validPagePlacement(fitted,id,fitted.parts[id]))).toBe(true);}
   expect(source).toEqual(saved);
  });
+ it('1920の標準を1296へ表示した後のXL化でも、投影経路を変えて兄弟を動かさない',()=>{
+  const state=ready(),source=state.run.seed.page.layout!;
+  for(const width of [1920,1366,1296,1280,800,352])for(const height of [720,920]){
+   const before=fitPageLayout(source,width,height);
+   const resized=actPageDesign(state,{type:'part-size',part:'generator',size:'extraLarge'});
+   const after=fitPageLayout(resized.run.seed.page.layout!,width,height);
+   for(const id of PAGE_PARTS.filter(id=>id!=='generator'))expect(after.parts[id],`${width}/${height}/${id}`).toEqual(before.parts[id]);
+   expect(after.parts.generator.x).toBe(before.parts.generator.x);expect(after.parts.generator.y).toBe(before.parts.generator.y);
+   expect(after.parts.generator.height).toBe(BALANCE.pageDesign.partSizes.generator.extraLarge.height);
+   expect(after.parts.generator.width).toBeGreaterThanOrEqual(before.parts.generator.width);
+   expect(PAGE_PARTS.every(id=>validPagePlacement(after,id,after.parts[id]))).toBe(true);
+   const font=actPageDesign(state,{type:'part-font',part:'generator',size:'large'});
+   expect(fitPageLayout(font.run.seed.page.layout!,width,height)).toEqual(before);
+  }
+ });
+ it('表示中の部品を自由移動した後も、兄弟の表示位置とサイズを変えない',()=>{
+  const before=fitPageLayout(recommendedPage(),1296,920),moved=structuredClone(before);
+  moved.parts.generator.x+=BALANCE.pageDesign.grid;
+  expect(validPagePlacement(moved,'generator',moved.parts.generator)).toBe(true);
+  const after=fitPageLayout(moved,1296,920);
+  expect(after.parts.generator).toEqual(moved.parts.generator);
+  for(const id of PAGE_PARTS.filter(id=>id!=='generator'))expect(after.parts[id]).toEqual(before.parts[id]);
+ });
  it('不明な部品/文字段階、旧button拡張、欠けたrect、危険な数値を拒む',()=>{
   const page=createPageDesign(),layout=recommendedPage();
   expect(isPageDesign({...page,layout:{...layout,button:{width:320,height:80}}})).toBe(false);

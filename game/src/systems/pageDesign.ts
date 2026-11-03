@@ -99,24 +99,36 @@ export const canSetPagePartSize=(layout:PageLayout,part:PagePart,size:PagePartSi
 export function pagePartSize(layout:PageLayout,part:PagePart):PagePartSize|'custom' {
  const rect=layout.parts[part];return PAGE_PART_SIZES.find(size=>{const preset=config.partSizes[part][size];return rect.width===preset.width&&rect.height===preset.height;})??'custom';
 }
-/** Viewport adaptation is a presentation projection and never changes the saved source layout. */
+/** Viewport adaptation uses the same per-part anchors before and after a customization. */
 export function fitPageLayout(layout:PageLayout,width:number,height:number):PageLayout {
  const w=Math.max(config.minCanvasWidth,Math.min(config.maxWidth,down(width))),h=Math.max(config.minCanvasHeight,Math.min(config.maxHeight,down(height)));
- if(isRecommendedPage(layout))return recommendedPage(w,h);
- const parts=Object.fromEntries(PAGE_PARTS.map(id=>{const r=layout.parts[id],minimum=pageMinimum(id),partWidth=Math.min(w,up(Math.max(minimum.width,id==='generator'?r.width:r.width*w/layout.width)));return [id,{x:Math.max(0,Math.min(w-partWidth,snap(r.x*w/layout.width))),y:snap(r.y),width:partWidth,height:Math.max(minimum.height,up(r.height))}];})) as PageLayout['parts'];
+ const source=recommendedPage(layout.width,layout.height),reference=recommendedPage(w,h),compact=w<config.layoutBreakpoint;
+ const same=(a:PageRect,b:PageRect)=>(['x','y','width','height'] as const).every(key=>a[key]===b[key]);
+ const parts=Object.fromEntries(PAGE_PARTS.map(id=>{
+  const r=layout.parts[id],before=source.parts[id],after=reference.parts[id],minimum=pageMinimum(id);
+  let x=r.x===before.x?after.x:r.x===config.gap?config.gap:r.x===config.contentInset?(compact?config.gap:config.contentInset):snap(after.x+(r.x-before.x)*w/layout.width);
+  x=Math.max(0,Math.min(w-minimum.width,x));
+  // Unchanged stretch regions stay responsive; explicit sizes remain physical UI choices.
+  const spansWidth=id!=='generator'&&r.x+r.width===layout.width-config.gap;
+  const desiredWidth=r.width===before.width?after.width:spansWidth?w-x-config.gap:r.width;
+  const partWidth=Math.min(w-x,up(Math.max(minimum.width,desiredWidth)));
+  x=Math.max(0,Math.min(w-partWidth,x));
+  const y=r.y===before.y?after.y:r.y;
+  const partHeight=r.height===before.height?after.height:r.height;
+  return [id,{x,y,width:partWidth,height:up(Math.max(minimum.height,partHeight))}];
+ })) as PageLayout['parts'];
  const projected={width:w,height:Math.min(config.maxHeight,up(Math.max(h,...PAGE_PARTS.map(id=>parts[id].y+parts[id].height)))),parts};
  if(PAGE_PARTS.every(id=>validPagePlacement(projected,id,parts[id])))return projected;
- // Preserve the visual reading order when a narrow viewport needs new lines.
- if(w<config.layoutBreakpoint){
-  let y=config.gap;
-  for(const id of [...PAGE_PARTS].sort((a,b)=>layout.parts[a].y-layout.parts[b].y||layout.parts[a].x-layout.parts[b].x)){
-   parts[id]={...parts[id],x:config.gap,width:Math.min(w-config.gap*2,parts[id].width),y};y+=parts[id].height+config.gap;
-  }
-  const stacked={width:w,height:up(Math.max(h,y)),parts};
-  if(stacked.height<=config.maxHeight&&PAGE_PARTS.every(id=>validPagePlacement(stacked,id,parts[id])))return stacked;
+ // A constrained viewport may relocate a changed part; unrelated defaults never switch projection paths.
+ const repaired={...reference,parts:structuredClone(reference.parts)};
+ const changed=PAGE_PARTS.filter(id=>!same(layout.parts[id],source.parts[id])).sort((a,b)=>layout.parts[a].y-layout.parts[b].y||layout.parts[a].x-layout.parts[b].x);
+ for(const id of changed){
+  const desired=parts[id],candidate=validPagePlacement(repaired,id,desired)?desired:pagePlacementForSize(repaired,id,desired,desired);
+  if(candidate)repaired.parts[id]=candidate;
  }
- return recommendedPage(w,h);
+ return repaired;
 }
+
 export function isPageDesign(value:unknown):value is PageDesign {
  if(!obj(value)||!['background','text','button'].every(key=>value[key]===null||typeof value[key]==='string'&&/^#[0-9a-f]{6}$/i.test(value[key] as string))
   ||!PAGE_FONTS.includes(value.headingFont as PageFont)||!PAGE_FONTS.includes(value.bodyFont as PageFont)||!PAGE_MOTIONS.includes(value.motion as PageDesign['motion'])||typeof value.heading!=='string'||[...value.heading].length>80

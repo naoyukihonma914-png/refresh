@@ -5,7 +5,7 @@ import type { CaptureGeometry } from './captureEvaluation';
 import { TEST_LANGUAGE } from '../content/i18n';
 import { createMemoryStorage,createSettingsStorage,SETTINGS_KEY } from '../platform/storage';
 import type { Platform } from '../platform/types';
-import { manualClickValue,passivePixelsPerSecond } from './economy';
+import { creditPixels,manualClickValue,passivePixelsPerSecond } from './economy';
 import { createFixture } from './fixtures';
 import { GameRuntime } from './runtime';
 import { encodeSave,loadGame,SAVE_KEYS } from './save';
@@ -293,13 +293,14 @@ describe('段階2の操作と保存', () => {
     expect(runtime.getSnapshot().state.resources.pixels).toBeCloseTo(.09);
     expect(loadGame(storage).kind).toBe('empty');
     for (let i = 0; i < 20; i++) runtime.pressSeed();
+    const beforeSave=runtime.getSnapshot().state.resources.pixels;
     runtime.buildSeed('save');
     const saved = loadGame(storage);
     expect(saved.kind).toBe('loaded');
     if (saved.kind === 'loaded') {
       expect(saved.state.run.seed.built).toEqual(['border', 'save']);
       expect(saved.state.run.seed.history.map(entry => entry.item)).toEqual(['border', 'save']);
-      expect(saved.state.resources.pixels).toBeCloseTo(.49);
+      expect(saved.state.resources.pixels).toBeCloseTo(beforeSave-BALANCE.w1.items.find(item=>item.id==='save')!.cost);
     }
     for (let i = 0; i < 8; i++) runtime.pressSeed();
     runtime.buildSeed('cursor');
@@ -625,5 +626,30 @@ describe('UI倍率は端末の設定',()=>{
   storage.setItem(SETTINGS_KEY,JSON.stringify({uiScale:999,language:'ja'}));
   await start();expect(runtime.getSnapshot().uiScale).toBe(BALANCE.accessibility.defaultUiScale);
   const before=runtime.getSnapshot();for(const value of [0,-1,NaN,Infinity,999]){runtime.changeUiScale(value);expect(runtime.getSnapshot()).toBe(before);}
+ });
+});
+
+
+describe('TP-3：runtimeから既知UIをまとめて作る',()=>{
+ it('普通の起動・保存・一度の購入音を通し、次版の9つから工房だけを起動する',async()=>{
+  const cost=BALANCE.w1.items.reduce((sum,item)=>sum+item.cost,0),fixture=creditPixels(createFixture('stage7-v2',clock.wall)!,cost+3);
+  storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
+  const before=runtime.getSnapshot().state;vi.mocked(platform.audio.play).mockClear();
+  runtime.buildKnownSeed();const after=runtime.getSnapshot().state;
+  expect(after.run.world).toBe('kumiki');expect(after.run.workshop.enterMs).toBe(BALANCE.workshop.enterMs);
+  expect(after.run.seed.built).toEqual(BALANCE.w1.items.map(item=>item.id));expect(after.resources.pixels).toBe(3);
+  expect(after.run.seed.autoCursors).toBe(0);expect(after.resources.tokens).toBe(before.resources.tokens);expect(after.persistent.setDocuments).toEqual(before.persistent.setDocuments);
+  expect(after.run.workshop.purchasedSets).toEqual([]);expect(after.run.workshop.parts).toEqual({});
+  const saved=loadGame(storage);expect(saved.kind).toBe('loaded');if(saved.kind==='loaded'){expect(saved.state.run.seed.built).toEqual(after.run.seed.built);expect(saved.state.run.world).toBe('kumiki');}
+  const payments=vi.mocked(platform.audio.play).mock.calls.filter(([sound])=>sound.kind==='build');expect(payments).toHaveLength(1);
+  const funds={...after.resources};runtime.buildKnownSeed();expect(runtime.getSnapshot().state.resources).toEqual(funds);
+ });
+ it('初回・導入中・裏のタブ・所有権を失ったタブから一括購入しない',async()=>{
+  runtime=new GameRuntime(platform);await runtime.start();const intro=runtime.getSnapshot().state;
+  runtime.buildKnownSeed();expect(runtime.getSnapshot().state).toBe(intro);runtime.startGame();runtime.addDebugPixels();
+  const fresh=runtime.getSnapshot().state;runtime.buildKnownSeed();expect(runtime.getSnapshot().state.run.seed.built).toEqual(fresh.run.seed.built);expect(runtime.getSnapshot().state.resources).toEqual(fresh.resources);
+  runtime.dispose();const fixture=creditPixels(createFixture('stage7-v2',clock.wall)!,1e9);storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
+  const before=runtime.getSnapshot().state;clock.hidden=true;runtime.buildKnownSeed();expect(runtime.getSnapshot().state).toBe(before);clock.hidden=false;clock.owned=false;
+  runtime.buildKnownSeed();expect(runtime.getSnapshot().state).toBe(before);expect(runtime.getSnapshot().status).toBe('blocked');
  });
 });

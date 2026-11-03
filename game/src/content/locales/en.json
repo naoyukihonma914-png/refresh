@@ -1551,6 +1551,25 @@
     "page.size.extraLarge": "Extra large",
     "page.text.small": "Small",
     "page.text.normal": "Standard",
-    "page.text.large": "Large"
+    "page.text.large": "Large",
+    "seed.replay": "Rebuild familiar UI",
+    "seed.replayBuy": "Build {count} for {price}",
+    "seed.replayWaiting": "Build together",
+    "seed.replayHint": "Rebuild only UI you have made before, in order and within your budget.",
+    "seed.future.title": "When it is complete",
+    "seed.future.editor": "The {app} workspace",
+    "seed.future.desktop": "The desktop that follows",
+    "seed.future.remaining": "{count} more UI pieces to start {app}",
+    "seed.future.ready": "{app} is starting",
+    "seed.future.next": "Next, {name}: {change}",
+    "seed.future.change.border": "outlines appear on buttons and dividers",
+    "seed.future.change.save": "your work can resume after closing",
+    "seed.future.change.color": "colors and a palette appear",
+    "seed.future.change.font": "choose fonts for headings and body text",
+    "seed.future.change.layout": "arrange the workspace around the canvas",
+    "seed.future.change.motion": "presses gain movement",
+    "seed.future.change.bars": "top and bottom bars appear",
+    "seed.future.change.workspace": "the canvas, parts panel, and tools appear",
+    "seed.future.change.export": "the editor starts"
   }
 }

@@ -19,7 +19,7 @@ import { createFixture } from './fixtures';
 import { clearGame, decodeSave, encodeSave, loadGame, saveGame } from './save';
 import { canSave, createInitialState, type GameState } from './state';
 import { advanceActiveTime, advanceOfflineTime, isInactiveGap, type TimeResult } from './time';
-import { applySeedSkills, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
+import { applySeedSkills, buildKnownSeed, buildSeed, freshMomentum, pressSeed, readGuide } from './seed';
 import type { GuideId } from './state';
 import { actWorkshop, enterWorkshop, canAssembleDesktop, type WorkshopAction } from './workshop';
 import { enterDesktop } from './desktop';
@@ -273,6 +273,16 @@ export class GameRuntime {
     const state = buildSeed(previous, id, this.platform.clock.wallNow());
     if (state === previous) return;
     this.publish({ state });
+    this.persist();
+    this.sound('build',state);
+  };
+
+  buildKnownSeed = () => {
+    if (!this.canOperate() || this.snapshot.introVisible || this.suspended || this.platform.visibility.isHidden()) return;
+    this.advanceForeground();
+    const previous=this.snapshot.state,state=buildKnownSeed(previous,this.platform.clock.wallNow());
+    if(state===previous)return;
+    this.publish({state});
     this.persist();
     this.sound('build',state);
   };

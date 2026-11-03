@@ -60,3 +60,6 @@
 .workshop-root .ws-navigation-row>.ws-navigation-target>.ws-navigation-copy {white-space:normal;font-size:inherit;overflow-wrap:anywhere;}
 .workshop-root .ws-navigation-state {min-inline-size:0;flex-wrap:wrap;}
 .workshop-root .ws-navigation-state>span {min-inline-size:0;overflow-wrap:anywhere;}
+/* Icon-only close controls do not need an inline text baseline. */
+.workshop-root .ws-help-dialog>header>button {display:grid;place-items:center;line-height:1;}
+.workshop-root .ws-help-dialog>header>button>svg {display:block;inline-size:16px;block-size:16px;max-inline-size:100%;max-block-size:100%;}

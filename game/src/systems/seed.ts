@@ -145,3 +145,51 @@ export function advanceSeedInstaller(state: GameState, activeMs: number): GameSt
   void activeMs;
   return state.run.seed.installer ? { ...state, run: { ...state.run, seed: { ...state.run.seed, installer: null } } } : state;
 }
+
+/** Only already-made page UI can be bought in a batch on later versions. */
+export function knownSeedItems(state:GameState):SeedItem[] {
+  if(state.run.version==='v0.1')return [];
+  const known=new Set<string>([
+    ...state.persistent.products.flatMap(product=>product.screen.built),
+    ...state.run.seed.history.map(entry=>entry.item),
+  ]);
+  return BALANCE.w1.items.filter(item=>known.has(item.id)).map(item=>item.id);
+}
+
+export interface SeedReplayQuote {
+  /** The affordable prefix that this click will actually build. */
+  items:SeedItem[];
+  cost:number;
+  /** The continuous known route ahead; an unfamiliar UI stops the batch. */
+  remaining:SeedItem[];
+  totalCost:number;
+}
+function replayKnownSeed(state:GameState,now:number):{quote:SeedReplayQuote;state:GameState} {
+  const quote:SeedReplayQuote={items:[],cost:0,remaining:[],totalCost:0};
+  if(state.run.world!=='seed'||state.run.version==='v0.1'||state.run.seed.installer||state.run.restartMs>0)return {quote,state};
+  const known=new Set(knownSeedItems(state));
+  for(const item of BALANCE.w1.items){
+    if(state.run.seed.built.includes(item.id)||contractBlocks(state,item.id))continue;
+    if(!known.has(item.id))break;
+    quote.remaining.push(item.id);quote.totalCost+=item.cost;
+  }
+  let next=state;
+  for(const id of quote.remaining){
+    if(!canBuildSeed(next,id))break;
+    const built=buildSeed(next,id,now);
+    if(built===next)break;
+    next=built;quote.items.push(id);quote.cost+=BALANCE.w1.items.find(item=>item.id===id)!.cost;
+    if(next.run.world!=='seed')break;
+  }
+  return {quote,state:next};
+}
+
+/** Quotes execute only pure construction reducers; the input and its records remain unchanged. */
+export function seedReplayQuote(state:GameState):SeedReplayQuote {
+  return replayKnownSeed(state,state.lastTickAt).quote;
+}
+
+/** Preserve normal prices, order, history and the editor-start transition. Never grants free UI. */
+export function buildKnownSeed(state:GameState,now:number):GameState {
+  return replayKnownSeed(state,now).state;
+}

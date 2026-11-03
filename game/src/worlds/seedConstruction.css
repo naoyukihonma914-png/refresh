@@ -14,15 +14,15 @@
 .seed-construction .page-layout-surface {position:absolute;inset:0 0 88px;inline-size:100%;block-size:auto;min-block-size:0;overflow:hidden;pointer-events:none;z-index:2;}
 .seed-construction .page-layout-canvas {position:relative;min-block-size:0;transform:none;}
 .seed-construction .page-part {position:absolute;min-inline-size:0;min-block-size:0;margin:0;padding:0;border:0;background:none;overflow:visible;pointer-events:auto;}
-.seed-construction .page-part>.page-part-content {inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;margin:0;padding:0;overflow:auto;font-size:var(--page-part-font,16px);}
+.seed-construction .page-part>.page-part-content {inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;margin:0;padding:0;overflow:auto;font-size:var(--page-part-font,16px);overflow-wrap:anywhere;}
 .seed-construction .page-part h1 {font:inherit;font-family:var(--seed-heading-font);margin:0;}
 .seed-construction.has-font .page-part h1 {font-weight:700;}
 .seed-construction .page-part h2 {font:inherit;font-weight:700;margin:0 0 8px;}
 .seed-construction .page-part p {margin:0 0 8px;}
 .seed-construction .page-part :is(button,select) {font-family:inherit;font-size:inherit;}
-.seed-construction .seed-fixed-resources {display:flex;align-items:center;gap:20px;inline-size:100%;block-size:100%;padding:8px 16px;overflow:hidden;}
+.seed-construction .seed-fixed-resources {display:flex;align-items:flex-start;gap:20px;inline-size:100%;block-size:100%;padding:0 16px;overflow:auto;line-height:1.3;}
 .seed-construction .seed-resource-name {order:1;flex:0 0 180px;min-inline-size:0;overflow:hidden;}
-.seed-construction .seed-resource-values {order:0;display:flex;align-items:baseline;gap:16px;min-inline-size:0;flex:1;overflow:auto;white-space:nowrap;}
+.seed-construction .seed-resource-values {order:0;display:flex;align-items:baseline;gap:16px;min-inline-size:240px;flex:1 0 max-content;white-space:nowrap;}
 .seed-construction .seed-resource-values>small {font-size:.85em;}
 .seed-construction.has-bars .seed-fixed-resources {background:var(--editor-panel);color:var(--editor-ink);}
 .seed-construction:not(.has-layout) :is(.seed-generate,[data-seed-upgrade]) {background:#efefef;color:#000;border:1px solid #767676;border-radius:2px;box-shadow:none;}
@@ -48,7 +48,7 @@
 .seed-construction .seed-upgrade-name {grid-column:1;grid-row:1/3;min-inline-size:0;overflow:auto;}
 .seed-construction .seed-upgrade-name>span {display:block;}
 .seed-construction .seed-upgrade-name>small {display:inline-block;margin-inline-end:8px;font-size:.8em;}
-.seed-construction .seed-upgrades [data-seed-upgrade] {grid-column:2;grid-row:1;inline-size:192px;block-size:64px;min-block-size:64px;margin:0;padding:2px 8px;overflow:hidden;}
+.seed-construction .seed-upgrades [data-seed-upgrade] {grid-column:2;grid-row:1;inline-size:192px;block-size:64px;min-block-size:64px;margin:0;padding:2px 8px;overflow:hidden;line-height:1.1;}
 .seed-construction .seed-upgrades>.purchase-estimate,.seed-construction .seed-upgrades>li>.purchase-estimate {grid-column:2;grid-row:2;inline-size:192px;max-block-size:32px;overflow:auto;font-size:.75em;}
 .seed-construction.has-layout .page-part[data-page-part=upgrades] {background:var(--editor-panel);color:var(--editor-ink);border-inline-start:1px solid var(--editor-edge-dark);}
 .seed-construction.has-layout .page-part[data-page-part=upgrades]>.page-part-content {padding:8px;}
@@ -79,8 +79,7 @@
 .page-size-choices {display:flex;gap:8px;margin:8px 0;}
 .page-size-choices>button {min-block-size:32px;}
 .seed-construction .seed-history-popup {position:absolute;inset-inline-start:24px;inset-block-end:96px;inline-size:600px;max-block-size:360px;overflow:auto;z-index:15;background:var(--editor-panel);color:var(--editor-ink);border:1px solid var(--editor-edge-dark);padding:12px;}
-.seed-construction .page-drag-demonstration {position:absolute;pointer-events:none;border:2px dashed #c8553d;background:#c8553d11;z-index:12;display:grid;place-items:center;animation:page-demo-drag 2s ease-in-out 1 both;}
-.seed-construction .page-drag-demonstration>span {background:var(--editor-panel);color:var(--editor-ink);padding:4px 8px;font:14px/1.4 'Refresh UI',sans-serif;}
+.seed-construction .page-drag-demonstration {position:absolute;pointer-events:none;border:2px dashed #c8553d;background:transparent;z-index:12;animation:page-demo-drag 2s ease-in-out 1 both;}
 @keyframes page-demo-drag {0%,15%{transform:translate(0,0);opacity:.3;}65%{transform:translate(56px,32px);opacity:.9;}100%{transform:translate(56px,32px);opacity:0;}}
 .seed-construction .page-drag-demonstration.is-reduced {animation:none;opacity:.8;}
 .seed-construction .first-layout-cue {animation:page-arrange-cue 1s ease-in-out 2;}
@@ -89,3 +88,33 @@
 
 .seed-construction .seed-resource-name>* {display:block;}
 .seed-construction .seed-resource-name>small {font-size:.75em;}
+
+/* A reserved forecast area is present from the first press; it never covers live page parts. */
+.seed-construction .page-layout-surface {inset-inline-end:var(--seed-future-reserve);inline-size:auto;}
+.seed-construction .seed-future-preview {position:absolute;inset-inline-end:var(--seed-future-right);inset-block-start:var(--seed-future-top);inline-size:var(--seed-future-width);max-block-size:calc(100% - var(--seed-future-top) - var(--seed-future-footer-clearance));overflow:auto;z-index:4;pointer-events:none;background:var(--editor-canvas);color:inherit;font:inherit;font-size:14px;}
+.seed-construction .seed-future-preview h2 {margin:0 0 8px;font:inherit;font-weight:700;}
+.seed-construction .seed-future-preview p {margin:0 0 8px;overflow-wrap:anywhere;}
+.seed-construction .seed-future-drawing {display:block;inline-size:100%;block-size:auto;color:currentColor;opacity:.68;}
+.seed-construction .seed-future-piece {fill:none;stroke:currentColor;stroke-width:1;opacity:.24;stroke-dasharray:3 3;}
+.seed-construction .seed-future-piece.is-built {opacity:.9;stroke-dasharray:none;}
+.seed-construction .seed-future-piece[data-seed-ghost-part=font] {fill:currentColor;stroke:none;}
+.seed-construction .seed-future-piece[data-seed-ghost-part=bars].is-built {fill:currentColor;fill-opacity:.1;}
+.seed-construction .seed-future-connection {fill:none;stroke:currentColor;opacity:.5;}
+.seed-construction .seed-future-desktop {fill:none;stroke:currentColor;stroke-dasharray:3 3;opacity:.22;}
+.seed-construction .seed-future-desktop-name {text-align:center;}
+.seed-construction .seed-future-progress {font-weight:700;}
+.seed-construction .seed-future-change {min-block-size:5.6em;}
+.seed-construction .seed-replay-purchase>[data-seed-replay] {grid-column:2;grid-row:1;inline-size:192px;block-size:64px;min-block-size:64px;margin:0;padding:2px 8px;overflow:hidden;line-height:1.1;}
+
+/* Compact content, never smaller type: the selected part font and button rectangle stay intact. */
+.seed-construction .seed-generate-label {position:relative;display:grid;place-items:center;inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;}
+.seed-construction .seed-generate-label-content {display:block;max-inline-size:100%;max-block-size:100%;}
+.seed-construction .seed-generate-label-full {white-space:normal;overflow-wrap:anywhere;}
+.seed-construction .seed-generate-label-compact,.seed-construction .seed-generate-label-compact-probe {display:inline-flex;align-items:center;justify-content:center;gap:.25em;line-height:1;white-space:nowrap;}
+.seed-construction .seed-generate-label-icon {display:flex;align-items:center;justify-content:center;inline-size:100%;block-size:100%;line-height:1;}
+.seed-construction .seed-generate-pixel-plus {display:block;flex:none;inline-size:1.5em;block-size:1em;max-inline-size:100%;max-block-size:100%;}
+.seed-construction .seed-generate-label-measure {position:absolute;inset-inline:0;inset-block-start:0;block-size:0;overflow:hidden;visibility:hidden;pointer-events:none;}
+.seed-construction .seed-generate-label-full-probe {display:block;inline-size:100%;block-size:auto;white-space:normal;overflow-wrap:anywhere;}
+.seed-construction .seed-generate-label-compact-probe {inline-size:max-content;max-inline-size:none;block-size:auto;}
+
+.seed-construction .seed-fixed-resources>.seed-link {flex:none;max-inline-size:none;white-space:nowrap;padding:0;line-height:1.3;}

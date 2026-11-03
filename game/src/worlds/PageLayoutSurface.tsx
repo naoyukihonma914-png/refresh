@@ -36,7 +36,7 @@ export function PageLayoutSurface({layout,design=createPageDesign(),parts,editin
     <div className="page-part-content" inert={editing}>{parts[id]}</div>
     {editing&&<button type="button" data-page-part-resize={id} className="page-part-resize" aria-label={i18n.t('page.resizePart',{name:i18n.t(`page.part.${id}`)})} title={i18n.t('page.resizePart',{name:i18n.t(`page.part.${id}`)})} onPointerDown={event=>start(event,id,true)} onPointerMove={move} onPointerUp={finish} onLostPointerCapture={finish} onKeyDown={event=>keyboard(event,id,true)}/>}
    </section>;})}
-   {firstGuide&&<div className={`page-drag-demonstration ${reducedMotion?'is-reduced':''}`} data-page-first-guide role="img" aria-label={i18n.t('page.dragExample')} style={{left:fitted.parts.generator.x,top:fitted.parts.generator.y,width:fitted.parts.generator.width,height:fitted.parts.generator.height}}><span>{i18n.t('page.dragExample')}</span></div>}
+   {firstGuide&&<div className={`page-drag-demonstration ${reducedMotion?'is-reduced':''}`} data-page-first-guide role="img" aria-label={i18n.t('page.dragExample')} style={{left:fitted.parts.generator.x,top:fitted.parts.generator.y,width:fitted.parts.generator.width,height:fitted.parts.generator.height}}/>}
   </div>
  </div>;
 }

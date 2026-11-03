@@ -217,7 +217,7 @@ class Review:
         shot=after['persistent']['screenshots'][-1]
         assert len(after['persistent']['screenshots'])==len(before['persistent']['screenshots'])+1
         scene=json.loads(shot['data']);evaluation=scene['evaluation']
-        assert scene['version']==11 and evaluation['origin']=='dom'
+        assert scene['version']==12 and evaluation['origin']=='dom'
         assert evaluation['visibleCount']==sum(bool(p['visible']) for p in evaluation['parts'])
         assert all(not p['visibleRects'] and not p['visibleArea'] for p in evaluation['parts'] if not p['visible'])
         assert not any(key in evaluation for key in ['placement','neatness','layoutBonus','perSecond'])
@@ -353,7 +353,7 @@ class Review:
         state=self.state(page);custom=state['persistent']['editorCustomization'];note_text=state['persistent']['productionNote']
         assert [d for d in state['persistent']['setDocuments'] if d['version']!='v1']==olddocs,'Live editing must not mutate archived documents'
         imported=self.import_state(page,state,c)
-        assert imported['schemaVersion']==15 and imported['persistent']['editorCustomization']==custom and imported['persistent']['productionNote']==note_text
+        assert imported['schemaVersion']==16 and imported['persistent']['editorCustomization']==custom and imported['persistent']['productionNote']==note_text
         self.navigate(page,None,c)
         reloaded=self.state(page)
         assert reloaded['persistent']['editorCustomization']==custom and reloaded['persistent']['productionNote']==note_text,'Save import and a true reload must preserve the customization and note'
@@ -412,7 +412,7 @@ class Review:
             legacy=json.loads(gzip.decompress(path.read_bytes()))
             assert legacy['schemaVersion']==14
             converted=self.import_state(page,legacy,c)
-            assert converted['schemaVersion']==15
+            assert converted['schemaVersion']==16
             for resource in ['pixels','tokens','dollars']:assert converted['resources'][resource]>=legacy['resources'][resource],(kind,resource)
             for key in ['specs','productionNote','seedSkills','editorSkills']:
                 assert converted['persistent'][key]==legacy['persistent'][key],(kind,key)
@@ -422,7 +422,7 @@ class Review:
                 if key in ['screenshots','products']:assert all(item in new for item in old),(kind,key)
             assert set(legacy['run']['desktop']['apps'])<=set(converted['run']['desktop']['apps'])
             self.navigate(page,None,c)
-            saved=self.state(page);assert saved['schemaVersion']==15
+            saved=self.state(page);assert saved['schemaVersion']==16
             assert saved['persistent']['screenshots']==converted['persistent']['screenshots']
             self.capture(page,c,'形式14の実データを移行した画面: '+kind,'migration-'+kind)
             samples.append({'source':path.name,'format':saved['schemaVersion'],'noLoss':True})
