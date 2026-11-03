@@ -60,7 +60,7 @@ export function WorkingCursors({app,...props}:Props&{app:JobId}){
  },[layout,j.assigned,j.cursors,s.run.desktop.windows[app].width,s.run.desktop.windows[app].height,props.i18n.language]);
  if(!j.assigned||!j.cursors)return null;
  return <div ref={root} style={layout?area:undefined} data-layout-job={layout?app:undefined} className={`working-cursors job-motion-${app} ${preview||runtime.platform.animation.reducedMotion()?'no-motion':''}`} aria-label={i18n.t('jobs.count',{count:j.cursors})}>
- <JobActivity {...props} app={app}/>{Array.from({length:Math.min(j.cursors,BALANCE.w3.maxVisibleJobCursors)},(_,i)=><svg key={i} viewBox="0 0 16 20" aria-hidden="true" style={{left:`${14+i*15}%`,animationDelay:`${-i*.37}s`}}><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="#fff" stroke="#283744"/></svg>)}<span>{i18n.t('jobs.count',{count:j.cursors})}</span></div>;
+ <JobActivity {...props} app={app}/>{Array.from({length:Math.min(j.cursors,BALANCE.w3.maxVisibleJobCursors)},(_,i)=><svg key={i} viewBox="0 0 16 20" width={16} height={20} aria-hidden="true" style={{left:`${14+i*15}%`,animationDelay:`${-i*.37}s`}}><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="#fff" stroke="#283744"/></svg>)}<span>{i18n.t('jobs.count',{count:j.cursors})}</span></div>;
 }
 export function PhotoApp(props:Props){
  const {snapshot,runtime,i18n}=props,s=snapshot.state,d=s.run.desktop,edit=d.photo;

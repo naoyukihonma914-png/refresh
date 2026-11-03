@@ -36,6 +36,6 @@ export function LineIcon({ kind }: { kind: 'minimize'|'maximize'|'restore'|'clos
   return <svg className="line-icon" viewBox="0 0 16 16" aria-hidden="true"><path d={paths[kind]} /></svg>;
 }
 
-export function CursorGlyph(){return <svg className="cursor-glyph" viewBox="0 0 16 20" aria-hidden="true"><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="currentColor" stroke="#8b969d"/></svg>;}
+export function CursorGlyph(){return <svg className="cursor-glyph" viewBox="0 0 16 20" width={14} height={18} aria-hidden="true"><path d="M1 1v14l4-3 3 6 3-2-3-5h6z" fill="currentColor" stroke="#8b969d"/></svg>;}
 
 export function ProductGlyph(){return <svg viewBox="0 0 32 32" className="app-icon product-glyph" aria-hidden="true"><path d="M4 5h20v5H9v8H4z" fill="#e7d5a5"/><path d="M12 13h16v5H17v9h-5z" fill="#c8e1e3"/><path d="M4 22h5v5H4z" fill="#b3c6db"/></svg>;}
