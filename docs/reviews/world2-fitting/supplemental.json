@@ -1,0 +1,66 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "language": "en",
+  "reducedMotion": true,
+  "baseUrl": "http://127.0.0.1:8173/",
+  "buildSha256": "9d25f62a12f1e5e57efcd8d0e278e93f7b49f3f28da47f36124b3144666c90cd",
+  "setup": "public fixed fixtures; real controls; frozen browser clock; debug export is read-only",
+  "references": [
+    "docs/mockups/02-1-tessera-aseprite-old.html",
+    "docs/mockups/02-2-tessera-aseprite-new.html"
+  ],
+  "cases": [
+    {
+      "id": "partial",
+      "fixture": "stage8a-part-files-search-step-0-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "unfinishedSearchInputWorks": true,
+        "unfinishedSliderWorks": true
+      }
+    },
+    {
+      "id": "era1",
+      "fixture": "fitting-frame-era1",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "geometry": {
+        "width": 469.33331298828125,
+        "logical": 704,
+        "panelWidth": 288,
+        "era": 1,
+        "manualZoom": 1,
+        "effectiveScale": 0.666666637767445,
+        "viewportScale": 0.6666666666666666,
+        "eraScale": 0.9999999566511675,
+        "zoomOptions": [
+          "0.5",
+          "0.75",
+          "1",
+          "1.25",
+          "1.5",
+          "2",
+          "fit"
+        ]
+      },
+      "checks": {
+        "layersVisible": true,
+        "layerVisibilityOnly": true,
+        "examplesOffKeepsSockets": true,
+        "examplesOffStillFits": true
+      }
+    }
+  ],
+  "passed": 2,
+  "failed": 0
+}

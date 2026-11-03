@@ -1255,9 +1255,9 @@
     "ws.skill.efficiency": "Production efficiency",
     "ws.skill.efficiency.description": "Increase production step payments",
     "ws.skill.update": "Update Tessera",
-    "ws.skill.update.description": "Dark colors, smaller controls, and a layer strip",
+    "ws.skill.update.description": "More canvas space, finer zoom, and layers. Newly completed parts produce ×1.15",
     "ws.skill.modern": "Switch to Gesso",
-    "ws.skill.modern.description": "Workspace switching and tabbed panels",
+    "ws.skill.modern.description": "Scene switching and tabbed panels. Newly completed parts produce ×1.3",
     "ws.percent": "{count}%",
     "ws.progressHeight": "Bar height",
     "ws.parenthesized": "({value})",
@@ -1656,6 +1656,20 @@
     "fe.pieceProgress": "{done} / {total}",
     "fe.goal": "Next: {name}",
     "fe.guide": "Enomoto",
-    "fitting.previewFor": "Preview of the completed {name} set"
+    "fitting.previewFor": "Preview of the completed {name} set",
+    "ws.guide.updateAvailable": "Exported parts earn tokens. With 3 tokens you can update Tessera: smaller tools, more canvas space, and a little more production from newly completed parts.",
+    "ws.guide.updateAvailable.title": "Update Tessera",
+    "ws.skill.gessoUpdate": "Update Gesso",
+    "ws.skill.gessoUpdate.description": "The next generation of Gesso",
+    "ws.skill.brio": "Switch to Brio",
+    "ws.skill.brio.description": "Tools centered on the canvas",
+    "ws.skill.brioUpdate": "Update Brio",
+    "ws.skill.brioUpdate.description": "The next generation of Brio",
+    "ws.futureEditorRequires": "Requires a newer editor environment",
+    "ws.extensionsBand3": "Next-generation plugins",
+    "examples.workshop.update": "Update Tessera. Requires 3 tokens.",
+    "fitting.updateHint": "Update Tessera for more room to work.",
+    "ws.extensionsLater": "Newer tools",
+    "ws.skillLaterUnavailable": "Unavailable in this version"
   }
 }

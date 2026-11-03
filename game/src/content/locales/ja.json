@@ -1224,9 +1224,9 @@
     "ws.skill.efficiency": "制作の手際",
     "ws.skill.efficiency.description": "工程払いが増える",
     "ws.skill.update": "Tessera をアップデートする",
-    "ws.skill.update.description": "暗い配色と細かい道具、レイヤーの帯",
+    "ws.skill.update.description": "広い作業台、細かいズーム、レイヤーの帯。新しく作るパーツの毎秒 ×1.15",
     "ws.skill.modern": "Gesso に乗り換える",
-    "ws.skill.modern.description": "場面の切り替えとタブ式パネル",
+    "ws.skill.modern.description": "場面の切り替えとタブ式パネル。新しく作るパーツの毎秒 ×1.3",
     "ws.percent": "{count}%",
     "ws.progressHeight": "バーの高さ",
     "ws.parenthesized": "（{value}）",
@@ -1619,6 +1619,20 @@
     "fe.pieceProgress": "{done} / {total}",
     "fe.goal": "短期目標：{name}",
     "fe.guide": "榎本",
-    "fitting.previewFor": "「{name}」の完成予想"
+    "fitting.previewFor": "「{name}」の完成予想",
+    "ws.guide.updateAvailable": "エクスポートで手に入るトークンで、Tessera をアップデートできます。3トークンで道具が小さくなり、作業台が広がります。新しく作るパーツの毎秒も少し増えます。",
+    "ws.guide.updateAvailable.title": "Tessera のアップデート",
+    "ws.skill.gessoUpdate": "Gesso をアップデートする",
+    "ws.skill.gessoUpdate.description": "Gesso の次の世代",
+    "ws.skill.brio": "Brio に乗り換える",
+    "ws.skill.brio.description": "作業台を中心にした道具",
+    "ws.skill.brioUpdate": "Brio をアップデートする",
+    "ws.skill.brioUpdate.description": "Brio の次の世代",
+    "ws.futureEditorRequires": "動作環境: さらに新しい世代の編集環境",
+    "ws.extensionsBand3": "次の世代のプラグイン",
+    "examples.workshop.update": "Tessera をアップデートする。3トークンが必要です。",
+    "fitting.updateHint": "Tessera をアップデートすると、作業台が広くなります。",
+    "ws.extensionsLater": "新しい道具",
+    "ws.skillLaterUnavailable": "このバージョンでは利用できません"
   }
 }

@@ -12,10 +12,13 @@ export type WorkshopExampleHand =
  | {kind:'buySet';set:UiSetId}
  | {kind:'export'|'selectPart';part:WorkshopPartId}
  | {kind:'spawnPiece'|'fitPiece';part:WorkshopPartId;piece:string}
- | {kind:'exit'|'release'|'customize'};
+ | {kind:'exit'|'release'|'customize'|'update'};
+
+export const workshopUpdateGoal=(state:GameState)=>state.run.workshop.guide.current==='updateAvailable'&&!state.persistent.editorSkills.includes('update');
 
 /** Guidance describes a gesture; it never inserts a piece on the player's behalf. */
 export function workshopExampleHand(state:GameState):WorkshopExampleHand {
+ if(workshopUpdateGoal(state))return {kind:'update'};
  const w=state.run.workshop,id=w.activePart,p=id?w.parts[id]:undefined;
  if(id&&p&&id!=='common-scrollbar'){
   const pieces=fittingDefinition(id).pieces;
@@ -30,11 +33,12 @@ export function workshopExampleHand(state:GameState):WorkshopExampleHand {
  return {kind:'customize'};
 }
 
-export function WorkshopExamples({state,i18n,dispatch,onRelease}:{state:GameState;i18n:I18n;dispatch:WorkshopDispatch;onRelease:()=>void;finishHint?:(part:WorkshopPartId)=>string|null|undefined}){
+export function WorkshopExamples({state,i18n,dispatch,onRelease,onOpenPlugins}:{state:GameState;i18n:I18n;dispatch:WorkshopDispatch;onRelease:()=>void;onOpenPlugins?:()=>void;finishHint?:(part:WorkshopPartId)=>string|null|undefined}){
  if(!state.persistent.examplesEnabled)return null;
  const hand=workshopExampleHand(state),t=i18n.t;
  let description:string,button:string|undefined,disabled=false,onClick:(()=>void)|undefined;
  switch(hand.kind){
+  case 'update':description=t('fitting.updateHint' as MessageKey);button=onOpenPlugins?t('ws.skill.update'):undefined;onClick=onOpenPlugins;break;
   case 'buySet':description=t('examples.workshop.buySet' as MessageKey,{name:t(`ws.set.${hand.set}`)});button=t('ws.buySet');disabled=!canBuyWorkshopSet(state,hand.set);onClick=()=>dispatch({type:'buySet',set:hand.set});break;
   case 'spawnPiece':description=t('fitting.spawnHint' as MessageKey,{name:t(`ws.element.${hand.piece}` as MessageKey)});break;
   case 'fitPiece':description=t('fitting.dragHint' as MessageKey,{name:t(`ws.element.${hand.piece}` as MessageKey)});break;

@@ -10,6 +10,7 @@ import type {GameRuntime,RuntimeSnapshot} from '../../systems/runtime';
 import type {GameState} from '../../systems/state';
 import {workshopExampleHand,WorkshopExamples} from './WorkshopExamples';
 import {WorkshopNavigator} from './WorkshopNavigator';
+import {WorkshopPlugins} from '../Workshop';
 const now=1_800_000_000_000;
 const platform={clock:{wallNow:()=>now,monotonicNow:()=>0},animation:{reducedMotion:()=>false}} as Platform;
 const runtime={platform,actWorkshop:()=>{},requestPrototypeRelease:()=>{}} as unknown as GameRuntime;
@@ -28,6 +29,7 @@ describe('殻とピースの案内と制作パネル',()=>{
     case 'spawnPiece':s=actWorkshop(s,{type:'spawnPiece',part:hand.part,piece:hand.piece},now);break;
     case 'fitPiece':{const p=s.run.workshop.parts[hand.part]!,socket=fittingDefinition(hand.part).sockets.find(socket=>socket.accepts.includes(hand.piece)&&(socket.stacked||!Object.values(p.fitting!.sockets).includes(socket.id)))!;s=actWorkshop(s,{type:'fitPiece',part:hand.part,piece:hand.piece,socket:socket.id},now);break;}
     case 'export':s=actWorkshop(s,{type:'export',part:hand.part},now);break;
+    case 'update':s=actWorkshop(s,{type:'guide',id:'close'},now);break;
     default:throw new Error(`Unexpected ${hand.kind}`);
    }
   }
@@ -61,5 +63,32 @@ describe('殻とピースの案内と制作パネル',()=>{
   expect(navigator(s)).toMatch(/data-workshop-piece="title" data-piece-status="spawned"[^>]*disabled/);
   s=actWorkshop(s,{type:'fitPiece',part:'common-frame',piece:'title',socket:'title'},now);
   expect(navigator(s)).toMatch(/data-workshop-piece="title" data-piece-status="fitted"[^>]*disabled/);
+ });
+});
+
+
+describe('Tesseraのアップデートへの案内',()=>{
+ it.each(['ja','en','en-XA'])('%s：初回の知らせだけが購入画面を案内し、制作を代わりに進めない',language=>{
+  const s=started();s.run.workshop.guide.current='updateAvailable';s.run.workshop.guide.seen.push('updateAvailable');
+  const before=structuredClone(s),i18n=createI18n(language);
+  const html=renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} onOpenPlugins={()=>{}} i18n={i18n}/>);
+  expect(workshopExampleHand(s)).toEqual({kind:'update'});expect(html).toContain('data-workshop-next-hand="update"');expect(html).toContain('data-workshop-example-action="update"');expect(html).toContain(i18n.t('ws.skill.update'));expect(s).toEqual(before);
+  const closed=actWorkshop(s,{type:'guide',id:'close'},now);expect(workshopExampleHand(closed).kind).toBe('spawnPiece');
+  s.persistent.examplesEnabled=false;expect(renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} onOpenPlugins={()=>{}} i18n={i18n}/>)).toBe('');
+ });
+ it('取得済みなら過去の知らせを開き直しても購入の案内を戻さない',()=>{
+  const s=started();s.run.workshop.guide.current='updateAvailable';s.persistent.editorSkills.push('update');
+  expect(workshopExampleHand(s).kind).toBe('spawnPiece');
+ });
+ it.each(['ja','en'])('%s：価格3の取得条件は状態に従い、後の3項目は高い残高でも取得できない',language=>{
+  const s=started(),i18n=createI18n(language);s.resources.tokens=2;
+  const render=()=>renderToStaticMarkup(<WorkshopPlugins state={s} i18n={i18n} dispatch={()=>{}} onClose={()=>{}}/>);
+  expect(render()).toMatch(/data-workshop-skill="update"[^>]*disabled/);
+  s.resources.tokens=3;expect(render()).not.toMatch(/data-workshop-skill="update"[^>]*disabled/);
+  s.resources.tokens=1000;
+  for(const id of ['batch','dimensions','layers','snap'])expect(render()).not.toContain(`data-workshop-skill="${id}"`);
+  for(const id of ['gessoUpdate','brio','brioUpdate']){
+   expect(render()).toMatch(new RegExp(`data-workshop-skill="${id}"[^>]*disabled`));expect(render()).toContain(`data-workshop-skill-reason="${id}"`);
+  }
  });
 });

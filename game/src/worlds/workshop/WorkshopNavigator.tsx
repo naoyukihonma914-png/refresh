@@ -25,11 +25,11 @@ import './fitting-panel.css';
 
 export interface WorkshopNavigatorProps {
  runtime:GameRuntime;snapshot:RuntimeSnapshot;i18n:I18n;onAssembleApp?:(app:BuiltApp)=>void;
- finishHint?:(part:WorkshopPartId)=>string|null|undefined;onPickColor?:()=>void;
+ finishHint?:(part:WorkshopPartId)=>string|null|undefined;onPickColor?:()=>void;onOpenPlugins?:()=>void;
 }
 
 /** The navigation hierarchy and the production panel have separate, small surfaces. */
-export function WorkshopNavigator({runtime,snapshot,i18n,onAssembleApp,onPickColor}:WorkshopNavigatorProps){
+export function WorkshopNavigator({runtime,snapshot,i18n,onAssembleApp,onPickColor,onOpenPlugins}:WorkshopNavigatorProps){
  const {state}=snapshot,w=state.run.workshop,t=i18n.t,stage=editorStage(state),examples=state.persistent.examplesEnabled;
  const dispatch:WorkshopDispatch=runtime.actWorkshop;
  const part=w.activePart&&w.activePart!=='common-scrollbar'?getWorkshopPart(w.activePart):null;
@@ -85,7 +85,7 @@ export function WorkshopNavigator({runtime,snapshot,i18n,onAssembleApp,onPickCol
  </section>:null;
  return <div className="ws-panel ws-panel-parts ws-navigator ws-fitting-panel" ref={panel} data-workshop-panel-view={view}>
   <div className="ws-panel-grip">{t('ws.parts')}</div>
-  {examples&&<WorkshopExamples state={state} i18n={i18n} dispatch={dispatch} onRelease={runtime.requestPrototypeRelease}/>}
+  {examples&&<WorkshopExamples state={state} i18n={i18n} dispatch={dispatch} onRelease={runtime.requestPrototypeRelease} onOpenPlugins={onOpenPlugins}/>}
   {view==='sets'?<>
    <h3 className="ws-navigation-heading">{t('ws.set')}</h3>
    <nav className="ws-navigation-rows" aria-label={t('ws.set')}>{UI_SETS.filter(definition=>w.purchasedSets.includes(definition.id)||next?.kind==='set'&&next.set===definition.id).map(definition=>row(definition.id))}</nav>

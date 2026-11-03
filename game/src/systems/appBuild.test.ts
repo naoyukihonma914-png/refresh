@@ -89,7 +89,7 @@ describe('第3版：完成素材から組み立てるアプリ',()=>{
  it('旧版で持っていた素材は外してinstall後も置き直せ、工房の無料完成へは変換しない',()=>{
   let s=installed();const project=s.run.desktop.projects.photo!;
   delete project.draftAssembly;delete project.installedAssembly;delete project.assemblyUndo;delete project.assemblyRedo;delete project.legacyMaterials;
-  const crop=s.run.workshop.parts['photo-crop']!;s.run.workshop.parts['photo-crop']={...crop,step:0,elements:[],completedAt:null,exportedAt:null,tested:false};delete s.run.workshop.parts['photo-crop']!.fitting;
+  const crop=s.run.workshop.parts['photo-crop']!;s.run.workshop.parts['photo-crop']={...crop,step:0,elements:[],completedAt:null,exportedAt:null,tested:false};delete s.run.workshop.parts['photo-crop']!.fitting;delete s.run.workshop.parts['photo-crop']!.createdStage;
   s=migrateAppAssemblies(s);const wallet=structuredClone(s.resources);
   s=actAppBuild(s,{type:'app-remove',app:'photo',part:'crop'});s=actAppBuild(s,{type:'app-install',app:'photo'});expect(hasAppPart(s,'photo','crop')).toBe(false);
   s=actAppBuild(s,{type:'app-recommend',app:'photo'});s=actAppBuild(s,{type:'app-install',app:'photo'});

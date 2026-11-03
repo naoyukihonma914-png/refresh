@@ -6,7 +6,7 @@ import type { GameState } from './state';
 import { isComponentDesign, type ComponentDesign } from './workshopState';
 import { fittedPieces, isPartFitting, type PartFitting } from './workshopFitting';
 
-export interface AssemblyMaterial { source:WorkshopPartId; design:ComponentDesign; elements:string[]; fitting?:PartFitting }
+export interface AssemblyMaterial { source:WorkshopPartId; design:ComponentDesign; elements:string[]; fitting?:PartFitting; createdStage?:0|1|2 }
 export interface AssemblySlot extends AssemblyMaterial { role:AppSlotRole; rect:Rect }
 export interface AppAssembly {
  app:BuiltApp; version:GameState['run']['version']; width:number; height:number;
@@ -17,6 +17,7 @@ const finite=(x:unknown):x is number=>typeof x==='number'&&Number.isFinite(x);
 const ids=new Set(WORKSHOP_PARTS.map(p=>p.id));
 export function validAssemblyMaterial(p:unknown,legacy=false):p is AssemblyMaterial {
  if(!obj(p)||typeof p.source!=='string'||!ids.has(p.source as WorkshopPartId)||!Array.isArray(p.elements)||!p.elements.every(e=>typeof e==='string')||new Set(p.elements).size!==p.elements.length)return false;
+ if(p.createdStage!==undefined&&![0,1,2].includes(p.createdStage as number))return false;
  const id=p.source as WorkshopPartId,definition=WORKSHOP_PARTS.find(def=>def.id===id)!;
  if(p.fitting!==undefined){
   if(!isPartFitting(p.fitting,id)||!p.fitting.completionPaid||JSON.stringify(fittedPieces({elements:p.elements as string[],fitting:p.fitting},id))!==JSON.stringify(p.elements))return false;

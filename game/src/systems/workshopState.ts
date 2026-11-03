@@ -4,7 +4,7 @@ import { fittingPartsForSet } from '../content/workshopFitting';
 import { fittedPieces, fittingComplete, isPartFitting, type PartFitting } from './workshopFitting';
 export type { EditorSkill } from '../config/balance';
 export type { WorkshopRect } from '../content/workshopCatalog';
-export const WORKSHOP_GUIDE_IDS = ['entered','place','elements','adjust','test','complete','export','wall','hint'] as const;
+export const WORKSHOP_GUIDE_IDS = ['entered','place','elements','adjust','test','complete','export','updateAvailable','wall','hint'] as const;
 export type WorkshopGuideId = typeof WORKSHOP_GUIDE_IDS[number];
 export type PanelPosition = 'left' | 'right' | 'top' | 'bottom';
 export interface ComponentDesign {
@@ -25,6 +25,8 @@ export interface EditorCustomization {
   panelWidths: Record<'palette'|'tools'|'parts',number>;
 }
 export interface PartProduction {
+  /** The editor used for its first completion; missing historical fields mean the first era. */
+  createdStage?:0|1|2;
   fitting?: PartFitting;
   step: 0|1|2|3|4; rect: WorkshopRect; elements: string[]; design: ComponentDesign;
   completedAt: number|null; exportedAt: number|null; tested: boolean;
@@ -156,6 +158,7 @@ export function minimumPartSize(id:WorkshopPartId,design?:ComponentDesign):{widt
 export function isPartProduction(x:unknown,id:WorkshopPartId):x is PartProduction {
   if(!record(x)||![0,1,2,3,4].includes(x.step as number)||!isWorkshopRect(x.rect)||!isComponentDesign(x.design)
     ||!Array.isArray(x.elements)||!unique(x.elements)||typeof x.tested!=='boolean')return false;
+  if(x.createdStage!==undefined&&(![0,1,2].includes(x.createdStage as number)||x.step!==4))return false;
   const descriptor=getWorkshopPart(id);
   const min=minimumPartSize(id,x.design);
   if(x.rect.width<min.width||x.rect.height<min.height)return false;

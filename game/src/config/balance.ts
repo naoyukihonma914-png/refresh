@@ -399,7 +399,7 @@ export const BALANCE = {
   // World2 naming retained only for generic integration settings during 8a.
   w2: { desktopCost: 200_000, hintMs: 300_000, enterMs: 1_200, upgradeMs: 2_000, maxName: 80 },
   workshop: {
-    eras: { canvasScale:[.85,1,1.15], panelWidths:[320,288,256], paletteWidths:[128,64,200] },
+    eras: { canvasScale:[.85,1,1.15], panelWidths:[320,288,256], paletteWidths:[128,64,200], partRateMultipliers:[1,1.15,1.3], era0ZoomOptions:[.5,.85,1] },
     fitting: {
       pieceRewardTotals: { small:115, medium:230, large:460 }, previewZoom:.32,
       snapDistance:28, dragThreshold:5, snapPulseMs:480,
@@ -517,6 +517,8 @@ export const BALANCE = {
       { id: 'motion', band: 2, cost: 20 }, { id: 'extraParts', band: 2, cost: 15 },
       { id: 'efficiency', band: 2, cost: 10 }, { id: 'update', band: 1, cost: 3 },
       { id: 'modern', band: 2, cost: 25 },
+      // Purchase gates remain closed until these later generations are implemented.
+      { id: 'gessoUpdate', band: 2, cost: 40 }, { id: 'brio', band: 3, cost: 60 }, { id: 'brioUpdate', band: 3, cost: 90 },
     ],
   },
   world4: { minimumVersion: 'v2', requiredRefreshLevel: 1, refreshHz: [30, 60, 120, 240] },

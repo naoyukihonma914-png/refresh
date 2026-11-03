@@ -10,11 +10,11 @@ export type { AppAssembly,AssemblySlot,AssemblyMaterial } from './appAssemblySch
 export { validAppAssembly } from './appAssemblySchema';
 export function availableAssemblyRoles(s:GameState,app:BuiltApp):AppSlotRole[]{return slotRoles(app).filter(role=>s.run.workshop.parts[sourceForSlot(app,role)!]?.step===4);}
 export function availableAssemblySources(s:GameState,app:BuiltApp):WorkshopPartId[]{return [...new Set(availableAssemblyRoles(s,app).map(role=>sourceForSlot(app,role)!))];}
-function commonMaterials(s:GameState,legacy=false):AssemblyMaterial[]{return WORKSHOP_PARTS.filter(p=>p.set==='common'&&(legacy||s.run.workshop.parts[p.id]?.step===4)).map(p=>{const production=s.run.workshop.parts[p.id];return {source:p.id,design:production?.step===4?structuredClone(production.design):createComponentDesign(),elements:[...(production?.step===4?production.elements:p.elements)],...(production?.step===4&&production.fitting?{fitting:structuredClone(production.fitting)}:{})};});}
+function commonMaterials(s:GameState,legacy=false):AssemblyMaterial[]{return WORKSHOP_PARTS.filter(p=>p.set==='common'&&(legacy||s.run.workshop.parts[p.id]?.step===4)&&!(p.id==='common-scrollbar'&&!legacy&&s.run.workshop.parts['common-frame']?.fitting&&s.run.workshop.parts['common-frame']?.step===4)).map(p=>{const production=s.run.workshop.parts[p.id];return {source:p.id,design:production?.step===4?structuredClone(production.design):createComponentDesign(),elements:[...(production?.step===4?production.elements:p.elements)],...(production?.step===4&&production.fitting?{fitting:structuredClone(production.fitting)}:{}),...(!legacy&&production?.step===4&&production.createdStage!==undefined?{createdStage:production.createdStage}:{})};});}
 function slotFromPart(s:GameState,app:BuiltApp,part:AppPart,legacy=false):AssemblySlot|null {
  const source=sourceForSlot(app,part.id);if(!source)return null;const production=s.run.workshop.parts[source];if(!legacy&&production?.step!==4)return null;
  const design:ComponentDesign=legacy?{...createComponentDesign(),nativeColors:false,color:part.color,textColor:readableText(part.color),fontSize:part.fontSize}:structuredClone(production!.design);
- return {role:part.id,source,elements:[...(production?.step===4?production.elements:WORKSHOP_PARTS.find(p=>p.id===source)!.elements)],...(production?.step===4&&production.fitting?{fitting:structuredClone(production.fitting)}:{}),rect:{x:part.x,y:part.y,width:part.width,height:part.height},design};
+ return {role:part.id,source,elements:[...(production?.step===4?production.elements:WORKSHOP_PARTS.find(p=>p.id===source)!.elements)],...(production?.step===4&&production.fitting?{fitting:structuredClone(production.fitting)}:{}),...(!legacy&&production?.step===4&&production.createdStage!==undefined?{createdStage:production.createdStage}:{}),rect:{x:part.x,y:part.y,width:part.width,height:part.height},design};
 }
 /** Installable recipes refer to actual completed materials. A role never creates inventory. */
 export function createAppAssembly(s:GameState,app:BuiltApp,roles:readonly AppSlotRole[]=availableAssemblyRoles(s,app),metrics:PartMinimums={},previous?:AppAssembly):AppAssembly {
@@ -50,7 +50,7 @@ export function legacyMaterialsFor(s:GameState,app:BuiltApp,project:AppProject):
  if(project.legacyMaterials)return project.legacyMaterials;
  const historical=legacyAppAssembly(s,app,recommendedLayout(app,project.crafted,undefined,{},project.draft));
  const materials=[...historical.common,...historical.slots];
- return [...new Map(materials.map(material=>[material.source,{source:material.source,design:structuredClone(material.design),elements:[...material.elements],...(material.fitting?{fitting:structuredClone(material.fitting)}:{})}])).values()];
+ return [...new Map(materials.map(material=>[material.source,{source:material.source,design:structuredClone(material.design),elements:[...material.elements],...(material.fitting?{fitting:structuredClone(material.fitting)}:{}),...(material.createdStage!==undefined?{createdStage:material.createdStage}:{})}])).values()];
 }
 /** Compatibility adoption preserves paid native apps; it never manufactures workshop productions. */
 export function migrateAppAssemblies(s:GameState):GameState {

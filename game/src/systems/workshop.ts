@@ -118,13 +118,19 @@ function payPiece(s:GameState,id:WorkshopPartId,now:number,firstFit:boolean,fini
   const reward=(firstFit?amount*efficiency*workshopComboMultiplier(s,now):0)+(finish?BALANCE.workshop.finishRewards[category]:0);
   return reward>0?creditPixels(s,reward*productionCreditMultiplier(s)):s;
 }
-function buySkill(s:GameState,id:EditorSkill):GameState {
+export function canBuyEditorSkill(s:GameState,id:EditorSkill):boolean {
   const skill=BALANCE.workshop.skills.find(p=>p.id===id);
-  if(!skill||s.persistent.editorSkills.includes(id)||s.resources.tokens<skill.cost||skill.band===2&&s.run.version==='v0.1'&&id!=='modern')return s;
-  // The environment unlock is persistent even when the player displays an older desktop.
-  if(id==='modern'&&!canSwitchEditor(s))return s;
+  return !!skill&&!['batch','dimensions','layers','snap','gessoUpdate','brio','brioUpdate'].includes(id)&&!s.persistent.editorSkills.includes(id)&&s.resources.tokens>=skill.cost
+    &&!(skill.band>=2&&s.run.version==='v0.1'&&id!=='modern')&&(id!=='modern'||canSwitchEditor(s));
+}
+function buySkill(s:GameState,id:EditorSkill):GameState {
+  if(!canBuyEditorSkill(s,id))return s;
+  const skill=BALANCE.workshop.skills.find(p=>p.id===id)!;
   let next:GameState={...s,resources:{...s.resources,tokens:s.resources.tokens-skill.cost},persistent:{...s.persistent,editorSkills:[...s.persistent.editorSkills,id]}};
-  if(id==='update')next=setEditorStage(next,1);
+  if(id==='update'){
+    next=setEditorStage(next,1);
+    if(next.run.workshop.guide.current==='updateAvailable')next={...next,run:{...next.run,workshop:{...next.run.workshop,guide:{...next.run.workshop.guide,current:null,collapsed:true}}}};
+  }
   if(id==='modern'){
     next=setEditorStage(next,2);
     next={...next,persistent:{...next.persistent,editorCustomization:{...next.persistent.editorCustomization,panelPositions:{palette:'right',tools:'left',parts:'left',info:'bottom'}}}};
@@ -174,6 +180,8 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     s={...s,run:{...s.run,workshop:{...w,view:action.view}}};
   }else if(action.type==='zoom'){
     if(!Number.isFinite(action.zoom)||action.zoom<BALANCE.workshop.zoomMin||action.zoom>BALANCE.workshop.zoomMax)return s;
+    const options=editorStage(s)===0?BALANCE.workshop.eras.era0ZoomOptions:BALANCE.workshop.zoomOptions;
+    if(!options.some(value=>value===action.zoom))return s;
     s={...s,run:{...s.run,workshop:{...w,zoom:action.zoom}}};
   }else if(action.type==='exit'){
     if(!canInspectDesktopExit(s))return s;
@@ -182,10 +190,15 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
   }else if(action.type==='export'){
     const ids=completedParts(s).filter(id=>(!action.part||id===action.part)&&w.parts[id]!.exportedAt===null);
     if(ids.length===0)return s;
+    const firstExport=!w.tokenDiscovered&&s.persistent.progress.records['first-export']===undefined
+      &&!s.persistent.setDocuments.some(document=>Object.values(document.parts).some(part=>part&&part.exportedAt!==null))
+      &&!s.persistent.products.some(product=>product.exports.length>0)
+      &&!s.persistent.guideArchive.some(record=>record.kind==='kumiki'&&record.id==='updateAvailable');
     for(const id of ids)s=writePart(s,id,{...s.run.workshop.parts[id]!,exportedAt:Math.max(now,s.run.workshop.parts[id]!.completedAt!)});
     s={...s,resources:{...s.resources,tokens:s.resources.tokens+ids.length*BALANCE.workshop.exportTokens},run:{...s.run,workshop:{...s.run.workshop,tokenDiscovered:true}}};
     for(const set of new Set(ids.map(id=>getWorkshopPart(id).set)))s=snapshotSet(s,set,now);
     s=showGuide(s,'export');
+    if(firstExport&&!s.persistent.editorSkills.includes('update'))s=showGuide(s,'updateAvailable');
   }else{
     const id=action.part??w.activePart;if(!id||!w.parts[id])return s;
     const p=w.parts[id]!,descriptor=getWorkshopPart(id);
@@ -216,10 +229,11 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
         return actWorkshop(s,{type:'fitPiece',part:id,piece:'scrollbar',socket:'scrollbar'},now);
       }
       const finish=!fitting.completionPaid&&fittingComplete(next,id);
-      if(finish)next={...next,step:4,tested:true,completedAt:now,fitting:{...nextFitting,completionPaid:true}};
+      if(finish)next={...next,step:4,tested:true,completedAt:now,createdStage:editorStage(s),fitting:{...nextFitting,completionPaid:true}};
       s=payPiece(writePart(s,id,next),id,now,firstFit,finish,pieceReward(id)-prepaid);
       if(finish){
         s={...s,run:{...s.run,workshop:{...s.run.workshop,combo:completionCombo(s,now)}}};
+        if(s.run.workshop.guide.current==='updateAvailable')s={...s,run:{...s.run,workshop:{...s.run.workshop,guide:{...s.run.workshop.guide,current:null,collapsed:true}}}};
         if(setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now);
         s=showGuide(s,'complete');
       }

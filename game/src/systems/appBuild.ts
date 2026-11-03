@@ -63,7 +63,7 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
   const draft=placeAppPart(project.draft,a.part,a.metrics,a.rect);if(draft===project.draft)return s;
   const placed=draft.parts.find(p=>p.id===a.part)!;
   const material=production?.step===4?production:legacyMaterial!;
-  const assembly={...draftAssembly,slots:[...draftAssembly.slots,{role:a.part,source,rect:{x:placed.x,y:placed.y,width:placed.width,height:placed.height},design:structuredClone(material.design),elements:[...material.elements],...(material.fitting?{fitting:structuredClone(material.fitting)}:{})}]};
+  const assembly={...draftAssembly,slots:[...draftAssembly.slots,{role:a.part,source,rect:{x:placed.x,y:placed.y,width:placed.width,height:placed.height},design:structuredClone(material.design),elements:[...material.elements],...(material.fitting?{fitting:structuredClone(material.fitting)}:{}),...(material.createdStage!==undefined?{createdStage:material.createdStage}:{})}]};
   return edit(assemblyLayout(assembly,draft),assembly);
  }
  if(a.type==='app-remove'){

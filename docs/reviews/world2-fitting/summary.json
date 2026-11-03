@@ -1,0 +1,199 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "language": "ja",
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8173/",
+  "buildSha256": "9d25f62a12f1e5e57efcd8d0e278e93f7b49f3f28da47f36124b3144666c90cd",
+  "setup": "public fixed fixtures; real controls; frozen browser clock; debug export is read-only",
+  "references": [
+    "docs/mockups/02-1-tessera-aseprite-old.html",
+    "docs/mockups/02-2-tessera-aseprite-new.html"
+  ],
+  "cases": [
+    {
+      "id": "frame",
+      "fixture": "fitting-frame-era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/01-era0-set-list.png",
+          "label": "段①・UIセット一覧"
+        },
+        {
+          "file": "screenshots/02-era0-frame-work-in-progress.png",
+          "label": "段①・窓枠の窪みと出現中のピース"
+        },
+        {
+          "file": "screenshots/03-era0-adjustments.png",
+          "label": "段①・任意の調整だけを開く"
+        },
+        {
+          "file": "screenshots/05-completion-flight.png",
+          "label": "完成した毎秒の値が上部の合計へ飛ぶ"
+        },
+        {
+          "file": "screenshots/06-just-after-update.png",
+          "label": "初回エクスポートの案内から実際にアップデートした直後"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "geometry": {
+        "width": 598.4000244140625,
+        "logical": 704,
+        "panelWidth": 320,
+        "era": 0,
+        "manualZoom": 1,
+        "effectiveScale": 0.850000034679066,
+        "viewportScale": 1,
+        "eraScale": 0.850000034679066,
+        "zoomOptions": [
+          "0.5",
+          "0.85",
+          "1"
+        ]
+      },
+      "checks": {
+        "spawnOnly": true,
+        "incompatibleDropNoReward": true,
+        "sharedControlIdentity": true,
+        "completionFlight": true,
+        "detachRefitExactWalletAndDates": true,
+        "actualScroll": {
+          "before": 0,
+          "after": 23
+        },
+        "commonFrameContainsWidgets": {
+          "contentTop": 137.70001220703125,
+          "childBottom": 129.20001220703125,
+          "childCount": 2
+        },
+        "realUpgrade": {
+          "tokenCost": 3,
+          "oneTokenDisabled": true,
+          "earnedTokensBeforePurchase": 3,
+          "newPartCreatedStage": 1,
+          "newPartRate": 10.35,
+          "newPartMultiplier": 1.15
+        }
+      },
+      "upgradeGeometry": {
+        "width": 704,
+        "logical": 704,
+        "panelWidth": 288,
+        "era": 1,
+        "manualZoom": 1,
+        "effectiveScale": 1.0,
+        "viewportScale": 1,
+        "eraScale": 1.0,
+        "zoomOptions": [
+          "0.5",
+          "0.75",
+          "1",
+          "1.25",
+          "1.5",
+          "2",
+          "fit"
+        ]
+      }
+    },
+    {
+      "id": "era1",
+      "fixture": "fitting-frame-era1",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/04-era1-frame-and-layers.png",
+          "label": "段②・同じ制作場面と増えたレイヤーの行"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "geometry": {
+        "width": 704,
+        "logical": 704,
+        "panelWidth": 288,
+        "era": 1,
+        "manualZoom": 1,
+        "effectiveScale": 1.0,
+        "viewportScale": 1,
+        "eraScale": 1.0,
+        "zoomOptions": [
+          "0.5",
+          "0.75",
+          "1",
+          "1.25",
+          "1.5",
+          "2",
+          "fit"
+        ]
+      },
+      "checks": {
+        "layersVisible": true,
+        "layerVisibilityOnly": true,
+        "examplesOffKeepsSockets": true,
+        "examplesOffStillFits": true
+      }
+    },
+    {
+      "id": "mail",
+      "fixture": "fitting-mail-era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/07-mail-columns-work-in-progress.png",
+          "label": "メールセット・異なる幅の列ピースを制作中"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "dedicatedColumnSeats": true,
+        "fittedColumnSelectsRealMessage": true
+      }
+    },
+    {
+      "id": "entry",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/08-era0-world-entry.png",
+          "label": "段①・世界に入った直後、最初のUIセットだけが入口になる"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "noAutomaticPurchasedSet": true,
+        "firstSetVisible": true
+      }
+    },
+    {
+      "id": "partial",
+      "fixture": "stage8a-part-files-search-step-0-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "unfinishedSearchInputWorks": true,
+        "unfinishedSliderWorks": true
+      }
+    }
+  ],
+  "passed": 5,
+  "failed": 0,
+  "fileProtocol": {
+    "status": "unverified",
+    "reason": "The browser environment blocked file:// navigation with ERR_BLOCKED_BY_ADMINISTRATOR; no bypass attempted."
+  }
+}
