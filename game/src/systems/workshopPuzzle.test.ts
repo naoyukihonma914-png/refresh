@@ -3,15 +3,36 @@ import { BALANCE } from '../config/balance';
 import { FITTING_PARTS, fittingDefinition } from '../content/workshopFitting';
 import type { WorkshopPartId } from '../content/workshopCatalog';
 import { actWorkshop } from './workshop';
-import { createFixture } from './fixtures';
+import { createFixture, completeWorkshopPartFixture } from './fixtures';
 import { decodeSave, encodeSave } from './save';
 import { isGameState } from './state';
-import { ensurePuzzlePositions, puzzleParts, puzzlePieceRect, puzzlePieceVisible, selectPuzzlePart } from './workshopPuzzle';
+import { ensurePuzzlePositions, puzzleBounds, puzzlePointInside, puzzleParts, puzzlePieceRect, puzzlePieceVisible, selectPuzzlePart } from './workshopPuzzle';
 const now=1_800_000_000_000;
 const start=()=>createFixture('fitting-frame-era0',now)!;
 const act=(s:ReturnType<typeof start>,action:Parameters<typeof actWorkshop>[1])=>actWorkshop(s,action,now);
 
 describe('persistent jigsaw workbench',()=>{
+ it('repairs only out-of-range live coordinates at load, preserving valid positions and frozen documents',()=>{
+  const state=completeWorkshopPartFixture(start(),'common-button',now,true),before=structuredClone(state.run.workshop.parts['common-frame']!.fitting!.positions);
+  const raw=JSON.parse(encodeSave(state));
+  raw.run.workshop.parts['common-frame'].fitting.positions.close={origin:{x:9000,y:9000},at:{x:9000,y:9000}};
+  raw.persistent.setDocuments[0].parts['common-button'].fitting.positions.label.at={x:9000,y:9000};
+  const frozen=structuredClone(raw.persistent.setDocuments),loaded=decodeSave(JSON.stringify(raw));
+  const positions=loaded.run.workshop.parts['common-frame']!.fitting!.positions!;
+  expect(positions.minimize).toEqual(before!.minimize);
+  expect(puzzlePointInside(positions.close!.origin,puzzlePieceRect(loaded.run.workshop,'common-frame','close'))).toBe(true);
+  expect(positions.close!.at).toEqual(positions.close!.origin);
+  expect(loaded.persistent.setDocuments).toEqual(frozen);
+  expect(decodeSave(encodeSave(loaded))).toEqual(loaded);
+ });
+ it('bounds a staged piece on every edge without changing the socket dimensions',()=>{
+  let state=start();state=act(state,{type:'stagePiece',part:'common-frame',piece:'close',at:{x:99999,y:99999}});
+  const r=puzzlePieceRect(state.run.workshop,'common-frame','close'),pos=state.run.workshop.parts['common-frame']!.fitting!.positions!.close!.at;
+  expect(pos).toEqual({x:puzzleBounds().width-r.width,y:puzzleBounds().height-r.height});
+  const rail=puzzlePieceRect(state.run.workshop,'common-frame','scrollbar'),edge={x:puzzleBounds().width-rail.width,y:200};
+  state=act(state,{type:'stagePiece',part:'common-frame',piece:'scrollbar',at:edge});
+  expect(decodeSave(encodeSave(state)).run.workshop.parts['common-frame']!.fitting!.positions!.scrollbar!.at).toEqual(edge);
+ });
  it('selects and reveals every piece together, at socket size and without payment',()=>{
   const state=start(),before=state.resources;
   expect(puzzleParts(state.run.workshop)).toEqual(['common-frame']);
@@ -99,6 +120,7 @@ describe('persistent jigsaw workbench',()=>{
     const p=w.parts[part.id]!,positions=p.fitting!.positions!;
     for(const piece of fittingDefinition(part.id).pieces.filter(piece=>p.fitting!.sockets[piece]===undefined)){
      const r=puzzlePieceRect(w,part.id,piece),pos=positions[piece]!;
+     expect(puzzlePointInside(pos.origin,r)).toBe(true);expect(puzzlePointInside(pos.at,r)).toBe(true);
      expect(pos.origin.y).toBeGreaterThan(BALANCE.workshop.canvas.height);
      for(const [otherId,other] of Object.entries(w.parts)){
       if(!other||!FITTING_PARTS.some(item=>item.id===otherId&&item.set===part.set))continue;

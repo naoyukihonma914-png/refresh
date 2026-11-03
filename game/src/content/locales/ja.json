@@ -1650,6 +1650,7 @@
     "fitting.customizePart": "「{name}」をカスタマイズ",
     "ws.updateFirst": "先に Tessera をアップデートしてください。購入すると、ほかのトークン消費が使えるようになります。",
     "fitting.selected": "選択中",
-    "fitting.hidden": "非表示"
+    "fitting.hidden": "非表示",
+    "ws.shelfDesktop": "デスクトップ"
   }
 }

@@ -1687,6 +1687,7 @@
     "fitting.customizePart": "Customize {name}",
     "ws.updateFirst": "Update Tessera first. Other token purchases become available after the update.",
     "fitting.selected": "Selected",
-    "fitting.hidden": "Hidden"
+    "fitting.hidden": "Hidden",
+    "ws.shelfDesktop": "Desktop"
   }
 }

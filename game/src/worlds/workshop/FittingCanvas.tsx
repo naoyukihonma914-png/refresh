@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject, type ReactNode } from 'react';
 import { BALANCE } from '../../config/balance';
 import type { I18n, MessageKey } from '../../content/i18n';
 import { getWorkshopPart, type WorkshopPartDefinition, type WorkshopPartId, type WorkshopRect } from '../../content/workshopCatalog';
@@ -16,13 +16,14 @@ import { OptionalTargetProvider } from './OptionalParts';
 import { WorkshopGlyph } from './WorkshopGlyph';
 import { FittingPieceContent, useFittingPieceFront } from './FittingPieceContent';
 import { ensurePuzzlePositions, puzzleParts, puzzlePieceRect, puzzlePieceVisible, puzzleSet } from '../../systems/workshopPuzzle';
+import { WorkshopExportShelf } from './WorkshopExportShelf';
 import './fitting-canvas.css';
 
 export interface FittingCanvasProps {
  platform:Platform;workshopSnap?:RuntimeSnapshot['workshopSnap'];state:GameState;workshop:WorkshopState;
  part:WorkshopPartDefinition|null;production:PartProduction|undefined;zoom:number;dispatch:WorkshopDispatch;i18n:I18n;
  picking:boolean;selectedPiece?:string|null;onSelectPiece?:(piece:string)=>void;layerSelection?:string|null;onSelectLayer?:(value:string|null)=>void;onPick:(color:string)=>void;
- onTargetScale?:(scale:number)=>void;reducedMotion?:boolean;showShell?:boolean;showPieces?:boolean;showAdjustments?:boolean;
+ onTargetScale?:(scale:number)=>void;preview?:boolean;reducedMotion?:boolean;showShell?:boolean;showPieces?:boolean;showAdjustments?:boolean;
 }
 interface Point {x:number;y:number}
 interface PieceGesture {part:WorkshopPartId;piece:string;start:Point;pointer:Point;loose:boolean;moved:boolean;pointerId:number;offset:Point;width:number;height:number}
@@ -33,24 +34,44 @@ const styleRect=(rect:WorkshopRect):CSSProperties=>({left:rect.x,top:rect.y,widt
 export function FittingCanvas(props:FittingCanvasProps) {
  return <WorkshopTargetProvider gameState={props.state} i18n={props.i18n}><OptionalTargetProvider gameState={props.state} i18n={props.i18n} onExport={()=>props.dispatch({type:'export'})}><FittingBoard {...props}/></OptionalTargetProvider></WorkshopTargetProvider>;
 }
-function FittingBoard({state,workshop,part,zoom,dispatch,i18n,picking,onPick,onTargetScale,reducedMotion=false,platform,showShell=true,showPieces=true,showAdjustments=true}:FittingCanvasProps) {
+function FittingBoard({state,workshop,part,zoom,dispatch,i18n,picking,onPick,onTargetScale,preview=false,reducedMotion=false,platform,showShell=true,showPieces=true,showAdjustments=true}:FittingCanvasProps) {
  const t=(key:string,params:Record<string,string|number>={})=>i18n.t(key as MessageKey,params);
  const c=BALANCE.workshop.canvas,f=BALANCE.workshop.fitting;
- const board=useRef<HTMLDivElement>(null),scrollTarget=useRef<HTMLDivElement>(null),gesture=useRef<PieceGesture|null>(null),suppressClick=useRef(false);
+ const viewport=useRef<HTMLDivElement>(null),board=useRef<HTMLDivElement>(null),scrollTarget=useRef<HTMLDivElement>(null),gesture=useRef<PieceGesture|null>(null),suppressClick=useRef(false);
  const [drag,setDrag]=useState<PieceGesture|null>(null),[response,setResponse]=useState<SnapResponse|null>(null),[windowMode,setWindowMode]=useState<'normal'|'minimized'|'closed'|'maximized'>('normal');
  const {files,actions}=useWorkshopTarget();
  workshop=ensurePuzzlePositions(workshop,puzzleParts(workshop));
  const selected=puzzleParts(workshop),set=puzzleSet(workshop),descriptors=fittingPartsForSet(set);
  const frame=workshop.parts['common-frame'];
- const inset=f.boardInset,baseWidth=c.width+inset*2,windowHeight=c.height+f.frameTitleHeight;
+ const inset=f.boardInset,windowHeight=c.height+f.frameTitleHeight;
+ const positionRects=descriptors.flatMap(descriptor=>Object.entries(workshop.parts[descriptor.id]?.fitting?.positions??{}).flatMap(([piece,pos])=>{const r=puzzlePieceRect(workshop,descriptor.id,piece);return [pos.origin,pos.at].map(point=>({...point,width:r.width,height:r.height}));}));
+ const baseWidth=Math.max(c.width+inset*2,...positionRects.map(r=>r.x+r.width+inset));
  const frameShellVisible=set==='common'&&!!frame&&(selected.includes('common-frame')||frame.elements.length>0||frame.step===4);
- const targetScale=windowMode==='maximized'?baseWidth/c.width:1,targetInset=windowMode==='maximized'?0:inset;
- useEffect(()=>onTargetScale?.(targetScale),[onTargetScale,targetScale]);
+ const targetScale=windowMode==='maximized'?(c.width+inset*2)/c.width:1,targetInset=windowMode==='maximized'?0:inset;
  const boardWidth=baseWidth*targetScale;
  const appOffset={x:targetInset,y:targetInset+(frameShellVisible?0:f.frameTitleHeight*targetScale)};
  const loose=descriptors.flatMap(descriptor=>fittingDefinition(descriptor.id).pieces.filter(piece=>puzzlePieceVisible(workshop,descriptor.id,piece)).map(piece=>({part:descriptor,piece,r:puzzlePieceRect(workshop,descriptor.id,piece),position:workshop.parts[descriptor.id]!.fitting!.positions![piece]!})));
- const positions=descriptors.flatMap(descriptor=>Object.entries(workshop.parts[descriptor.id]?.fitting?.positions??{}).flatMap(([piece,pos])=>{const r=puzzlePieceRect(workshop,descriptor.id,piece);return [pos.origin.y+r.height,pos.at.y+r.height];}));
- const boardHeight=(Math.max(windowHeight+inset,...positions)+inset)*targetScale;
+ const boardHeight=Math.max(windowHeight+inset*2,...positionRects.map(r=>r.y+r.height+inset))*targetScale;
+ const [space,setSpace]=useState<{width:number;height:number}|null>(null);
+ useLayoutEffect(()=>{
+  const node=viewport.current;if(!node||preview)return;
+  const measure=()=>{const css=getComputedStyle(node),n=(value:string)=>Number.parseFloat(value)||0;
+   const width=node.clientWidth-n(css.paddingLeft)-n(css.paddingRight),height=node.clientHeight-n(css.paddingTop)-n(css.paddingBottom);
+   setSpace(previous=>previous?.width===width&&previous.height===height?previous:{width,height});};
+  measure();const observer=new ResizeObserver(measure);observer.observe(node);return()=>observer.disconnect();
+ },[preview]);
+ const displayZoom=space?Math.max(.001,Math.min(zoom,space.width/boardWidth,space.height/boardHeight)):zoom;
+ useEffect(()=>onTargetScale?.(displayZoom*targetScale/zoom),[onTargetScale,displayZoom,targetScale,zoom]);
+ const history=useRef({run:`${state.createdAt}:${state.run.version}`,parts:workshop.parts,serial:0});
+ useEffect(()=>{
+  const previous=history.current,run=`${state.createdAt}:${state.run.version}`;
+  if(previous.run===run&&!reducedMotion){
+   for(const [id,p] of Object.entries(workshop.parts))for(const [piece,socket] of Object.entries(p?.fitting?.sockets??{})){
+    if(previous.parts[id as WorkshopPartId]?.fitting?.sockets[piece]!==socket)setResponse({part:id as WorkshopPartId,piece,socket,at:++previous.serial});
+   }
+  }else setResponse(null);
+  history.current={run,parts:workshop.parts,serial:previous.serial};
+ },[workshop.parts,state.createdAt,state.run.version,reducedMotion]);
  const [hovered,setHovered]=useState<{part:WorkshopPartId;piece:string}|null>(null);
  const highlight=drag??hovered;
  useEffect(()=>{gesture.current=null;setDrag(null);setWindowMode('normal');setResponse(null);setHovered(null);},[set,state.createdAt,state.run.version]);
@@ -92,7 +113,7 @@ function FittingBoard({state,workshop,part,zoom,dispatch,i18n,picking,onPick,onT
   const p=point(e),view=board.current!.closest('.wf-workbench-scroll')!.getBoundingClientRect();
   const inside=e.clientX>=view.left&&e.clientX<view.right&&e.clientY>=view.top&&e.clientY<view.bottom&&p.x>=0&&p.x<=boardWidth&&p.y>=0&&p.y<=boardHeight;
   const socket=inside?candidate(g.part,g.piece,p):null;
-  if(socket){dispatch({type:'fitPiece',part:g.part,piece:g.piece,socket});setResponse({part:g.part,piece:g.piece,socket,at:state.elapsedMs});}
+  if(socket)dispatch({type:'fitPiece',part:g.part,piece:g.piece,socket});
   else dispatch({type:'stagePiece',part:g.part,piece:g.piece,...(inside?{at:{x:Math.max(0,Math.min(baseWidth-g.width/targetScale,(p.x-g.offset.x)/targetScale)),y:Math.max(0,Math.min(boardHeight/targetScale-g.height/targetScale,(p.y-g.offset.y)/targetScale))}}:{})});
  };
  const windowAction=(symbol:'minimize'|'maximize'|'close')=>setWindowMode(old=>symbol==='close'?'closed':symbol==='minimize'?'minimized':old==='maximized'?'normal':'maximized');
@@ -129,12 +150,12 @@ function FittingBoard({state,workshop,part,zoom,dispatch,i18n,picking,onPick,onT
     return <div key={socket.id} className={`wf-socket ${occupied?'is-filled':''} ${next?'is-next':''} ${drag&&drag.part===descriptor.id&&candidate(drag.part,drag.piece,drag.pointer)===socket.id?'is-near':''} ${highlight&&!occupied&&Math.abs(puzzlePieceRect(workshop,highlight.part,highlight.piece).width-r.width)<.1&&Math.abs(puzzlePieceRect(workshop,highlight.part,highlight.piece).height-r.height)<.1?'is-compatible':''}`} data-fitting-socket={socket.id} data-socket-accepts={socket.accepts.join(',')} data-socket-filled={occupied||undefined} role="img" aria-label={t('wf.socket',{name:t(`ws.element.${socket.accepts[0]}`)})} style={styleRect(r)}/>;
    })}
    {showPieces&&d.pieces.filter(piece=>map[piece]!==undefined).map(piece=>renderPiece(descriptor,p,piece,map[piece]!))}
-   {isActive&&response?.part===descriptor.id&&geometry[response.socket]&&<div key={`${response.at}:${response.piece}`} className="wf-snap-response" data-workshop-snap={descriptor.id} data-fitting-snap={response.piece} data-reduced-motion={reducedMotion||undefined} role="status" aria-label={t('wf.snap',{name:t(`ws.element.${response.piece}`)})} style={{...styleRect(geometry[response.socket]!),animationDuration:`${f.snapPulseMs}ms`}}/>}
+   {!reducedMotion&&response?.part===descriptor.id&&geometry[response.socket]&&<div key={`${response.at}:${response.piece}`} className="wf-snap-response" data-workshop-snap={descriptor.id} data-fitting-snap={response.piece} data-reduced-motion={reducedMotion||undefined} role="status" aria-label={t('wf.snap',{name:t(`ws.element.${response.piece}`)})} style={{...styleRect(geometry[response.socket]!),animationDuration:`${f.snapPulseMs}ms`}}/>}
   </section>;
  };
- return <div className="ws-workbench-scroll wf-workbench-scroll" data-workshop-picking={picking||undefined} onClickCapture={pick}>
-  <div className="wf-board-sizer ws-canvas-sizer" style={{width:boardWidth*zoom,height:boardHeight*zoom}}>
-   <div ref={board} className="wf-board" data-fitting-board data-workshop-canvas data-reduced-motion={reducedMotion||undefined} style={{width:boardWidth,height:boardHeight,transform:`scale(${zoom})`}} onPointerMove={move} onPointerUp={end} onPointerCancel={()=>{gesture.current=null;setDrag(null);}}>
+ return <div ref={viewport} className="ws-workbench-scroll wf-workbench-scroll" data-workshop-fit={!preview||undefined} data-workshop-picking={picking||undefined} onClickCapture={pick}>
+  <div className="wf-board-sizer ws-canvas-sizer" style={{width:boardWidth*displayZoom,height:boardHeight*displayZoom}}>
+   <div ref={board} className="wf-board" data-fitting-board data-workshop-canvas data-reduced-motion={reducedMotion||undefined} style={{width:boardWidth,height:boardHeight,transform:`scale(${displayZoom})`}} onPointerMove={move} onPointerUp={end} onPointerCancel={()=>{gesture.current=null;setDrag(null);}}>
     {windowMode!=='normal'&&<button type="button" className="wf-restore-target" data-workshop-action="restoreTarget" onClick={()=>setWindowMode('normal')}>{t('wf.restoreTarget')}</button>}
     {windowMode!=='closed'&&<div className={`wf-destination-window ${windowMode==='maximized'?'is-maximized':''}`} data-workshop-target={set} data-destination-era={state.persistent.appearance.desktop} style={{left:targetInset,top:targetInset,width:c.width,height:windowMode==='minimized'?f.frameTitleHeight:windowHeight,transform:`scale(${targetScale})`,transformOrigin:'top left'}}>
      {!frameShellVisible&&<div className="wf-target-title" style={{height:f.frameTitleHeight}}><span>{t(`ws.set.${set}`)}</span><div className="wf-target-controls">{frame?.elements.filter((piece):piece is 'minimize'|'maximize'|'close'=>['minimize','maximize','close'].includes(piece)).map(symbol=><button type="button" key={symbol} data-workshop-control={symbol} aria-label={t(`ws.window.${symbol}`)} onClick={()=>windowAction(symbol)} style={fittingWindowControlPalette}><WorkshopGlyph name={symbol}/></button>)}</div></div>}
@@ -153,6 +174,7 @@ function FittingBoard({state,workshop,part,zoom,dispatch,i18n,picking,onPick,onT
 
    </div>
   </div>
+  {!preview&&<WorkshopExportShelf state={state} i18n={i18n} platform={platform} viewport={viewport} reducedMotion={reducedMotion}/>}
  </div>;
 }
 function FittedPiece({descriptor,production,piece,seat,style,draggable,hidden,state,i18n,begin,onWindowAction,hover,children}:{descriptor:WorkshopPartDefinition;production:PartProduction;piece:string;seat:string;style:CSSProperties;draggable:boolean;hidden:boolean;state:GameState;i18n:I18n;begin:(event:PointerEvent)=>void;onWindowAction:(symbol:'minimize'|'maximize'|'close')=>void;hover:(value:boolean)=>void;children:ReactNode}) {

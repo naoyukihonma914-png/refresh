@@ -3,7 +3,7 @@ import { paletteFor } from '../content/palette';
 import { WORKSHOP_PARTS, SET_IDS, getWorkshopPart, type UiSetId, type WorkshopPartId, type WorkshopRect, type TestInteraction } from '../content/workshopCatalog';
 import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
-import { clearPuzzleSelection, ensurePuzzlePositions, puzzleParts, selectPuzzlePart, type PiecePoint } from './workshopPuzzle';
+import { clampPuzzlePoint, puzzlePieceRect, clearPuzzleSelection, ensurePuzzlePositions, puzzleParts, selectPuzzlePart, type PiecePoint } from './workshopPuzzle';
 import { productionCreditMultiplier } from './productionModel';
 import { grantTesseraUpdateFunds, tesseraUpdatePending } from './workshopUpdate';
 import type { GameState } from './state';
@@ -224,7 +224,7 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
       let next:GameState['run']['workshop']={...s.run.workshop,puzzleSet:getWorkshopPart(id).set,selectedParts:[...new Set([...puzzleParts(s.run.workshop).filter(other=>getWorkshopPart(other).set===getWorkshopPart(id).set),id])],activePart:id};
       next=ensurePuzzlePositions(next,[id]);
       const p=next.parts[id]!,positions={...p.fitting!.positions},previous=positions[action.piece]!;
-      positions[action.piece]={...previous,at:{...(action.at??previous.origin)}};
+      positions[action.piece]={...previous,at:clampPuzzlePoint(action.at??previous.origin,puzzlePieceRect(next,id,action.piece))};
       s={...s,run:{...s.run,workshop:{...next,parts:{...next.parts,[id]:{...p,fitting:{...p.fitting!,positions}}}}}};
     }else if(action.type==='spawnPiece'){
       if(!definition.pieces.includes(action.piece)||fitting.spawned.includes(action.piece))return s;

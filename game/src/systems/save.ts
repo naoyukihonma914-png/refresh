@@ -1,3 +1,4 @@
+import { repairPuzzlePositions } from './workshopPuzzle';
 import { createAdviceState } from './advice';
 import { createPageDesign, isPageDesign } from './pageDesign';
 import { repairAppProjects } from './appLayout';
@@ -136,6 +137,7 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();
   repairWorkshopRects(candidate);
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
+  candidate.run.workshop=repairPuzzlePositions(candidate.run.workshop);
   return data;
 }
 

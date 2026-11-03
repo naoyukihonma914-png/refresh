@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { BALANCE, type SpecKey } from '../../config/balance';
 import type { I18n, MessageKey } from '../../content/i18n';
 import { paletteFor } from '../../content/palette';
@@ -13,6 +13,7 @@ import { useWorkshopTarget, type TargetFileSort } from './WorkshopTargetContext'
 import { useOptionalTarget } from './OptionalParts';
 import { partVisual } from './partVisual';
 import { fittingWindowControlPalette } from '../../systems/commonChrome';
+import { usePieceTextFit } from './usePieceTextFit';
 import './fitting-piece-content.css';
 
 const SPECS:readonly SpecKey[]=['color','storage','memory','resolution','network','refresh','graphics'];
@@ -36,6 +37,7 @@ export function useFittingPieceFront(part:WorkshopPartId,piece:string,production
 export function FittingPieceContent({part,piece,production,state,i18n,loose=false,onWindowAction}:FittingPieceContentProps){
  const target=useWorkshopTarget(),shared=useOptionalTarget(),{files,mail,photo,trash,foundation,stream,actions:a}=target,b=shared.actions;
  const [folded,setFolded]=useState(false),[applied,setApplied]=useState(false);
+ const textRoot=useRef<HTMLDivElement>(null);usePieceTextFit(textRoot,production.design.fontSize);
  const front=useFittingPieceFront(part.id,piece,production,loose),P=BALANCE.workshop.preview;
  const t=(key:string,params:Record<string,string|number>={})=>i18n.t(key as MessageKey,params);
  const label=t(`ws.element.${piece}`),visual=partVisual(part.id,production.design),d=production.design;
@@ -98,7 +100,7 @@ export function FittingPieceContent({part,piece,production,state,i18n,loose=fals
   case 'theme-mode':content=button(t(piece==='light'?'theme.light':'theme.dark'),()=>b.theme({mode:piece as 'light'|'dark'}));break;
   case 'theme-accent':content=piece==='palette'?<select aria-label={t('theme.accent')} disabled={loose} value={shared.theme.accent} onChange={e=>b.theme({accent:e.target.value})}>{paletteFor(state.persistent.specs.color).map(color=><option key={color} value={color}>{color}</option>)}</select>:<span className="wf-accent-sample" style={{background:shared.theme.accent}}/>;break;
   case 'theme-radius':content=piece==='thumb'?range(shared.theme.radius,0,BALANCE.workshop.design.radiusMax,value=>b.theme({radius:value})):piece==='track'?<div className="wf-slider-track"/>:<span className="wf-radius-sample" style={{borderRadius:shared.theme.radius}}/>;break;
-  case 'theme-slideshow':content=piece==='images'?<label className="wf-slideshow">{image()}<input type="checkbox" disabled={loose} checked={shared.theme.slideshow} onChange={e=>b.theme({slideshow:e.target.checked})}/>{t('theme.slideshow')}</label>:<span>{t('ws.optional.seconds',{count:P.slideshowMs/P.timerTickMs})}</span>;break;
+  case 'theme-slideshow':content=piece==='images'?<label className="wf-slideshow">{image()}<span className="wf-slideshow-caption"><input type="checkbox" disabled={loose} checked={shared.theme.slideshow} onChange={e=>b.theme({slideshow:e.target.checked})}/><span>{t('theme.slideshow')}</span></span></label>:<span>{t('ws.optional.seconds',{count:P.slideshowMs/P.timerTickMs})}</span>;break;
   case 'theme-icons':content=piece==='thumb'?range(shared.theme.iconSize,P.iconSizes[0],P.iconSizes.at(-1)!,value=>b.theme({iconSize:value})):piece==='track'?<div className="wf-slider-track"/>:<span style={{width:shared.theme.iconSize,height:shared.theme.iconSize}}><WorkshopGlyph name="file"/></span>;break;
   case 'terminal-output':content=piece==='prompt'?button(commandName(shared.terminal.command),b.runOnce):<pre>{shared.terminal.history.at(-1)?.lines.join('\n')??t('ws.preview.terminalHint')}</pre>;break;
   case 'terminal-commands':content=<div className="wf-list">{(['list','photo','export'] as const).map(command=><button type="button" key={command} disabled={loose} aria-pressed={shared.terminal.command===command} onClick={()=>b.command(command)}>{piece==='command'?commandName(command):t(`ws.optional.commandDescription.${command}`)}</button>)}</div>;break;
@@ -122,5 +124,5 @@ export function FittingPieceContent({part,piece,production,state,i18n,loose=fals
  const windowControl=part.id==='common-frame'&&['minimize','maximize','close'].includes(piece);
  const foreground=windowControl?fittingWindowControlPalette.color:nativeTitle?'#fff':visual.foreground,background=windowControl?fittingWindowControlPalette.backgroundColor:nativeTitle?'#000080':visual.background;
  const style={color:foreground,backgroundColor:background,borderRadius:d.radius,fontSize:d.fontSize,boxShadow:d.shadow?'1px 1px 0 #555':undefined,'--wf-piece-radius':`${d.radius}px`,'--wf-piece-foreground':foreground,'--wf-piece-background':background} as CSSProperties;
- return <div className={`wf-piece-content wf-content-${part.id} wf-element-${piece}`} data-workshop-control-piece={piece} data-piece-front={front} hidden={!front} style={style}>{content}</div>;
+ return <div ref={textRoot} data-loose={loose||undefined} className={`wf-piece-content wf-content-${part.id} wf-element-${piece}`} data-workshop-control-piece={piece} data-piece-front={front} hidden={!front} style={style}>{content}</div>;
 }
