@@ -110,7 +110,7 @@ class Round3Review(PanelReview):
         page.mouse.move(1250, 800)
         page.clock.run_for(1500)
         self.capture(page, case, '03-fitted-gray-controls', '灰色の最小化・最大化・閉じるボタンと濃紺のタイトル帯')
-        page.locator('[data-workshop-action="openAdjustments"]').click()
+        page.locator('[data-workshop-customize]').click()
         adjustments = page.locator('[data-workshop-customization]')
         expect(adjustments.locator('.ws-window-controls-editor')).to_have_count(0)
         adjustments.locator('.ws-colors').first.locator('button[aria-label$=" #1f3f7a"]').click()

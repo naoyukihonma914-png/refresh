@@ -301,7 +301,7 @@ class PanelReview(FittingReview):
         assert active_after['resources'] == active_before['resources']
         assert active_after['persistent']['editorCustomization']['background'] == color
         self.capture(page, case, '06-palette-changes-background', 'メインパレットは作業台の背景だけを変える')
-        page.locator('[data-workshop-action="openAdjustments"]').click()
+        page.locator('[data-workshop-customize]').click()
         editor_before = active_after['persistent']['editorCustomization']
         page.locator('[data-workshop-customization] .ws-colors').first.locator('button[aria-label$=" #1f3f7a"]').click()
         adjusted = self.state(page)

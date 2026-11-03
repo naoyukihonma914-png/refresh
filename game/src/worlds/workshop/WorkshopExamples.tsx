@@ -2,6 +2,7 @@ import type { I18n, MessageKey } from '../../content/i18n';
 import { getWorkshopPart, type UiSetId, type WorkshopPartId } from '../../content/workshopCatalog';
 import { fittingDefinition } from '../../content/workshopFitting';
 import type { GameState } from '../../systems/state';
+import { tesseraUpdatePending } from '../../systems/workshopUpdate';
 import { fittedPieces } from '../../systems/workshopFitting';
 import { canBuyWorkshopSet, canInspectDesktopExit } from '../../systems/workshop';
 import { canRelease } from '../../systems/release';
@@ -14,7 +15,7 @@ export type WorkshopExampleHand =
  | {kind:'spawnPiece'|'fitPiece';part:WorkshopPartId;piece:string}
  | {kind:'exit'|'release'|'customize'|'update'};
 
-export const workshopUpdateGoal=(state:GameState)=>state.run.workshop.guide.current==='updateAvailable'&&!state.persistent.editorSkills.includes('update');
+export const workshopUpdateGoal=(state:GameState)=>tesseraUpdatePending(state)||state.run.workshop.guide.current==='updateAvailable'&&!state.persistent.editorSkills.includes('update');
 
 /** Guidance describes a gesture; it never inserts a piece on the player's behalf. */
 export function workshopExampleHand(state:GameState):WorkshopExampleHand {

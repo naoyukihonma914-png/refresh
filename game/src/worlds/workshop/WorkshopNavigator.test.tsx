@@ -28,6 +28,20 @@ function zonesPresent(html:string){
 }
 
 describe('World 2 keeps its navigation zones in place',()=>{
+ it.each([0,1])('era%s: customization belongs only to the selected row, both during production and after completion',era=>{
+  let state=createFixture(`fitting-frame-era${era}`,now)!;
+  for(const finished of [false,true]){
+   if(finished)state=completeWorkshopPartFixture(state,'common-frame',now,false);
+   const html=render(state),parts=zone(html,'parts'),pieces=zone(html,'pieces');
+   expect(parts.match(/data-workshop-customize=/g)).toHaveLength(1);
+   expect(parts).toContain('data-workshop-customize="common-frame"');
+   expect(pieces).not.toContain('data-workshop-customize');expect(html).not.toContain('openAdjustments');
+   state=actWorkshop(state,{type:'selectPart',part:'common-button'},now);
+   expect(zone(render(state),'parts')).toContain('data-workshop-customize="common-button"');
+   state=actWorkshop(state,{type:'selectPart',part:'common-frame'},now);
+  }
+ });
+
  it('piece selection is independent of fitting status and dims only within its own zone',()=>{
   const state=createFixture('fitting-frame-era0',now)!;
   const html=renderToStaticMarkup(<WorkshopNavigator runtime={runtime} snapshot={{state} as RuntimeSnapshot} i18n={createI18n('ja')} selectedPiece="close"/>);

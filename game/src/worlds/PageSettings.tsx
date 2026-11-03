@@ -1,3 +1,4 @@
+import {tesseraUpdatePending} from '../systems/workshopUpdate';
 import {ExampleSettings} from '../components/ExampleSettings';
 import {GuideHistory} from '../components/GuideHistory';
 import {UiScaleControl} from '../components/UiScaleControl';
@@ -15,6 +16,7 @@ import { LanguageSelect } from '../components/LanguageSelect';
 export function PageSettings({ state, runtime, i18n, onClose }: {
   state: GameState; runtime: GameRuntime; i18n: I18n; onClose(): void;
 }) {
+  const locked=tesseraUpdatePending(state);
   const owned = state.persistent.seedSkills;
   const appearance = state.persistent.seedAppearance;
   const [selected, setSelected] = useState<SeedSkill[]>(owned.filter(id =>
@@ -27,6 +29,7 @@ export function PageSettings({ state, runtime, i18n, onClose }: {
     <ExampleSettings state={state} runtime={runtime} i18n={i18n}/>
     <UiScaleControl runtime={runtime} i18n={i18n}/>
     {state.run.version!=='v0.1'&&<><p>{i18n.t('settings.tokens', { count: state.resources.tokens })}</p>
+    {locked&&<p role="status">{i18n.t('ws.updateFirst')}</p>}
     <form onSubmit={event => {
       event.preventDefault();
       runtime.applySeedSettings(selected, selected.includes('pattern') ? pattern : 'none', selected.includes('marquee'));
@@ -35,7 +38,7 @@ export function PageSettings({ state, runtime, i18n, onClose }: {
         <legend>{i18n.t(band === 1 ? 'settings.band1' : 'settings.band2')}</legend>
         {BALANCE.w1.skills.filter(skill => skill.band === band).map(skill => <div className="skill-row" key={skill.id}>
           <label>
-            <input type="checkbox" checked={selected.includes(skill.id)} disabled={owned.includes(skill.id) && !skill.playful}
+            <input type="checkbox" checked={selected.includes(skill.id)} disabled={owned.includes(skill.id) && !skill.playful||locked&&!owned.includes(skill.id)}
               onChange={event => setSelected(event.target.checked ? [...selected, skill.id] : selected.filter(id => id !== skill.id))} />
             <span>{i18n.t(`settings.${skill.id}`)}</span>
             <small>{owned.includes(skill.id) ? i18n.t('settings.owned') : i18n.t('settings.price', { cost: skill.cost })}</small>
@@ -49,7 +52,7 @@ export function PageSettings({ state, runtime, i18n, onClose }: {
         </select>
       </label></p>}
       <p>{i18n.t('settings.total', { count: cost })}</p>
-      <button type="submit" disabled={cost > state.resources.tokens}>{i18n.t('settings.apply')}</button>
+      <button type="submit" disabled={cost > state.resources.tokens||locked&&cost>0}>{i18n.t('settings.apply')}</button>
     </form></>}
     <ProductSettings state={state} runtime={runtime} i18n={i18n}/><LanguageSelect i18n={i18n} onChange={runtime.changeLanguage} />
     {state.persistent.products.length > 0 && <section className="product-history"><h2>{i18n.t('release.history')}</h2><table><thead><tr><th>{i18n.t('release.version')}</th><th>{i18n.t('release.releasedAt')}</th><th>{i18n.t('release.contents')}</th></tr></thead><tbody>{state.persistent.products.map(product => <tr key={product.id}><td>{productLabel(i18n,product.name,product.version==='v0.1'?i18n.t('release.prototype'):i18n.t('release.version.v1'))}</td><td>{i18n.date(product.releasedAt)}</td><td>{i18n.t('release.summary', { built: product.builtCount, icons: product.exports.length })}</td></tr>)}</tbody></table></section>}

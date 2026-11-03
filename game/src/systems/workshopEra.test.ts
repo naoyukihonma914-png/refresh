@@ -154,9 +154,9 @@ describe('editor upgrade capabilities and introduction',()=>{
   let state=complete(actWorkshop(workshop(1),{type:'buySet',set:'common'},now),'common-button');
   state=actWorkshop(state,{type:'export'},now);expect(state.run.workshop.guide.seen).not.toContain('updateAvailable');
  });
- it('does not treat an additional export from a historical run as its first-ever export',()=>{
+ it('does not introduce first-run funds or guidance in a later run',()=>{
   let state=complete(actWorkshop(workshop(),{type:'buySet',set:'common'},now),'common-button');
-  state.run.workshop.parts['common-button']!.exportedAt=now;state.run.workshop.tokenDiscovered=true;
+  state.run.version='v1';state.run.workshop.parts['common-button']!.exportedAt=now;state.run.workshop.tokenDiscovered=true;
   state=complete(state,'common-heading');state=actWorkshop(state,{type:'export'},now+1);
   expect(state.run.workshop.guide.seen).not.toContain('updateAvailable');
  });

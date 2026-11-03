@@ -37,7 +37,7 @@
 .workshop-root .ws-panel-state-bar {position:absolute;inset-inline-start:2px;inset-block:3px;inline-size:3px;background:var(--panel-state-unowned);pointer-events:none;}
 .workshop-root [data-status=ready]>.ws-panel-set-select>.ws-panel-state-bar,.workshop-root [data-status=ready]>.ws-panel-part-select>.ws-panel-state-bar {background:var(--panel-state-ready);}
 .workshop-root [data-status=complete]>.ws-panel-set-select>.ws-panel-state-bar,.workshop-root [data-status=complete]>.ws-panel-part-select>.ws-panel-state-bar {background:var(--panel-state-complete);}
-.workshop-root .ws-fitting-panel :is(.ws-panel-set-select,.ws-panel-set-buy,.ws-panel-part-select,.ws-navigation-help,.ws-panel-category-tabs>button,.ws-panel-optional-toggle,.ws-fitting-open-adjustments,.ws-fitting-piece-list>button,.ws-exit>button,.ws-assemble-app,.ws-example-hand>button) {border:2px solid;border-color:var(--panel-face-light) var(--panel-face-dark) var(--panel-face-dark) var(--panel-face-light);background:var(--panel-face);box-shadow:inset 1px 1px #ffffff70,inset -1px -1px #0002;color:inherit;opacity:1;}
+.workshop-root .ws-fitting-panel :is(.ws-panel-set-select,.ws-panel-set-buy,.ws-panel-part-select,.ws-navigation-help,.ws-panel-category-tabs>button,.ws-panel-optional-toggle,.ws-panel-part-customize,.ws-fitting-piece-list>button,.ws-exit>button,.ws-assemble-app,.ws-example-hand>button) {border:2px solid;border-color:var(--panel-face-light) var(--panel-face-dark) var(--panel-face-dark) var(--panel-face-light);background:var(--panel-face);box-shadow:inset 1px 1px #ffffff70,inset -1px -1px #0002;color:inherit;opacity:1;}
 .workshop-root .ws-fitting-panel :is(.ws-panel-set-buy,.ws-panel-part-select,.ws-fitting-piece-list>button,.ws-exit>button):disabled {background:var(--panel-disabled);color:var(--panel-disabled-text);border-color:var(--panel-face-dark) var(--panel-face-light) var(--panel-face-light) var(--panel-face-dark);box-shadow:inset 1px 1px #0003;opacity:1;cursor:default;}
 .workshop-root .ws-fitting-panel .ws-navigation-help {align-self:stretch;padding:1px;font-size:13px;}
 .workshop-root .ws-panel-unowned-note {padding:5px 7px;font-size:12px;line-height:1.4;}
@@ -50,7 +50,6 @@
 .workshop-root .ws-fitting-piece-list>button>span {min-inline-size:0;overflow-wrap:anywhere;}
 .workshop-root .ws-fitting-piece-list>button>small {font-size:11px;max-inline-size:6em;}
 .workshop-root .ws-fitting-piece-status {display:flex;align-items:center;justify-content:center;}
-.workshop-root .ws-fitting-open-adjustments {display:block;inline-size:calc(100% - 10px);margin:0 5px 6px;padding:4px 6px;min-block-size:29px;font-size:14px;white-space:normal;}
 .workshop-root .editor-stage-1 .ws-fitting-panel,.workshop-root .editor-stage-2 .ws-fitting-panel {--panel-face:#45454e;--panel-face-light:#72717c;--panel-face-dark:#19191e;--panel-disabled:#303037;--panel-disabled-text:#909099;--panel-zone:#3f4650;--panel-state-unowned:#b49350;--panel-state-ready:#81a3ba;--panel-state-complete:#8ea96f;}
 .workshop-root .editor-stage-1 .ws-panel-goal,.workshop-root .editor-stage-2 .ws-panel-goal {block-size:108px;min-block-size:108px;max-block-size:108px;}
 .workshop-root .editor-stage-1 .ws-panel-goal .ws-example-hand>strong,.workshop-root .editor-stage-2 .ws-panel-goal .ws-example-hand>strong {font-size:11px;min-block-size:14px;}
@@ -65,10 +64,15 @@
 .workshop-root .editor-stage-1 .ws-panel-part-select,.workshop-root .editor-stage-2 .ws-panel-part-select {font-size:12px;}
 .workshop-root .editor-stage-1 .ws-panel-zone>h3,.workshop-root .editor-stage-2 .ws-panel-zone>h3 {font-size:12px;min-block-size:24px;}
 .workshop-root .editor-stage-1 .ws-fitting-piece-list>button,.workshop-root .editor-stage-2 .ws-fitting-piece-list>button {font-size:12px;min-block-size:29px;}
-.workshop-root .editor-stage-1 .ws-fitting-panel :is(.ws-panel-set-select,.ws-panel-set-buy,.ws-panel-part-select,.ws-navigation-help,.ws-panel-category-tabs>button,.ws-panel-optional-toggle,.ws-fitting-open-adjustments,.ws-fitting-piece-list>button,.ws-exit>button,.ws-assemble-app,.ws-example-hand>button),.workshop-root .editor-stage-2 .ws-fitting-panel :is(.ws-panel-set-select,.ws-panel-set-buy,.ws-panel-part-select,.ws-navigation-help,.ws-panel-category-tabs>button,.ws-panel-optional-toggle,.ws-fitting-open-adjustments,.ws-fitting-piece-list>button,.ws-exit>button,.ws-assemble-app,.ws-example-hand>button) {border-width:1px;}
+.workshop-root .editor-stage-1 .ws-fitting-panel :is(.ws-panel-set-select,.ws-panel-set-buy,.ws-panel-part-select,.ws-navigation-help,.ws-panel-category-tabs>button,.ws-panel-optional-toggle,.ws-panel-part-customize,.ws-fitting-piece-list>button,.ws-exit>button,.ws-assemble-app,.ws-example-hand>button),.workshop-root .editor-stage-2 .ws-fitting-panel :is(.ws-panel-set-select,.ws-panel-set-buy,.ws-panel-part-select,.ws-navigation-help,.ws-panel-category-tabs>button,.ws-panel-optional-toggle,.ws-panel-part-customize,.ws-fitting-piece-list>button,.ws-exit>button,.ws-assemble-app,.ws-example-hand>button) {border-width:1px;}
 
 /* Each zone keeps its selected face raised; its other rows lose brightness and saturation. */
 .workshop-root .ws-fitting-panel .ws-panel-category-tabs>button[aria-selected=false],
 .workshop-root .ws-fitting-panel .ws-panel-set-row[data-selected=false],
 .workshop-root .ws-fitting-panel .ws-panel-part-rows[data-has-selection=true]>.ws-panel-part-row[data-selected=false],
 .workshop-root .ws-fitting-panel .ws-fitting-piece-list[data-has-selection=true]>button[aria-pressed=false] {filter:saturate(.45) brightness(.72);}
+
+.workshop-root .ws-panel-part-row[data-selected=true] {grid-template-columns:minmax(0,1fr) auto 22px;}
+.workshop-root .ws-panel-part-customize {align-self:stretch;padding:3px 4px;font-size:12px;line-height:1.25;white-space:normal;}
+.workshop-root .editor-stage-1 .ws-panel-part-row[data-selected=true],.workshop-root .editor-stage-2 .ws-panel-part-row[data-selected=true] {grid-template-columns:minmax(0,1fr) auto 20px;}
+.workshop-root :is(.editor-stage-1,.editor-stage-2) .ws-panel-part-customize {font-size:11px;}

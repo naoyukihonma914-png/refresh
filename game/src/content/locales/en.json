@@ -1590,7 +1590,7 @@
     "examples.workshop.export": "Export the finished part to receive tokens.",
     "examples.workshop.exit": "Assemble the desktop from the parts you made.",
     "examples.workshop.release": "Release the prototype to meet the display requirement.",
-    "examples.workshop.customize": "Complete. Open adjustments to change the colors and shape at any time.",
+    "examples.workshop.customize": "Finished. Use Customize on the part row to change its colors and shape later.",
     "examples.workshop.custom": "Custom work",
     "examples.workshop.customPlacement": "Custom work: position and size",
     "examples.workshop.customBeforeAdjustment": "Use the workbench handles to change position and size. Colors and shapes become available after adding the elements.",
@@ -1657,7 +1657,7 @@
     "fe.goal": "Next: {name}",
     "fe.guide": "Enomoto",
     "fitting.previewFor": "Preview of the completed {name} set",
-    "ws.guide.updateAvailable": "Exported parts earn tokens. With 3 tokens you can update Tessera: smaller tools, more canvas space, and a little more production from newly completed parts.",
+    "ws.guide.updateAvailable": "Your first export is ready. Here are {count} tokens to fund the update. Update Tessera first: smaller tools leave more room to work, and new parts produce a little more each second.",
     "ws.guide.updateAvailable.title": "Update Tessera",
     "ws.skill.gessoUpdate": "Update Gesso",
     "ws.skill.gessoUpdate.description": "The next generation of Gesso",
@@ -1683,6 +1683,8 @@
     "fitting.optionalHide": "Hide optional tools",
     "fe.paletteTargets": "Canvas background and adjustment color",
     "fe.adjustmentColor": "Adjustment color",
-    "fe.paletteDefault": "Default background"
+    "fe.paletteDefault": "Default background",
+    "fitting.customizePart": "Customize {name}",
+    "ws.updateFirst": "Update Tessera first. Other token purchases become available after the update."
   }
 }

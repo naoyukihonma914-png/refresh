@@ -109,7 +109,7 @@ describe('殻とピースの工房',()=>{
  });
  it('exports once and snapshots completed live sets with four common parts',()=>{
   let s=completeSet(workshop(),'common');expect(prototypeConditions(s)).toEqual([true,true,false]);expect(s.persistent.setDocuments[0]!.parts['common-scrollbar']).toBeUndefined();
-  s=actWorkshop(s,{type:'export'},now);expect(s.resources.tokens).toBe(4);expect(actWorkshop(s,{type:'export'},now)).toBe(s);
+  s=actWorkshop(s,{type:'export'},now);expect(s.resources.tokens).toBe(4*BALANCE.workshop.exportTokens+BALANCE.workshop.updateGrantTokens);expect(actWorkshop(s,{type:'export'},now)).toBe(s);
   const copy=structuredClone(s.persistent.setDocuments[0]!);s=actWorkshop(s,{type:'adjust',part:'common-button',patch:{radius:8}},now+1);
   expect(copy.parts['common-button']!.design.radius).not.toBe(8);expect(s.persistent.setDocuments[0]!.parts['common-button']!.design.radius).toBe(8);expect(isGameState(s)).toBe(true);
  });

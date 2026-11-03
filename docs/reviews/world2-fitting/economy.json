@@ -34,11 +34,11 @@
         "mail"
       ],
       "cursors": 24,
-      "totalPixelsGenerated": 838167.8303634716,
-      "pixels": 611603.8303635522,
-      "rate": 875.4879999999999,
-      "tokens": 18,
-      "revenue": 404,
+      "totalPixelsGenerated": 842961.6383636085,
+      "pixels": 616397.638363532,
+      "rate": 878.1039999999999,
+      "tokens": 21,
+      "revenue": 405,
       "displayWallBlocked": true,
       "guidesRead": 8,
       "purchases": [
@@ -98,124 +98,124 @@
           "pixels": 19167.775363550398
         },
         {
-          "seconds": 803.4,
-          "action": "complete:common-button",
-          "pixels": 31779.761363549376
+          "seconds": 713.4,
+          "action": "upgrade:Tessera",
+          "pixels": 19696.997363550407
         },
         {
-          "seconds": 897.4,
-          "action": "complete:common-heading",
-          "pixels": 45371.1873635466
+          "seconds": 807.4,
+          "action": "complete:common-button",
+          "pixels": 32434.384363550675
         },
         {
           "seconds": 901.4,
-          "action": "upgrade:Tessera",
-          "pixels": 45968.889363546594
+          "action": "complete:common-heading",
+          "pixels": 46308.75336354913
         },
         {
           "seconds": 995.4,
           "action": "complete:common-progress",
-          "pixels": 60316.63436354626
+          "pixels": 60897.98636355137
         },
         {
           "seconds": 995.4,
           "action": "set:foundation",
-          "pixels": 30316.63436354626
+          "pixels": 30897.98636355137
         },
         {
           "seconds": 1093.4,
           "action": "complete:foundation-taskbar",
-          "pixels": 47353.63436354409
+          "pixels": 48189.00236354947
         },
         {
           "seconds": 1187.4,
           "action": "complete:foundation-desktop",
-          "pixels": 66636.49436354452
+          "pixels": 67715.5103635501
         },
         {
           "seconds": 1281.4,
           "action": "complete:foundation-icons",
-          "pixels": 87745.8503635483
+          "pixels": 89068.51436355428
         },
         {
           "seconds": 1375.4,
           "action": "complete:foundation-notification",
-          "pixels": 111403.79036354624
+          "pixels": 112970.1023635526
         },
         {
           "seconds": 1469.4,
           "action": "complete:foundation-wallpaper",
-          "pixels": 137153.2583635462
+          "pixels": 138963.2183635539
         },
         {
           "seconds": 1563.4,
           "action": "complete:foundation-upgrades",
-          "pixels": 164810.4383635342
+          "pixels": 166864.0463635423
         },
         {
           "seconds": 1563.4,
           "action": "set:files",
-          "pixels": 99810.4383635342
+          "pixels": 101864.0463635423
         },
         {
           "seconds": 1661.4,
           "action": "complete:files-list",
-          "pixels": 132136.45836353963
+          "pixels": 134444.08236354814
         },
         {
           "seconds": 1755.4,
           "action": "complete:files-back",
-          "pixels": 167020.7823635395
+          "pixels": 169572.0543635484
         },
         {
           "seconds": 1849.4,
           "action": "complete:files-sort",
-          "pixels": 205488.33036355028
+          "pixels": 208283.25036355958
         },
         {
           "seconds": 1943.4,
           "action": "complete:files-search",
-          "pixels": 248427.0783635453
+          "pixels": 251465.646363555
         },
         {
           "seconds": 2037.4,
           "action": "complete:files-large",
-          "pixels": 296564.83836354635
+          "pixels": 299847.0543635375
         },
         {
           "seconds": 2131.4,
           "action": "complete:files-storage",
-          "pixels": 348417.3663635383
+          "pixels": 351943.2303635549
         },
         {
           "seconds": 2131.4,
           "action": "set:mail",
-          "pixels": 258417.3663635383
+          "pixels": 261943.2303635549
         },
         {
           "seconds": 2229.4,
           "action": "complete:mail-list",
-          "pixels": 317682.36636355455
+          "pixels": 321462.24636354484
         },
         {
           "seconds": 2323.4,
           "action": "complete:mail-body",
-          "pixels": 380164.47036355507
+          "pixels": 384187.9983635184
         },
         {
           "seconds": 2417.4,
           "action": "complete:mail-reply",
-          "pixels": 447040.23036357015
+          "pixels": 451307.4063635065
         },
         {
           "seconds": 2511.4,
           "action": "complete:mail-folders",
-          "pixels": 520221.67836358806
+          "pixels": 524732.5023634977
         },
         {
           "seconds": 2605.4,
           "action": "complete:mail-unread",
-          "pixels": 598471.5103635538
+          "pixels": 603226.0783635383
         }
       ]
     },
@@ -233,11 +233,11 @@
         "mail"
       ],
       "cursors": 24,
-      "totalPixelsGenerated": 1199837.0378635381,
-      "pixels": 973273.0378634572,
-      "rate": 875.4879999999999,
-      "tokens": 18,
-      "revenue": 466,
+      "totalPixelsGenerated": 1206917.2958637709,
+      "pixels": 980353.2958636577,
+      "rate": 878.1039999999999,
+      "tokens": 21,
+      "revenue": 467,
       "displayWallBlocked": true,
       "guidesRead": 8,
       "purchases": [
@@ -297,124 +297,124 @@
           "pixels": 24018.595363550474
         },
         {
-          "seconds": 893.4,
-          "action": "complete:common-button",
-          "pixels": 42528.6863635488
+          "seconds": 758.4,
+          "action": "upgrade:Tessera",
+          "pixels": 24547.817363550483
         },
         {
-          "seconds": 1032.4,
-          "action": "complete:common-heading",
-          "pixels": 62495.21736354421
+          "seconds": 897.4,
+          "action": "complete:common-button",
+          "pixels": 43238.9518635507
         },
         {
           "seconds": 1036.4,
-          "action": "upgrade:Tessera",
-          "pixels": 63092.9193635442
+          "action": "complete:common-heading",
+          "pixels": 63620.7933635482
         },
         {
           "seconds": 1175.4,
           "action": "complete:common-progress",
-          "pixels": 84164.81186355239
+          "pixels": 85049.7338635427
         },
         {
           "seconds": 1175.4,
           "action": "set:foundation",
-          "pixels": 54164.811863552386
+          "pixels": 55049.7338635427
         },
         {
           "seconds": 1318.4,
           "action": "complete:foundation-taskbar",
-          "pixels": 78491.81186354805
+          "pixels": 79747.38986353896
         },
         {
           "seconds": 1457.4,
           "action": "complete:foundation-desktop",
-          "pixels": 106461.92186353878
+          "pixels": 108077.78786353028
         },
         {
           "seconds": 1596.4,
           "action": "complete:foundation-icons",
-          "pixels": 137376.32786354123
+          "pixels": 139352.48186353204
         },
         {
           "seconds": 1735.4,
           "action": "complete:foundation-notification",
-          "pixels": 172068.8978635388
+          "pixels": 174405.3398635302
         },
         {
           "seconds": 1874.4,
           "action": "complete:foundation-wallpaper",
-          "pixels": 209859.01586355493
+          "pixels": 212555.7458635469
         },
         {
           "seconds": 2013.4,
           "action": "complete:foundation-upgrades",
-          "pixels": 250451.08586353683
+          "pixels": 253508.1038635294
         },
         {
           "seconds": 2013.4,
           "action": "set:files",
-          "pixels": 185451.08586353683
+          "pixels": 188508.1038635294
         },
         {
           "seconds": 2156.4,
           "action": "complete:files-list",
-          "pixels": 232053.3558635449
+          "pixels": 235481.02986353805
         },
         {
           "seconds": 2295.4,
           "action": "complete:files-back",
-          "pixels": 283449.52986355993
+          "pixels": 287237.49186353706
         },
         {
           "seconds": 2434.4,
           "action": "complete:files-sort",
-          "pixels": 339993.84786357736
+          "pixels": 344142.0978635146
         },
         {
           "seconds": 2573.4,
           "action": "complete:files-search",
-          "pixels": 403133.18586360913
+          "pixels": 407641.7238635065
         },
         {
           "seconds": 2712.4,
           "action": "complete:files-large",
-          "pixels": 473986.5858636109
+          "pixels": 478855.41186347074
         },
         {
           "seconds": 2851.4,
           "action": "complete:files-storage",
-          "pixels": 550455.0138636212
+          "pixels": 555684.1278634992
         },
         {
           "seconds": 2851.4,
           "action": "set:mail",
-          "pixels": 460455.01386362116
+          "pixels": 465684.1278634992
         },
         {
           "seconds": 2994.4,
           "action": "complete:mail-list",
-          "pixels": 546347.9538636295
+          "pixels": 551947.7238635088
         },
         {
           "seconds": 3133.4,
           "action": "complete:mail-body",
-          "pixels": 638140.7178636276
+          "pixels": 644100.7758634717
         },
         {
           "seconds": 3272.4,
           "action": "complete:mail-reply",
-          "pixels": 736786.2978635689
+          "pixels": 743106.6438635349
         },
         {
           "seconds": 3411.4,
           "action": "complete:mail-folders",
-          "pixels": 844643.8458635143
+          "pixels": 851324.4798636023
         },
         {
           "seconds": 3550.4,
           "action": "complete:mail-unread",
-          "pixels": 960140.7178634588
+          "pixels": 967181.735863664
         }
       ]
     },
@@ -432,11 +432,11 @@
         "mail"
       ],
       "cursors": 24,
-      "totalPixelsGenerated": 1561506.2453637787,
-      "pixels": 1334942.2453635177,
-      "rate": 875.4879999999999,
-      "tokens": 18,
-      "revenue": 518,
+      "totalPixelsGenerated": 1570872.953363968,
+      "pixels": 1344308.9533636887,
+      "rate": 878.1039999999999,
+      "tokens": 21,
+      "revenue": 519,
       "displayWallBlocked": true,
       "guidesRead": 8,
       "purchases": [
@@ -496,124 +496,124 @@
           "pixels": 28869.41536355121
         },
         {
-          "seconds": 983.4,
-          "action": "complete:common-button",
-          "pixels": 53277.61136354902
+          "seconds": 803.4,
+          "action": "upgrade:Tessera",
+          "pixels": 29398.637363551217
         },
         {
-          "seconds": 1167.4,
-          "action": "complete:common-heading",
-          "pixels": 79619.24736354257
+          "seconds": 987.4,
+          "action": "complete:common-button",
+          "pixels": 54043.51936355153
         },
         {
           "seconds": 1171.4,
-          "action": "upgrade:Tessera",
-          "pixels": 80216.94936354285
+          "action": "complete:common-heading",
+          "pixels": 80932.83336354786
         },
         {
           "seconds": 1355.4,
           "action": "complete:common-progress",
-          "pixels": 108012.98936355539
+          "pixels": 109201.48136353934
         },
         {
           "seconds": 1355.4,
           "action": "set:foundation",
-          "pixels": 78012.98936355539
+          "pixels": 79201.48136353934
         },
         {
           "seconds": 1543.4,
           "action": "complete:foundation-taskbar",
-          "pixels": 109629.98936354974
+          "pixels": 111305.77736353448
         },
         {
           "seconds": 1727.4,
           "action": "complete:foundation-desktop",
-          "pixels": 146287.34936353675
+          "pixels": 148440.06536352227
         },
         {
           "seconds": 1911.4,
           "action": "complete:foundation-icons",
-          "pixels": 187006.80536351824
+          "pixels": 189636.44936350454
         },
         {
           "seconds": 2095.4,
           "action": "complete:foundation-notification",
-          "pixels": 232734.00536351482
+          "pixels": 235840.57736350188
         },
         {
           "seconds": 2279.4,
           "action": "complete:foundation-wallpaper",
-          "pixels": 282564.77336351713
+          "pixels": 286148.27336352435
         },
         {
           "seconds": 2463.4,
           "action": "complete:foundation-upgrades",
-          "pixels": 336091.73336354416
+          "pixels": 340152.1613635009
         },
         {
           "seconds": 2463.4,
           "action": "set:files",
-          "pixels": 271091.73336354416
+          "pixels": 275152.1613635009
         },
         {
           "seconds": 2651.4,
           "action": "complete:files-list",
-          "pixels": 331970.2533635025
+          "pixels": 336517.97736351244
         },
         {
           "seconds": 2835.4,
           "action": "complete:files-back",
-          "pixels": 399878.2773635541
+          "pixels": 404902.92936351127
         },
         {
           "seconds": 3019.4,
           "action": "complete:files-sort",
-          "pixels": 474499.36536357703
+          "pixels": 480000.9453634814
         },
         {
           "seconds": 3203.4,
           "action": "complete:files-search",
-          "pixels": 557839.2933636169
+          "pixels": 563817.8013634733
         },
         {
           "seconds": 3387.4,
           "action": "complete:files-large",
-          "pixels": 651408.3333635168
+          "pixels": 657863.76936353
         },
         {
           "seconds": 3571.4,
           "action": "complete:files-storage",
-          "pixels": 752492.6613636024
+          "pixels": 759425.0253635674
         },
         {
           "seconds": 3571.4,
           "action": "set:mail",
-          "pixels": 662492.6613636024
+          "pixels": 669425.0253635674
         },
         {
           "seconds": 3759.4,
           "action": "complete:mail-list",
-          "pixels": 775013.5413635307
+          "pixels": 782433.201363656
         },
         {
           "seconds": 3943.4,
           "action": "complete:mail-body",
-          "pixels": 896116.9653635287
+          "pixels": 904013.5533636059
         },
         {
           "seconds": 4127.4,
           "action": "complete:mail-reply",
-          "pixels": 1026532.365363451
+          "pixels": 1034905.8813636896
         },
         {
           "seconds": 4311.4,
           "action": "complete:mail-folders",
-          "pixels": 1169066.0133633835
+          "pixels": 1177916.45736359
         },
         {
           "seconds": 4495.4,
           "action": "complete:mail-unread",
-          "pixels": 1321809.9253635192
+          "pixels": 1331137.3933636774
         }
       ]
     }
