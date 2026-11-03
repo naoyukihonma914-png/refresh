@@ -2,6 +2,7 @@ import type { I18n, MessageKey } from '../../content/i18n';
 import { getWorkshopPart, type UiSetId, type WorkshopPartId } from '../../content/workshopCatalog';
 import { fittingDefinition } from '../../content/workshopFitting';
 import type { GameState } from '../../systems/state';
+import { puzzlePieceVisible } from '../../systems/workshopPuzzle';
 import { tesseraUpdatePending } from '../../systems/workshopUpdate';
 import { fittedPieces } from '../../systems/workshopFitting';
 import { canBuyWorkshopSet, canInspectDesktopExit } from '../../systems/workshop';
@@ -24,7 +25,7 @@ export function workshopExampleHand(state:GameState):WorkshopExampleHand {
  if(id&&p&&id!=='common-scrollbar'){
   const pieces=fittingDefinition(id).pieces;
   const fitted=fittedPieces(p,id),missing=pieces.find(piece=>!fitted.includes(piece));
-  if(missing)return {kind:p.fitting?.spawned.includes(missing)?'fitPiece':'spawnPiece',part:id,piece:missing};
+  if(missing)return {kind:puzzlePieceVisible(w,id,missing)?'fitPiece':'spawnPiece',part:id,piece:missing};
   if(p.step===4&&p.exportedAt===null)return {kind:'export',part:id};
  }
  const next=nextWorkshopTarget(state);

@@ -28,10 +28,29 @@ function zonesPresent(html:string){
 }
 
 describe('World 2 keeps its navigation zones in place',()=>{
+ it.each([0,1])('era%s: groups multiple selections and distinguishes fitted, hidden and selected rows',era=>{
+  let state=createFixture(`fitting-frame-era${era}`,now)!;
+  state=actWorkshop(state,{type:'togglePart',part:'common-heading'},now);
+  let html=render(state);
+  expect(zone(html,'pieces').match(/data-piece-part=/g)).toHaveLength(2);
+  expect(zone(html,'parts').match(/data-workshop-customize=/g)).toHaveLength(2);
+  state=completeWorkshopPartFixture(state,'common-button',now,false);
+  state=actWorkshop(state,{type:'selectPart',part:'common-frame'},now);
+  state=actWorkshop(state,{type:'fitPiece',part:'common-frame',piece:'minimize',socket:'control-0'},now);
+  state=actWorkshop(state,{type:'togglePiece',part:'common-frame',piece:'maximize'},now);
+  html=render(state);
+  for(const level of ['complete','default','selected']){
+   expect(zone(html,'parts')).toContain(`data-brightness="${level}"`);
+   expect(zone(html,'pieces')).toContain(`data-brightness="${level}"`);
+  }
+  state=actWorkshop(state,{type:'stagePiece',part:'common-button',piece:'label',at:{x:100,y:300}},now);
+  expect(state.run.workshop.parts['common-button']!.step).toBe(4);
+  expect(zone(render(state),'parts')).toMatch(/data-navigation-part="common-button"[^>]*data-brightness="selected"/);
+ });
  it.each([0,1])('era%s: customization belongs only to the selected row, both during production and after completion',era=>{
   let state=createFixture(`fitting-frame-era${era}`,now)!;
   for(const finished of [false,true]){
-   if(finished)state=completeWorkshopPartFixture(state,'common-frame',now,false);
+   if(finished){state=completeWorkshopPartFixture(state,'common-frame',now,false);state=actWorkshop(state,{type:'selectPart',part:'common-frame'},now);}
    const html=render(state),parts=zone(html,'parts'),pieces=zone(html,'pieces');
    expect(parts.match(/data-workshop-customize=/g)).toHaveLength(1);
    expect(parts).toContain('data-workshop-customize="common-frame"');
@@ -42,13 +61,13 @@ describe('World 2 keeps its navigation zones in place',()=>{
   }
  });
 
- it('piece selection is independent of fitting status and dims only within its own zone',()=>{
-  const state=createFixture('fitting-frame-era0',now)!;
-  const html=renderToStaticMarkup(<WorkshopNavigator runtime={runtime} snapshot={{state} as RuntimeSnapshot} i18n={createI18n('ja')} selectedPiece="close"/>);
-  expect(zone(html,'parts')).toContain('data-has-selection="true"');
-  expect(zone(html,'pieces')).toContain('data-has-selection="true"');
-  expect(zone(html,'pieces')).toMatch(/data-workshop-piece="close"[^>]*aria-pressed="true"/);
-  expect(zone(html,'pieces')).toMatch(/data-workshop-piece="minimize"[^>]*aria-pressed="false"/);
+ it('piece rows show the persisted visibility selection independently from completion',()=>{
+  let state=createFixture('fitting-frame-era0',now)!;
+  state=actWorkshop(state,{type:'togglePiece',part:'common-frame',piece:'close'},now);
+  const html=render(state);
+  expect(zone(html,'pieces')).toMatch(/data-workshop-piece="close"[^>]*aria-pressed="false"/);
+  expect(zone(html,'pieces')).toMatch(/data-workshop-piece="minimize"[^>]*aria-pressed="true"/);
+  expect(zone(html,'pieces')).toContain('data-brightness="default"');expect(zone(html,'pieces')).toContain('data-brightness="selected"');
  });
  it.each(['ja','en','en-XA'])('%s: entry shows categories, the common set and locked parts without acquiring anything',language=>{
   const state=createFixture('fitting-entry-era0',now)!,before=structuredClone(state),html=render(state,language);
@@ -67,7 +86,7 @@ describe('World 2 keeps its navigation zones in place',()=>{
   expect(zone(button,'pieces')).toContain('data-workshop-piece="label"');expect(zone(button,'pieces')).not.toContain('data-workshop-piece="scrollbar"');
  });
  it('the opening category follows the concrete next set and retains all three required sets, including locked materials',()=>{
-  let state=completeSet(createFixture('fitting-entry-era0',now)!,'common');state.run.workshop.activePart=null;
+  let state=completeSet(createFixture('fitting-entry-era0',now)!,'common');state=actWorkshop(state,{type:'clearPartSelection',set:'foundation'},now);
   expect(initialWorkshopPanelSet(state)).toBe('foundation');const html=render(state);zonesPresent(html);
   expect(html).toContain('data-workshop-category="required" aria-selected="true"');
   for(const id of ['foundation','files','mail'])expect(zone(html,'sets')).toContain(`data-workshop-select-set="${id}"`);

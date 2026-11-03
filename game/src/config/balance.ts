@@ -402,10 +402,9 @@ export const BALANCE = {
     eras: { canvasScale:[.85,1,1.15], panelWidths:[320,288,256], paletteWidths:[128,64,200], partRateMultipliers:[1,1.15,1.3], era0ZoomOptions:[.5,.85,1] },
     fitting: {
       pieceRewardTotals: { small:115, medium:230, large:460 }, previewZoom:.32,
-      snapDistance:28, dragThreshold:5, snapPulseMs:480,
-      boardInset:32, trayWidth:292, trayHeight:184, trayGap:12,
+      hoverScale:.65, puzzleGap:24, snapDistance:28, dragThreshold:5, snapPulseMs:480,
+      boardInset:32, pieceAreaGap:12,
       frameTitleHeight:32, frameControlSize:26, frameControlGap:3,
-      tray: { width:272, height:112, gap:12, pieceGap:8 },
     },
     feedback: { flightMs:650, pulseMs:1100, messageMs:1800, frameMs:33, originLift:12, maxWidth:260, queueLimit:4 },
     // 4.2 お手本/連続制作: 付録Cに具体値がないため一括で置いた仮値。

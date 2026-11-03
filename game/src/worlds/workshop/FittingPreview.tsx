@@ -1,3 +1,4 @@
+import { puzzleSet } from '../../systems/workshopPuzzle';
 import { useMemo, useState } from 'react';
 import { BALANCE } from '../../config/balance';
 import type { I18n, MessageKey } from '../../content/i18n';
@@ -14,7 +15,7 @@ import { WorkshopGlyph } from './WorkshopGlyph';
 export function FittingPreview({state,i18n,platform}:{state:GameState;i18n:I18n;platform:Platform}) {
  const [collapsed,setCollapsed]=useState(false);
  const projected=useMemo(()=>{
-  const source=state.run.workshop,active=source.activePart&&source.activePart!=='common-scrollbar'?getWorkshopPart(source.activePart):getWorkshopPart('common-frame');
+  const source=state.run.workshop,active=source.activePart&&source.activePart!=='common-scrollbar'?getWorkshopPart(source.activePart):fittingPartsForSet(puzzleSet(source))[0]!;
   const parts={...source.parts};
   for(const definition of fittingPartsForSet(active.set)){
    const previous=parts[definition.id],fitting=emptyFitting(),recipe=fittingDefinition(definition.id);
@@ -27,7 +28,7 @@ export function FittingPreview({state,i18n,platform}:{state:GameState;i18n:I18n;
    const p={step:4 as const,rect:previous?.rect??{...definition.defaultRect},elements:[] as string[],design:previous?.design??createComponentDesign(),completedAt:previous?.completedAt??state.lastTickAt,exportedAt:null,tested:true,fitting};
    parts[definition.id]={...p,elements:fittedPieces(p,definition.id)};
   }
-  const workshop={...source,activePart:active.id,parts};
+  const workshop={...source,puzzleSet:active.set,selectedParts:[],activePart:active.id,parts};
   return {active,workshop,state:{...state,run:{...state.run,workshop}}};
  },[state]);
  const t=i18n.t;

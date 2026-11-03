@@ -1,0 +1,299 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8186/",
+  "buildSha256": "4e88d0545e06f0cde3fbcdb332437da2965ba0075e0abbf4e2bb851e9f5f6d2c",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-修正指示書-第5ラウンド.md"
+  ],
+  "cases": [
+    {
+      "id": "ja:era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/01-multiple-parts.png",
+          "label": "段①・2つのパーツと全ピースが下側に一斉出現"
+        },
+        {
+          "file": "screenshots/02-staged-piece.png",
+          "label": "窪みにはまらなかったピースは落とした場所に仮置き"
+        },
+        {
+          "file": "screenshots/03-three-levels.png",
+          "label": "選択中・未設置・チェック付きの完了を3段階の明るさで表示"
+        },
+        {
+          "file": "screenshots/04a-part-preview.png",
+          "label": "パーツ行のホバーで完成した姿を表示"
+        },
+        {
+          "file": "screenshots/04b-piece-preview.png",
+          "label": "ピース行のホバーで窪みと同寸の実物を表示"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": false,
+      "checks": {
+        "multipleSelection": true,
+        "pieceToggle": true,
+        "normalSaveReload": true,
+        "stablePositions": true,
+        "noPaymentWhileStaged": true,
+        "completionDeselects": true,
+        "threeBrightnessLevels": [
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          }
+        ],
+        "realPreviews": true,
+        "matchingSocketGlow": true,
+        "previewKeepsState": true,
+        "tallPreviewFits": true,
+        "setClearsSelection": true,
+        "fittedPieceStaging": true,
+        "outsideReturnsToOrigin": true,
+        "categoryClearsSelection": true
+      }
+    },
+    {
+      "id": "ja:era1",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/05-era1-pieces.png",
+          "label": "段②・複数選択と全ピースの一斉出現"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": true,
+      "checks": {
+        "multipleSelection": true,
+        "pieceToggle": true,
+        "normalSaveReload": true,
+        "stablePositions": true,
+        "noPaymentWhileStaged": true,
+        "completionDeselects": true,
+        "threeBrightnessLevels": [
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          }
+        ],
+        "realPreviews": true,
+        "matchingSocketGlow": true,
+        "previewKeepsState": true,
+        "tallPreviewFits": true,
+        "setClearsSelection": true,
+        "fittedPieceStaging": true,
+        "outsideReturnsToOrigin": true,
+        "categoryClearsSelection": true
+      }
+    },
+    {
+      "id": "en:era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": false,
+      "checks": {
+        "multipleSelection": true,
+        "pieceToggle": true,
+        "normalSaveReload": true,
+        "stablePositions": true,
+        "noPaymentWhileStaged": true,
+        "completionDeselects": true,
+        "threeBrightnessLevels": [
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          }
+        ],
+        "realPreviews": true,
+        "matchingSocketGlow": true,
+        "previewKeepsState": true,
+        "tallPreviewFits": true,
+        "setClearsSelection": true,
+        "fittedPieceStaging": true,
+        "outsideReturnsToOrigin": true,
+        "categoryClearsSelection": true
+      }
+    },
+    {
+      "id": "en:era1",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": true,
+      "checks": {
+        "multipleSelection": true,
+        "pieceToggle": true,
+        "normalSaveReload": true,
+        "stablePositions": true,
+        "noPaymentWhileStaged": true,
+        "completionDeselects": true,
+        "threeBrightnessLevels": [
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          }
+        ],
+        "realPreviews": true,
+        "matchingSocketGlow": true,
+        "previewKeepsState": true,
+        "tallPreviewFits": true,
+        "setClearsSelection": true,
+        "fittedPieceStaging": true,
+        "outsideReturnsToOrigin": true,
+        "categoryClearsSelection": true
+      }
+    }
+  ],
+  "languages": [
+    "ja",
+    "en"
+  ],
+  "passed": 4,
+  "failed": 0
+}

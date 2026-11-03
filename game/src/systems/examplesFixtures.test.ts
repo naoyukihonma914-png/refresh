@@ -29,7 +29,7 @@ describe('お手本の実操作用固定状態',()=>{
    const state=createFixture(`examples-${mode}-era${era}`,now)!;
    expect(state.run.workshop.activePart).toBe('common-button');expect(state.run.workshop.parts['common-button']!.step).toBe(1);
    expect(state.run.workshop.parts['common-button']!.fitting!.sockets).toEqual({});
-   expect(state.run.workshop.parts['common-button']!.fitting!.spawned).toEqual(mode==='place-on'?[]:['label']);
+   expect(state.run.workshop.parts['common-button']!.fitting!.spawned).toEqual(['label']);
    expect(completedParts(state)).toEqual(['common-frame','common-heading']);
    expect(state.run.workshop.parts['common-button']!.tested).toBe(false);
   }

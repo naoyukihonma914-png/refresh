@@ -972,7 +972,7 @@
     "ws.cursorEffect": "+{count}/sec",
     "ws.intro": "The screen you made is now a tool for making UI.",
     "ws.guide.entered": "This is {app}. Start with the Common Parts UI Set.",
-    "ws.guide.place": "Click a piece name to bring it to the tray at the lower right, then drag it into a socket.",
+    "ws.guide.place": "Select parts to spread all their pieces below the canvas. You can select several parts in the same set and fit each piece into its matching socket.",
     "ws.guide.elements": "Each fitted piece works immediately. Keep fitting the remaining pieces.",
     "ws.guide.adjust": "Choose your colors and shapes. Keeping the defaults is fine too.",
     "ws.guide.test": "Fit every piece to complete the part. You can use buttons and sliders right here.",
@@ -1628,7 +1628,7 @@
     "fitting.fitted": "Fitted",
     "fitting.openAdjustments": "Open adjustments",
     "fitting.closeAdjustments": "Close adjustments",
-    "fitting.spawnHint": "Bring {name} onto the workbench",
+    "fitting.spawnHint": "Show {name} using its piece row",
     "fitting.dragHint": "Drag {name} into a socket",
     "fitting.auto": "Use defaults",
     "fitting.adjustments": "Adjustments",
@@ -1685,6 +1685,8 @@
     "fe.adjustmentColor": "Adjustment color",
     "fe.paletteDefault": "Default background",
     "fitting.customizePart": "Customize {name}",
-    "ws.updateFirst": "Update Tessera first. Other token purchases become available after the update."
+    "ws.updateFirst": "Update Tessera first. Other token purchases become available after the update.",
+    "fitting.selected": "Selected",
+    "fitting.hidden": "Hidden"
   }
 }
