@@ -4,11 +4,12 @@ import { createPageDesign, isPageDesign, type PageDesign } from './pageDesign';
 import { desktopScreen } from './desktopGeometry';
 import { createAppearance, unlockedEditorStage, unlockedDesktopStage, type Appearance } from './appearance';
 import { createDesktopPreferences, isDesktopPreferences, type DesktopPreferences, createDesktopState, isDesktopState, isScreenshot, type DesktopState, type Screenshot } from './desktopState';
+import { SET_IDS, type UiSetId } from '../content/workshopCatalog';
 import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/balance';
 import { createWorkshopState, createEditorCustomization, isWorkshopState, isEditorCustomization, isSetDocument, isEditorSkill, workshopRectOnGrid, type WorkshopState, type EditorCustomization, type SetDocument, type EditorSkill } from './workshopState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 15;
+export const SCHEMA_VERSION = 16;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];
@@ -44,6 +45,7 @@ export interface GameState {
     desktop: DesktopState;
   };
   persistent: {
+    testplay:{layoutGuideSeen:boolean;helpSeen:UiSetId[]};
     progress:Progress;
     appearance:Appearance;
     specs: Record<SpecKey, number>; playerName: string | null;
@@ -80,6 +82,7 @@ export function createInitialState(now: number): GameState {
       workshop: createWorkshopState(), desktop: createDesktopState(),
     },
     persistent: {
+      testplay:{layoutGuideSeen:false,helpSeen:[]},
       progress:createProgress(),appearance:createAppearance(),
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
       playerName: null, productName: null, numberNotation: 'compact',
@@ -127,6 +130,7 @@ export function isGameState(value: unknown): value is GameState {
     || (run.shipping.storeElapsedMs!==undefined&&(!isAmount(run.shipping.storeElapsedMs)||run.shipping.storeElapsedMs>BALANCE.release.storeAnimationMs))
     || run.shipping.phase==='store'&&(run.shipping.storeElapsedMs===undefined||run.shipping.elapsedMs!==0)))return false;
   if(!isProgress(persistent.progress)||!isPlay(run.play))return false;
+  if(!isRecord(persistent.testplay)||typeof persistent.testplay.layoutGuideSeen!=='boolean'||!Array.isArray(persistent.testplay.helpSeen)||new Set(persistent.testplay.helpSeen).size!==persistent.testplay.helpSeen.length||!persistent.testplay.helpSeen.every(id=>SET_IDS.includes(id as UiSetId)))return false;
   if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;
   const screen=desktopScreen((persistent.appearance as unknown as Appearance).desktop);

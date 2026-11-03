@@ -1,6 +1,338 @@
 // docs/経済の仮値.md に対応。未調整の数値はここだけに置く。
 // w1 のキー名は tools/economy_sim.py の CONFIG と対応させる。
 export const BALANCE = {
+  accessibility: { uiScales: [0.75, 1, 1.25, 1.5], defaultUiScale: 1 },
+  workshopHelp: {
+    "width": 320,
+    "height": 190,
+    "highlight": "#c8553d",
+    "window": {
+      "x": 55,
+      "y": 18,
+      "width": 250,
+      "height": 142
+    },
+    "regions": {
+      "common-frame": {
+        "x": 55,
+        "y": 18,
+        "width": 250,
+        "height": 142
+      },
+      "common-scrollbar": {
+        "x": 292,
+        "y": 48,
+        "width": 10,
+        "height": 109
+      },
+      "common-button": {
+        "x": 194,
+        "y": 127,
+        "width": 76,
+        "height": 20
+      },
+      "common-heading": {
+        "x": 66,
+        "y": 50,
+        "width": 192,
+        "height": 14
+      },
+      "common-progress": {
+        "x": 66,
+        "y": 101,
+        "width": 198,
+        "height": 16
+      },
+      "foundation-taskbar": {
+        "x": 2,
+        "y": 171,
+        "width": 316,
+        "height": 17
+      },
+      "foundation-desktop": {
+        "x": 2,
+        "y": 2,
+        "width": 316,
+        "height": 166
+      },
+      "foundation-icons": {
+        "x": 6,
+        "y": 12,
+        "width": 34,
+        "height": 140
+      },
+      "foundation-notification": {
+        "x": 226,
+        "y": 119,
+        "width": 90,
+        "height": 49
+      },
+      "foundation-wallpaper": {
+        "x": 44,
+        "y": 5,
+        "width": 270,
+        "height": 160
+      },
+      "foundation-upgrades": {
+        "x": 2,
+        "y": 89,
+        "width": 144,
+        "height": 80
+      },
+      "files-list": {
+        "x": 117,
+        "y": 71,
+        "width": 168,
+        "height": 53
+      },
+      "files-back": {
+        "x": 63,
+        "y": 48,
+        "width": 18,
+        "height": 16
+      },
+      "files-sort": {
+        "x": 91,
+        "y": 48,
+        "width": 65,
+        "height": 16
+      },
+      "files-search": {
+        "x": 164,
+        "y": 48,
+        "width": 122,
+        "height": 16
+      },
+      "files-large": {
+        "x": 249,
+        "y": 129,
+        "width": 37,
+        "height": 19
+      },
+      "files-storage": {
+        "x": 65,
+        "y": 130,
+        "width": 120,
+        "height": 17
+      },
+      "mail-list": {
+        "x": 65,
+        "y": 49,
+        "width": 85,
+        "height": 82
+      },
+      "mail-body": {
+        "x": 157,
+        "y": 49,
+        "width": 127,
+        "height": 82
+      },
+      "mail-reply": {
+        "x": 203,
+        "y": 135,
+        "width": 81,
+        "height": 17
+      },
+      "mail-folders": {
+        "x": 65,
+        "y": 137,
+        "width": 86,
+        "height": 15
+      },
+      "mail-unread": {
+        "x": 130,
+        "y": 55,
+        "width": 13,
+        "height": 8
+      },
+      "photo-display": {
+        "x": 65,
+        "y": 49,
+        "width": 132,
+        "height": 86
+      },
+      "photo-brightness": {
+        "x": 205,
+        "y": 49,
+        "width": 80,
+        "height": 16
+      },
+      "photo-tone": {
+        "x": 205,
+        "y": 75,
+        "width": 80,
+        "height": 16
+      },
+      "photo-wallpaper": {
+        "x": 205,
+        "y": 115,
+        "width": 80,
+        "height": 18
+      },
+      "photo-crop": {
+        "x": 65,
+        "y": 137,
+        "width": 70,
+        "height": 15
+      },
+      "photo-compare": {
+        "x": 140,
+        "y": 137,
+        "width": 65,
+        "height": 15
+      },
+      "photo-switch": {
+        "x": 210,
+        "y": 137,
+        "width": 75,
+        "height": 15
+      },
+      "bin-list": {
+        "x": 65,
+        "y": 49,
+        "width": 220,
+        "height": 80
+      },
+      "bin-undo": {
+        "x": 65,
+        "y": 136,
+        "width": 102,
+        "height": 18
+      },
+      "bin-empty": {
+        "x": 183,
+        "y": 136,
+        "width": 102,
+        "height": 18
+      },
+      "clock-time": {
+        "x": 65,
+        "y": 49,
+        "width": 120,
+        "height": 30
+      },
+      "clock-timer": {
+        "x": 65,
+        "y": 89,
+        "width": 120,
+        "height": 62
+      },
+      "clock-calendar": {
+        "x": 199,
+        "y": 49,
+        "width": 87,
+        "height": 102
+      },
+      "theme-mode": {
+        "x": 65,
+        "y": 49,
+        "width": 220,
+        "height": 17
+      },
+      "theme-accent": {
+        "x": 65,
+        "y": 71,
+        "width": 106,
+        "height": 17
+      },
+      "theme-radius": {
+        "x": 179,
+        "y": 71,
+        "width": 106,
+        "height": 17
+      },
+      "theme-slideshow": {
+        "x": 65,
+        "y": 94,
+        "width": 220,
+        "height": 20
+      },
+      "theme-icons": {
+        "x": 65,
+        "y": 122,
+        "width": 220,
+        "height": 20
+      },
+      "terminal-output": {
+        "x": 65,
+        "y": 49,
+        "width": 145,
+        "height": 66
+      },
+      "terminal-commands": {
+        "x": 218,
+        "y": 49,
+        "width": 67,
+        "height": 65
+      },
+      "terminal-interval": {
+        "x": 65,
+        "y": 123,
+        "width": 70,
+        "height": 16
+      },
+      "terminal-run": {
+        "x": 142,
+        "y": 123,
+        "width": 66,
+        "height": 16
+      },
+      "terminal-history": {
+        "x": 65,
+        "y": 143,
+        "width": 220,
+        "height": 10
+      },
+      "manager-processes": {
+        "x": 65,
+        "y": 49,
+        "width": 135,
+        "height": 102
+      },
+      "manager-performance": {
+        "x": 209,
+        "y": 49,
+        "width": 76,
+        "height": 102
+      },
+      "plugin-tabs": {
+        "x": 65,
+        "y": 49,
+        "width": 220,
+        "height": 18
+      },
+      "plugin-table": {
+        "x": 65,
+        "y": 76,
+        "width": 220,
+        "height": 76
+      },
+      "stream-preview": {
+        "x": 65,
+        "y": 49,
+        "width": 140,
+        "height": 86
+      },
+      "stream-sources": {
+        "x": 214,
+        "y": 49,
+        "width": 72,
+        "height": 27
+      },
+      "stream-scenes": {
+        "x": 65,
+        "y": 141,
+        "width": 140,
+        "height": 13
+      },
+      "stream-comments": {
+        "x": 214,
+        "y": 84,
+        "width": 72,
+        "height": 68
+      }
+    }
+  },
   w1: {
     items: [
       { id: 'border', cost: 10, perSecond: 0.05 },
@@ -42,6 +374,18 @@ export const BALANCE = {
   // World2 naming retained only for generic integration settings during 8a.
   w2: { desktopCost: 200_000, hintMs: 300_000, enterMs: 1_200, upgradeMs: 2_000, maxName: 80 },
   workshop: {
+    testplay: {
+      "fillMs": 900,
+      "scrollOverflowPx": 160,
+      "minimumScrollPixels": 1,
+      "selectionMinSize": 8,
+      "preview": {
+        "width": 240,
+        "height": 148,
+        "runMs": 2600,
+        "frameMs": 50
+      }
+    },
     // 第3版の個別毎秒・工程払い。全て調整前の仮値。
     setCosts: { common: 4_000, foundation: 30_000, files: 65_000, mail: 90_000,
       photo: 180_000, bin: 35_000, clock: 8_000, theme: 80_000,
@@ -203,7 +547,25 @@ export const BALANCE = {
     maxNote: 20_000, compactCursors: 8,
   },
   longPlay:{achievementNoticeMs:4000,achievementBonus:.01,contractBonus:.05,partBonus:.005,partCap:50,shotMilestone:50,cursorBonus:.001,bulkUnlock:10,cursorLimit:10000,strayMinMs:120000,strayMaxMs:240000,strayLifeMs:30000,straySeconds:20,secretPresses:100,secretPartColor:'#c8553d',secretClockClicks:10,clockChainMs:5000,refreshCooldownMs:30000,refreshSeconds:30,soundVolume:.15,soundPerSecond:8},
-  pageDesign:{buttonFontMin:12,buttonFontMax:36,buttonMinWidth:160,buttonMinHeight:40,width:1920,height:920,grid:8,cardWidth:800,minWidth:320,minHeights:{heading:64,notice:64,generator:160,upgrades:120},compactHeights:{heading:80,notice:80,generator:280,upgrades:160},recommendedHeights:{heading:112,notice:160,generator:176,upgrades:224}},
+  pageDesign: {
+    guideDemoMs: 2200,
+    buttonFontMin:12,buttonFontMax:36,buttonMinWidth:160,buttonMinHeight:40,
+    width:1920,height:920,grid:8,minWidth:320,minCanvasWidth:352,minCanvasHeight:720,maxWidth:1920,maxHeight:1080,
+    layoutBreakpoint:1000,gap:16,contentInset:80,sidebarFraction:.28,
+    minWidths:{heading:240,notice:240,pixels:240,generator:160,cursors:160,upgrades:288},
+    minHeights:{heading:64,notice:64,pixels:48,generator:40,cursors:64,upgrades:160},
+    partSizes:{
+      heading:{small:{width:320,height:64},large:{width:560,height:96},extraLarge:{width:800,height:128}},
+      notice:{small:{width:320,height:96},large:{width:560,height:160},extraLarge:{width:800,height:240}},
+      pixels:{small:{width:320,height:48},large:{width:560,height:64},extraLarge:{width:800,height:80}},
+      generator:{small:{width:160,height:40},large:{width:320,height:80},extraLarge:{width:480,height:160}},
+      cursors:{small:{width:160,height:64},large:{width:320,height:96},extraLarge:{width:480,height:128}},
+      upgrades:{small:{width:320,height:224},large:{width:480,height:352},extraLarge:{width:640,height:512}},
+    },
+    partFontSizes:{small:12,normal:16,large:24},
+    recommendedHeights:{heading:80,notice:128,pixels:64,generator:80,cursors:96,upgrades:224},
+    compactHeights:{heading:64,notice:96,pixels:64,generator:80,cursors:80,upgrades:160},
+  },
   legacyHome:{switchRefund:20_000,sliderRefund:32_000},
   appBuild:{minWidth:160,minHeight:100,maxWidth:1920,maxHeight:1080,fontSizes:[10,12,14,16,18,20,24,28],rowHeights:[20,24,28,32,40],width:640,height:416,grid:8,bodyMinWidth:112,bodyMinHeight:64,controlMinWidth:112,controlMinHeight:48,history:30},
   appearance:{transitionMs:2_000,gessoRequirement:2,screens:[{width:800,height:600},{width:1024,height:768},{width:1366,height:768},{width:1366,height:768}]},

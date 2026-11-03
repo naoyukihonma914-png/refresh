@@ -54,8 +54,12 @@ describe('組み立て中のエディタを安全に設計する',()=>{
   const s=ready();for(const p of [{x:-8},{x:1920},{width:8},{height:8},{x:13},{x:NaN},{y:s.run.seed.page.layout!.parts.heading.y}]){const l=structuredClone(s.run.seed.page.layout!);Object.assign(l.parts.generator,p);expect(actPageDesign(s,{type:'layout',layout:l})).toBe(s);}
   const l=structuredClone(s.run.seed.page.layout!);l.parts.generator.x+=8;l.parts.generator.width-=8;expect(actPageDesign(actPageDesign(s,{type:'layout',layout:l}),{type:'recommended'}).run.seed.page.layout).toEqual(recommendedPage());
  });
- it('押せないボタン寸法を拒み、適切な寸法だけ保存復元する',()=>{
-  const s=ready(),l=structuredClone(s.run.seed.page.layout!);for(const b of [{width:8,height:32},{width:120,height:8},{width:1920,height:32}])expect(actPageDesign(s,{type:'layout',layout:{...l,button:b}})).toBe(s);l.button={width:320,height:40};const n=actPageDesign(s,{type:'layout',layout:l});expect(decodeSave(encodeSave(n)).run.seed.page.layout!.button).toEqual(l.button);expect(isGameState(n)).toBe(true);
+ it('ボタン自身の寸法だけを変更し、資源とカーソルの領域は変えない',()=>{
+  const s=ready(),l=structuredClone(s.run.seed.page.layout!),original=structuredClone(l);
+  for(const size of [{width:8,height:40},{width:160,height:8},{width:1920,height:40}])expect(actPageDesign(s,{type:'layout',layout:{...l,parts:{...l.parts,generator:{...l.parts.generator,...size}}}})).toBe(s);
+  l.parts.generator={...l.parts.generator,width:320,height:40};const n=actPageDesign(s,{type:'layout',layout:l});
+  expect(decodeSave(encodeSave(n)).run.seed.page.layout!.parts.generator).toEqual(l.parts.generator);
+  expect(n.run.seed.page.layout!.parts.pixels).toEqual(original.parts.pixels);expect(n.run.seed.page.layout!.parts.cursors).toEqual(original.parts.cursors);expect(isGameState(n)).toBe(true);
  });
  it('書体の後だけ見出しを付け、作者や製品名を変えない',()=>{
   const empty=createInitialState(now);expect(actPageDesign(empty,{type:'heading',heading:'My editor'})).toBe(empty);const s=ready();s.persistent.playerName='Author';s.persistent.productName='Product';const n=actPageDesign(s,{type:'heading',heading:'My editor'});expect(n.run.seed.page.heading).toBe('My editor');expect(n.persistent.playerName).toBe('Author');expect(n.persistent.productName).toBe('Product');expect(actPageDesign(n,{type:'heading',heading:'x'.repeat(100)}).run.seed.page.heading).toHaveLength(80);

@@ -1,5 +1,6 @@
 import {describe,expect,it} from 'vitest';
 import {BALANCE} from '../config/balance';
+import {createLegacyPageDesign} from './legacyPageDesign';
 import {createFixture} from './fixtures';
 import {evaluateCapture,isCaptureEvaluation,modelCaptureGeometry,registerCaptureGeometry,registeredCaptureGeometry,type CaptureGeometry} from './captureEvaluation';
 import {capturedContentSummary,photoContentQuality} from './capturePhoto';
@@ -27,9 +28,9 @@ describe('撮影は内容の記録であり毎秒や整頓の採点ではない'
   expect(registeredCaptureGeometry({...s,run:{...s.run,workshop:{...s.run.workshop,parts:{...s.run.workshop.parts}}}})).toBeUndefined();
   expect(registeredCaptureGeometry({...s,lastTickAt:now+1})).toBe(g);
  });
- it('DOM由来の根拠と可視内容を形式11へ凍結し、元stateの編集で変化しない',()=>{
+ it('DOM由来の根拠と可視内容を形式12へ凍結し、元stateの編集で変化しない',()=>{
   const s=state(),g=geometry();registerCaptureGeometry(s,g);const scene=projectCapture(s,'ja'),saved=encodeScene(scene);
-  expect(scene.version).toBe(11);expect(scene.evaluation).toMatchObject({origin:'dom',visibleCount:2,kinds:2,fullyHidden:0});
+  expect(scene.version).toBe(12);expect(scene.evaluation).toMatchObject({origin:'dom',visibleCount:2,kinds:2,fullyHidden:0});
   expect(scene.display.parts).toBe(2);expect(isCaptureScene(scene)).toBe(true);
   g.elements[0]!.rects[0]!.x=500;
   expect(encodeScene(scene)).toBe(saved);
@@ -56,7 +57,7 @@ describe('撮影は内容の記録であり毎秒や整頓の採点ではない'
  });
  it('旧形式10の実額・旧parts数・PPS・整頓風の値を新品質へ混ぜず、保存された窓と中身だけを数え直す',()=>{
   const s=state(),native=projectCapture(s,'ja');
-  const legacy={...native,version:10 as const};delete (legacy as {evaluation?:unknown}).evaluation;
+  const legacy={...native,version:10 as const,page:createLegacyPageDesign()};delete (legacy as {evaluation?:unknown}).evaluation;
   const original:Screenshot={id:1,at:now,language:'ja',data:encodeScene(legacy)};
   const changed=structuredClone(legacy);changed.display.parts=1e10;changed.display.rate=1e20;changed.display.reward=1e25;changed.view.desktop.layoutBonus=9999;
   const altered:Screenshot={...original,data:encodeScene(changed)};

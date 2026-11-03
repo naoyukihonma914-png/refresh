@@ -601,12 +601,29 @@ describe('段階8bの実画面撮影',()=>{
   expect(runtime.takeScreenshot(geometry)).toBe(true);
   const shot=runtime.getSnapshot().state.persistent.screenshots.at(-1)!;
   const scene=readCapture(shot);
-  expect(scene.version).toBe(11);
-  if(scene.version!==11||!scene.evaluation)throw new Error('expected format 11 evaluation');
+  expect(scene.version).toBe(12);
+  if(scene.version!==12||!scene.evaluation)throw new Error('expected format 11 evaluation');
   expect(scene.evaluation.origin).toBe('dom');
   expect(scene.evaluation.visibleCount).toBe(1);
   expect(scene.evaluation.parts.filter(part=>part.visible).map(part=>part.id)).toEqual(['visible-source']);
   runtime.actDesktop({type:'close',app:'files'});
   expect(readCapture(shot)).toEqual(scene);
+ });
+});
+
+
+describe('UI倍率は端末の設定',()=>{
+ it('ゲームの財布・配置・未解放セーブを変えず、言語変更と再起動をまたいで倍率を保持する',async()=>{
+  await start();const before=runtime.getSnapshot().state;
+  runtime.changeUiScale(1.25);
+  expect(runtime.getSnapshot().uiScale).toBe(1.25);expect(runtime.getSnapshot().state).toBe(before);
+  expect(loadGame(storage).kind).toBe('empty');expect(platform.settings.read().uiScale).toBe(1.25);
+  runtime.changeLanguage('en');expect(platform.settings.read()).toMatchObject({language:'en',uiScale:1.25});
+  runtime.dispose();runtime=new GameRuntime(platform);await runtime.start();expect(runtime.getSnapshot().uiScale).toBe(1.25);
+ });
+ it('壊れた倍率は読み捨て、選択肢に無い倍率を操作からも受け付けない',async()=>{
+  storage.setItem(SETTINGS_KEY,JSON.stringify({uiScale:999,language:'ja'}));
+  await start();expect(runtime.getSnapshot().uiScale).toBe(BALANCE.accessibility.defaultUiScale);
+  const before=runtime.getSnapshot();for(const value of [0,-1,NaN,Infinity,999]){runtime.changeUiScale(value);expect(runtime.getSnapshot()).toBe(before);}
  });
 });

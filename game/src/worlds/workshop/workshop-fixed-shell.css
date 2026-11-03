@@ -1,0 +1,30 @@
+/* Fixed native toolbar slots keep the generator and purchases stationary. */
+.workshop-root .ws-app-title {block-size:40px;min-block-size:40px;max-block-size:40px;overflow:hidden;}
+.workshop-root .ws-app-title>button {flex:0 0 140px;inline-size:140px;block-size:30px;min-block-size:30px;}
+.workshop-root .ws-menu {display:grid;grid-template-columns:256px minmax(0,1fr) 120px;gap:8px;block-size:64px;min-block-size:64px;max-block-size:64px;padding:4px 8px;overflow:visible;}
+.workshop-root .ws-menu-actions {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;block-size:100%;}
+.workshop-root .ws-menu-actions>button {margin:0;padding:2px 4px;min-inline-size:0;inline-size:100%;block-size:100%;font-size:.9em;overflow:hidden;}
+.workshop-root .ws-fixed-resources {display:grid;grid-template-columns:minmax(0,1fr) 120px;align-items:center;gap:8px;min-inline-size:0;block-size:100%;}
+.workshop-root .ws-fixed-resources .ws-pixels {display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;min-inline-size:0;overflow:hidden;white-space:nowrap;line-height:1.2;}
+.workshop-root .ws-fixed-resources .ws-pixels>* {display:block;max-inline-size:100%;overflow:hidden;text-overflow:ellipsis;}
+.workshop-root .ws-fixed-resources .ws-pixels>small {font-size:.75em;}
+.workshop-root .ws-token-slot {inline-size:120px;block-size:100%;display:flex;align-items:center;}
+.workshop-root .ws-token-slot>button {inline-size:100%;min-inline-size:0;max-block-size:100%;overflow:hidden;}
+.workshop-root .ws-generator {position:relative;inline-size:120px;block-size:100%;}
+.workshop-root .ws-generator>button {inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:40px;transform:none!important;}
+.workshop-root .ws-generator>button:active {box-shadow:inset 2px 2px #0006;}
+.workshop-root .ws-tool-options {display:grid;grid-template-columns:120px 64px 264px minmax(120px,1fr) 140px 88px;gap:12px;align-items:center;block-size:64px;min-block-size:64px;max-block-size:64px;overflow:hidden;}
+.workshop-root .ws-zoom-choice {grid-column:1;grid-row:1;display:flex;flex-direction:column;align-items:stretch;gap:0;min-inline-size:0;}
+.workshop-root .ws-zoom-choice>select {inline-size:100%;max-inline-size:100%;}
+.workshop-root .ws-cursor-total {grid-column:2;grid-row:1;white-space:nowrap;overflow:hidden;}
+.workshop-root [data-workshop-cursor-buy] {grid-column:3;grid-row:1;inline-size:264px;block-size:48px;min-block-size:48px;overflow:hidden;}
+.workshop-root :is(.ws-add-color,.ws-cursor-effect) {grid-column:4;grid-row:1;min-inline-size:0;max-block-size:48px;white-space:normal!important;overflow:auto;}
+.workshop-root .ws-tool-options>.purchase-estimate {grid-column:5;grid-row:1;min-inline-size:0;max-block-size:48px;overflow:auto;}
+.workshop-root .ws-bulk-choice {grid-column:6;grid-row:1;inline-size:88px;}
+.workshop-root :is(.editor-stage-1,.editor-stage-2) .ws-app-title {block-size:30px;min-block-size:30px;max-block-size:30px;}
+.workshop-root :is(.editor-stage-1,.editor-stage-2) .ws-app-title>button {block-size:24px;min-block-size:24px;}
+.workshop-root :is(.editor-stage-1,.editor-stage-2) .ws-menu {block-size:48px;min-block-size:48px;max-block-size:48px;}
+.workshop-root :is(.editor-stage-1,.editor-stage-2) .ws-tool-options {block-size:52px;min-block-size:52px;max-block-size:52px;}
+.workshop-root :is(.editor-stage-1,.editor-stage-2) [data-workshop-cursor-buy] {block-size:40px;min-block-size:40px;}
+.window-content>.workshop-root.is-embedded>.editor-shell>.editor-shell-top>.ws-menu {min-inline-size:760px;}
+.window-content>.workshop-root.is-embedded>.editor-shell>.editor-shell-top>.ws-tool-options {min-inline-size:920px;}

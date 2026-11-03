@@ -128,7 +128,7 @@ export function collectCaptureGeometry(root:HTMLElement,state:GameState):Capture
       if(rects.length)append(`${app}:part:common-scrollbar`,'common-scrollbar',clip(rects,candidate),layer,app,'common-scrollbar');
     }
     if(app==='tessera'){
-      for(const selector of ['.editor-shell-top','.editor-shell-palette','.editor-shell-tools','.editor-shell-parts','.editor-shell-bottom','.editor-shell-layers']){
+      for(const selector of ['.editor-shell-fixed-top','.editor-shell-top','.editor-shell-palette','.editor-shell-tools','.editor-shell-parts','.editor-shell-bottom','.editor-shell-layers']){
         const part=node.querySelector(selector);element(`${app}:${selector}`,`editor:${selector}`,part,layer,app);
       }
       for(const part of node.querySelectorAll('[data-workshop-canvas-part]')){

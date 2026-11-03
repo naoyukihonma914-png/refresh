@@ -3,7 +3,7 @@ import {gunzipSync} from 'node:zlib';
 import {describe,it,expect} from 'vitest';
 import {BALANCE} from '../config/balance';
 import {partsForSet,type UiSetId,type WorkshopPartId} from '../content/workshopCatalog';
-import {createInitialState,isGameState,type GameState} from './state';
+import {SCHEMA_VERSION,createInitialState,isGameState,type GameState} from './state';
 import {createSeedVersion,buildSeed} from './seed';
 import {actWorkshop,advanceWorkshop,canAssembleDesktop,canBuyWorkshopSet,enterWorkshop,prototypeConditions} from './workshop';
 import {createComponentDesign,createEditorCustomization,isCompleteSetDocument} from './workshopState';
@@ -92,12 +92,12 @@ describe('段階8b：世界4は制作と格納と性能の判定まで',()=>{
  });
 });
 
-describe('公開済み8aの保存形式14を15へ移行する',()=>{
+describe('公開済み8aの保存形式14を現形式へ移行する',()=>{
  for(const name of ['workshop','desktop','release'])it(`${name}: frozen main1f0d72aの保存を資源・制作・記録のまま読む`,()=>{
   const raw=gunzipSync(readFileSync(new URL(`./testdata/v14-stage8a-${name}.json.gz`,import.meta.url))).toString();
   const original=JSON.parse(raw),frozen=JSON.stringify(original),next=decodeSave(raw);
-  expect(next.schemaVersion).toBe(15);expect(next.resources).toEqual(original.resources);expect(next.run.totalPixelsGenerated).toBe(original.run.totalPixelsGenerated);
-  expect(next.run.workshop).toEqual({...original.run.workshop,editorStageAtEntry:original.persistent.appearance.editor});expect(next.persistent.setDocuments).toEqual(original.persistent.setDocuments);
+  expect(next.schemaVersion).toBe(SCHEMA_VERSION);expect(next.resources).toEqual(original.resources);expect(next.run.totalPixelsGenerated).toBe(original.run.totalPixelsGenerated);
+  expect(next.run.workshop).toEqual({...original.run.workshop,editorStageAtEntry:original.persistent.appearance.editor,helpTarget:null});expect(next.persistent.setDocuments).toEqual(original.persistent.setDocuments);
   expect(next.run.desktop.windows).toEqual(original.run.desktop.windows);expect(next.run.desktop.jobs).toEqual(original.run.desktop.jobs);expect(next.run.desktop.apps).toEqual(original.run.desktop.apps);
   expect(next.persistent.screenshots).toEqual(original.persistent.screenshots);expect(next.persistent.products).toEqual(original.persistent.products);expect(next.persistent.productionNote).toBe(original.persistent.productionNote);
   expect(isGameState(next)).toBe(true);expect(decodeSave(encodeSave(next))).toEqual(next);

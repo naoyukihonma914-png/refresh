@@ -31,6 +31,7 @@ export interface RuntimeSnapshot {
   tesseraIntent?:{serial:number;kind:'color'|'part'};
   shotHintSerial?: number;
   language: string;
+  uiScale?: number;
   status: 'starting' | 'ready' | 'blocked' | 'corrupt';
   notice: MessageKey | null;
   offline: Omit<TimeResult, 'state'> | null;
@@ -66,7 +67,7 @@ export class GameRuntime {
     this.platform = fixture ? platform.createPreview() : platform;
     const language = chooseLanguage(this.platform.settings.read().language, platform.preferredLanguages);
     this.snapshot = {
-      state: fixture ?? createInitialState(now), language,
+      state: fixture ?? createInitialState(now), language, uiScale: this.platform.settings.read().uiScale ?? BALANCE.accessibility.defaultUiScale,
       status: 'starting', notice: null, offline: null, press: null, introVisible: false, releaseConfirmation: false,
     };
     this.platform.setDocumentLanguage(language, createI18n(language).direction);
@@ -238,6 +239,12 @@ export class GameRuntime {
   };
 
   reload = () => { this.platform.reload(); };
+
+  changeUiScale = (uiScale: number) => {
+    if (!this.canOperate() || !(BALANCE.accessibility.uiScales as readonly number[]).includes(uiScale)) return;
+    const stored=this.platform.settings.write({...this.platform.settings.read(),uiScale});
+    this.publish({uiScale,notice:stored?this.snapshot.notice:'settings.failed'},false);
+  };
 
   startGame = () => {
     if (!this.canOperate() || !this.snapshot.introVisible) return;
