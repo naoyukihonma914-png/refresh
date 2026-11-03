@@ -26,7 +26,7 @@ describe('第3版：ブラウザ固定状態の整合性',()=>{
   expect(repeated.resources).toEqual(state.resources);expect(isGameState(repeated)).toBe(true);
  });
  it('新制作全段階と旧公開名が新スキーマで保存復元できる',()=>{
-  for(const name of FIXTURE_NAMES){const state=createFixture(name,now);expect(state,name).not.toBeNull();expect(isGameState(state),name).toBe(true);expect(decodeSave(encodeSave(state!)),name).toEqual(state);}
+  for(const name of FIXTURE_NAMES){const state=createFixture(name,now);expect(state,name).not.toBeNull();expect(isGameState(state),name).toBe(true);const expected=structuredClone(state!);const ec=expected.persistent.editorCustomization;if(ec.panelWidth===BALANCE.workshop.customization.panelWidth)ec.panelWidth=BALANCE.workshop.customization.panelWidthByStage[expected.persistent.appearance?.editor??0]??ec.panelWidth;expect(decodeSave(encodeSave(state!)),name).toEqual(expected);}
  },30_000);
  it('セットの材料購入と完成を区別し、必須21部品の書類を格納する',()=>{
   const empty=createFixture('stage8a-main',now)!;expect(Object.values(empty.run.workshop.parts).every(p=>p?.step===0)).toBe(true);

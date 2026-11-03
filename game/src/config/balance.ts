@@ -481,11 +481,11 @@ export const BALANCE = {
     measurement: { clicksPerSecond: 2.5, decisionSeconds: 4, guideSeconds: 15,
       partSeconds: [90, 135, 180], averageMomentum: 1.3, cursorPaybackSeconds: 120,
       maxSeconds: 86_400, targetMinutes: [40, 60] },
-    canvas: { width: 640, height: 416, frameExtraWidth: 8, frameExtraHeight: 32, layerStripHeight: 40, layerStripButtonHeight: 28, inset: 8, minWidth: 72, minHeight: 32, grid: 8, resolutionGrid: [8, 4, 2, 1] },
+    canvas: { width: 640, height: 416, frameExtraWidth: 8, frameExtraHeight: 32, layerStripHeight: 40, layerStripButtonHeight: 28, inset: 8, minWidth: 72, minHeight: 32, grid: 8, resolutionGrid: [8, 4, 2, 1], stageScales: [0.85, 1, 1.15] },
     design: { color: '#3a3450', textColor: '#f4efe4', radius: 0, radiusMax: 24,
       fontSize: 14, fontSizeMin: 12, fontSizeMax: 28, scrollbarWidth: 16,
       scrollbarMin: 8, scrollbarMax: 32, progressHeight: 16, progressHeightMin: 8, progressHeightMax: 40, minContrast: 4.5 },
-    customization: { accent: '#d0523a', background: '#3a3450', nativeBackgrounds: ['#5d6f7d', '#29292f', '#2b2b2b'], panelWidth: 256,
+    customization: { accent: '#d0523a', background: '#3a3450', nativeBackgrounds: ['#5d6f7d', '#29292f', '#2b2b2b'], panelWidth: 256, panelWidthByStage: [320, 288, 256],
       panelMin: 192, panelMax: 384, gridSpacing: 8, gridMin: 4, gridMax: 32,
       fontSize: 14, fontMin: 12, fontMax: 20, maxPresets: 12 },
     skills: [

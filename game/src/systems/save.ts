@@ -6,6 +6,7 @@ import { isPartProduction, mergeLegacyScrollbarIntoFrame, minimumPartSize, works
 import { normalizeWorkshopRect } from './workshop';
 import { captureStore } from '../platform/captures';
 import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
+import { BALANCE } from '../config/balance';
 import { migrateLegacySave } from './legacySave';
 import { migrateStage8bSave } from './stage8bMigration';
 import { migrateTestplaySave } from './testplayMigration';
@@ -136,6 +137,8 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
   if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();
   if(candidate.persistent&&typeof candidate.persistent.doubleClickFit!=='boolean')(candidate.persistent as Record<string,unknown>).doubleClickFit=false;
+  // A parts-panel width still at the old flat default follows the editor stage's standard width.
+  if(candidate.persistent?.editorCustomization&&candidate.persistent.editorCustomization.panelWidth===BALANCE.workshop.customization.panelWidth)candidate.persistent.editorCustomization.panelWidth=BALANCE.workshop.customization.panelWidthByStage[candidate.persistent.appearance?.editor??0]??BALANCE.workshop.customization.panelWidth;
   repairLegacyScrollbar(candidate);
   repairWorkshopRects(candidate);
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');

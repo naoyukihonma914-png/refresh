@@ -6,11 +6,13 @@ import { migratePageLayoutSave } from './pageLayoutMigration';
 import { decodeSave,encodeSave } from './save';
 import { isGameState } from './state';
 import { mergeLegacyScrollbarIntoFrame } from './workshopState';
+import { BALANCE } from '../config/balance';
 import { foldLegacyAssemblyMaterials, type AppAssembly } from './appAssemblySchema';
 
 /** decodeSave also folds the retired scrollbar part into the frame; apply the same fold to expectations. */
 const folded=<T,>(state:T):T=>{
- const s=structuredClone(state) as {run:{workshop:{parts:Record<string,unknown>;activePart?:unknown;helpTarget?:{part?:unknown}|null};desktop:{projects:Record<string,{draftAssembly?:AppAssembly;installedAssembly?:AppAssembly|null;assemblyUndo?:AppAssembly[];assemblyRedo?:AppAssembly[]}>}};persistent:{setDocuments:{parts:Record<string,unknown>}[]}};
+ const s=structuredClone(state) as {run:{workshop:{parts:Record<string,unknown>;activePart?:unknown;helpTarget?:{part?:unknown}|null};desktop:{projects:Record<string,{draftAssembly?:AppAssembly;installedAssembly?:AppAssembly|null;assemblyUndo?:AppAssembly[];assemblyRedo?:AppAssembly[]}>}};persistent:{setDocuments:{parts:Record<string,unknown>}[];editorCustomization:{panelWidth:number};appearance?:{editor?:number}}};
+ if(s.persistent.editorCustomization.panelWidth===BALANCE.workshop.customization.panelWidth)s.persistent.editorCustomization.panelWidth=BALANCE.workshop.customization.panelWidthByStage[s.persistent.appearance?.editor??0]??s.persistent.editorCustomization.panelWidth;
  mergeLegacyScrollbarIntoFrame(s.run.workshop.parts);
  if(s.run.workshop.activePart==='common-scrollbar')s.run.workshop.activePart=s.run.workshop.parts['common-frame']?'common-frame':null;
  if(s.run.workshop.helpTarget&&s.run.workshop.helpTarget.part==='common-scrollbar')s.run.workshop.helpTarget.part='common-frame';

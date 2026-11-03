@@ -51,7 +51,7 @@ describe('お手本の組み立てと自由制作の二層',()=>{
  it('OFFでも本線の唯一の印とヘルプを保ち、調整を直接表示し、ON/OFF表示だけでデザインは戻らない',()=>{
   let s=adjustReady();s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{radius:4}},now);s.persistent.examplesEnabled=false;const before=structuredClone(s),html=navigator(s);
   expect(html).not.toContain('data-workshop-next-hand');expect(html).not.toContain('data-workshop-customization');expect(html).toContain('data-workshop-inspector="true"');expect(html).toContain('data-workshop-action="confirmAdjustment"');
-  expect((html.match(/class="ws-next-indicator"/g)??[])).toHaveLength(1);expect(html).toContain('data-workshop-help-part="common-button"');expect(s).toEqual(before);
+  expect((html.match(/class="ws-next-indicator"/g)??[])).toHaveLength(1);expect(html).toContain('data-workshop-help-part="common-frame"');expect(s).toEqual(before);
  });
  it.each([0,1,2])('段%s：最初の配置だけに薄い輪郭を出し、自由操作や完成品には残さない',era=>{
   let s=createFixture(`tp2-route-era${era}`,now)!;s=actWorkshop(s,{type:'buySet',set:'common'},now);const before=structuredClone(s);

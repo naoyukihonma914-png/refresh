@@ -58,7 +58,7 @@ export const createComponentDesign = (): ComponentDesign => ({
 export const createEditorCustomization = (stage:0|1|2=0): EditorCustomization => ({
   nativeBackground:true,
   accent: BALANCE.workshop.customization.accent, bandPosition: 'top',
-  panelWidth: BALANCE.workshop.customization.panelWidth, background: BALANCE.workshop.customization.background,
+  panelWidth: BALANCE.workshop.customization.panelWidthByStage[stage] ?? BALANCE.workshop.customization.panelWidth, background: BALANCE.workshop.customization.background,
   grid: true, gridSpacing: BALANCE.workshop.customization.gridSpacing,
   fontSize: BALANCE.workshop.customization.fontSize, docking: 'standard', presets: [],
   panelPositions: stage===2?{ palette:'right',tools:'left',parts:'left',info:'bottom' }:{ palette:'left',tools:'right',parts:'right',info:'bottom' },
