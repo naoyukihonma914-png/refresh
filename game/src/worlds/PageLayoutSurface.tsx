@@ -7,9 +7,10 @@ interface Props {
  layout:PageLayout|null;design?:PageDesign;parts:Record<PagePart,ReactNode>;editing:boolean;canvas?:boolean;
  onChange(layout:PageLayout):void;i18n:I18n;measureRef:Ref<PageLayoutHandle>;allowArrangement?:boolean;
  selectedPart?:PagePart;onSelectPart?:(part:PagePart)=>void;onRequestEdit?:()=>void;firstGuide?:boolean;reducedMotion?:boolean;
+ partActions?:Partial<Record<PagePart,ReactNode>>;
 }
 /** Coordinates belong to the whole page, independently of its evolving editor rails. */
-export function PageLayoutSurface({layout,design=createPageDesign(),parts,editing,onChange,i18n,measureRef,allowArrangement=false,selectedPart,onSelectPart,onRequestEdit,firstGuide=false,reducedMotion=false}:Props){
+export function PageLayoutSurface({layout,design=createPageDesign(),parts,editing,onChange,i18n,measureRef,allowArrangement=false,selectedPart,onSelectPart,onRequestEdit,firstGuide=false,reducedMotion=false,partActions}:Props){
  const root=useRef<HTMLDivElement>(null),[size,setSize]=useState({width:BALANCE.pageDesign.width as number,height:BALANCE.pageDesign.height as number});
  const [preview,setPreview]=useState<{id:PagePart;rect:PageRect;valid:boolean}|null>(null);
  const drag=useRef<{id:PagePart;rect:PageRect;x:number;y:number;scale:number;resize:boolean}|null>(null);
@@ -34,6 +35,7 @@ export function PageLayoutSurface({layout,design=createPageDesign(),parts,editin
    {PAGE_PARTS.map(id=>{const rect=preview?.id===id?preview.rect:fitted.parts[id];return <section key={id} data-page-part={id} data-page-selected={selectedPart===id||undefined} className={`page-part ${preview?.id===id&&!preview.valid?'invalid':''}`} style={{left:rect.x,top:rect.y,width:rect.width,height:rect.height,'--page-part-font':`${pagePartFontSize(design,id)}px`} as CSSProperties}>
     {allowArrangement&&<button type="button" data-page-part-grip={id} className={`page-part-grip ${editing?'':'page-quiet-grip'}`} style={editing?{insetBlockStart:Math.max(-BALANCE.pageDesign.gripOffset,-rect.y)}:undefined} aria-label={i18n.t('page.movePart',{name:i18n.t(`page.part.${id}`)})} title={i18n.t('page.movePart',{name:i18n.t(`page.part.${id}`)})} onClick={()=>{onSelectPart?.(id);if(!editing)onRequestEdit?.();}} onPointerDown={event=>start(event,id,false)} onPointerMove={move} onPointerUp={finish} onLostPointerCapture={finish} onKeyDown={event=>keyboard(event,id)}><svg viewBox="0 0 14 14" width={14} height={14} aria-hidden="true"><path d="M3 2h2v2H3zM9 2h2v2H9zM3 6h2v2H3zM9 6h2v2H9zM3 10h2v2H3zM9 10h2v2H9z"/></svg>{editing&&<span>{i18n.t(`page.part.${id}`)}</span>}</button>}
     <div className="page-part-content" inert={editing}>{parts[id]}</div>
+    {!editing&&partActions?.[id]}
     {editing&&<button type="button" data-page-part-resize={id} className="page-part-resize" aria-label={i18n.t('page.resizePart',{name:i18n.t(`page.part.${id}`)})} title={i18n.t('page.resizePart',{name:i18n.t(`page.part.${id}`)})} onPointerDown={event=>start(event,id,true)} onPointerMove={move} onPointerUp={finish} onLostPointerCapture={finish} onKeyDown={event=>keyboard(event,id,true)}/>}
    </section>;})}
    {firstGuide&&<div className={`page-drag-demonstration ${reducedMotion?'is-reduced':''}`} data-page-first-guide role="img" aria-label={i18n.t('page.dragExample')} style={{left:fitted.parts.generator.x,top:fitted.parts.generator.y,width:fitted.parts.generator.width,height:fitted.parts.generator.height}}/>}

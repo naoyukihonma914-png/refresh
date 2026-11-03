@@ -644,6 +644,8 @@
     "page.part.notice": "Comments",
     "page.part.generator": "Generate button",
     "page.part.upgrades": "Available items",
+    "page.customize": "Customize",
+    "common.close": "Close",
     "page.colors": "Colors",
     "page.color.background": "Background color",
     "page.color.button": "Generate button color",
