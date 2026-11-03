@@ -50,11 +50,12 @@ export function recommendedPage(width:number=config.width,height:number=config.h
  const left=compact?gap:config.contentInset;
  const sidebar=compact?w-gap*2:up(Math.max(config.minWidths.upgrades,w*config.sidebarFraction));
  const main=compact?w-gap*2:w-sidebar-gap*2-left;
+ const generatorWidth=Math.min(main,config.partSizes.generator.extraLarge.width);
  const parts:PageLayout['parts']={
   pixels:{x:gap,y:pixelY,width:w-gap*2,height:heights.pixels},
   heading:{x:left,y:headingY,width:main,height:heights.heading},
   notice:{x:left,y:noticeY,width:main,height:heights.notice},
-  generator:{x:left,y:generatorY,width:Math.min(main,config.partSizes.generator.large.width),height:heights.generator},
+  generator:{x:left+down((main-generatorWidth)/2),y:generatorY,width:generatorWidth,height:heights.generator},
   cursors:{x:left,y:cursorsY,width:main,height:heights.cursors},
   upgrades:compact?{x:gap,y:cursorsY+heights.cursors+gap,width:sidebar,height:heights.upgrades}
    :{x:left+main+gap,y:headingY,width:sidebar,height:up(Math.max(heights.upgrades,Math.min(config.maxHeight,height)-headingY-gap))},
@@ -68,12 +69,19 @@ export function initialPageLayout(width:number=config.width,height:number=config
  const headingY=gap+heights.pixels+gap,generatorY=headingY+heights.heading+gap;
  const cursorsY=generatorY+config.partSizes.generator.extraLarge.height+gap;
  const noticeY=cursorsY+heights.cursors+gap,upgradesY=noticeY+heights.notice+gap;
+ const generatorWidth=Math.min(main,config.partSizes.generator.extraLarge.width);
  return {width:w,height:up(Math.max(config.minCanvasHeight,Math.min(config.maxHeight,height),upgradesY+heights.upgrades+gap)),parts:{
   pixels:{x:gap,y:gap,width:w-gap*2,height:heights.pixels},heading:{x:left,y:headingY,width:main,height:heights.heading},
-  generator:{x:left,y:generatorY,width:Math.min(main,config.partSizes.generator.large.width),height:heights.generator},
+  generator:{x:left+down((main-generatorWidth)/2),y:generatorY,width:generatorWidth,height:heights.generator},
   cursors:{x:left,y:cursorsY,width:main,height:heights.cursors},notice:{x:left,y:noticeY,width:main,height:heights.notice},
   upgrades:{x:left,y:upgradesY,width:main,height:heights.upgrades},
  }};
+}
+/** A layout converted by an older build can end up squeezed into one corner: parts span only part of the canvas, or the generate button shrank below the standard large preset. Such a layout is a conversion artifact, not a design choice. */
+export function isCrampedPageLayout(layout:PageLayout):boolean {
+ const left=Math.min(...PAGE_PARTS.map(id=>layout.parts[id].x)),right=Math.max(...PAGE_PARTS.map(id=>layout.parts[id].x+layout.parts[id].width));
+ const generator=layout.parts.generator,large=config.partSizes.generator.large;
+ return right-left<layout.width*.75||generator.width<large.width||generator.height<large.height;
 }
 export function isRecommendedPage(layout:PageLayout|null):boolean {
  if(layout===null)return true;

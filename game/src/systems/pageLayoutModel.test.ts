@@ -14,7 +14,7 @@ describe('TP1: 独立した6つの配置部品',()=>{
    const layout=initial?initialPageLayout(width,720):recommendedPage(width,720);
    expect(isPageDesign({...createPageDesign(),layout})).toBe(true);
    expect(PAGE_PARTS.every(id=>validPagePlacement(layout,id,layout.parts[id]))).toBe(true);
-   expect(layout.parts.generator.width).toBeLessThanOrEqual(BALANCE.pageDesign.partSizes.generator.large.width);
+   expect(layout.parts.generator.width).toBeLessThanOrEqual(BALANCE.pageDesign.partSizes.generator.extraLarge.width);
   }
   const a=initialPageLayout(),b=recommendedPage();expect(a.parts.generator).not.toEqual(b.parts.generator);
   expect(a.parts.pixels).toEqual(b.parts.pixels);

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BALANCE } from '../config/balance';
 import { BASE_PALETTE } from '../content/palette';
 import { creditPixels, passivePixelsPerSecond } from './economy';
 import { buildSeed, createSeedVersion } from './seed';
@@ -13,7 +14,7 @@ describe('組み立て中のエディタを安全に設計する',()=>{
   const s=createInitialState(now);for(const a of [{type:'color',slot:'button',color:BASE_PALETTE[6]!},{type:'font',slot:'bodyFont',font:'pixel'},{type:'motion',motion:'lift'},{type:'layout',layout:recommendedPage()}] as const)expect(actPageDesign(s,a)).toBe(s);
  });
  it('おすすめは中央カードでなく作業面と右の一覧を分け、狭い面でも全領域を保つ',()=>{
-  const l=recommendedPage();expect(l.parts.upgrades.x).toBeGreaterThan(l.parts.generator.x+l.parts.generator.width);expect(l.parts.heading.x).toBe(l.parts.generator.x);expect(l.parts.upgrades.y).toBe(l.parts.heading.y);expect(isRecommendedPage(l)).toBe(true);
+  const l=recommendedPage();expect(l.parts.upgrades.x).toBeGreaterThan(l.parts.generator.x+l.parts.generator.width);expect(l.parts.generator.width).toBe(BALANCE.pageDesign.partSizes.generator.extraLarge.width);expect(l.parts.generator.height).toBe(BALANCE.pageDesign.partSizes.generator.extraLarge.height);expect(l.parts.generator.x-l.parts.heading.x).toBe(l.parts.heading.x+l.parts.heading.width-(l.parts.generator.x+l.parts.generator.width));expect(l.parts.upgrades.y).toBe(l.parts.heading.y);expect(isRecommendedPage(l)).toBe(true);
   for(const width of [1920,1552,1366,800,480,352]){const f=fitPageLayout(l,width,720);expect(PAGE_PARTS.every(id=>validPagePlacement(f,id,f.parts[id]))).toBe(true);expect(isPageDesign({...createPageDesign(),layout:f})).toBe(true);expect(isRecommendedPage(f)).toBe(true);if(width>=1000)expect(f.parts.upgrades.x-f.parts.generator.x-f.parts.generator.width).toBeGreaterThanOrEqual(16);}
  });
  it('読めない文字色と色深度外を拒み、同じ工房の色の設定へ反映する',()=>{
