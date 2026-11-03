@@ -1633,6 +1633,19 @@
     "examples.workshop.update": "Tessera をアップデートする。3トークンが必要です。",
     "fitting.updateHint": "Tessera をアップデートすると、作業台が広くなります。",
     "ws.extensionsLater": "新しい道具",
-    "ws.skillLaterUnavailable": "このバージョンでは利用できません"
+    "ws.skillLaterUnavailable": "このバージョンでは利用できません",
+    "fitting.category.shared": "共有パーツ",
+    "fitting.category.required": "必須ツール",
+    "fitting.category.optional": "任意ツール",
+    "fitting.zone.sets": "UIセット",
+    "fitting.zone.parts": "パーツ",
+    "fitting.zone.pieces": "ピース",
+    "fitting.selectPart": "パーツを選んで制作する",
+    "fitting.lockedParts": "UIセットを購入すると制作できます",
+    "fitting.optionalShow": "任意ツールを表示",
+    "fitting.optionalHide": "任意ツールを閉じる",
+    "fe.paletteTargets": "作業台の背景と調整で使う色",
+    "fe.adjustmentColor": "調整で使う色",
+    "fe.paletteDefault": "標準の背景"
   }
 }

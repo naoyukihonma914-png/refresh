@@ -1670,6 +1670,19 @@
     "examples.workshop.update": "Update Tessera. Requires 3 tokens.",
     "fitting.updateHint": "Update Tessera for more room to work.",
     "ws.extensionsLater": "Newer tools",
-    "ws.skillLaterUnavailable": "Unavailable in this version"
+    "ws.skillLaterUnavailable": "Unavailable in this version",
+    "fitting.category.shared": "Shared parts",
+    "fitting.category.required": "Required tools",
+    "fitting.category.optional": "Optional tools",
+    "fitting.zone.sets": "UI sets",
+    "fitting.zone.parts": "Parts",
+    "fitting.zone.pieces": "Pieces",
+    "fitting.selectPart": "Select a part to work on",
+    "fitting.lockedParts": "Buy this UI set to start crafting",
+    "fitting.optionalShow": "Show optional tools",
+    "fitting.optionalHide": "Hide optional tools",
+    "fe.paletteTargets": "Canvas background and adjustment color",
+    "fe.adjustmentColor": "Adjustment color",
+    "fe.paletteDefault": "Default background"
   }
 }

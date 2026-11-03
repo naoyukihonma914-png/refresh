@@ -1,0 +1,9 @@
+.workshop-root .fitting-editor .fe-color-pair>span {position:absolute;inline-size:34px;block-size:34px;border:2px solid #26221c;}
+.workshop-root .fitting-editor .fe-color-pair>.fe-foreground {inset-inline-start:20px;inset-block-start:0;z-index:1;}
+.workshop-root .fitting-editor .fe-color-pair>.fe-background {inset-inline-start:0;inset-block-start:16px;z-index:2;}
+.workshop-root .fitting-editor .fe-palette-target-labels {display:flex;flex-direction:column;gap:3px;font-size:11px;line-height:1.4;overflow-wrap:anywhere;}
+.workshop-root .fitting-editor .fe-palette-target-labels>strong {font-weight:normal;}
+.workshop-root .fitting-editor.editor-stage-1 .fe-color-pair>span {inline-size:22px;block-size:22px;border-width:1px;}
+.workshop-root .fitting-editor.editor-stage-1 .fe-color-pair>.fe-foreground {inset-inline-start:14px;}
+.workshop-root .fitting-editor.editor-stage-1 .fe-color-pair>.fe-background {inset-block-start:10px;}
+.workshop-root .fitting-editor.editor-stage-1 .fe-palette-target-labels {font-size:10px;gap:1px;}

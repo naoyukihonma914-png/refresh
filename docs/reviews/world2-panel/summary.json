@@ -1,0 +1,3538 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8183/",
+  "buildSha256": "bc52d727aafe03e5d9e13f9fa9e82b46c964b986b7784052cc2805fa8f9ad0b7",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-パネル修正指示書.md",
+    "docs/spec.md §4.2",
+    "docs/デザインの決まり.md §4"
+  ],
+  "cases": [
+    {
+      "id": "ja:entry",
+      "language": "ja",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/01-era0-entry-zones.png",
+          "label": "段①・入場直後から分類、セット、パーツ、ピースの場所が分かる"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "scroll": {
+        "overflow": "auto",
+        "nested": [],
+        "heads": [
+          "sticky",
+          "sticky",
+          "sticky"
+        ]
+      },
+      "price": {
+        "text": "4,000 ピクセル",
+        "font": 14,
+        "spacing": "0.42px",
+        "left": 1766,
+        "right": 1890,
+        "textLeft": 1776.890625,
+        "textRight": 1879.09375,
+        "client": 120,
+        "scroll": 120
+      },
+      "faces": {
+        "era": 0,
+        "selected": {
+          "top": "rgb(200, 85, 61)",
+          "bottom": "rgb(200, 85, 61)"
+        },
+        "raised": {
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)",
+          "background": "rgb(227, 220, 201)"
+        },
+        "stateBars": 5
+      },
+      "checks": {
+        "initialCategoryFollowsGoal": true,
+        "oneGoal": true,
+        "purchaseExactlyOnce": true
+      }
+    },
+    {
+      "id": "ja:production",
+      "language": "ja",
+      "fixture": "fitting-frame-era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/05-gray-empty-sockets.png",
+          "label": "未装着のタイトル帯と各ボタンの窪みは灰色"
+        },
+        {
+          "file": "screenshots/02-era0-production-zones.png",
+          "label": "段①・制作中もセットとパーツを隠さず、下にピースを置く"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "gray": [
+        {
+          "socket": "title",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "control-0",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "control-1",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "control-2",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "scrollbar",
+          "color": "rgb(184, 184, 184)"
+        }
+      ],
+      "faces": {
+        "era": 0,
+        "selected": {
+          "top": "rgb(200, 85, 61)",
+          "bottom": "rgb(200, 85, 61)"
+        },
+        "raised": {
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)",
+          "background": "rgb(227, 220, 201)"
+        },
+        "stateBars": 6
+      },
+      "checks": {
+        "permanentZones": true,
+        "partSelectionDoesNotMoveSetsOrTabs": true,
+        "fittedPieceKeepsColor": true,
+        "emptySocketsNeutral": true
+      }
+    },
+    {
+      "id": "ja:optional",
+      "language": "ja",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/03-era0-optional-tab.png",
+          "label": "段①・任意ツールの分類の中に開閉ボタンを置く"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "sticky": {
+        "position": "sticky",
+        "actual": 172,
+        "expected": 172,
+        "scrollTop": 300
+      },
+      "checks": {
+        "allOptionalSetsHavePlaces": true,
+        "optionalToggleInOptionalTab": true,
+        "oneVerticalScroller": true,
+        "actualStickyHeader": true
+      }
+    },
+    {
+      "id": "ja:era1",
+      "language": "ja",
+      "fixture": "fitting-frame-era1",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/04-era1-production-zones.png",
+          "label": "段②・暗色でも浮いた行、選択の朱色、沈んだ無効操作を区別"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "gray": [
+        {
+          "socket": "title",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "control-0",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "control-1",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "control-2",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "scrollbar",
+          "color": "rgb(82, 82, 82)"
+        }
+      ],
+      "faces": {
+        "era": 1,
+        "selected": {
+          "top": "rgb(200, 85, 61)",
+          "bottom": "rgb(200, 85, 61)"
+        },
+        "raised": {
+          "top": "rgb(114, 113, 124)",
+          "bottom": "rgb(25, 25, 30)",
+          "background": "rgb(69, 69, 78)"
+        },
+        "stateBars": 10
+      }
+    },
+    {
+      "id": "ja:palette",
+      "language": "ja",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/06-palette-changes-background.png",
+          "label": "メインパレットは作業台の背景だけを変える"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "backgroundWorksWithoutSelectedPart": true,
+        "normalImportAndReloadPreservesBackground": true,
+        "palettePreservesEveryPartDesignAndWallet": true,
+        "adjustmentChangesOnlySelectedPart": true,
+        "background": "#2f6b3a"
+      }
+    },
+    {
+      "id": "ja:gray-catalog",
+      "language": "ja",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "surfaces": [
+        {
+          "era": 0,
+          "part": "common-frame",
+          "sockets": [
+            {
+              "socket": "title",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "control-0",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "control-1",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "control-2",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "scrollbar",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "common-button",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "common-heading",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "separator",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "common-progress",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "fill",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "percent",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-taskbar",
+          "sockets": [
+            {
+              "socket": "app-slots",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "resource-area",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-desktop",
+          "sockets": [
+            {
+              "socket": "surface",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-icons",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-notification",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "action",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-upgrades",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "price",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "purchase",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-list",
+          "sockets": [
+            {
+              "socket": "rows",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "columns",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-back",
+          "sockets": [
+            {
+              "socket": "back",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "label",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-sort",
+          "sockets": [
+            {
+              "socket": "sort-key",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "direction",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-search",
+          "sockets": [
+            {
+              "socket": "query",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "search",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-large",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-storage",
+          "sockets": [
+            {
+              "socket": "used",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "capacity",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-list",
+          "sockets": [
+            {
+              "socket": "sender",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "subject",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-body",
+          "sockets": [
+            {
+              "socket": "subject",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "body",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-reply",
+          "sockets": [
+            {
+              "socket": "reply",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "draft",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-folders",
+          "sockets": [
+            {
+              "socket": "inbox",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "archive",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-unread",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-display",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-brightness",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-tone",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "apply",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-crop",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "crop-frame",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-compare",
+          "sockets": [
+            {
+              "socket": "before",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "after",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-switch",
+          "sockets": [
+            {
+              "socket": "navigation-0",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "navigation-1",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "bin-list",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "bin-undo",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "restore",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "bin-empty",
+          "sockets": [
+            {
+              "socket": "count",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "empty",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "clock-time",
+          "sockets": [
+            {
+              "socket": "hours",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "minutes",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "seconds",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "clock-timer",
+          "sockets": [
+            {
+              "socket": "duration",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "start",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "clock-calendar",
+          "sockets": [
+            {
+              "socket": "month",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "days",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-mode",
+          "sockets": [
+            {
+              "socket": "light",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "dark",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-accent",
+          "sockets": [
+            {
+              "socket": "palette",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-radius",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-slideshow",
+          "sockets": [
+            {
+              "socket": "images",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "interval",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-icons",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "icon",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-output",
+          "sockets": [
+            {
+              "socket": "prompt",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "output",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-commands",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "description",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-interval",
+          "sockets": [
+            {
+              "socket": "interval",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "unit",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-run",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-history",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "result",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "manager-processes",
+          "sockets": [
+            {
+              "socket": "process",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "rate",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "share",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "manager-performance",
+          "sockets": [
+            {
+              "socket": "specs",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "values",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "plugin-tabs",
+          "sockets": [
+            {
+              "socket": "tab",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "page",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "plugin-table",
+          "sockets": [
+            {
+              "socket": "time",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "pixels",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-preview",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-sources",
+          "sockets": [
+            {
+              "socket": "source",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-scenes",
+          "sockets": [
+            {
+              "socket": "scene",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "preview",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-comments",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-frame",
+          "sockets": [
+            {
+              "socket": "title",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "control-0",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "control-1",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "control-2",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "scrollbar",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-button",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-heading",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "separator",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-progress",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "fill",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "percent",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-taskbar",
+          "sockets": [
+            {
+              "socket": "app-slots",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "resource-area",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-desktop",
+          "sockets": [
+            {
+              "socket": "surface",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-icons",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-notification",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "action",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-upgrades",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "price",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "purchase",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-list",
+          "sockets": [
+            {
+              "socket": "rows",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "columns",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-back",
+          "sockets": [
+            {
+              "socket": "back",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "label",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-sort",
+          "sockets": [
+            {
+              "socket": "sort-key",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "direction",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-search",
+          "sockets": [
+            {
+              "socket": "query",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "search",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-large",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-storage",
+          "sockets": [
+            {
+              "socket": "used",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "capacity",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-list",
+          "sockets": [
+            {
+              "socket": "sender",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "subject",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-body",
+          "sockets": [
+            {
+              "socket": "subject",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "body",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-reply",
+          "sockets": [
+            {
+              "socket": "reply",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "draft",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-folders",
+          "sockets": [
+            {
+              "socket": "inbox",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "archive",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-unread",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-display",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-brightness",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-tone",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "apply",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-crop",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "crop-frame",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-compare",
+          "sockets": [
+            {
+              "socket": "before",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "after",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-switch",
+          "sockets": [
+            {
+              "socket": "navigation-0",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "navigation-1",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "bin-list",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "bin-undo",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "restore",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "bin-empty",
+          "sockets": [
+            {
+              "socket": "count",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "empty",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "clock-time",
+          "sockets": [
+            {
+              "socket": "hours",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "minutes",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "seconds",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "clock-timer",
+          "sockets": [
+            {
+              "socket": "duration",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "start",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "clock-calendar",
+          "sockets": [
+            {
+              "socket": "month",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "days",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-mode",
+          "sockets": [
+            {
+              "socket": "light",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "dark",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-accent",
+          "sockets": [
+            {
+              "socket": "palette",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-radius",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-slideshow",
+          "sockets": [
+            {
+              "socket": "images",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "interval",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-icons",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "icon",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-output",
+          "sockets": [
+            {
+              "socket": "prompt",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "output",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-commands",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "description",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-interval",
+          "sockets": [
+            {
+              "socket": "interval",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "unit",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-run",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-history",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "result",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "manager-processes",
+          "sockets": [
+            {
+              "socket": "process",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "rate",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "share",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "manager-performance",
+          "sockets": [
+            {
+              "socket": "specs",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "values",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "plugin-tabs",
+          "sockets": [
+            {
+              "socket": "tab",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "page",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "plugin-table",
+          "sockets": [
+            {
+              "socket": "time",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "pixels",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-preview",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-sources",
+          "sockets": [
+            {
+              "socket": "source",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-scenes",
+          "sockets": [
+            {
+              "socket": "scene",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "preview",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-comments",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        }
+      ],
+      "checks": {
+        "all52PartsInBothEras": true,
+        "inspected": 104
+      }
+    },
+    {
+      "id": "en:entry",
+      "language": "en",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "scroll": {
+        "overflow": "auto",
+        "nested": [],
+        "heads": [
+          "sticky",
+          "sticky",
+          "sticky"
+        ]
+      },
+      "price": {
+        "text": "4K pixels",
+        "font": 14,
+        "spacing": "0.42px",
+        "left": 1766,
+        "right": 1890,
+        "textLeft": 1794.609375,
+        "textRight": 1861.390625,
+        "client": 120,
+        "scroll": 120
+      },
+      "faces": {
+        "era": 0,
+        "selected": {
+          "top": "rgb(200, 85, 61)",
+          "bottom": "rgb(200, 85, 61)"
+        },
+        "raised": {
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)",
+          "background": "rgb(227, 220, 201)"
+        },
+        "stateBars": 5
+      },
+      "checks": {
+        "initialCategoryFollowsGoal": true,
+        "oneGoal": true,
+        "purchaseExactlyOnce": true
+      }
+    },
+    {
+      "id": "en:production",
+      "language": "en",
+      "fixture": "fitting-frame-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "gray": [
+        {
+          "socket": "title",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "control-0",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "control-1",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "control-2",
+          "color": "rgb(184, 184, 184)"
+        },
+        {
+          "socket": "scrollbar",
+          "color": "rgb(184, 184, 184)"
+        }
+      ],
+      "faces": {
+        "era": 0,
+        "selected": {
+          "top": "rgb(200, 85, 61)",
+          "bottom": "rgb(200, 85, 61)"
+        },
+        "raised": {
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)",
+          "background": "rgb(227, 220, 201)"
+        },
+        "stateBars": 6
+      },
+      "checks": {
+        "permanentZones": true,
+        "partSelectionDoesNotMoveSetsOrTabs": true,
+        "fittedPieceKeepsColor": true,
+        "emptySocketsNeutral": true
+      }
+    },
+    {
+      "id": "en:optional",
+      "language": "en",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "sticky": {
+        "position": "sticky",
+        "actual": 172,
+        "expected": 172,
+        "scrollTop": 300
+      },
+      "checks": {
+        "allOptionalSetsHavePlaces": true,
+        "optionalToggleInOptionalTab": true,
+        "oneVerticalScroller": true,
+        "actualStickyHeader": true
+      }
+    },
+    {
+      "id": "en:era1",
+      "language": "en",
+      "fixture": "fitting-frame-era1",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "gray": [
+        {
+          "socket": "title",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "control-0",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "control-1",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "control-2",
+          "color": "rgb(82, 82, 82)"
+        },
+        {
+          "socket": "scrollbar",
+          "color": "rgb(82, 82, 82)"
+        }
+      ],
+      "faces": {
+        "era": 1,
+        "selected": {
+          "top": "rgb(200, 85, 61)",
+          "bottom": "rgb(200, 85, 61)"
+        },
+        "raised": {
+          "top": "rgb(114, 113, 124)",
+          "bottom": "rgb(25, 25, 30)",
+          "background": "rgb(69, 69, 78)"
+        },
+        "stateBars": 10
+      }
+    },
+    {
+      "id": "en:palette",
+      "language": "en",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "backgroundWorksWithoutSelectedPart": true,
+        "normalImportAndReloadPreservesBackground": true,
+        "palettePreservesEveryPartDesignAndWallet": true,
+        "adjustmentChangesOnlySelectedPart": true,
+        "background": "#2f6b3a"
+      }
+    },
+    {
+      "id": "en:gray-catalog",
+      "language": "en",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "surfaces": [
+        {
+          "era": 0,
+          "part": "common-frame",
+          "sockets": [
+            {
+              "socket": "title",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "control-0",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "control-1",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "control-2",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "scrollbar",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "common-button",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "common-heading",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "separator",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "common-progress",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "fill",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "percent",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-taskbar",
+          "sockets": [
+            {
+              "socket": "app-slots",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "resource-area",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-desktop",
+          "sockets": [
+            {
+              "socket": "surface",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-icons",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-notification",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "action",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "foundation-upgrades",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "price",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "purchase",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-list",
+          "sockets": [
+            {
+              "socket": "rows",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "columns",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-back",
+          "sockets": [
+            {
+              "socket": "back",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "label",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-sort",
+          "sockets": [
+            {
+              "socket": "sort-key",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "direction",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-search",
+          "sockets": [
+            {
+              "socket": "query",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "search",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-large",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "files-storage",
+          "sockets": [
+            {
+              "socket": "used",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "capacity",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-list",
+          "sockets": [
+            {
+              "socket": "sender",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "subject",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-body",
+          "sockets": [
+            {
+              "socket": "subject",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "body",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-reply",
+          "sockets": [
+            {
+              "socket": "reply",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "draft",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-folders",
+          "sockets": [
+            {
+              "socket": "inbox",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "archive",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "mail-unread",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-display",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-brightness",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-tone",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "apply",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-crop",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "crop-frame",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-compare",
+          "sockets": [
+            {
+              "socket": "before",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "after",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "photo-switch",
+          "sockets": [
+            {
+              "socket": "navigation-0",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "navigation-1",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "bin-list",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "bin-undo",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "restore",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "bin-empty",
+          "sockets": [
+            {
+              "socket": "count",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "empty",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "clock-time",
+          "sockets": [
+            {
+              "socket": "hours",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "minutes",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "seconds",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "clock-timer",
+          "sockets": [
+            {
+              "socket": "duration",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "start",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "clock-calendar",
+          "sockets": [
+            {
+              "socket": "month",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "days",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-mode",
+          "sockets": [
+            {
+              "socket": "light",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "dark",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-accent",
+          "sockets": [
+            {
+              "socket": "palette",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-radius",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-slideshow",
+          "sockets": [
+            {
+              "socket": "images",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "interval",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "theme-icons",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "icon",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-output",
+          "sockets": [
+            {
+              "socket": "prompt",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "output",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-commands",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "description",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-interval",
+          "sockets": [
+            {
+              "socket": "interval",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "unit",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-run",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "terminal-history",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "result",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "manager-processes",
+          "sockets": [
+            {
+              "socket": "process",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "rate",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "share",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "manager-performance",
+          "sockets": [
+            {
+              "socket": "specs",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "values",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "plugin-tabs",
+          "sockets": [
+            {
+              "socket": "tab",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "page",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "plugin-table",
+          "sockets": [
+            {
+              "socket": "time",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "pixels",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-preview",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-sources",
+          "sockets": [
+            {
+              "socket": "source",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-scenes",
+          "sockets": [
+            {
+              "socket": "scene",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "preview",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 0,
+          "part": "stream-comments",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(184, 184, 184)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(184, 184, 184)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-frame",
+          "sockets": [
+            {
+              "socket": "title",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "control-0",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "control-1",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "control-2",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "scrollbar",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-button",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-heading",
+          "sockets": [
+            {
+              "socket": "label",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "separator",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "common-progress",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "fill",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "percent",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-taskbar",
+          "sockets": [
+            {
+              "socket": "app-slots",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "resource-area",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-desktop",
+          "sockets": [
+            {
+              "socket": "surface",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-icons",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-notification",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "action",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "foundation-upgrades",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "price",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "purchase",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-list",
+          "sockets": [
+            {
+              "socket": "rows",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "columns",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-back",
+          "sockets": [
+            {
+              "socket": "back",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "label",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-sort",
+          "sockets": [
+            {
+              "socket": "sort-key",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "direction",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-search",
+          "sockets": [
+            {
+              "socket": "query",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "search",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-large",
+          "sockets": [
+            {
+              "socket": "icon",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "caption",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "files-storage",
+          "sockets": [
+            {
+              "socket": "used",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "capacity",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-list",
+          "sockets": [
+            {
+              "socket": "sender",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "subject",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-body",
+          "sockets": [
+            {
+              "socket": "subject",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "body",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-reply",
+          "sockets": [
+            {
+              "socket": "reply",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "draft",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-folders",
+          "sockets": [
+            {
+              "socket": "inbox",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "archive",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "mail-unread",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-display",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "fit",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-brightness",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-tone",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "value",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-wallpaper",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "apply",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-crop",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "crop-frame",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-compare",
+          "sockets": [
+            {
+              "socket": "before",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "after",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "photo-switch",
+          "sockets": [
+            {
+              "socket": "navigation-0",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "navigation-1",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "bin-list",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "date",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "bin-undo",
+          "sockets": [
+            {
+              "socket": "item",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "restore",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "bin-empty",
+          "sockets": [
+            {
+              "socket": "count",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "empty",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "clock-time",
+          "sockets": [
+            {
+              "socket": "hours",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "minutes",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "seconds",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "clock-timer",
+          "sockets": [
+            {
+              "socket": "duration",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "start",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "clock-calendar",
+          "sockets": [
+            {
+              "socket": "month",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "days",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-mode",
+          "sockets": [
+            {
+              "socket": "light",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "dark",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-accent",
+          "sockets": [
+            {
+              "socket": "palette",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-radius",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "sample",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-slideshow",
+          "sockets": [
+            {
+              "socket": "images",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "interval",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "theme-icons",
+          "sockets": [
+            {
+              "socket": "track",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "thumb",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "icon",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-output",
+          "sockets": [
+            {
+              "socket": "prompt",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "output",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-commands",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "description",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-interval",
+          "sockets": [
+            {
+              "socket": "interval",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "unit",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-run",
+          "sockets": [
+            {
+              "socket": "state",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "terminal-history",
+          "sockets": [
+            {
+              "socket": "command",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "result",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "manager-processes",
+          "sockets": [
+            {
+              "socket": "process",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "rate",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "share",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "manager-performance",
+          "sockets": [
+            {
+              "socket": "specs",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "values",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "plugin-tabs",
+          "sockets": [
+            {
+              "socket": "tab",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "page",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "plugin-table",
+          "sockets": [
+            {
+              "socket": "time",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "pixels",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-preview",
+          "sockets": [
+            {
+              "socket": "image",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-sources",
+          "sockets": [
+            {
+              "socket": "source",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-scenes",
+          "sockets": [
+            {
+              "socket": "scene",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "preview",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        },
+        {
+          "era": 1,
+          "part": "stream-comments",
+          "sockets": [
+            {
+              "socket": "message",
+              "color": "rgb(82, 82, 82)"
+            },
+            {
+              "socket": "selection",
+              "color": "rgb(82, 82, 82)"
+            }
+          ]
+        }
+      ],
+      "checks": {
+        "all52PartsInBothEras": true,
+        "inspected": 104
+      }
+    },
+    {
+      "id": "en-XA:entry",
+      "language": "en-XA",
+      "fixture": "fitting-entry-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "scroll": {
+        "overflow": "auto",
+        "nested": [],
+        "heads": [
+          "sticky",
+          "sticky",
+          "sticky"
+        ]
+      },
+      "price": {
+        "text": "[4[K~] pixels~~~]",
+        "font": 14,
+        "spacing": "0.42px",
+        "left": 1766,
+        "right": 1890,
+        "textLeft": 1790.890625,
+        "textRight": 1865.09375,
+        "client": 120,
+        "scroll": 120
+      },
+      "faces": {
+        "era": 0,
+        "selected": {
+          "top": "rgb(200, 85, 61)",
+          "bottom": "rgb(200, 85, 61)"
+        },
+        "raised": {
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)",
+          "background": "rgb(227, 220, 201)"
+        },
+        "stateBars": 5
+      },
+      "checks": {
+        "initialCategoryFollowsGoal": true,
+        "oneGoal": true,
+        "purchaseExactlyOnce": true
+      }
+    }
+  ],
+  "languages": [
+    "ja",
+    "en"
+  ],
+  "passed": 13,
+  "failed": 0
+}

@@ -38,12 +38,13 @@ describe('殻とピースの案内と制作パネル',()=>{
   expect(s.resources.tokens-initialTokens).toBe(21*BALANCE.workshop.exportTokens);
   expect(workshopExampleHand(s)).toEqual({kind:'exit'});
  });
- it.each(['ja','en','en-XA'])('%s：制作中はピース一覧と任意調整への入口だけを出す',language=>{
+ it.each(['ja','en','en-XA'])('%s：制作中もセット・パーツを残し、ピースと任意調整を続けて出す',language=>{
   const s=started(),before=structuredClone(s),html=navigator(s,language);
   expect((html.match(/data-workshop-next-hand=/g)??[])).toHaveLength(1);
   expect(html).toContain('data-workshop-next-hand="spawnPiece"');
   expect(html).toContain('data-workshop-piece="scrollbar"');expect(html).toContain('data-workshop-action="openAdjustments"');
-  expect(html).toContain('data-workshop-action="backToParts"');expect(html).toContain('ws-fitting-part-chips');
+  for(const zone of ['sets','parts','pieces'])expect(html).toContain(`data-workshop-zone="${zone}"`);
+  expect(html).not.toContain('backToParts');expect(html).not.toContain('ws-fitting-part-chips');
   for(const legacy of ['ws-steps','data-workshop-inspector','data-workshop-dimension','confirmAdjustment','data-workshop-action="place"','data-workshop-action="element"','ws-test-hint'])expect(html).not.toContain(legacy);
   expect(s).toEqual(before);
  });

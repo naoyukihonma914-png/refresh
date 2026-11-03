@@ -19,9 +19,7 @@
 .workshop-root .wf-frame-content>button[aria-pressed=true] {background:#000080;color:#fff;}
 .workshop-root .wf-frame-content>button .ws-glyph {width:16px;height:16px;}
 .workshop-root .wf-frame-note {margin:0;padding:14px;font:14px/1.8 'Refresh Pixel','Refresh UI',sans-serif;white-space:pre-wrap;user-select:text;}
-.workshop-root .wf-socket {position:absolute;z-index:1;min-width:0;min-height:0;border:1px solid #877f6e;background:#bbb6a780;box-shadow:inset 3px 3px #0005,inset -1px -1px #fff9;pointer-events:none;}
-.workshop-root .wf-frame-shell>.wf-socket {background:#c8c4b6;}
-.workshop-root .wf-frame-shell>.wf-socket[data-fitting-socket=title],.workshop-root .wf-frame-shell>.wf-socket[data-fitting-socket^=control] {background:#08085c;border-color:#08084b;box-shadow:inset 3px 3px #0009,inset -1px -1px #ffffff50;}
+.workshop-root .wf-socket {position:absolute;z-index:1;min-width:0;min-height:0;border:1px solid #7a7a7a;background:var(--wf-empty-socket,#b8b8b8);box-shadow:inset 3px 3px #0005,inset -1px -1px #fff9;pointer-events:none;}
 .workshop-root .wf-socket.is-filled {box-shadow:inset 1px 1px #0005;}
 .workshop-root .wf-socket.is-near {outline:3px solid #f0c060;outline-offset:2px;}
 .workshop-root .wf-socket.is-next:not(.is-filled) {border-style:dashed;border-color:#ebc27a;}
@@ -53,3 +51,5 @@
 .workshop-root .wf-frame-scroll-thumb {position:absolute;left:0;width:100%;min-height:12px;padding:0;border:2px outset #ddd;background:#c0c0c0;touch-action:none;}
 .workshop-root .editor-stage-1 .wf-loose-piece {border-width:1px;box-shadow:inset 1px 1px #e1d8c4,inset -1px -1px #383432,2px 2px #0005;}
 @media(prefers-reduced-motion:reduce) {.workshop-root .wf-snap-response {animation:none;}}
+
+.workshop-root :is(.editor-stage-1,.editor-stage-2) .wf-socket {--wf-empty-socket:#525252;border-color:#303030;}
