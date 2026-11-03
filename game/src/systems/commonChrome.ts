@@ -6,6 +6,8 @@ import type { AppId } from './desktopState';
 import type { AppAssembly, AssemblyMaterial } from './appAssemblySchema';
 import { BALANCE } from '../config/balance';
 export type WindowSymbol='minimize'|'maximize'|'close';
+/** Fitted controls have their own classic surface, independent of the title palette. */
+export const fittingWindowControlPalette={color:'#101010',backgroundColor:'#c0c0c0'} as const;
 export interface ProducedChrome {design:ComponentDesign;symbols:WindowSymbol[];custom:boolean;customColors:boolean;fitted?:boolean}
 export function producedWindowChrome(s:GameState,app?:AppId):ProducedChrome|null {
  const current=s.run.workshop.parts['common-frame'];

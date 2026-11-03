@@ -1,5 +1,5 @@
 import { BALANCE, type EditorSkill } from '../../config/balance';
-import type { I18n, MessageKey } from '../../content/i18n';
+import type { I18n } from '../../content/i18n';
 import type { WorkshopPartDefinition } from '../../content/workshopCatalog';
 import { colorContrast, createComponentDesign, createEditorCustomization, usesNativeComponentColors, usesNativeEditorBackground, type ComponentDesign, type EditorCustomization, type PartProduction } from '../../systems/workshopState';
 import type { WorkshopAction } from '../../systems/workshop';
@@ -11,7 +11,7 @@ export function ColorChoices({label,value,colors,onChange,against,native=false,n
 export function PartInspector({part,production,stage,colors,skills,customization,dispatch,i18n}:{part:WorkshopPartDefinition;production:PartProduction;stage:number;colors:readonly string[];skills:readonly EditorSkill[];customization:EditorCustomization;dispatch:WorkshopDispatch;i18n:I18n}){
  const t=i18n.t,d=production.design,limits=BALANCE.workshop.design;
  const defaults=createComponentDesign();
- const adjustmentCount=(Object.keys(defaults) as Array<keyof ComponentDesign>).filter(key=>!['nativeColors','controlSide','controlSides'].includes(key)&&JSON.stringify(d[key])!==JSON.stringify(defaults[key])).length+(!usesNativeComponentColors(d)&&d.color===defaults.color&&d.textColor===defaults.textColor&&Object.keys(d.controlColors).length===0?1:0);
+ const adjustmentCount=(Object.keys(defaults) as Array<keyof ComponentDesign>).filter(key=>!['nativeColors','controlSide','controlSides',...(part.id==='common-frame'?['controlColors']:[])].includes(key)&&JSON.stringify(d[key])!==JSON.stringify(defaults[key])).length+(!usesNativeComponentColors(d)&&d.color===defaults.color&&d.textColor===defaults.textColor&&(part.id==='common-frame'||Object.keys(d.controlColors).length===0)?1:0);
  const patch=(patch:Partial<ComponentDesign>)=>dispatch({type:'adjust',part:part.id,patch});
  const range=(key:'radius'|'fontSize'|'scrollbarWidth'|'progressHeight',min:number,max:number)=><label>{t(`ws.${key}`)}<input data-workshop-adjust={key} title={key==='fontSize'?t('ws.fontFitHint'):undefined} type="range" min={min} max={max} value={d[key]} onChange={e=>patch({[key]:Number(e.target.value)})}/><output>{i18n.number(d[key])}</output></label>;
  const checkbox=(key:'shadow'|'arrows'|'separator'|'showPercent')=><label className="ws-check"><input data-workshop-adjust={key} type="checkbox" checked={d[key]} onChange={e=>patch({[key]:e.target.checked})}/>{t(`ws.${key}`)}</label>;
@@ -24,9 +24,6 @@ export function PartInspector({part,production,stage,colors,skills,customization
   {part.id==='common-frame'&&<>
    <label>{t('ws.titleAlign')}<select value={d.titleAlign} onChange={e=>patch({titleAlign:e.target.value as ComponentDesign['titleAlign']})}>{(['start','center','end'] as const).map(v=><option key={v} value={v}>{t(`ws.${v}`)}</option>)}</select></label>
    <label>{t('ws.symbolShape')}<select value={d.symbolShape} onChange={e=>patch({symbolShape:e.target.value as ComponentDesign['symbolShape']})}><option value="line">{t('ws.line')}</option><option value="square">{t('ws.square')}</option></select></label>
-   <div className="ws-window-controls-editor">{['minimize','maximize','close'].map(element=><fieldset key={element}><legend>{t(`ws.element.${element}` as MessageKey)}</legend>
-    <ColorChoices label={t('ws.controlColor',{name:t(`ws.element.${element}` as MessageKey)})} value={d.controlColors[element]??d.textColor} colors={colors} native={usesNativeComponentColors(d)&&d.controlColors[element]===undefined} against={d.color} onChange={color=>patch({controlColors:{...d.controlColors,[element]:color}})}/>
-   </fieldset>)}</div>
   </>}
   {(part.id==='common-frame'||part.id==='common-scrollbar')&&<>{range('scrollbarWidth',limits.scrollbarMin,limits.scrollbarMax)}{checkbox('arrows')}</>}
   {part.id==='common-progress'&&<>{range('progressHeight',limits.progressHeightMin,limits.progressHeightMax)}<label>{t('ws.progressStyle')}<select value={d.progressStyle} onChange={e=>patch({progressStyle:e.target.value as ComponentDesign['progressStyle']})}><option value="solid">{t('ws.solid')}</option><option value="striped">{t('ws.striped')}</option></select></label>{checkbox('showPercent')}</>}

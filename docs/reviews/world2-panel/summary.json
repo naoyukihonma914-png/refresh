@@ -4,8 +4,8 @@
     "height": 1080
   },
   "reducedMotion": false,
-  "baseUrl": "http://127.0.0.1:8183/",
-  "buildSha256": "bc52d727aafe03e5d9e13f9fa9e82b46c964b986b7784052cc2805fa8f9ad0b7",
+  "baseUrl": "http://127.0.0.1:8184/",
+  "buildSha256": "3e5f68eaa2611c5aa562f20a01fa7bcd4549032d134c92f0235f1186c762fa6a",
   "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
   "references": [
     "docs/世界2-パネル修正指示書.md",
@@ -34,6 +34,29 @@
           "sticky",
           "sticky",
           "sticky"
+        ],
+        "tabs": [
+          {
+            "category": "shared",
+            "clientWidth": 97,
+            "scrollWidth": 97,
+            "clientHeight": 26,
+            "scrollHeight": 26
+          },
+          {
+            "category": "required",
+            "clientWidth": 97,
+            "scrollWidth": 97,
+            "clientHeight": 26,
+            "scrollHeight": 26
+          },
+          {
+            "category": "optional",
+            "clientWidth": 97,
+            "scrollWidth": 97,
+            "clientHeight": 26,
+            "scrollHeight": 26
+          }
         ]
       },
       "price": {
@@ -50,8 +73,8 @@
       "faces": {
         "era": 0,
         "selected": {
-          "top": "rgb(200, 85, 61)",
-          "bottom": "rgb(200, 85, 61)"
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)"
         },
         "raised": {
           "top": "rgb(255, 246, 223)",
@@ -109,8 +132,8 @@
       "faces": {
         "era": 0,
         "selected": {
-          "top": "rgb(200, 85, 61)",
-          "bottom": "rgb(200, 85, 61)"
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)"
         },
         "raised": {
           "top": "rgb(255, 246, 223)",
@@ -192,8 +215,8 @@
       "faces": {
         "era": 1,
         "selected": {
-          "top": "rgb(200, 85, 61)",
-          "bottom": "rgb(200, 85, 61)"
+          "top": "rgb(114, 113, 124)",
+          "bottom": "rgb(25, 25, 30)"
         },
         "raised": {
           "top": "rgb(114, 113, 124)",
@@ -1777,6 +1800,29 @@
           "sticky",
           "sticky",
           "sticky"
+        ],
+        "tabs": [
+          {
+            "category": "shared",
+            "clientWidth": 97,
+            "scrollWidth": 97,
+            "clientHeight": 26,
+            "scrollHeight": 26
+          },
+          {
+            "category": "required",
+            "clientWidth": 97,
+            "scrollWidth": 97,
+            "clientHeight": 26,
+            "scrollHeight": 26
+          },
+          {
+            "category": "optional",
+            "clientWidth": 97,
+            "scrollWidth": 97,
+            "clientHeight": 26,
+            "scrollHeight": 26
+          }
         ]
       },
       "price": {
@@ -1793,8 +1839,8 @@
       "faces": {
         "era": 0,
         "selected": {
-          "top": "rgb(200, 85, 61)",
-          "bottom": "rgb(200, 85, 61)"
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)"
         },
         "raised": {
           "top": "rgb(255, 246, 223)",
@@ -1843,8 +1889,8 @@
       "faces": {
         "era": 0,
         "selected": {
-          "top": "rgb(200, 85, 61)",
-          "bottom": "rgb(200, 85, 61)"
+          "top": "rgb(255, 246, 223)",
+          "bottom": "rgb(143, 133, 116)"
         },
         "raised": {
           "top": "rgb(255, 246, 223)",
@@ -1916,8 +1962,8 @@
       "faces": {
         "era": 1,
         "selected": {
-          "top": "rgb(200, 85, 61)",
-          "bottom": "rgb(200, 85, 61)"
+          "top": "rgb(114, 113, 124)",
+          "bottom": "rgb(25, 25, 30)"
         },
         "raised": {
           "top": "rgb(114, 113, 124)",
@@ -3479,60 +3525,12 @@
         "all52PartsInBothEras": true,
         "inspected": 104
       }
-    },
-    {
-      "id": "en-XA:entry",
-      "language": "en-XA",
-      "fixture": "fitting-entry-era0",
-      "status": "passed",
-      "images": [],
-      "pageErrors": [],
-      "console": [],
-      "externalRequests": [],
-      "scroll": {
-        "overflow": "auto",
-        "nested": [],
-        "heads": [
-          "sticky",
-          "sticky",
-          "sticky"
-        ]
-      },
-      "price": {
-        "text": "[4[K~] pixels~~~]",
-        "font": 14,
-        "spacing": "0.42px",
-        "left": 1766,
-        "right": 1890,
-        "textLeft": 1790.890625,
-        "textRight": 1865.09375,
-        "client": 120,
-        "scroll": 120
-      },
-      "faces": {
-        "era": 0,
-        "selected": {
-          "top": "rgb(200, 85, 61)",
-          "bottom": "rgb(200, 85, 61)"
-        },
-        "raised": {
-          "top": "rgb(255, 246, 223)",
-          "bottom": "rgb(143, 133, 116)",
-          "background": "rgb(227, 220, 201)"
-        },
-        "stateBars": 5
-      },
-      "checks": {
-        "initialCategoryFollowsGoal": true,
-        "oneGoal": true,
-        "purchaseExactlyOnce": true
-      }
     }
   ],
   "languages": [
     "ja",
     "en"
   ],
-  "passed": 13,
+  "passed": 12,
   "failed": 0
 }

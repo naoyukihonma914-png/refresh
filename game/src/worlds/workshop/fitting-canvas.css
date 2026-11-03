@@ -31,14 +31,14 @@
 .workshop-root .wf-piece-grip {position:absolute;z-index:8;right:-5px;top:-5px;min-height:0;width:15px;height:15px;padding:0;opacity:0;background:#d6cfc0;color:#26221c;border:1px solid #26221c;cursor:grab;touch-action:none;}
 .workshop-root .wf-piece-grip>.ws-glyph {width:11px;height:11px;}
 .workshop-root .wf-fitted-piece:hover>.wf-piece-grip,.workshop-root .wf-fitted-piece:focus-within>.wf-piece-grip {opacity:1;}
-.workshop-root .wf-piece-tray {position:absolute;padding:20px 8px 8px;background:#45556370;border:1px solid #3e4a54;box-shadow:inset 1px 1px #0003;color:#f4efe4;}
+.workshop-root .wf-piece-tray {position:absolute;padding:0;background:#45556370;border:1px solid #3e4a54;box-shadow:inset 1px 1px #0003;color:#f4efe4;}
 .workshop-root .wf-piece-tray>span {position:absolute;left:8px;top:3px;max-width:calc(100% - 16px);overflow:hidden;white-space:nowrap;font-size:11px;color:#f5eee0;}
-.workshop-root .wf-tray-pieces {display:flex;align-items:flex-start;justify-content:flex-end;gap:8px;flex-wrap:wrap;height:100%;overflow:visible;}
-.workshop-root .wf-loose-piece {position:relative;display:flex;min-width:0;min-height:0;color:#101010;background:#d6cfc0;border:2px solid #26221c;box-shadow:inset 2px 2px #f4efe4,inset -2px -2px #8f8574,3px 3px #0005;outline:1px dashed #f0c060;outline-offset:3px;cursor:grab;touch-action:none;}
+.workshop-root .wf-tray-pieces {position:absolute;inset:0;overflow:visible;}
+.workshop-root .wf-loose-piece {position:absolute;display:block;min-width:0;min-height:0;color:#101010;background:#d6cfc0;border:0;box-shadow:3px 3px #0005;outline:1px dashed #f0c060;outline-offset:3px;cursor:grab;touch-action:none;}
 .workshop-root .wf-loose-piece:focus-visible {outline:2px solid #f0c060;}
 .workshop-root .wf-loose-piece>* {pointer-events:none;}
 .workshop-root .wf-piece-tray.is-return-target {outline:2px dashed #f0c060;outline-offset:3px;}
-.workshop-root .wf-drag-ghost {position:absolute;z-index:50;pointer-events:none;min-width:0;background:#d6cfc0;color:#101010;border:2px solid #26221c;box-shadow:inset 2px 2px #f4efe4,inset -2px -2px #8f8574,4px 4px #0005;opacity:.95;}
+.workshop-root .wf-drag-ghost {position:absolute;z-index:50;pointer-events:none;min-width:0;background:#d6cfc0;color:#101010;border:0;box-shadow:4px 4px #0005;}
 .workshop-root .wf-restore-target {position:absolute;left:0;top:0;z-index:10;}
 .workshop-root .wf-empty-canvas {position:absolute;inset:40% 10% auto;text-align:center;color:#766f61;}
 .workshop-root .wf-snap-response {position:absolute;z-index:9;pointer-events:none;outline:2px solid #f0c060;animation:wf-snap steps(5) both;}
@@ -49,7 +49,7 @@
 .workshop-root .wf-frame-scroll-rail>button .ws-glyph {width:10px;height:10px;}
 .workshop-root .wf-frame-scroll-track {position:relative;flex:1;min-height:0;background:repeating-conic-gradient(#bbb 0% 25%,#eee 0% 50%) 0 0/2px 2px;}
 .workshop-root .wf-frame-scroll-thumb {position:absolute;left:0;width:100%;min-height:12px;padding:0;border:2px outset #ddd;background:#c0c0c0;touch-action:none;}
-.workshop-root .editor-stage-1 .wf-loose-piece {border-width:1px;box-shadow:inset 1px 1px #e1d8c4,inset -1px -1px #383432,2px 2px #0005;}
+.workshop-root .wf-piece-scale {position:absolute;left:0;top:0;transform-origin:top left;}
 @media(prefers-reduced-motion:reduce) {.workshop-root .wf-snap-response {animation:none;}}
 
 .workshop-root :is(.editor-stage-1,.editor-stage-2) .wf-socket {--wf-empty-socket:#525252;border-color:#303030;}

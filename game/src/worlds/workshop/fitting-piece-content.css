@@ -42,3 +42,6 @@
 .workshop-root .wf-desktop-surface {display:block;inline-size:100%;block-size:100%;background:#008080 center/cover;}
 .workshop-root .wf-selection-frame {display:block;inline-size:80%;block-size:75%;border:1px dashed #111;background:#00008022;}
 .workshop-root .wf-manager-column>button:not(:first-child) {min-block-size:29px;}
+
+/* Loose window controls keep the same face and dark glyph as fitted controls. */
+.workshop-root .wf-content-common-frame:is(.wf-element-minimize,.wf-element-maximize,.wf-element-close)>button:disabled {opacity:1;color:#101010;background:#c0c0c0;}

@@ -12,7 +12,7 @@ import { WorkshopGlyph } from './WorkshopGlyph';
 import { useWorkshopTarget, type TargetFileSort } from './WorkshopTargetContext';
 import { useOptionalTarget } from './OptionalParts';
 import { partVisual } from './partVisual';
-import { producedControlPalette } from '../../systems/commonChrome';
+import { fittingWindowControlPalette } from '../../systems/commonChrome';
 import './fitting-piece-content.css';
 
 const SPECS:readonly SpecKey[]=['color','storage','memory','resolution','network','refresh','graphics'];
@@ -49,7 +49,7 @@ export function FittingPieceContent({part,piece,production,state,i18n,loose=fals
   case 'common-frame':
    if(piece==='title')content=<strong style={{inlineSize:'100%',textAlign:d.titleAlign==='start'?'left':d.titleAlign==='end'?'right':'center'}}>{t('ws.set.common')}</strong>;
    else if(piece==='scrollbar')content=<div className="wf-native-scrollbar" aria-label={t('ws.element.scrollbar')}><span/><span/><span/></div>;
-   else content=<button type="button" disabled={loose} aria-label={t(`ws.window.${piece}`)} data-workshop-control={piece} onClick={()=>onWindowAction?.(piece as WindowAction)} style={producedControlPalette(d,piece as WindowAction)}><WorkshopGlyph name={piece as WindowAction}/></button>;
+   else content=<button type="button" disabled={loose} aria-label={t(`ws.window.${piece}`)} data-workshop-control={piece} onClick={()=>onWindowAction?.(piece as WindowAction)} style={fittingWindowControlPalette}><WorkshopGlyph name={piece as WindowAction}/></button>;
    break;
   case 'common-button':content=button(t(foundation.upgradeOpen?'ws.close':'ws.preview.press'),a.toggleUpgrade);break;
   case 'common-heading':content=piece==='separator'?<hr hidden={!d.separator}/>:button(t('ws.preview.folderHeading'),()=>setFolded(!folded),false,<span>{t('ws.preview.folderHeading')}{!folded&&<small>{files.selected?.name??t('ws.preview.files')}</small>}</span>);break;
@@ -119,6 +119,8 @@ export function FittingPieceContent({part,piece,production,state,i18n,loose=fals
   default:content=<span>{label}</span>;
  }
  const nativeTitle=part.id==='common-frame'&&piece==='title'&&!visual.customColors;
- const style={color:nativeTitle?'#fff':visual.foreground,backgroundColor:nativeTitle?'#000080':visual.background,borderRadius:d.radius,fontSize:d.fontSize,boxShadow:d.shadow?'1px 1px 0 #555':undefined,'--wf-piece-radius':`${d.radius}px`,'--wf-piece-foreground':visual.foreground,'--wf-piece-background':visual.background} as CSSProperties;
+ const windowControl=part.id==='common-frame'&&['minimize','maximize','close'].includes(piece);
+ const foreground=windowControl?fittingWindowControlPalette.color:nativeTitle?'#fff':visual.foreground,background=windowControl?fittingWindowControlPalette.backgroundColor:nativeTitle?'#000080':visual.background;
+ const style={color:foreground,backgroundColor:background,borderRadius:d.radius,fontSize:d.fontSize,boxShadow:d.shadow?'1px 1px 0 #555':undefined,'--wf-piece-radius':`${d.radius}px`,'--wf-piece-foreground':foreground,'--wf-piece-background':background} as CSSProperties;
  return <div className={`wf-piece-content wf-content-${part.id} wf-element-${piece}`} data-workshop-control-piece={piece} data-piece-front={front} hidden={!front} style={style}>{content}</div>;
 }
