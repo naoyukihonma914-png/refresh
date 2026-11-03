@@ -20,7 +20,7 @@
 .seed-construction:not(.has-color):not(.has-layout) .seed-link {color:#000080;}
 .seed-construction:not(.has-layout) button:not(.seed-link),.seed-construction:not(.has-layout) select {color:#000;background:#efefef;border:1px solid #767676;border-radius:2px;box-shadow:none;min-block-size:24px;padding:1px 6px;}
 .seed-construction.has-border:not(.has-layout) .seed-generate,.seed-construction.has-border:not(.has-layout) [data-seed-upgrade] {border:2px solid #000;border-radius:0;}
-.seed-construction .seed-generate {min-block-size:32px;position:relative;}
+.seed-construction .seed-generate {min-block-size:52px;position:relative;padding:.7em 1.8em;font-size:1.1rem;}
 .seed-construction .seed-generator-line {min-block-size:100px;}
 .seed-construction .seed-generator-anchor {display:inline-block;position:relative;min-inline-size:240px;max-inline-size:100%;}
 .seed-construction .seed-auto-cursor {position:absolute;width:18px;height:24px;inline-size:18px;block-size:24px;pointer-events:none;}
@@ -67,6 +67,6 @@
 .seed-construction .page-settings button,.seed-construction .page-settings select,.seed-construction .page-settings input {background:#f4f4f4;color:#111;border:1px solid #777;box-shadow:none;}
 .seed-construction.has-color .editor-shell-workspace {color:var(--seed-text);}
 .seed-construction .seed-generator-anchor {min-inline-size:0;}
-.seed-construction.has-layout .seed-generate {inline-size:min(100%,var(--page-button-width,auto));block-size:var(--page-button-height,auto);min-inline-size:120px;min-block-size:32px;max-inline-size:100%;white-space:normal;overflow-wrap:anywhere;}
-.seed-construction.has-layout .seed-generate {block-size:auto;min-block-size:var(--page-button-height,32px);}
+.seed-construction.has-layout .seed-generate {inline-size:min(100%,var(--page-button-width,auto));block-size:var(--page-button-height,auto);min-inline-size:160px;min-block-size:40px;max-inline-size:100%;white-space:normal;overflow-wrap:anywhere;}
+.seed-construction.has-layout .seed-generate {block-size:auto;min-block-size:var(--page-button-height,40px);}
 .seed-construction .seed-layout-actions button,.seed-construction .page-part-grip,.seed-construction .page-part-resize,.seed-construction .seed-construction-footer select {color:var(--editor-ink);}
