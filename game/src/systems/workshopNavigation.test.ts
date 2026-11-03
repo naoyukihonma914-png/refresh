@@ -10,7 +10,7 @@ const now=1_800_000_000_000;
 const entry=()=>createFixture('stage8a-entry-era0',now)!;
 
 describe('TP2：必須ルートで次に作るものを1つだけ示す',()=>{
- it('購入と完成を区別し、選択中のセットや財布に左右されず本線22パーツを案内する',()=>{
+ it('購入と完成を区別し、選択中のセットや財布に左右されず本線21パーツを案内する',()=>{
   let s=entry();expect(nextWorkshopTarget(s)).toEqual({kind:'set',set:'common'});
   for(const set of WORKSHOP_MAINLINE){
    expect(nextWorkshopTarget(s)).toEqual({kind:'set',set});

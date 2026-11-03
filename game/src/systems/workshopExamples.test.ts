@@ -61,9 +61,9 @@ describe('お手本と自由制作',()=>{
  });
  it('既存の部品と標準位置が重なる場合は吸着を押し付けない',()=>{
   let s=workshop();const id='common-button',target=getWorkshopPart(id).defaultRect;
-  const scrollbar={...getWorkshopPart('common-scrollbar').defaultRect,x:target.x,y:target.y};
-  s=actWorkshop(s,{type:'place',part:'common-scrollbar',rect:scrollbar},now);
-  expect(s.run.workshop.parts['common-scrollbar']!.step).toBe(1);
+  const blocker={...getWorkshopPart('common-progress').defaultRect,x:target.x,y:target.y};
+  s=actWorkshop(s,{type:'place',part:'common-progress',rect:blocker},now);
+  expect(s.run.workshop.parts['common-progress']!.step).toBe(1);
   expect(examplePlacement(s,id,target)).toEqual({rect:target,snapped:false});
  });
  it('おまかせは標準designと工程3を一度だけ適用し、通常の確認と同じ払い',()=>{
@@ -78,7 +78,7 @@ describe('お手本と自由制作',()=>{
   expect(actWorkshop(workshop(),{type:'useExample',part:'common-button'},now).run.workshop.parts['common-button']!.step).toBe(0);
  });
  it('ON/OFF・標準位置・自由designは工程払いと毎秒に影響しない',()=>{
-  const original=complete(workshop(),'common-scrollbar'),id='common-button';
+  const original=complete(workshop(),'common-heading'),id='common-button';
   let example=prepared(original,id,now+1),free=prepared(setExamplesEnabled(original,false),id,now+1);
   example=actWorkshop(example,{type:'useExample',part:id},now+1);
   free=actWorkshop(free,{type:'adjust',part:id,patch:{radius:8,shadow:true}},now+1);

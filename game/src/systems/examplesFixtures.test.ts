@@ -28,7 +28,7 @@ describe('お手本の実操作用固定状態',()=>{
   for(const era of [0,1,2])for(const [mode,step] of [['place-on',0],['adjust-on',2],['finish-on',3]] as const){
    const state=createFixture(`examples-${mode}-era${era}`,now)!;
    expect(state.run.workshop.activePart).toBe('common-button');expect(state.run.workshop.parts['common-button']!.step).toBe(step);
-   expect(completedParts(state)).toEqual(['common-frame','common-scrollbar']);
+   expect(completedParts(state)).toEqual(['common-frame']);
    expect(state.run.workshop.parts['common-button']!.tested).toBe(false);
   }
  });

@@ -4,7 +4,7 @@ export const SET_IDS = ['common', 'foundation', 'files', 'mail', 'photo', 'bin',
 export type UiSetId = typeof SET_IDS[number];
 export type PartCategory = 'small' | 'medium' | 'large';
 export type TestInteraction = 'press' | 'slide' | 'scroll' | 'select' | 'toggle' | 'input' | 'resize';
-export type PartKind = 'frame' | 'scrollbar' | 'button' | 'heading' | 'progress' | 'list' | 'surface' | 'slider' | 'input' | 'toggle' | 'select' | 'timer' | 'calendar' | 'table' | 'tabs';
+export type PartKind = 'frame' | 'button' | 'heading' | 'progress' | 'list' | 'surface' | 'slider' | 'input' | 'toggle' | 'select' | 'timer' | 'calendar' | 'table' | 'tabs';
 export interface WorkshopRect { x: number; y: number; width: number; height: number }
 interface PartSeed { id: WorkshopPartId; kind: PartKind; elements: readonly string[]; testInteraction: TestInteraction; testAlternatives: readonly TestInteraction[]; category: PartCategory }
 export type WorkshopPartId = keyof typeof BALANCE.workshop.partRates;
@@ -13,8 +13,7 @@ export interface WorkshopPartDefinition extends PartSeed { set: UiSetId; default
 const make = (id: WorkshopPartId, kind: PartKind, elements: readonly string[], testInteraction: TestInteraction, category: PartCategory = 'medium'): PartSeed => ({ id, kind, elements, testInteraction, testAlternatives: testInteraction==='scroll'?['select']:[], category });
 const definitions: Record<UiSetId, readonly PartSeed[]> = {
   common: [
-    make('common-frame','frame',['title','minimize','maximize','close'],'press','large'),
-    make('common-scrollbar','scrollbar',['track','thumb','arrows'],'scroll','small'),
+    make('common-frame','frame',['title','minimize','maximize','close','track','thumb','arrows'],'press','large'),
     make('common-button','button',['label'],'press','small'),
     make('common-heading','heading',['label','separator'],'select','small'),
     make('common-progress','progress',['track','fill','percent'],'select','small'),

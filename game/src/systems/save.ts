@@ -2,7 +2,7 @@ import { createAdviceState } from './advice';
 import { createPageDesign, isPageDesign } from './pageDesign';
 import { repairAppProjects } from './appLayout';
 import { getWorkshopPart, WORKSHOP_PARTS, type UiSetId, type WorkshopPartId, type WorkshopRect } from '../content/workshopCatalog';
-import { isPartProduction, minimumPartSize, workshopPairValid, workshopRectOnGrid, type PartProduction } from './workshopState';
+import { isPartProduction, mergeLegacyScrollbarIntoFrame, minimumPartSize, workshopPairValid, workshopRectOnGrid, type PartProduction } from './workshopState';
 import { normalizeWorkshopRect } from './workshop';
 import { captureStore } from '../platform/captures';
 import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
@@ -15,6 +15,19 @@ import type { SaveStorage } from '../platform/storage';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
 export const SAVE_KEYS = { primary: 'refresh.save', backup: 'refresh.save.backup' } as const;
+
+/** The scrollbar part merged into the frame (2026-11): fold live records on load. Frozen records (screenshots, shipped products) keep their original bytes. */
+function repairLegacyScrollbar(state: GameState): void {
+  const workshop = state.run?.workshop;
+  if (workshop?.parts && typeof workshop.parts === 'object' && 'common-scrollbar' in workshop.parts) {
+    mergeLegacyScrollbarIntoFrame(workshop.parts as Record<string, unknown>);
+    if ((workshop.activePart as string) === 'common-scrollbar') workshop.activePart = workshop.parts['common-frame'] ? 'common-frame' : null;
+    if (workshop.helpTarget && (workshop.helpTarget as { part?: string }).part === 'common-scrollbar') workshop.helpTarget = { ...workshop.helpTarget, part: 'common-frame' } as typeof workshop.helpTarget;
+    if (workshop.assistance && (workshop.assistance.part as string) === 'common-scrollbar') workshop.assistance = workshop.activePart === 'common-frame' ? { ...workshop.assistance, part: 'common-frame' } : { part: null, elapsedMs: 0 };
+  }
+  const documents = state.persistent?.setDocuments;
+  if (Array.isArray(documents)) for (const doc of documents) if (doc?.parts && 'common-scrollbar' in doc.parts) mergeLegacyScrollbarIntoFrame(doc.parts as Record<string, unknown>);
+}
 
 /** Geometry can be repaired without resetting a paid/completed production. */
 function repairWorkshopRects(state: GameState): void {
@@ -122,6 +135,7 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
   if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
   if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
   if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();
+  repairLegacyScrollbar(candidate);
   repairWorkshopRects(candidate);
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
   return data;

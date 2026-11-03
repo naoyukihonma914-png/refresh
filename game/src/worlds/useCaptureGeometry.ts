@@ -117,7 +117,7 @@ export function collectCaptureGeometry(root:HTMLElement,state:GameState):Capture
     for(const [source,selector] of [['common-button','.app-layout .app-layout-part :is(button.win-button,button.nav-button)'],['common-heading','.app-layout .app-layout-part :is(h1,h2,h3)'],['common-progress','.app-layout .app-layout-part progress']] as const){
       if(adopted(source))for(const control of node.querySelectorAll(selector))element(`${app}:part:${source}`,source,control,layer,app,source);
     }
-    if(adopted('common-scrollbar'))for(const candidate of node.querySelectorAll<HTMLElement>('.app-layout,.app-layout *')){
+    if(adopted('common-frame'))for(const candidate of node.querySelectorAll<HTMLElement>('.app-layout,.app-layout *')){
       if(!shown(candidate))continue;
       const style=getComputedStyle(candidate),raw=candidate.getBoundingClientRect();
       const vertical=candidate.offsetWidth-candidate.clientWidth-parseFloat(style.borderLeftWidth||'0')-parseFloat(style.borderRightWidth||'0');

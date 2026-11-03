@@ -39,7 +39,7 @@ describe('エディタのジョブは工程を進め、人が仕上げる',()=>{
   let s=actWorkshop(job(),{type:'selectPart',part:'common-frame'},now);const rect=getWorkshopPart('common-frame').defaultRect;
   s=actWorkshop(s,{type:'place',part:'common-frame',rect},now);s=actWorkshop(s,{type:'addElement',part:'common-frame',element:'close',side:'start'},now);
   const design=s.run.workshop.parts['common-frame']!.design,next=advanceWorkshopAssistance(s,duration(),now+duration());
-  expect(next.run.workshop.parts['common-frame']!.step).toBe(2);expect(next.run.workshop.parts['common-frame']!.elements).toEqual(['close','title','minimize','maximize']);expect(next.run.workshop.parts['common-frame']!.design).toEqual(design);expect(next.run.workshop.parts['common-frame']!.rect).toEqual(rect);
+  expect(next.run.workshop.parts['common-frame']!.step).toBe(2);expect(next.run.workshop.parts['common-frame']!.elements).toEqual(['close','title','minimize','maximize','track','thumb','arrows']);expect(next.run.workshop.parts['common-frame']!.design).toEqual(design);expect(next.run.workshop.parts['common-frame']!.rect).toEqual(rect);
  });
  it('配置できない保存矩形をおすすめへ動かさず停止し、払いも発生しない',()=>{
   let s=job();const definition=getWorkshopPart('common-button');s=actWorkshop(s,{type:'place',part:'common-button',rect:definition.defaultRect},now);

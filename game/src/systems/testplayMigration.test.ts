@@ -8,7 +8,8 @@ import {isPageDesign,PAGE_PARTS,validPagePlacement} from './pageDesign';
 import {decodeSave,encodeSave} from './save';
 import {isGameState} from './state';
 import {migrateLegacyPageDesign,migrateTestplaySave} from './testplayMigration';
-import {isWorkshopHelpTarget} from './workshopState';
+import {isWorkshopHelpTarget,mergeLegacyScrollbarIntoFrame} from './workshopState';
+const foldedParts=(parts:Record<string,unknown>)=>{const copy=structuredClone(parts);mergeLegacyScrollbarIntoFrame(copy);return copy;};
 import {enterWorkshop} from './workshop';
 const fixtures=['seed-before-layout','seed-custom-layout','seed-inherited-layout','workshop-mid','desktop-records','shipping'] as const;
 const oldSave=(name:typeof fixtures[number])=>JSON.parse(gunzipSync(readFileSync(new URL(`./testdata/tp-v15-main-${name}.json.gz`,import.meta.url))).toString());
@@ -23,8 +24,9 @@ describe('TP1: 真正main形式15から16への移行',()=>{
   expect(state.run.seed.built).toEqual(source.run.seed.built);expect(state.run.seed.history).toEqual(source.run.seed.history);expect(state.run.seed.autoCursors).toBe(source.run.seed.autoCursors);
   for(const field of ['background','text','button','headingFont','bodyFont','motion','heading'] as const)expect(state.run.seed.page[field]).toEqual(source.run.seed.page[field]);
   if(source.run.seed.page.layout){const layout=state.run.seed.page.layout!;expect(Object.keys(layout.parts).sort()).toEqual([...PAGE_PARTS].sort());expect(PAGE_PARTS.every(part=>validPagePlacement(layout,part,layout.parts[part]))).toBe(true);}
-  for(const field of ['specs','seedSkills','editorSkills','editorCustomization','progress','productionNote','setDocuments','products','screenshots'] as const)expect(state.persistent[field]).toEqual(source.persistent[field]);
-  expect(state.run.workshop.parts).toEqual(source.run.workshop.parts);expect(state.run.workshop.purchasedSets).toEqual(source.run.workshop.purchasedSets);expect(state.run.workshop.helpTarget).toBeNull();
+  for(const field of ['specs','seedSkills','editorSkills','editorCustomization','progress','productionNote','products','screenshots'] as const)expect(state.persistent[field]).toEqual(source.persistent[field]);
+  expect(state.persistent.setDocuments.map(doc=>({...doc,parts:foldedParts(doc.parts as Record<string,unknown>)}))).toEqual(source.persistent.setDocuments.map((doc:{parts:Record<string,unknown>})=>({...doc,parts:foldedParts(doc.parts)})));
+  expect(state.run.workshop.parts).toEqual(foldedParts(source.run.workshop.parts));expect(state.run.workshop.purchasedSets).toEqual(source.run.workshop.purchasedSets);expect(state.run.workshop.helpTarget).toBeNull();
   expect(decodeSave(encodeSave(state))).toEqual(state);expect(JSON.stringify(source)).toBe(untouched);
  });
  it('未配置の旧プレイヤーだけを未紹介にし、引継ぎ直後のbuilt=[]を再紹介しない',()=>{

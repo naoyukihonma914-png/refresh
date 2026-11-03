@@ -169,6 +169,32 @@ export function isWorkshopCombo(x:unknown):x is WorkshopCombo {
   return record(x)&&Number.isSafeInteger(x.count)&&Number(x.count)>=0
     &&(x.count===0?x.lastCompletedAt===null:amount(x.lastCompletedAt));
 }
+/** The scrollbar part merged into the frame (2026-11): fold a legacy production record into the frame's, in place. */
+export function mergeLegacyScrollbarIntoFrame(parts:Record<string,unknown>):void {
+  const scroll=parts['common-scrollbar'] as {step?:unknown;elements?:unknown;design?:{scrollbarWidth?:unknown;arrows?:unknown}}|undefined;
+  if(!scroll||typeof scroll!=='object')return;
+  delete parts['common-scrollbar'];
+  const scrollElements=Array.isArray(scroll.elements)?scroll.elements.filter(e=>['track','thumb','arrows'].includes(e as string)):[];
+  const frameDef=getWorkshopPart('common-frame');
+  const frame=parts['common-frame'] as {step?:unknown;elements?:unknown;design?:Record<string,unknown>}|undefined;
+  if(frame&&typeof frame==='object'){
+    if(Array.isArray(frame.elements)&&typeof frame.step==='number')frame.elements=frame.step>=2?[...frameDef.elements]:frame.step===1?[...new Set([...frame.elements,...scrollElements])]:frame.elements;
+    if(frame.design&&scroll.design)frame.design={...frame.design,...(typeof scroll.design.scrollbarWidth==='number'?{scrollbarWidth:scroll.design.scrollbarWidth}:{}),...(typeof scroll.design.arrows==='boolean'?{arrows:scroll.design.arrows}:{})};
+  }else{
+    const step=scroll.step===0?0:1;
+    parts['common-frame']={...scroll,step,rect:{...frameDef.defaultRect},elements:step===0?[]:scrollElements,completedAt:null,exportedAt:null,tested:false};
+  }
+}
+/** Frozen recording formats keep their original part ids; validate them through a virtual fold instead of rewriting them. */
+export function isFrozenWorkshopState(x:unknown):x is WorkshopState {
+  if(isWorkshopState(x))return true;
+  if(!record(x)||!record(x.parts)||!('common-scrollbar' in x.parts))return false;
+  const copy=structuredClone(x) as Record<string,unknown>&{parts:Record<string,unknown>;activePart?:unknown;helpTarget?:{part?:unknown}|null};
+  mergeLegacyScrollbarIntoFrame(copy.parts);
+  if(copy.activePart==='common-scrollbar')copy.activePart=copy.parts['common-frame']?'common-frame':null;
+  if(copy.helpTarget&&copy.helpTarget.part==='common-scrollbar')copy.helpTarget.part='common-frame';
+  return isWorkshopState(copy);
+}
 export function isWorkshopState(x:unknown):x is WorkshopState {
   if(record(x)&&x.combo!==undefined&&!isWorkshopCombo(x.combo))return false;
   if(record(x)&&x.helpTarget!==undefined&&x.helpTarget!==null&&!isWorkshopHelpTarget(x.helpTarget))return false;

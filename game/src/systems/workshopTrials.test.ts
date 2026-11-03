@@ -8,7 +8,6 @@ import {advanceFinishTrial,createFinishTrialState,type FinishTrialAction} from '
 
 const successful:Record<string,FinishTrialAction[]>={
  'common-frame':[{type:'window',mode:'minimized'},{type:'window',mode:'normal'}],
- 'common-scrollbar':[{type:'scroll',position:BALANCE.workshop.testplay.scrollOverflowPx,extent:BALANCE.workshop.testplay.scrollOverflowPx}],
  'common-button':[{type:'press',control:'apply'}],
  'common-heading':[{type:'heading',expanded:false},{type:'heading',expanded:true}],
  'common-progress':[{type:'fill-start'},{type:'fill-end'}],
@@ -55,7 +54,7 @@ describe('TP3：実部品の固有の仕上げ',()=>{
   expect(play('mail-unread',[{type:'message-read'}]).done).toBe(false);
  });
  it('スクロールは実際に最後まで動かし、先頭・非overflow・NaNの値では完成しない',()=>{
-  for(const part of ['common-scrollbar','mail-body'] as const){
+  for(const part of ['mail-body'] as const){
    for(const action of [{type:'scroll',position:0,extent:100},{type:'scroll',position:2,extent:0},{type:'scroll',position:NaN,extent:100},{type:'scroll',position:10,extent:100}] as FinishTrialAction[])expect(play(part,[action]).done).toBe(false);
    expect(play(part,[{type:'scroll',position:100,extent:100}]).done).toBe(true);
   }

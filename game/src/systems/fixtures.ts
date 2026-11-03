@@ -47,7 +47,7 @@ export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
   ...TP_SEED_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp1-${view}-era${era}`)),
   ...[0,1,2].map(era=>`tp1-workshop-shell-era${era}`),
   ...TP_WORKSHOP_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp2-${view}-era${era}`)),
-  ...[0,5,11,17,22].flatMap(count=>[0,1,2].map(era=>`tp3-progress-${count}-era${era}`)),
+  ...[0,5,11,17,21].flatMap(count=>[0,1,2].map(era=>`tp3-progress-${count}-era${era}`)),
   ...TP_MAIN_PARTS.flatMap(part=>[0,1,2].map(era=>`tp3-finish-${part.id}-era${era}`)),
   ...[0,1,2].map(era=>`tp3-second-run-era${era}`),
   ...STAGE8B_DESKTOP_VIEWS.flatMap(view=>[0,1,2,3].map(era=>`stage8b-${view}-era${era}`)),
@@ -94,7 +94,7 @@ export function completeWorkshopPartFixture(s:GameState,id:WorkshopPartId,now:nu
  return exported?actWorkshop(s,{type:'export',part:id},now):s;
 }
 function customizeCommon(s:GameState):GameState {
- const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','close','minimize','maximize'];s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:BASE_PALETTE[11]!,textColor:BASE_PALETTE[4]!,titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:BASE_PALETTE[4]!,minimize:BASE_PALETTE[4]!,maximize:BASE_PALETTE[4]!},symbolShape:'square'}},s.lastTickAt);}
+ const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','minimize','maximize','close','track','thumb','arrows'];s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:BASE_PALETTE[11]!,textColor:BASE_PALETTE[4]!,titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:BASE_PALETTE[4]!,minimize:BASE_PALETTE[4]!,maximize:BASE_PALETTE[4]!},symbolShape:'square'}},s.lastTickAt);}
  s.run.workshop.activePart='common-frame';return s;
 }
 function customEditor(s:GameState,era:number):GameState {
@@ -423,7 +423,7 @@ function examplesFixture(mode:string,era:number,now:number):GameState {
   return setExamplesEnabled(s,!mode.endsWith('-off'));
  }
  if(mode.startsWith('route'))return setExamplesEnabled(testplayWorkshop(now,era),mode.endsWith('-on'));
- let s=testplayMainPrefix(testplayWorkshop(now,era),2,now);
+ let s=testplayMainPrefix(testplayWorkshop(now,era),TP_MAIN_PARTS.findIndex(p=>p.id==='common-button'),now);
  const part=getWorkshopPart('common-button');
  s=actWorkshop(s,{type:'selectPart',part:part.id},now);
  if(!mode.startsWith('place')){

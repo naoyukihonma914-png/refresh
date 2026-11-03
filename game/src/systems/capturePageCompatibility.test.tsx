@@ -13,6 +13,7 @@ import {createFixture} from './fixtures';
 import {isLegacyPageDesign} from './legacyPageDesign';
 import {createPageDesign,isPageDesign,PAGE_PARTS,recommendedPage} from './pageDesign';
 import {isProductRecord} from './releaseState';
+import {mergeLegacyScrollbarIntoFrame} from './workshopState';
 import {decodeSave,encodeSave} from './save';
 import {SCHEMA_VERSION} from './state';
 
@@ -91,8 +92,11 @@ describe('TP-1：旧ページ配置を含む写真と製品は過去の契約で
  it('実形式15の財布・制作・撮影11を保ち、現在のページだけを移行できる',()=>{
   const old=published().save,data=JSON.stringify(old),s=decodeSave(data);
   expect(old.schemaVersion).toBe(15);expect(s.schemaVersion).toBe(SCHEMA_VERSION);
-  expect(s.resources).toEqual(old.resources);expect(s.run.workshop.parts).toEqual(old.run.workshop.parts);
-  expect(s.persistent.setDocuments).toEqual(old.persistent.setDocuments);
+  expect(s.resources).toEqual(old.resources);
+  const expectedParts=structuredClone(old.run.workshop.parts);mergeLegacyScrollbarIntoFrame(expectedParts as Record<string,unknown>);
+  expect(s.run.workshop.parts).toEqual(expectedParts);
+  const expectedDocs=structuredClone(old.persistent.setDocuments);for(const doc of expectedDocs)mergeLegacyScrollbarIntoFrame(doc.parts as unknown as Record<string,unknown>);
+  expect(s.persistent.setDocuments).toEqual(expectedDocs);
   expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
   expect(isPageDesign(s.run.seed.page)).toBe(true);
   const oldShot=old.persistent.screenshots[0] as Screenshot;
