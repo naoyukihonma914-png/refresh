@@ -41,7 +41,7 @@ describe('殻とピースの案内と制作パネル',()=>{
  it.each(['ja','en','en-XA'])('%s：制作中もセット・パーツを残し、ピースと任意調整を続けて出す',language=>{
   const s=started(),before=structuredClone(s),html=navigator(s,language);
   expect((html.match(/data-workshop-next-hand=/g)??[])).toHaveLength(1);
-  expect(html).toContain('data-workshop-next-hand="spawnPiece"');
+  expect(html).toContain('data-workshop-next-hand="fitPiece"');
   expect(html).toContain('data-workshop-piece="scrollbar"');expect(html).toContain('data-workshop-customize="common-frame"');
   for(const zone of ['sets','parts','pieces'])expect(html).toContain(`data-workshop-zone="${zone}"`);
   expect(html).not.toContain('backToParts');expect(html).not.toContain('ws-fitting-part-chips');
@@ -50,7 +50,7 @@ describe('殻とピースの案内と制作パネル',()=>{
  });
  it('ピースを出す案内もドラッグの案内も、代わりにはめるボタンを持たない',()=>{
   let s=started();const render=()=>renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} i18n={createI18n('ja')}/>);
-  expect(render()).toContain('data-workshop-next-hand="spawnPiece"');expect(render()).not.toContain('<button');
+  expect(render()).toContain('data-workshop-next-hand="fitPiece"');expect(render()).not.toContain('<button');
   s=actWorkshop(s,{type:'spawnPiece',part:'common-frame',piece:'title'},now);
   expect(render()).toContain('data-workshop-next-hand="fitPiece"');expect(render()).not.toContain('<button');
  });
@@ -61,9 +61,9 @@ describe('殻とピースの案内と制作パネル',()=>{
  });
  it('はめ済みと出現中を区別し、出現中の名前をもう一度出すボタンにしない',()=>{
   let s=started();s=actWorkshop(s,{type:'spawnPiece',part:'common-frame',piece:'title'},now);
-  expect(navigator(s)).toMatch(/data-workshop-piece="title" data-piece-status="spawned"[^>]*disabled/);
+  expect(navigator(s)).toMatch(/data-workshop-piece="title"[^>]*data-piece-status="spawned"[^>]*aria-pressed="true"/);
   s=actWorkshop(s,{type:'fitPiece',part:'common-frame',piece:'title',socket:'title'},now);
-  expect(navigator(s)).toMatch(/data-workshop-piece="title" data-piece-status="fitted"[^>]*disabled/);
+  expect(navigator(s)).toMatch(/data-workshop-piece="title"[^>]*data-piece-status="fitted"[^>]*disabled/);
  });
 });
 
@@ -90,7 +90,7 @@ describe('Tesseraのアップデートへの案内',()=>{
  });
  it('取得済みなら過去の知らせを開き直しても購入の案内を戻さない',()=>{
   const s=started();s.run.workshop.guide.current='updateAvailable';s.persistent.editorSkills.push('update');
-  expect(workshopExampleHand(s).kind).toBe('spawnPiece');
+  expect(workshopExampleHand(s).kind).toBe('fitPiece');
  });
  it.each(['ja','en'])('%s：価格3の取得条件は状態に従い、後の3項目は高い残高でも取得できない',language=>{
   const s=started(),i18n=createI18n(language);s.resources.tokens=2;

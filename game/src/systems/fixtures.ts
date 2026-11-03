@@ -1,3 +1,4 @@
+import { selectPuzzlePart } from './workshopPuzzle';
 import { advanceAdvice, createAdviceState } from './advice';
 import { reconcileProgress } from './longPlay';
 import { actAppBuild } from './appBuild';
@@ -154,6 +155,12 @@ function prototypeReady(now:number):GameState {
 
 // Runtime fixed states use memory storage and never overwrite a real save.
 export function createFixture(name:string|null,now:number):GameState|null {
+ const state=fixtureState(name,now);if(!state)return null;
+ const w=state.run.workshop,id=w.activePart;
+ if(id&&id!=='common-scrollbar'&&w.parts[id]?.step!==4)state.run.workshop={...selectPuzzlePart(w,id),view:w.view};
+ return state;
+}
+function fixtureState(name:string|null,now:number):GameState|null {
  if(!name||!FIXTURE_NAMES.includes(name))return null;
  if(name==='intro')return createInitialState(now);
  const fitting=/^fitting-(entry|frame|mail)-era([01])$/.exec(name);

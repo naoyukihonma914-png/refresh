@@ -2,6 +2,7 @@ import { BALANCE } from '../config/balance';
 import { fittingDefinition, type FittingDefinition } from '../content/workshopFitting';
 import { getWorkshopPart, type WorkshopPartId } from '../content/workshopCatalog';
 import type { PartProduction } from './workshopState';
+import type { LoosePiecePosition } from './workshopPuzzle';
 
 export interface PartFitting {
   /** Piece identity determines its behavior; the value determines its position. */
@@ -12,6 +13,8 @@ export interface PartFitting {
   completionPaid: boolean;
   /** Previously paid placement credit is consumed before any new piece income. */
   prepaid?: number;
+  hidden?:string[];
+  positions?:Record<string,LoosePiecePosition>;
 }
 export const emptyFitting = (): PartFitting => ({ sockets: {}, spawned: [], paid: [], completionPaid: false });
 export function fittedPieces(production: Pick<PartProduction,'elements'|'fitting'>, id: WorkshopPartId): string[] {
@@ -33,6 +36,8 @@ export function isPartFitting(value: unknown, id: WorkshopPartId): value is Part
   const f = value as PartFitting, definition = fittingDefinition(id);
   if (!f.sockets || typeof f.sockets !== 'object' || Array.isArray(f.sockets) || !Array.isArray(f.spawned) || !Array.isArray(f.paid) || typeof f.completionPaid !== 'boolean') return false;
   if (![f.spawned, f.paid].every(items => new Set(items).size === items.length && items.every(piece => definition.pieces.includes(piece)))) return false;
+  if(f.hidden!==undefined&&(!Array.isArray(f.hidden)||new Set(f.hidden).size!==f.hidden.length||!f.hidden.every(piece=>definition.pieces.includes(piece))))return false;
+  if(f.positions!==undefined&&(!f.positions||typeof f.positions!=='object'||Array.isArray(f.positions)||!Object.entries(f.positions).every(([piece,pos])=>definition.pieces.includes(piece)&&pos&&[pos.origin,pos.at].every(point=>point&&[point.x,point.y].every(value=>Number.isFinite(value)&&value>=0)))))return false;
   if(!f.paid.every(piece=>f.spawned.includes(piece))||f.completionPaid&&!definition.pieces.every(piece=>f.paid.includes(piece)))return false;
   if(f.prepaid!==undefined&&(!Number.isFinite(f.prepaid)||f.prepaid<0||f.prepaid>BALANCE.workshop.fitting.pieceRewardTotals[getWorkshopPart(id).category]))return false;
   return Object.entries(f.sockets).every(([piece, socket]) => typeof socket === 'string' && f.spawned.includes(piece) && f.paid.includes(piece) && canFitPiece(id, f, piece, socket));

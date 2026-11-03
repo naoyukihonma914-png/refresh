@@ -34,6 +34,8 @@ export interface PartProduction {
 export interface WorkshopHelpTarget {set:UiSetId;part?:WorkshopPartId}
 export interface WorkshopCombo {count:number;lastCompletedAt:number|null}
 export interface WorkshopState {
+  selectedParts?:WorkshopPartId[];
+  puzzleSet?:UiSetId;
   /** Absent in historical workshop pictures; completion chains belong only to this run. */
   combo?:WorkshopCombo;
   /** UI hints are optional in historical workshop presentation documents. */
@@ -70,6 +72,7 @@ export const createEditorCustomization = (stage:0|1|2=0): EditorCustomization =>
   panelWidths: { palette:BALANCE.workshop.customization.panelWidth,tools:BALANCE.workshop.customization.panelWidth,parts:BALANCE.workshop.customization.panelWidth },
 });
 export const createWorkshopState = (): WorkshopState => ({
+  selectedParts:[],puzzleSet:'common',
   combo:{count:0,lastCompletedAt:null},
   helpTarget:null,
   editorStageAtEntry:0,
@@ -193,6 +196,8 @@ export function isWorkshopState(x:unknown):x is WorkshopState {
   const entries=Object.entries(x.parts);
   if(!entries.every(([id,p])=>WORKSHOP_PARTS.some(d=>d.id===id)&&(x.purchasedSets as unknown[]).includes(getWorkshopPart(id as WorkshopPartId).set)&&isPartProduction(p,id as WorkshopPartId)))return false;
   if(x.activePart!==null&&(!WORKSHOP_PARTS.some(d=>d.id===x.activePart)||!x.parts[x.activePart as string]))return false;
+  if(x.puzzleSet!==undefined&&!SET_IDS.includes(x.puzzleSet as UiSetId))return false;
+  if(x.selectedParts!==undefined&&(!Array.isArray(x.selectedParts)||!unique(x.selectedParts)||!x.selectedParts.every(id=>typeof id==='string'&&id!=='common-scrollbar'&&!!(x.parts as Record<string,unknown>)[id]&&(x.puzzleSet===undefined||getWorkshopPart(id as WorkshopPartId).set===x.puzzleSet))||new Set(x.selectedParts.map(id=>getWorkshopPart(id as WorkshopPartId).set)).size>1))return false;
   if(x.assistance!==undefined){
     const assistant=x.assistance;
     if(!record(assistant)||!amount(assistant.elapsedMs)||assistant.elapsedMs>=BALANCE.workshop.assistStepMs

@@ -3,6 +3,7 @@ import { paletteFor } from '../content/palette';
 import { WORKSHOP_PARTS, SET_IDS, getWorkshopPart, type UiSetId, type WorkshopPartId, type WorkshopRect, type TestInteraction } from '../content/workshopCatalog';
 import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
+import { clearPuzzleSelection, ensurePuzzlePositions, puzzleParts, selectPuzzlePart, type PiecePoint } from './workshopPuzzle';
 import { productionCreditMultiplier } from './productionModel';
 import { grantTesseraUpdateFunds, tesseraUpdatePending } from './workshopUpdate';
 import type { GameState } from './state';
@@ -13,6 +14,8 @@ import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEdit
 
 export type WorkshopAction =
   | {type:'help';target:WorkshopHelpTarget|null}
+  | {type:'clearPartSelection';set?:UiSetId} | {type:'togglePart'|'focusPart';part:WorkshopPartId}
+  | {type:'togglePiece';part:WorkshopPartId;piece:string} | {type:'stagePiece';part:WorkshopPartId;piece:string;at?:PiecePoint}
   | {type:'buySet';set:UiSetId} | {type:'selectPart';part:WorkshopPartId}
   | {type:'spawnPiece'|'removePiece';part?:WorkshopPartId;piece:string}
   | {type:'fitPiece';part?:WorkshopPartId;piece:string;socket:string}
@@ -164,16 +167,21 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     return {...s,run:{...s.run,workshop:{...w,guide:{...w.guide,current:action.id,collapsed:false}}}};
   }
   if(w.enterMs>0)return s;
+  if(action.type==='clearPartSelection'&&action.set!==undefined&&!SET_IDS.includes(action.set))return s;
+  if(action.type==='clearPartSelection')return {...s,run:{...s.run,workshop:clearPuzzleSelection(w,action.set)}};
+  if(action.type==='togglePart')return {...s,run:{...s.run,workshop:selectPuzzlePart(w,action.part,true)}};
+  if(action.type==='focusPart')return puzzleParts(w).includes(action.part)?{...s,run:{...s.run,workshop:{...w,activePart:action.part}}}:s;
   if(action.type==='buySet'){
     if(!canBuyWorkshopSet(s,action.set))return s;
     const parts={...w.parts};
     for(const d of partsForSet(action.set))parts[d.id]={step:1,rect:{...d.defaultRect},elements:[],fitting:emptyFitting(),design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
     s={...s,resources:{...s.resources,pixels:s.resources.pixels-BALANCE.workshop.setCosts[action.set]},run:{...s.run,workshop:{...w,purchasedSets:[...w.purchasedSets,action.set],parts,activePart:partsForSet(action.set)[0]!.id,view:'workbench'}}};
+    s={...s,run:{...s.run,workshop:selectPuzzlePart(s.run.workshop,partsForSet(action.set)[0]!.id)}};
     s=showGuide(s,'place');
     s=showFirstSetHelp(s,action.set);
   }else if(action.type==='selectPart'){
     if(!w.parts[action.part])return s;
-    s={...s,run:{...s.run,workshop:{...w,activePart:action.part,view:'workbench'}}};
+    s={...s,run:{...s.run,workshop:selectPuzzlePart(w,action.part)}};
   }else if(action.type==='skill')s=buySkill(s,action.id);
   else if(action.type==='customize')s=customize(s,action.patch);
   else if(action.type==='view'){
@@ -203,7 +211,22 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     if(!current.fitting)return s;
     if(current!==p)s=writePart(s,id,current);
     const fitting=current.fitting;
-    if(action.type==='spawnPiece'){
+    if(action.type==='togglePiece'){
+      if(!definition.pieces.includes(action.piece)||fitting.sockets[action.piece]!==undefined)return s;
+      const hidden=fitting.hidden??[],visible=fitting.spawned.includes(action.piece)&&!hidden.includes(action.piece);
+      s=writePart(s,id,{...current,fitting:{...fitting,spawned:fitting.spawned.includes(action.piece)?fitting.spawned:[...fitting.spawned,action.piece],hidden:visible?[...hidden,action.piece]:hidden.filter(piece=>piece!==action.piece)}});
+      s={...s,run:{...s.run,workshop:ensurePuzzlePositions(s.run.workshop,[id])}};
+    }else if(action.type==='stagePiece'){
+      if(!definition.pieces.includes(action.piece)||action.at&&![action.at.x,action.at.y].every(value=>Number.isFinite(value)&&value>=0))return s;
+      const sockets={...fitting.sockets};delete sockets[action.piece];
+      const f={...fitting,sockets,spawned:fitting.spawned.includes(action.piece)?fitting.spawned:[...fitting.spawned,action.piece],hidden:(fitting.hidden??[]).filter(piece=>piece!==action.piece)};
+      s=writePart(s,id,{...current,fitting:f,elements:fittedPieces({...current,fitting:f},id)});
+      let next:GameState['run']['workshop']={...s.run.workshop,puzzleSet:getWorkshopPart(id).set,selectedParts:[...new Set([...puzzleParts(s.run.workshop).filter(other=>getWorkshopPart(other).set===getWorkshopPart(id).set),id])],activePart:id};
+      next=ensurePuzzlePositions(next,[id]);
+      const p=next.parts[id]!,positions={...p.fitting!.positions},previous=positions[action.piece]!;
+      positions[action.piece]={...previous,at:{...(action.at??previous.origin)}};
+      s={...s,run:{...s.run,workshop:{...next,parts:{...next.parts,[id]:{...p,fitting:{...p.fitting!,positions}}}}}};
+    }else if(action.type==='spawnPiece'){
       if(!definition.pieces.includes(action.piece)||fitting.spawned.includes(action.piece))return s;
       s=writePart(s,id,{...current,fitting:{...fitting,spawned:[...fitting.spawned,action.piece]}});
     }else if(action.type==='fitPiece'||action.type==='addElement'){
@@ -228,6 +251,7 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
       const finish=!fitting.completionPaid&&fittingComplete(next,id);
       if(finish)next={...next,step:4,tested:true,completedAt:now,createdStage:editorStage(s),fitting:{...nextFitting,completionPaid:true}};
       s=payPiece(writePart(s,id,next),id,now,firstFit,finish,pieceReward(id)-prepaid);
+      if(fittingComplete(next,id))s={...s,run:{...s.run,workshop:{...s.run.workshop,selectedParts:puzzleParts(s.run.workshop).filter(part=>part!==id)}}};
       if(finish){
         s={...s,run:{...s.run,workshop:{...s.run.workshop,combo:completionCombo(s,now)}}};
         if(s.run.workshop.guide.current==='updateAvailable')s={...s,run:{...s.run,workshop:{...s.run.workshop,guide:{...s.run.workshop.guide,current:null,collapsed:true}}}};

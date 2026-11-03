@@ -46,7 +46,7 @@ describe('殻とピースの工房',()=>{
   let s=workshop();const before=s.resources.pixels;s=actWorkshop(s,{type:'buySet',set:'common'},now);
   expect(before-s.resources.pixels).toBe(BALANCE.workshop.setCosts.common);
   expect(s.run.workshop.parts['common-scrollbar']).toBeUndefined();
-  for(const part of fittingPartsForSet('common'))expect(s.run.workshop.parts[part.id]).toMatchObject({step:1,rect:part.defaultRect,elements:[],fitting:{sockets:{},spawned:[],paid:[],completionPaid:false}});
+  for(const part of fittingPartsForSet('common'))expect(s.run.workshop.parts[part.id]).toMatchObject({step:1,rect:part.defaultRect,elements:[],fitting:{sockets:{},spawned:part.id==='common-frame'?[...fittingDefinition(part.id).pieces]:[],paid:[],completionPaid:false}});
   expect(isGameState(s)).toBe(true);
  });
  it('spawning does not fit or pay; a valid drag fits and the last piece completes immediately',()=>{

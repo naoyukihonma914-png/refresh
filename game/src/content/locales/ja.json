@@ -941,7 +941,7 @@
     "ws.cursorEffect": "毎秒 +{count}",
     "ws.intro": "作った画面が、UIを作る道具になりました。",
     "ws.guide.entered": "ここは {app}。まず共通パーツのUIセットから作ってみましょう。",
-    "ws.guide.place": "ピース名を押すと、右下の置き場に出ます。窪みへドラッグしてはめてみましょう。",
+    "ws.guide.place": "パーツを選ぶと、ピースがまとめて作業台の下に広がります。同じセットのパーツをいくつか選び、合う窪みにはめてみましょう。",
     "ws.guide.elements": "はめたピースは、その場で使えます。残りも組み立てていきましょう。",
     "ws.guide.adjust": "色や形は自分で選べます。標準のままでも大丈夫です。",
     "ws.guide.test": "すべてのピースがはまると完成です。ボタンやスライダーもその場で使えます。",
@@ -1591,7 +1591,7 @@
     "fitting.fitted": "はめ済み",
     "fitting.openAdjustments": "調整を開く",
     "fitting.closeAdjustments": "調整を閉じる",
-    "fitting.spawnHint": "「{name}」を作業台に出す",
+    "fitting.spawnHint": "ピース行で「{name}」を表示する",
     "fitting.dragHint": "「{name}」を窪みへドラッグする",
     "fitting.auto": "おまかせ",
     "fitting.adjustments": "調整",
@@ -1652,6 +1652,8 @@
     "fe.adjustmentColor": "調整で使う色",
     "fe.paletteDefault": "標準の背景",
     "fitting.customizePart": "「{name}」をカスタマイズ",
-    "ws.updateFirst": "先に Tessera をアップデートしてください。購入すると、ほかのトークン消費が使えるようになります。"
+    "ws.updateFirst": "先に Tessera をアップデートしてください。購入すると、ほかのトークン消費が使えるようになります。",
+    "fitting.selected": "選択中",
+    "fitting.hidden": "非表示"
   }
 }
