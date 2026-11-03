@@ -128,7 +128,7 @@ describe('TP：実操作の固定状態と真正v15入力',()=>{
    const socket=defaultPieceSocket(fittingDefinition('common-button'),s.run.workshop.parts['common-button']!.fitting!,'label')!;
    s=actWorkshop(s,{type:'fitPiece',part:'common-button',piece:'label',socket},now);
    s=actWorkshop(s,{type:'export',part:'common-button'},now);
-   expect(s.resources.tokens).toBe(BALANCE.workshop.exportTokens);expect(s.run.workshop.tokenDiscovered).toBe(true);
+   expect(s.resources.tokens).toBe(BALANCE.workshop.exportTokens+(era===0?BALANCE.workshop.updateGrantTokens:0));expect(s.run.workshop.tokenDiscovered).toBe(true);
   }
  });
  it('完成プレビューの公開URLは新しい本線21パーツの範囲で進捗を作る',()=>{

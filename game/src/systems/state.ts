@@ -55,6 +55,7 @@ export interface GameState {
     seedSkills: SeedSkill[];
     seedAppearance: { pattern: 'none' | 'dots' | 'grid' | 'diagonal'; marquee: boolean; era?:0|1; availableEra?:0|1 };
     editorSkills: EditorSkill[];
+    tesseraUpdateGrantReceived?:boolean;
     editorCustomization: EditorCustomization;
     setDocuments: SetDocument[];
     products: ProductRecord[];
@@ -89,7 +90,7 @@ export function createInitialState(now: number): GameState {
       specs: { color: 0, resolution: 0, refresh: 0, memory: 0, storage: 0, network: 0, graphics: 0 },
       playerName: null, productName: null, numberNotation: 'compact',
       seedSkills: [], seedAppearance: { pattern: 'none', marquee: false },
-      editorSkills: [], editorCustomization: createEditorCustomization(), setDocuments: [],
+      editorSkills: [], tesseraUpdateGrantReceived:false, editorCustomization: createEditorCustomization(), setDocuments: [],
       products: [], guideArchive: [], screenshots: [], desktopPrefs:createDesktopPreferences(), productionNote: null, noteUpdatedAt: null,
     },
   };
@@ -133,6 +134,7 @@ export function isGameState(value: unknown): value is GameState {
     || run.shipping.phase==='store'&&(run.shipping.storeElapsedMs===undefined||run.shipping.elapsedMs!==0)))return false;
   if(!isProgress(persistent.progress)||!isPlay(run.play))return false;
   if(typeof persistent.examplesEnabled!=='boolean')return false;
+  if(persistent.tesseraUpdateGrantReceived!==undefined&&typeof persistent.tesseraUpdateGrantReceived!=='boolean')return false;
   if(!isRecord(persistent.testplay)||typeof persistent.testplay.layoutGuideSeen!=='boolean'||!Array.isArray(persistent.testplay.helpSeen)||new Set(persistent.testplay.helpSeen).size!==persistent.testplay.helpSeen.length||!persistent.testplay.helpSeen.every(id=>SET_IDS.includes(id as UiSetId)))return false;
   if (!isDesktopPreferences(persistent.desktopPrefs)) return false;
   if (!isDesktopState(run.desktop) || run.world === 'desktop' && !run.desktop.entered) return false;

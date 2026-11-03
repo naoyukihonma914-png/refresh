@@ -33,7 +33,7 @@ describe('エディタのジョブはピースをはめ、最後のピースで�
   const expected=(BALANCE.workshop.categoryStepRewards.small.reduce((sum,value)=>sum+value,0)+BALANCE.workshop.finishRewards.small)*productionCreditMultiplier(source);
   expect(next.resources.pixels-source.resources.pixels).toBe(expected);expect(next.resources.tokens).toBe(source.resources.tokens);expect(canExportWorkshop(next)).toBe(true);
   const waiting=advanceWorkshopAssistance(next,1e12,now+2e12);expect(waiting.resources).toEqual(next.resources);expect(fittedCount(waiting,'common-heading')).toBe(0);
-  const exported=actWorkshop(next,{type:'export',part:'common-button'},now+2e12);expect(exported.resources.tokens).toBe(next.resources.tokens+BALANCE.workshop.exportTokens);
+  const exported=actWorkshop(next,{type:'export',part:'common-button'},now+2e12);expect(exported.resources.tokens).toBe(next.resources.tokens+BALANCE.workshop.exportTokens+BALANCE.workshop.updateGrantTokens);
   expect(advanceWorkshopAssistance(exported,1e12,now+3e12).resources).toEqual(exported.resources);expect(decodeSave(encodeSave(exported))).toEqual(exported);
  });
  it('共有窪みで選んだ記号の座と作風を保ち、欠けたピースを1枚ずつ足す',()=>{

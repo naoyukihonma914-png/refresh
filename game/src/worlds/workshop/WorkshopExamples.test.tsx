@@ -29,7 +29,7 @@ describe('殻とピースの案内と制作パネル',()=>{
     case 'spawnPiece':s=actWorkshop(s,{type:'spawnPiece',part:hand.part,piece:hand.piece},now);break;
     case 'fitPiece':{const p=s.run.workshop.parts[hand.part]!,socket=fittingDefinition(hand.part).sockets.find(socket=>socket.accepts.includes(hand.piece)&&(socket.stacked||!Object.values(p.fitting!.sockets).includes(socket.id)))!;s=actWorkshop(s,{type:'fitPiece',part:hand.part,piece:hand.piece,socket:socket.id},now);break;}
     case 'export':s=actWorkshop(s,{type:'export',part:hand.part},now);break;
-    case 'update':s=actWorkshop(s,{type:'guide',id:'close'},now);break;
+    case 'update':s=actWorkshop(s,{type:'skill',id:'update'},now);break;
     default:throw new Error(`Unexpected ${hand.kind}`);
    }
   }
@@ -42,7 +42,7 @@ describe('殻とピースの案内と制作パネル',()=>{
   const s=started(),before=structuredClone(s),html=navigator(s,language);
   expect((html.match(/data-workshop-next-hand=/g)??[])).toHaveLength(1);
   expect(html).toContain('data-workshop-next-hand="spawnPiece"');
-  expect(html).toContain('data-workshop-piece="scrollbar"');expect(html).toContain('data-workshop-action="openAdjustments"');
+  expect(html).toContain('data-workshop-piece="scrollbar"');expect(html).toContain('data-workshop-customize="common-frame"');
   for(const zone of ['sets','parts','pieces'])expect(html).toContain(`data-workshop-zone="${zone}"`);
   expect(html).not.toContain('backToParts');expect(html).not.toContain('ws-fitting-part-chips');
   for(const legacy of ['ws-steps','data-workshop-inspector','data-workshop-dimension','confirmAdjustment','data-workshop-action="place"','data-workshop-action="element"','ws-test-hint'])expect(html).not.toContain(legacy);
@@ -57,7 +57,7 @@ describe('殻とピースの案内と制作パネル',()=>{
  it('OFFで誘導だけを隠し、同じピース一覧と調整への入口を残す',()=>{
   const s=started();s.persistent.examplesEnabled=false;const before=structuredClone(s),html=navigator(s);
   expect(html).not.toContain('data-workshop-next-hand');expect(html).not.toContain('data-example-next');expect(html).not.toContain('ws-next-indicator');
-  expect(html).toContain('data-workshop-piece="title"');expect(html).toContain('data-workshop-action="openAdjustments"');expect(html).not.toContain('data-workshop-inspector');expect(s).toEqual(before);
+  expect(html).toContain('data-workshop-piece="title"');expect(html).toContain('data-workshop-customize="common-frame"');expect(html).not.toContain('data-workshop-inspector');expect(s).toEqual(before);
  });
  it('はめ済みと出現中を区別し、出現中の名前をもう一度出すボタンにしない',()=>{
   let s=started();s=actWorkshop(s,{type:'spawnPiece',part:'common-frame',piece:'title'},now);
@@ -69,12 +69,23 @@ describe('殻とピースの案内と制作パネル',()=>{
 
 
 describe('Tesseraのアップデートへの案内',()=>{
+ it.each(['ja','en','en-XA'])('%s: other token purchases explain that the update comes first, then unlock immediately',language=>{
+  const state=started(),i18n=createI18n(language);state.persistent.tesseraUpdateGrantReceived=true;state.resources.tokens=4;
+  const render=()=>renderToStaticMarkup(<WorkshopPlugins state={state} i18n={i18n} dispatch={()=>{}} onClose={()=>{}}/>);
+  const locked=render();expect(locked).toContain(i18n.t('ws.updateFirst'));
+  for(const id of ['presets','eyedropper'])expect(locked).toMatch(new RegExp(`data-workshop-skill="${id}"[^>]*disabled`));
+  expect(locked).not.toMatch(/data-workshop-skill="update"[^>]*disabled/);
+  state.persistent.editorSkills.push('update');state.resources.tokens=1;
+  expect(render()).not.toContain(i18n.t('ws.updateFirst'));
+  for(const id of ['presets','eyedropper'])expect(render()).not.toMatch(new RegExp(`data-workshop-skill="${id}"[^>]*disabled`));
+ });
+
  it.each(['ja','en','en-XA'])('%s：初回の知らせだけが購入画面を案内し、制作を代わりに進めない',language=>{
   const s=started();s.run.workshop.guide.current='updateAvailable';s.run.workshop.guide.seen.push('updateAvailable');
   const before=structuredClone(s),i18n=createI18n(language);
   const html=renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} onOpenPlugins={()=>{}} i18n={i18n}/>);
   expect(workshopExampleHand(s)).toEqual({kind:'update'});expect(html).toContain('data-workshop-next-hand="update"');expect(html).toContain('data-workshop-example-action="update"');expect(html).toContain(i18n.t('ws.skill.update'));expect(s).toEqual(before);
-  const closed=actWorkshop(s,{type:'guide',id:'close'},now);expect(workshopExampleHand(closed).kind).toBe('spawnPiece');
+  const closed=actWorkshop(s,{type:'guide',id:'close'},now);expect(workshopExampleHand(closed).kind).toBe('update');
   s.persistent.examplesEnabled=false;expect(renderToStaticMarkup(<WorkshopExamples state={s} dispatch={()=>{}} onRelease={()=>{}} onOpenPlugins={()=>{}} i18n={i18n}/>)).toBe('');
  });
  it('取得済みなら過去の知らせを開き直しても購入の案内を戻さない',()=>{

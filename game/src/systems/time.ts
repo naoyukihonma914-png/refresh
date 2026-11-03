@@ -6,6 +6,7 @@ import { advanceHomeGeneration } from './economy';
 import type { GameState } from './state';
 import { advanceSeedInstaller, updateSeedGuide } from './seed';
 import { advanceWorkshop } from './workshop';
+import { grantTesseraUpdateFunds } from './workshopUpdate';
 import { advanceShipping } from './release';
 
 export interface TimeResult {
@@ -36,6 +37,7 @@ function applyTime(state: GameState, elapsedMs: number, creditedMs: number, capp
 // runtime が performance.now() の差と、前回の端数を渡す。
 export function advanceActiveTime(state: GameState, elapsedMs: number, language='ja', captures=true): TimeResult {
   if (!Number.isFinite(elapsedMs)) throw new Error('Invalid active duration');
+  state=grantTesseraUpdateFunds(state);
   const elapsed = Math.max(0, elapsedMs);
   const creditedMs = Math.floor(elapsed / BALANCE.time.tickMs) * BALANCE.time.tickMs;
   if (state.run.world === 'release') return { state: advanceShipping(state, creditedMs), elapsedMs: elapsed, creditedMs, pixels: 0, capped: false, remainderMs: elapsed - creditedMs };

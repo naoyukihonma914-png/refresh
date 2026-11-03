@@ -68,9 +68,9 @@ describe('第3版：朱色の部品の隠し要素',()=>{
   let before=s;s=observeProgress(before,fitBasicButton(before));
   s=reconcileProgress(s,now);expect(s.persistent.progress.secretPart).toBe(false);expect(s.persistent.progress.records['secret-art']).toBeUndefined();
   before=s;const beforeTokens=s.resources.tokens;s=observeProgress(before,actWorkshop(before,{type:'export',part:'common-button'},now+1));
-  s=reconcileProgress(s,now+1);expect(s.persistent.progress.secretPart).toBe(true);expect(s.persistent.progress.records['secret-art']).toBe(now+1);expect(s.resources.tokens-beforeTokens).toBe(1);
+  s=reconcileProgress(s,now+1);expect(s.persistent.progress.secretPart).toBe(true);expect(s.persistent.progress.records['secret-art']).toBe(now+1);expect(s.resources.tokens-beforeTokens).toBe(BALANCE.workshop.exportTokens+BALANCE.workshop.updateGrantTokens);
   before=s;s=reconcileProgress(observeProgress(before,actWorkshop(before,{type:'export',part:'common-button'},now+2)),now+2);
-  expect(s).toBe(before);expect(s.resources.tokens-beforeTokens).toBe(1);expect(decodeSave(encodeSave(s)).persistent.progress).toEqual(s.persistent.progress);
+  expect(s).toBe(before);expect(s.resources.tokens-beforeTokens).toBe(BALANCE.workshop.exportTokens+BALANCE.workshop.updateGrantTokens);expect(decodeSave(encodeSave(s)).persistent.progress).toEqual(s.persistent.progress);
   const desktop=createFixture('desktop-ready',now)!;desktop.persistent.progress=s.persistent.progress;
   expect(actCommon(desktop,{type:'letter-open'},now+3).run.play.letterOpen).toBe(true);
  });

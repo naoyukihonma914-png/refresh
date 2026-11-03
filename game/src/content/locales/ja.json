@@ -1553,7 +1553,7 @@
     "examples.workshop.export": "できたパーツをエクスポートして、トークンにする。",
     "examples.workshop.exit": "作ったパーツでデスクトップ画面を組み立てる。",
     "examples.workshop.release": "表示要件を満たすため、試作版をリリースする。",
-    "examples.workshop.customize": "完成です。調整を開くと、あとからも色や形を変えられます。",
+    "examples.workshop.customize": "完成です。パーツの行のカスタマイズから、あとからも色や形を変えられます。",
     "examples.workshop.custom": "こだわり",
     "examples.workshop.customPlacement": "こだわり：場所と大きさ",
     "examples.workshop.customBeforeAdjustment": "場所と大きさは作業台のつまみで変えられます。色と形は、要素を足してから。",
@@ -1620,7 +1620,7 @@
     "fe.goal": "短期目標：{name}",
     "fe.guide": "榎本",
     "fitting.previewFor": "「{name}」の完成予想",
-    "ws.guide.updateAvailable": "エクスポートで手に入るトークンで、Tessera をアップデートできます。3トークンで道具が小さくなり、作業台が広がります。新しく作るパーツの毎秒も少し増えます。",
+    "ws.guide.updateAvailable": "エクスポートできましたね。アップデート資金として{count}トークンを進呈します。まずは Tessera をアップデートしましょう。道具が小さくなり、作業台が広がります。新しく作るパーツの毎秒も少し増えます。",
     "ws.guide.updateAvailable.title": "Tessera のアップデート",
     "ws.skill.gessoUpdate": "Gesso をアップデートする",
     "ws.skill.gessoUpdate.description": "Gesso の次の世代",
@@ -1650,6 +1650,8 @@
     "fitting.optionalHide": "任意ツールを閉じる",
     "fe.paletteTargets": "作業台の背景と調整で使う色",
     "fe.adjustmentColor": "調整で使う色",
-    "fe.paletteDefault": "標準の背景"
+    "fe.paletteDefault": "標準の背景",
+    "fitting.customizePart": "「{name}」をカスタマイズ",
+    "ws.updateFirst": "先に Tessera をアップデートしてください。購入すると、ほかのトークン消費が使えるようになります。"
   }
 }

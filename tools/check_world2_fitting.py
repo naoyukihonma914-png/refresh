@@ -247,7 +247,7 @@ class FittingReview:
         invalid = self.state(page)
         assert invalid['resources'] == spawned['resources'], 'An incompatible drop paid pixels'
         assert invalid['run']['workshop']['parts']['common-frame']['elements'] == []
-        page.locator('[data-workshop-action="openAdjustments"]').click()
+        page.locator('[data-workshop-customize]').click()
         expect(page.locator('[data-workshop-customization]')).to_be_visible()
         self.capture(page, case, '03-era0-adjustments', '段①・任意の調整だけを開く')
         self.close_adjustments(page)
@@ -301,7 +301,7 @@ class FittingReview:
         before_export = self.state(page)
         page.locator('[data-workshop-action="export"]').click()
         after_export = self.state(page)
-        assert after_export['resources']['tokens'] == before_export['resources']['tokens'] + 1
+        assert after_export['resources']['tokens'] == before_export['resources']['tokens'] + 4
         guide = after_export['run']['workshop']['guide']
         assert guide['current'] == 'updateAvailable', guide
         expect(page.locator('[data-workshop-next-hand="update"]')).to_be_visible()
@@ -313,8 +313,9 @@ class FittingReview:
             assert refitted['run']['workshop']['parts']['common-frame'][key] == after_export['run']['workshop']['parts']['common-frame'][key]
         page.locator('[data-workshop-action="plugins"]').click()
         update = page.locator('[data-workshop-skill="update"]')
-        expect(update).to_be_disabled()
-        assert after_export['resources']['tokens'] == 1, after_export['resources']
+        expect(update).to_be_enabled()
+        expect(page.locator('[data-workshop-skill="presets"]')).to_be_disabled()
+        assert after_export['resources']['tokens'] == 4, after_export['resources']
         page.locator('.ws-plugin-dialog header button').click()
         self.select_part(page, 'common-button')
         case['checks']['commonFrameContainsWidgets'] = self.common_frame_geometry(page)
@@ -325,7 +326,7 @@ class FittingReview:
         self.fit(page, 'separator', 'separator')
         page.locator('[data-workshop-action="export"]').click()
         ready = self.state(page)
-        assert ready['resources']['tokens'] == 3, ready['resources']
+        assert ready['resources']['tokens'] == 6, ready['resources']
         # Let earlier completion paint finish before photographing the upgrade.
         # This advances ordinary gameplay time; it does not alter the saved state directly.
         page.clock.run_for(2_000)
@@ -349,7 +350,7 @@ class FittingReview:
         expect(completed).to_be_visible()
         part_rate = float(completed.get_attribute('data-workshop-completion-part-rate'))
         assert abs(part_rate - 9 * 1.15) < 1e-9, part_rate
-        case['checks']['realUpgrade'] = {'tokenCost': 3, 'oneTokenDisabled': True,
+        case['checks']['realUpgrade'] = {'tokenCost': 3, 'firstExportGrant': 3, 'otherPurchasesLocked': True,
                                        'earnedTokensBeforePurchase': ready['resources']['tokens'],
                                        'newPartCreatedStage': upgraded_part['createdStage'],
                                        'newPartRate': part_rate, 'newPartMultiplier': 1.15}

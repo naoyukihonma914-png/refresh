@@ -4,6 +4,7 @@ import { WORKSHOP_PARTS, SET_IDS, getWorkshopPart, type UiSetId, type WorkshopPa
 import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
 import { productionCreditMultiplier } from './productionModel';
+import { grantTesseraUpdateFunds, tesseraUpdatePending } from './workshopUpdate';
 import type { GameState } from './state';
 import { completionCombo, workshopComboMultiplier } from './workshopExamples';
 import { FITTING_PARTS, fittingDefinition, fittingPartsForSet as partsForSet } from '../content/workshopFitting';
@@ -120,7 +121,7 @@ function payPiece(s:GameState,id:WorkshopPartId,now:number,firstFit:boolean,fini
 }
 export function canBuyEditorSkill(s:GameState,id:EditorSkill):boolean {
   const skill=BALANCE.workshop.skills.find(p=>p.id===id);
-  return !!skill&&!['batch','dimensions','layers','snap','gessoUpdate','brio','brioUpdate'].includes(id)&&!s.persistent.editorSkills.includes(id)&&s.resources.tokens>=skill.cost
+  return !!skill&&(id==='update'||!tesseraUpdatePending(s))&&!['batch','dimensions','layers','snap','gessoUpdate','brio','brioUpdate'].includes(id)&&!s.persistent.editorSkills.includes(id)&&s.resources.tokens>=skill.cost
     &&!(skill.band>=2&&s.run.version==='v0.1'&&id!=='modern')&&(id!=='modern'||canSwitchEditor(s));
 }
 function buySkill(s:GameState,id:EditorSkill):GameState {
@@ -150,7 +151,7 @@ function customize(s:GameState,patch:Partial<EditorCustomization>):GameState {
 }
 export function actWorkshop(state:GameState,action:WorkshopAction,now:number):GameState {
   if(!Number.isFinite(now)||now<0||!state.run.workshop.entered||!['kumiki','desktop'].includes(state.run.world))return state;
-  state=grantExtraMaterials(state);
+  state=grantTesseraUpdateFunds(grantExtraMaterials(state));
   let s=state;
   const w=s.run.workshop;
   if(action.type==='help'){
@@ -190,15 +191,11 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
   }else if(action.type==='export'){
     const ids=completedParts(s).filter(id=>(!action.part||id===action.part)&&w.parts[id]!.exportedAt===null);
     if(ids.length===0)return s;
-    const firstExport=!w.tokenDiscovered&&s.persistent.progress.records['first-export']===undefined
-      &&!s.persistent.setDocuments.some(document=>Object.values(document.parts).some(part=>part&&part.exportedAt!==null))
-      &&!s.persistent.products.some(product=>product.exports.length>0)
-      &&!s.persistent.guideArchive.some(record=>record.kind==='kumiki'&&record.id==='updateAvailable');
     for(const id of ids)s=writePart(s,id,{...s.run.workshop.parts[id]!,exportedAt:Math.max(now,s.run.workshop.parts[id]!.completedAt!)});
     s={...s,resources:{...s.resources,tokens:s.resources.tokens+ids.length*BALANCE.workshop.exportTokens},run:{...s.run,workshop:{...s.run.workshop,tokenDiscovered:true}}};
     for(const set of new Set(ids.map(id=>getWorkshopPart(id).set)))s=snapshotSet(s,set,now);
     s=showGuide(s,'export');
-    if(firstExport&&!s.persistent.editorSkills.includes('update'))s=showGuide(s,'updateAvailable');
+    s=grantTesseraUpdateFunds(s);
   }else{
     const id=action.part??w.activePart;if(!id||!w.parts[id])return s;
     const p=w.parts[id]!,descriptor=getWorkshopPart(id);
@@ -286,9 +283,9 @@ export function advanceWorkshopAssistance(state:GameState,ms:number,now:number):
 }
 export function advanceWorkshop(s:GameState,ms:number):GameState {
   if(!Number.isFinite(ms)||ms<0||!s.run.workshop.entered)return s;
-  s=grantExtraMaterials(s);
+  s=grantTesseraUpdateFunds(grantExtraMaterials(s));
   const w=s.run.workshop,enterMs=Math.max(0,w.enterMs-ms);
   let next=enterMs===w.enterMs?s:{...s,run:{...s.run,workshop:{...w,enterMs}}};
-  if(next.run.world==='kumiki'&&next.elapsedMs-next.run.workshop.lastActionAt>=BALANCE.workshop.hintMs)next=showGuide(next,'hint');
+  if(next.run.world==='kumiki'&&!tesseraUpdatePending(next)&&next.elapsedMs-next.run.workshop.lastActionAt>=BALANCE.workshop.hintMs)next=showGuide(next,'hint');
   return next;
 }

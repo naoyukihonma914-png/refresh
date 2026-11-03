@@ -1,3 +1,4 @@
+import {tesseraUpdatePending} from './workshopUpdate';
 import {contractBlocks} from './longPlay';
 import {bulkQuote} from './bulk';
 import { recommendedPage } from './pageDesign';
@@ -103,7 +104,7 @@ export function applySeedSkills(state: GameState, selected: readonly SeedSkill[]
   const additions = BALANCE.w1.skills.filter(skill => skills.includes(skill.id) && !state.persistent.seedSkills.includes(skill.id));
   if (additions.some(skill => skill.band === 2 && state.run.version === 'v0.1')) return state;
   const cost = additions.reduce((sum, skill) => sum + skill.cost, 0);
-  if (cost > state.resources.tokens) return state;
+  if (cost > state.resources.tokens || cost>0&&tesseraUpdatePending(state)) return state;
   const owned = [...state.persistent.seedSkills, ...additions.map(skill => skill.id)];
   return { ...state, resources: { ...state.resources, tokens: state.resources.tokens - cost },
     run: { ...state.run, seed: { ...state.run.seed, lastActionAt: state.elapsedMs } },

@@ -444,7 +444,7 @@ export const BALANCE = {
     },
     categoryStepRewards: { small: [20, 25, 30, 40], medium: [40, 50, 60, 80], large: [80, 100, 120, 160] },
     finishRewards: { small: 120, medium: 250, large: 500 },
-    efficiencyMultiplier: 1.25, exportTokens: 1, achievementParts: [6, 10],
+    efficiencyMultiplier: 1.25, exportTokens: 1, updateGrantTokens: 3, achievementParts: [6, 10],
     assistStepMs: 45_000,
     enterMs: 1_200, hintMs: 300_000, zoomMin: 0.5, zoomMax: 2, zoomStep: 0.25,
     zoomOptions: [0.5, 0.75, 1, 1.25, 1.5, 2],

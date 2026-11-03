@@ -1,0 +1,109 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8185/",
+  "buildSha256": "e2e15a067d3a95f73ca331d6e28cea972ada031932bd5a0ca432d4f706ca5327",
+  "setup": "public fixtures; real controls; unchanged exported save imported through file chooser; normal URL reload",
+  "references": [
+    "docs/世界2-修正指示書-第4ラウンド.md"
+  ],
+  "cases": [
+    {
+      "id": "ja:customization",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/01-selected-part-customize.png",
+          "label": "選択したパーツ行だけにカスタマイズボタンを表示"
+        },
+        {
+          "file": "screenshots/02-customization-open.png",
+          "label": "パーツ行のボタンから従来の調整パネルを開く"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "selectedRowOnly": true,
+        "oldPieceZoneEntryRemoved": true,
+        "unfinishedAndCompletedCustomizable": true,
+        "selectedPartOnlyAdjusted": true
+      }
+    },
+    {
+      "id": "ja:funding",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/03-first-export-funds.png",
+          "label": "初回エクスポートの1＋進呈3＝4トークンと榎本の案内"
+        },
+        {
+          "file": "screenshots/04-other-purchases-locked.png",
+          "label": "アップデート前は他の消費先を閉じ、理由を表示"
+        },
+        {
+          "file": "screenshots/05-update-unlocks-purchases.png",
+          "label": "アップデート購入後は残り1トークン・他の購入が可能"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "ordinaryReward": 1,
+        "grant": 3,
+        "balanceAfterExport": 4,
+        "balanceAfterUpdate": 1,
+        "normalImportReloadNoDuplicate": true,
+        "otherPurchasesBlockedBeforeUpdate": true,
+        "dismissalKeepsUpdateGoal": true,
+        "otherPurchasesAvailableImmediately": true,
+        "secondExportRewardOnly": 1
+      }
+    },
+    {
+      "id": "en:customization",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "selectedRowOnly": true,
+        "oldPieceZoneEntryRemoved": true,
+        "unfinishedAndCompletedCustomizable": true,
+        "selectedPartOnlyAdjusted": true
+      }
+    },
+    {
+      "id": "en:funding",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "ordinaryReward": 1,
+        "grant": 3,
+        "balanceAfterExport": 4,
+        "balanceAfterUpdate": 1,
+        "normalImportReloadNoDuplicate": true,
+        "otherPurchasesBlockedBeforeUpdate": true,
+        "dismissalKeepsUpdateGoal": true,
+        "otherPurchasesAvailableImmediately": true,
+        "secondExportRewardOnly": 1
+      }
+    }
+  ],
+  "languages": [
+    "ja",
+    "en"
+  ],
+  "passed": 4,
+  "failed": 0
+}
