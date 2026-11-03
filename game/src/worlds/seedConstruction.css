@@ -142,3 +142,4 @@
 .seed-construction .seed-customize-panel label {display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0;}
 .seed-construction .seed-customize-panel select,.seed-construction .seed-customize-panel input {max-width:170px;}
 .seed-construction .seed-customize-panel p {margin:4px 0 0;}
+.seed-construction .seed-zone-head {padding-inline-end:40px;}
