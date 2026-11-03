@@ -392,7 +392,10 @@ export class GameRuntime {
 
   actPage = (action:PageAction) => {
     if(!this.canOperate()||this.snapshot.state.run.world==='release')return;
-    this.advanceForeground();const previous=this.snapshot.state;this.publish({state:observeTesseraAction(previous,actPageDesign(previous,action),action.type==='color'&&action.slot==='button'?'design':'page',this.platform.clock.wallNow())});this.persist();
+    this.advanceForeground();const previous=this.snapshot.state,next=actPageDesign(previous,action);
+    this.publish({state:observeTesseraAction(previous,next,action.type==='color'&&action.slot==='button'?'design':'page',this.platform.clock.wallNow())});
+    if(action.type==='fit'&&next!==previous)this.sound('build',next);
+    this.persist();
   };
 
   applySeedSettings = (selected: readonly SeedSkill[], pattern: GameState['persistent']['seedAppearance']['pattern'], marquee: boolean) => {
@@ -415,7 +418,7 @@ export class GameRuntime {
     this.advanceForeground();
     const state = this.snapshot.state;
     if (canSave(state)) return;
-    this.publish({ state: { ...state, run: { ...state.run, seed: { ...state.run.seed, built: ['border', 'save'], autoCursors: 1 } } } });
+    this.publish({ state: { ...state, run: { ...state.run, seed: { ...state.run.seed, built: ['border', 'save'], autoCursors: 1, page: { ...state.run.seed.page, fitted: ['pixels', 'generator', 'heading', 'notice', 'upgrades', 'cursors'] } } } } });
     this.persist();
   };
 

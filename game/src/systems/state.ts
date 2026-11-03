@@ -77,7 +77,7 @@ export function createInitialState(now: number): GameState {
     run: {
       advice:createAdviceState(),play:createPlay(),version: 'v0.1', world: 'seed', totalPixelsGenerated: 0, shipping: null, restartMs: 0,
       seed: {
-        page:createPageDesign(),built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
+        page:{...createPageDesign(),fitted:['pixels','generator']},built: [], autoCursors: 0, history: [], lastActionAt: 0, installer: null,
         guide: { seen: [], current: null, collapsed: false },
       },
       workshop: createWorkshopState(), desktop: createDesktopState(),

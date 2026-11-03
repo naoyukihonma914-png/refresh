@@ -576,7 +576,7 @@ export const BALANCE = {
   },
   longPlay:{achievementNoticeMs:4000,achievementBonus:.01,contractBonus:.05,partBonus:.005,partCap:50,shotMilestone:50,cursorBonus:.001,bulkUnlock:10,cursorLimit:10000,strayMinMs:120000,strayMaxMs:240000,strayLifeMs:30000,straySeconds:20,secretPresses:100,secretPartColor:'#c8553d',secretClockClicks:10,clockChainMs:5000,refreshCooldownMs:30000,refreshSeconds:30,soundVolume:.15,soundPerSecond:8},
   pageDesign: {
-    guideDemoMs: 2200, gripOffset: 22,
+    guideDemoMs: 2200, gripOffset: 22, socketSnapDistance: 48, socketSpawnOffset: 28, socketPulseMs: 450,
     buttonFontMin:12,buttonFontMax:36,buttonMinWidth:160,buttonMinHeight:40,
     width:1920,height:920,grid:8,minWidth:320,minCanvasWidth:352,minCanvasHeight:720,maxWidth:1920,maxHeight:1080,
     layoutBreakpoint:1000,gap:16,contentInset:80,sidebarFraction:.28,

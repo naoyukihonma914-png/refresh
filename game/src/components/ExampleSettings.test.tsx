@@ -14,7 +14,7 @@ describe('お手本の設定と次の手は人物コメントと独立する',()
   const state=createInitialState(now),i18n=createI18n(language);
   const markup=renderToStaticMarkup(<><ExampleSettings state={state} runtime={runtime} i18n={i18n}/><SeedNextHand state={state} i18n={i18n}/></>);
   expect(markup).toContain('data-examples-input');expect(markup).toContain('checked=""');
-  expect(markup).toContain('data-example-next="seed-generate"');expect(markup).toContain('data-example-item="border"');expect(markup).toContain(i18n.t('item.border'));
+  expect(markup).toContain('data-example-next="seed-fit"');expect(markup).toContain(i18n.t('page.part.heading'));
   state.persistent.examplesEnabled=false;expect(renderToStaticMarkup(<SeedNextHand state={state} i18n={i18n}/>)).toBe('');
  });
  it('世界3の次の手は画面を遮る別overlayを描かず、入口1個へ具体的な名前を付ける',()=>{

@@ -16,7 +16,7 @@ import { creditPixels, cursorPixelsPerSecond, manualClickValue, passivePixelsPer
 
 const now=1_800_000_000_000;
 function workshop():GameState {
-  let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(x=>x.id);
+  let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(x=>x.id);s.run.seed.page.fitted=['pixels','generator','heading','notice','upgrades','cursors'];
   s=creditPixels(s,10_000_000);return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);
 }
 function complete(s:GameState,id:WorkshopPartId):GameState {

@@ -4,13 +4,15 @@ import {desktopConditions,installedApps} from './desktop';
 import {nextDesktopOffer,type DesktopOffer} from './desktopOffers';
 import type {AppId,BuiltApp} from './desktopState';
 import {visibleSeedItems} from './seed';
+import {nextPieceToFit,type PagePart} from './pageDesign';
 import type {GameState} from './state';
 
-export type SeedNextHand={kind:'seed-generate'|'seed-buy';item:SeedItem;missing:number}|{kind:'seed-launch'};
+export type SeedNextHand={kind:'seed-generate'|'seed-buy';item:SeedItem;missing:number}|{kind:'seed-launch'}|{kind:'seed-fit';part:PagePart};
 /** Pure presentation guidance: no rewards, prices, layout scores, or game state changes. */
 export function nextSeedHand(state:GameState):SeedNextHand|null {
  if(state.run.world!=='seed'||!state.persistent.examplesEnabled)return null;
  if(state.run.seed.installer||state.run.restartMs>0)return {kind:'seed-launch'};
+ const piece=nextPieceToFit(state.run.seed.page,true,state.run.seed.autoCursors);if(piece)return {kind:'seed-fit',part:piece};
  const item=visibleSeedItems(state)[0];if(!item)return {kind:'seed-launch'};
  const missing=Math.max(0,BALANCE.w1.items.find(candidate=>candidate.id===item)!.cost-state.resources.pixels);
  return {kind:missing>0?'seed-generate':'seed-buy',item,missing};

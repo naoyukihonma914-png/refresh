@@ -144,3 +144,11 @@
 .seed-construction .seed-customize-panel p {margin:4px 0 0;}
 .seed-construction .seed-zone-head {padding-inline-end:40px;}
 .seed-construction .page-part>.page-part-content {background:var(--page-part-background,transparent);color:var(--page-part-text,inherit);}
+.seed-construction .page-socket {position:absolute;border:2px solid #0004;border-radius:4px;background:#0002;box-shadow:inset 0 3px 10px #0006,inset 0 0 0 2px #fff6;z-index:0;animation:seed-socket-breathe 2.4s ease-in-out infinite;}
+@keyframes seed-socket-breathe {0%,100%{box-shadow:inset 0 3px 10px #0006,inset 0 0 0 2px #fff6;}50%{box-shadow:inset 0 3px 14px #0009,inset 0 0 0 2px #fff9;}}
+.seed-construction .page-part.is-piece {cursor:grab;z-index:15;filter:drop-shadow(0 6px 8px #0006);}
+.seed-construction .page-part.is-piece:active {cursor:grabbing;}
+.seed-construction .page-part.just-fitted {animation:seed-fit-pulse 450ms ease-out;}
+@keyframes seed-fit-pulse {0%{transform:scale(1);}35%{transform:scale(1.045);}100%{transform:scale(1);}}
+@media (prefers-reduced-motion:reduce) {.seed-construction .page-socket {animation:none;}.seed-construction .page-part.just-fitted {animation:none;}}
+.seed-construction .seed-fit-hint {font-weight:700;margin:0;}

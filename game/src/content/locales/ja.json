@@ -1565,6 +1565,7 @@
     "examples.description": "短期目標と制作の見本を表示します。いつでも自由に変えられます。",
     "examples.next": "短期目標",
     "examples.nextCompact": "短期",
+    "examples.seed.fit": "{name}をドラッグして、窪みにはめよう",
     "examples.seed.generate": "［生成］であと{pixels}集め、{item}を作る",
     "examples.seed.buy": "［作る］で{item}を作る",
     "examples.seed.launch": "エディタが起動しています",

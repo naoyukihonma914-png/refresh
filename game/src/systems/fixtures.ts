@@ -61,7 +61,7 @@ const MAIN_SETS:readonly UiSetId[]=['common','foundation','files','mail'];
 const BASE_SETS=STAGE8A_SETS.filter(set=>set.id!=='extras').map(set=>set.id);
 
 function seedState(now:number,count:number):GameState {
- const s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.slice(0,count).map(item=>item.id);
+ const s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.slice(0,count).map(item=>item.id);s.run.seed.page.fitted=['pixels','generator','heading','notice','upgrades','cursors'];
  s.run.seed.history=s.run.seed.built.map((item,i)=>({item,at:Math.max(0,now-(count-i)*60_000)}));
  s.run.seed.autoCursors=count>1?8:0;s.resources.pixels=100_000;s.run.totalPixelsGenerated=250_000;
  if(count>1)s.lastSavedAt=now;return updateSeedGuide(s);

@@ -5,7 +5,7 @@ import { createInitialState } from './state';
 import { advanceActiveTime, advanceOfflineTime, isInactiveGap } from './time';
 
 const hour = BALANCE.time.millisecondsPerHour;
-const savedState = () => {const s=createInitialState(1_000);s.run.seed.built=['border','save'];s.run.seed.autoCursors=1;return s;};
+const savedState = () => {const s=createInitialState(1_000);s.run.seed.built=['border','save'];s.run.seed.autoCursors=1;s.run.seed.page.fitted=['pixels','generator','heading','notice','upgrades','cursors'];return s;};
 // One border-enhanced cursor plus the individual Border and Save production.
 const savedRate = BALANCE.w1.cursor_press_per_sec * (BALANCE.w1.base_click + BALANCE.w1.border_bonus)
   + BALANCE.w1.items.filter(item=>['border','save'].includes(item.id)).reduce((n,item)=>n+item.perSecond,0);

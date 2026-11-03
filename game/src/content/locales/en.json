@@ -1602,6 +1602,7 @@
     "examples.description": "Show the short-term goal and a model to build from. You can change your design at any time.",
     "examples.next": "Short-term goal",
     "examples.nextCompact": "Next step",
+    "examples.seed.fit": "Drag {name} into its recess",
     "examples.seed.generate": "Generate {pixels} more, then build {item}",
     "examples.seed.buy": "Build {item} with the build button",
     "examples.seed.launch": "The editor is starting",
