@@ -403,7 +403,8 @@ export const BALANCE = {
     fitting: {
       pieceRewardTotals: { small:115, medium:230, large:460 }, previewZoom:.32,
       hoverScale:.65, puzzleGap:24, snapDistance:28, dragThreshold:5, snapPulseMs:480,
-      boardInset:32, pieceAreaGap:12,
+      boardInset:32, pieceAreaGap:12, boardWidth:1152, boardHeight:1600,
+      exportFlightMs:650, exportMergeMs:220, exportPulseMs:1300,
       frameTitleHeight:32, frameControlSize:26, frameControlGap:3,
     },
     feedback: { flightMs:650, pulseMs:1100, messageMs:1800, frameMs:33, originLift:12, maxWidth:260, queueLimit:4 },

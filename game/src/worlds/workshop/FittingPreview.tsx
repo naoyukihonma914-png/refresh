@@ -35,7 +35,7 @@ export function FittingPreview({state,i18n,platform}:{state:GameState;i18n:I18n;
  return <aside className="fitting-preview" data-fitting-preview data-collapsed={collapsed}>
   <header><strong>{t('tp.preview.title' as MessageKey)}</strong><button type="button" aria-label={t(collapsed?'ws.preview.open':'ws.window.minimize')} aria-expanded={!collapsed} onClick={()=>setCollapsed(!collapsed)}><WorkshopGlyph name={collapsed?'maximize':'minimize'}/></button></header>
   {!collapsed&&<div className="fitting-preview-surface" role="img" aria-label={t('fitting.previewFor' as MessageKey,{name:t(`ws.set.${projected.active.set}`)})}>
-   <div inert aria-hidden="true"><FittingCanvas platform={platform} state={projected.state} workshop={projected.workshop} part={projected.active} production={projected.workshop.parts[projected.active.id]} zoom={BALANCE.workshop.fitting.previewZoom} dispatch={()=>{}} i18n={i18n} picking={false} onPick={()=>{}} reducedMotion showShell={false}/></div>
+   <div inert aria-hidden="true"><FittingCanvas platform={platform} state={projected.state} workshop={projected.workshop} part={projected.active} production={projected.workshop.parts[projected.active.id]} zoom={BALANCE.workshop.fitting.previewZoom} dispatch={()=>{}} i18n={i18n} picking={false} onPick={()=>{}} preview reducedMotion showShell={false}/></div>
   </div>}
  </aside>;
 }

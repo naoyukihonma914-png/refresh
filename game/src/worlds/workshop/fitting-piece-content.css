@@ -45,3 +45,11 @@
 
 /* Loose window controls keep the same face and dark glyph as fitted controls. */
 .workshop-root .wf-content-common-frame:is(.wf-element-minimize,.wf-element-maximize,.wf-element-close)>button:disabled {opacity:1;color:#101010;background:#c0c0c0;}
+
+.workshop-root .wf-piece-content {position:relative;overflow-wrap:anywhere;}
+.workshop-root .wf-piece-content button {white-space:normal;text-overflow:clip;}
+.workshop-root .wf-piece-content[data-loose=true][data-loose-frame=true] {outline:1px solid #494949;outline-offset:-1px;}
+.workshop-root .wf-calendar {grid-template-rows:repeat(5,minmax(0,1fr));overflow:hidden;}
+.workshop-root .wf-calendar>button {min-block-size:0;line-height:1;padding:0;border-width:1px;}
+
+.workshop-root .wf-slideshow-caption {display:grid;grid-template-columns:14px minmax(0,1fr);align-items:center;gap:2px;inline-size:100%;block-size:25%;min-block-size:0;}
