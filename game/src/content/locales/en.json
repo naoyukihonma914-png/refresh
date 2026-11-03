@@ -1640,6 +1640,22 @@
     "wf.emptyCanvas": "Choose a UI set to start building",
     "wf.restoreTarget": "Open the target window",
     "wf.snap": "{name} fitted",
-    "ws.element.scrollbar": "Scrollbar"
+    "ws.element.scrollbar": "Scrollbar",
+    "fe.document": "{name}.ui",
+    "fe.tool": "Pencil",
+    "fe.paletteCount": "{count} colors",
+    "fe.foreground": "Foreground",
+    "fe.background": "Background",
+    "fe.paletteIndex": "Idx {count}",
+    "fe.comment": "Comment",
+    "fe.cursorState": "{count} cursors keep generating",
+    "fe.noComment": "Comments from Enomoto appear here",
+    "fe.layerShell": "Shell",
+    "fe.layerPieces": "Pieces",
+    "fe.layerAdjustments": "Adjustments",
+    "fe.pieceProgress": "{done} / {total}",
+    "fe.goal": "Next: {name}",
+    "fe.guide": "Enomoto",
+    "fitting.previewFor": "Preview of the completed {name} set"
   }
 }

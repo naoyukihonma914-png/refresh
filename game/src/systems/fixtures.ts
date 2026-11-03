@@ -159,6 +159,7 @@ export function createFixture(name:string|null,now:number):GameState|null {
  const fitting=/^fitting-(entry|frame|mail)-era([01])$/.exec(name);
  if(fitting){
   const mode=fitting[1]!,era=Number(fitting[2]);let s=testplayWorkshop(now,era);
+  if(era===0&&mode!=='mail')s.resources.tokens=0;
   if(mode!=='entry'){
    s=actWorkshop(s,{type:'buySet',set:'common'},now);
    if(mode==='mail'){

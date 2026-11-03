@@ -36,6 +36,10 @@ describe('殻とピースの実寸キャンバス',()=>{
   expect(p['navigation-0']!.width).toBe(p['navigation-1']!.width);
   for(const id of ['mail-unread','terminal-run'] as const)expect(Object.keys(fittingSocketRects(getWorkshopPart(id),getWorkshopPart(id).defaultRect))).toEqual(['state']);
  });
+ it('スクロールバーの調整で窪みが右端を保ちながら太くなる',()=>{
+  const frame=getWorkshopPart('common-frame'),thin=fittingSocketRects(frame,frame.defaultRect,8).scrollbar!,thick=fittingSocketRects(frame,frame.defaultRect,32).scrollbar!;
+  expect(thick.width).toBe(32);expect(thick.x).toBe(thin.x-24);expect(thick.x+thick.width).toBe(thin.x+thin.width);
+ });
  it('お手本OFFでも構造の窪みと出現済みピースは残り、旧配置・仕上げの操作は現れない',()=>{
   const on=render(),off=render(false);
   for(const html of [on,off]){

@@ -34,18 +34,20 @@ export function PartInspector({part,production,stage,colors,skills,customization
   {skills.includes('presets')&&<fieldset><legend>{t('ws.presets')}</legend><button type="button" disabled={customization.presets.length>=BALANCE.workshop.customization.maxPresets} onClick={()=>dispatch({type:'customize',patch:{presets:[...customization.presets,d]}})}>{t('ws.savePreset')}</button>{customization.presets.map((preset,index)=><button type="button" key={index} onClick={()=>patch(preset)}>{t('ws.applyPreset',{count:index+1})}</button>)}</fieldset>}
  </div>;
 }
-export function EditorCustomizationPanel({customization,colors,dispatch,i18n}:{customization:EditorCustomization;stage:number;colors:readonly string[];dispatch:WorkshopDispatch;i18n:I18n}){
+export function EditorCustomizationPanel({customization,stage,colors,dispatch,i18n}:{customization:EditorCustomization;stage:number;colors:readonly string[];dispatch:WorkshopDispatch;i18n:I18n}){
  const t=i18n.t,c=customization,limits=BALANCE.workshop.customization;
+ const widthOffset=stage<2?BALANCE.workshop.eras.panelWidths[stage]!-limits.panelWidth:0;
+ const displayWidth=Math.min(limits.panelMax,c.panelWidth+widthOffset);
  const patch=(patch:Partial<EditorCustomization>)=>dispatch({type:'customize',patch});
  return <section className="ws-editor-settings"><h2>{t('ws.settings')}</h2>
   <ColorChoices label={t('ws.accent')} value={c.accent} colors={colors} onChange={accent=>patch({accent})}/>
-  <label>{t('ws.info')}<select value={c.bandPosition} onChange={e=>patch({bandPosition:e.target.value as 'top'|'bottom'})}><option value="top">{t('ws.top')}</option><option value="bottom">{t('ws.bottom')}</option></select></label>
+  {stage>=2&&<label>{t('ws.info')}<select value={c.bandPosition} onChange={e=>patch({bandPosition:e.target.value as 'top'|'bottom'})}><option value="top">{t('ws.top')}</option><option value="bottom">{t('ws.bottom')}</option></select></label>}
   <>
    <ColorChoices label={t('ws.background')} value={c.background} colors={colors} native={usesNativeEditorBackground(c)} nativeLabel={t('ws.nativeColors')} onNative={()=>patch({nativeBackground:true})} onChange={background=>patch({background})}/>
    <label className="ws-check"><input type="checkbox" checked={c.grid} onChange={e=>patch({grid:e.target.checked})}/>{t('ws.grid')}</label>
-   <label>{t('ws.gridSpacing')}<input type="range" min={limits.gridMin} max={limits.gridMax} value={c.gridSpacing} onChange={e=>patch({gridSpacing:Number(e.target.value)})}/><output>{i18n.number(c.gridSpacing)}</output></label>
+   {stage>=2&&<label>{t('ws.gridSpacing')}<input type="range" min={limits.gridMin} max={limits.gridMax} value={c.gridSpacing} onChange={e=>patch({gridSpacing:Number(e.target.value)})}/><output>{i18n.number(c.gridSpacing)}</output></label>}
    <label>{t('ws.fontSize')}<input type="range" min={limits.fontMin} max={limits.fontMax} value={c.fontSize} onChange={e=>patch({fontSize:Number(e.target.value)})}/><output>{i18n.number(c.fontSize)}</output></label>
-   <label>{t('ws.panelWidth')}<input data-workshop-customize="panelWidth" type="range" min={limits.panelMin} max={limits.panelMax} value={c.panelWidth} onChange={e=>patch({panelWidth:Number(e.target.value)})}/><output>{i18n.number(c.panelWidth)}</output></label>
+   <label>{t('ws.panelWidth')}<input data-workshop-customize="panelWidth" type="range" min={limits.panelMin+widthOffset} max={limits.panelMax} value={displayWidth} onChange={e=>patch({panelWidth:Number(e.target.value)-widthOffset})}/><output>{i18n.number(displayWidth)}</output></label>
   </>
   <button type="button" data-workshop-action="resetCustomization" onClick={()=>patch({...createEditorCustomization(),presets:c.presets,panelPositions:c.panelPositions,panelWidths:c.panelWidths})}>{t('ws.reset')}</button>
  </section>;

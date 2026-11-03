@@ -9,7 +9,7 @@ import type { GameState } from '../../systems/state';
 import type { Platform } from '../../platform/types';
 import type { RuntimeSnapshot } from '../../systems/runtime';
 import { producedControlPalette } from '../../systems/commonChrome';
-import { usesNativeComponentColors } from '../../systems/workshopState';
+import { createComponentDesign, usesNativeComponentColors } from '../../systems/workshopState';
 import type { WorkshopDispatch } from './WorkshopCustomization';
 import { WorkshopTargetProvider, useWorkshopTarget } from './WorkshopTargetContext';
 import { OptionalTargetProvider } from './OptionalParts';
@@ -21,7 +21,7 @@ export interface FittingCanvasProps {
  platform:Platform;workshopSnap?:RuntimeSnapshot['workshopSnap'];state:GameState;workshop:WorkshopState;
  part:WorkshopPartDefinition|null;production:PartProduction|undefined;zoom:number;dispatch:WorkshopDispatch;i18n:I18n;
  picking:boolean;layerSelection?:string|null;onSelectLayer?:(value:string|null)=>void;onPick:(color:string)=>void;
- reducedMotion?:boolean;showShell?:boolean;showPieces?:boolean;
+ reducedMotion?:boolean;showShell?:boolean;showPieces?:boolean;showAdjustments?:boolean;
 }
 interface Point {x:number;y:number}
 interface PieceGesture {piece:string;start:Point;pointer:Point;loose:boolean;moved:boolean;pointerId:number}
@@ -32,7 +32,7 @@ const styleRect=(rect:WorkshopRect):CSSProperties=>({left:rect.x,top:rect.y,widt
 export function FittingCanvas(props:FittingCanvasProps) {
  return <WorkshopTargetProvider gameState={props.state} i18n={props.i18n}><OptionalTargetProvider gameState={props.state} i18n={props.i18n} onExport={()=>props.dispatch({type:'export'})}><FittingBoard {...props}/></OptionalTargetProvider></WorkshopTargetProvider>;
 }
-function FittingBoard({state,workshop,part,production,zoom,dispatch,i18n,picking,onPick,reducedMotion=false,platform,showShell=true,showPieces=true}:FittingCanvasProps) {
+function FittingBoard({state,workshop,part,production,zoom,dispatch,i18n,picking,onPick,reducedMotion=false,platform,showShell=true,showPieces=true,showAdjustments=true}:FittingCanvasProps) {
  const t=(key:string,params:Record<string,string|number>={})=>i18n.t(key as MessageKey,params);
  const c=BALANCE.workshop.canvas,f=BALANCE.workshop.fitting;
  const board=useRef<HTMLDivElement>(null),scrollTarget=useRef<HTMLDivElement>(null),gesture=useRef<PieceGesture|null>(null),suppressClick=useRef(false);
@@ -46,7 +46,8 @@ function FittingBoard({state,workshop,part,production,zoom,dispatch,i18n,picking
  const spawned=production?.fitting?.spawned??[];
  const loose=pieces.filter(piece=>spawned.includes(piece)&&sockets[piece]===undefined);
  const activeRect=production?.rect??part?.defaultRect;
- const activeGeometry=part&&activeRect?fittingSocketRects(part,activeRect,production?.design.scrollbarWidth):{};
+ const displayProduction=production&&!showAdjustments?{...production,design:createComponentDesign()}:production;
+ const activeGeometry=part&&activeRect?fittingSocketRects(part,activeRect,displayProduction?.design.scrollbarWidth):{};
  const targetScale=windowMode==='maximized'?boardWidth/c.width:1,targetInset=windowMode==='maximized'?0:inset;
  const appOffset={x:targetInset,y:targetInset+(activeFrame?0:f.frameTitleHeight*targetScale)};
  const tray:WorkshopRect={x:boardWidth-f.trayWidth-inset,y:windowHeight+inset+f.trayGap,width:f.trayWidth,height:f.trayHeight};
@@ -60,7 +61,8 @@ function FittingBoard({state,workshop,part,production,zoom,dispatch,i18n,picking
    if(!socket.accepts.includes(piece)||!socket.stacked&&Object.entries(sockets).some(([other,seat])=>other!==piece&&seat===socket.id))return [];
    const r=socketBoardRect(socket.id);if(!r)return [];
    const dx=Math.max(r.x-p.x,0,p.x-r.x-r.width),dy=Math.max(r.y-p.y,0,p.y-r.y-r.height);
-   return Math.hypot(dx,dy)<=f.snapDistance?[{id:socket.id,distance:Math.hypot(p.x-r.x-r.width/2,p.y-r.y-r.height/2)}]:[];
+   const tolerance=state.persistent.editorCustomization.grid?f.snapDistance:0;
+   return Math.hypot(dx,dy)<=tolerance?[{id:socket.id,distance:Math.hypot(p.x-r.x-r.width/2,p.y-r.y-r.height/2)}]:[];
   }).sort((a,b)=>a.distance-b.distance);
   return near[0]?.id??null;
  };
@@ -104,17 +106,18 @@ function FittingBoard({state,workshop,part,production,zoom,dispatch,i18n,picking
    {descriptor.id==='common-frame'&&piece==='scrollbar'?<FrameScrollRail target={scrollTarget} production={p} i18n={i18n}/>:null}
   </FittedPiece>;
  };
- const renderShell=(descriptor:WorkshopPartDefinition,p:PartProduction,isActive:boolean)=>{
+ const renderShell=(descriptor:WorkshopPartDefinition,original:PartProduction,isActive:boolean)=>{
+  const p=showAdjustments?original:{...original,design:createComponentDesign()};
   const d=fittingDefinition(descriptor.id),map=p.fitting?.sockets??Object.fromEntries(p.elements.map(piece=>[piece,d.sockets.find(socket=>socket.accepts.includes(piece))?.id??piece]));
   const geometry=fittingSocketRects(descriptor,p.rect,p.design.scrollbarWidth),native=usesNativeComponentColors(p.design),isFrame=descriptor.id==='common-frame';
   const shellStyle={...styleRect(p.rect),fontSize:p.design.fontSize,borderRadius:p.design.radius,backgroundColor:native?undefined:p.design.color,color:native?undefined:p.design.textColor,'--wf-part-bg':native?'#c0c0c0':p.design.color,'--wf-part-fg':native?'#101010':p.design.textColor} as CSSProperties;
-  return <section key={descriptor.id} className={`wf-part-shell ${isFrame?'wf-frame-shell':''} ${isActive?'is-active':''}`} data-workshop-canvas-part={descriptor.id} data-fitting-shell={descriptor.id} data-component-motion={p.design.motion} style={shellStyle} aria-label={t(descriptor.labelKey)}>
+  return <section key={descriptor.id} className={`wf-part-shell ${isFrame?'wf-frame-shell':''} ${isActive?'is-active':''} ${showShell?'':'is-shell-hidden'}`} data-workshop-canvas-part={descriptor.id} data-fitting-shell={descriptor.id} data-component-motion={p.design.motion} style={shellStyle} aria-label={t(descriptor.labelKey)}>
    {isFrame&&<><div className="wf-frame-title-surface" style={{height:f.frameTitleHeight}}/><div className="wf-frame-content" ref={scrollTarget} style={{top:f.frameTitleHeight,right:p.elements.includes('scrollbar')?p.design.scrollbarWidth+4:4}}>
     {files.entries.map(entry=><button type="button" key={entry.id} aria-pressed={files.selectedId===entry.id} onClick={()=>actions.selectFile(entry.id)}><WorkshopGlyph name="file"/><span>{entry.name}</span></button>)}
     <pre className="wf-frame-note">{state.persistent.productionNote??t('intro.note')}</pre>
    </div></>}
    {showShell&&isActive&&d.sockets.map(socket=>{
-    const r=geometry[socket.id],occupied=Object.values(map).includes(socket.id),next=state.persistent.examplesEnabled&&!occupied&&d.pieces.find(piece=>map[piece]===undefined&&socket.accepts.includes(piece));
+    const r=geometry[socket.id],occupied=Object.values(map).includes(socket.id),nextPiece=d.pieces.find(piece=>map[piece]===undefined),next=state.persistent.examplesEnabled&&!occupied&&nextPiece&&socket.accepts.includes(nextPiece);
     if(!r)return null;
     return <div key={socket.id} className={`wf-socket ${occupied?'is-filled':''} ${next?'is-next':''} ${drag&&candidate(drag.piece,drag.pointer)===socket.id?'is-near':''}`} data-fitting-socket={socket.id} data-socket-accepts={socket.accepts.join(',')} data-socket-filled={occupied||undefined} role="img" aria-label={t('wf.socket',{name:t(`ws.element.${socket.accepts[0]}`)})} style={styleRect(r)}/>;
    })}
@@ -127,21 +130,21 @@ function FittingBoard({state,workshop,part,production,zoom,dispatch,i18n,picking
    <div ref={board} className="wf-board" data-fitting-board data-workshop-canvas data-reduced-motion={reducedMotion||undefined} style={{width:boardWidth,height:boardHeight,transform:`scale(${zoom})`}} onPointerMove={move} onPointerUp={end} onPointerCancel={()=>{gesture.current=null;setDrag(null);}}>
     {windowMode!=='normal'&&<button type="button" className="wf-restore-target" data-workshop-action="restoreTarget" onClick={()=>setWindowMode('normal')}>{t('wf.restoreTarget')}</button>}
     {windowMode!=='closed'&&<div className={`wf-destination-window ${windowMode==='maximized'?'is-maximized':''}`} data-workshop-target={part?.set??'common'} data-destination-era={state.persistent.appearance.desktop} style={{left:targetInset,top:targetInset,width:c.width,height:windowMode==='minimized'?f.frameTitleHeight:windowHeight,transform:`scale(${targetScale})`,transformOrigin:'top left'}}>
-     {!activeFrame&&<div className="wf-target-title" style={{height:f.frameTitleHeight}}><span>{t(`ws.set.${part?.set??'common'}`)}</span><div className="wf-target-controls">{frame?.elements.filter((piece):piece is 'minimize'|'maximize'|'close'=>['minimize','maximize','close'].includes(piece)).map(symbol=><button type="button" key={symbol} data-workshop-control={symbol} aria-label={t(`ws.window.${symbol}`)} onClick={()=>windowAction(symbol)} style={producedControlPalette(frame.design,symbol)}><WorkshopGlyph name={symbol}/></button>)}</div></div>}
+     {!activeFrame&&<div className="wf-target-title" style={{height:f.frameTitleHeight}}><span>{t(`ws.set.${part?.set??'common'}`)}</span><div className="wf-target-controls">{frame?.elements.filter((piece):piece is 'minimize'|'maximize'|'close'=>['minimize','maximize','close'].includes(piece)).map(symbol=><button type="button" key={symbol} data-workshop-control={symbol} aria-label={t(`ws.window.${symbol}`)} onClick={()=>windowAction(symbol)} style={producedControlPalette(showAdjustments?frame.design:createComponentDesign(),symbol)}><WorkshopGlyph name={symbol}/></button>)}</div></div>}
      {windowMode!=='minimized'&&<div className="wf-destination-surface" style={{height:c.height,top:activeFrame?0:f.frameTitleHeight}}>
       {!part&&<p className="wf-empty-canvas">{t('wf.emptyCanvas')}</p>}
       {part&&fittingPartsForSet(part.set).map(descriptor=>{const p=workshop.parts[descriptor.id];return p&&(descriptor.id===part.id||p.elements.length>0||p.step===4)?renderShell(descriptor,p,descriptor.id===part.id):null;})}
      </div>}
     </div>}
     <div className={`wf-piece-tray ${drag&&!drag.loose?'is-return-target':''}`} data-fitting-tray style={styleRect(tray)}><span>{t('wf.tray')}</span><div className="wf-tray-pieces">
-     {part&&production&&loose.map(piece=>{
-      const target=definition!.sockets.find(socket=>socket.accepts.includes(piece))!,r=activeGeometry[target.id]!,scale=Math.min(1,f.looseMaxWidth/r.width,f.looseMaxHeight/r.height);
+     {showPieces&&part&&production&&loose.map(piece=>{
+      const target=definition!.sockets.find(socket=>socket.accepts.includes(piece))!,r=activeGeometry[target.id]!,columns=Math.min(loose.length,f.trayColumns),width=Math.min(f.looseMaxWidth,(tray.width-f.tray.pieceGap*(columns+1))/columns),scale=Math.min(1,width/r.width,f.looseMaxHeight/r.height);
       return <div className="wf-loose-piece" key={piece} data-fitting-piece={piece} data-piece-status="spawned" style={{width:Math.max(26,r.width*scale),height:Math.max(24,r.height*scale),visibility:drag?.piece===piece?'hidden':undefined}} role="button" tabIndex={0} aria-label={t('wf.dragPiece',{name:t(`ws.element.${piece}`)})} onPointerDown={e=>begin(e,piece,true)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const socket=definition!.sockets.find(seat=>seat.accepts.includes(piece)&&(seat.stacked||!Object.values(sockets).includes(seat.id)));if(socket)dispatch({type:'fitPiece',part:part.id,piece,socket:socket.id});}}}>
-       <FittingPieceContent part={part} production={production} piece={piece} state={state} i18n={i18n} loose/>
+       <FittingPieceContent part={part} production={displayProduction!} piece={piece} state={state} i18n={i18n} loose/>
       </div>;
      })}
     </div></div>
-    {part&&production&&drag&&<div className="wf-drag-ghost" data-fitting-drag={drag.piece} style={{left:drag.pointer.x-f.looseMaxWidth/2,top:drag.pointer.y-24,width:f.looseMaxWidth,height:48}}><FittingPieceContent part={part} production={production} piece={drag.piece} state={state} i18n={i18n} loose/></div>}
+    {part&&production&&drag&&<div className="wf-drag-ghost" data-fitting-drag={drag.piece} style={{left:drag.pointer.x-f.looseMaxWidth/2,top:drag.pointer.y-24,width:f.looseMaxWidth,height:48}}><FittingPieceContent part={part} production={displayProduction!} piece={drag.piece} state={state} i18n={i18n} loose/></div>}
    </div>
   </div>
  </div>;

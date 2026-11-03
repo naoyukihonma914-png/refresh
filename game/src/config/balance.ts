@@ -399,8 +399,9 @@ export const BALANCE = {
   // World2 naming retained only for generic integration settings during 8a.
   w2: { desktopCost: 200_000, hintMs: 300_000, enterMs: 1_200, upgradeMs: 2_000, maxName: 80 },
   workshop: {
+    eras: { canvasScale:[.85,1,1.15], panelWidths:[320,288,256], paletteWidths:[128,64,200] },
     fitting: {
-      pieceRewardTotals: { small:115, medium:230, large:460 },
+      pieceRewardTotals: { small:115, medium:230, large:460 }, previewZoom:.32,
       snapDistance:28, dragThreshold:5, snapPulseMs:480,
       boardInset:32, trayWidth:292, trayHeight:184, trayGap:12, trayColumns:3,
       looseMaxWidth:150, looseMaxHeight:104, frameTitleHeight:32, frameControlSize:26, frameControlGap:3,

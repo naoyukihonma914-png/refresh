@@ -1603,6 +1603,22 @@
     "wf.emptyCanvas": "UIセットを選んで制作を始める",
     "wf.restoreTarget": "作業中の窓を開く",
     "wf.snap": "「{name}」がはまりました",
-    "ws.element.scrollbar": "スクロールバー"
+    "ws.element.scrollbar": "スクロールバー",
+    "fe.document": "{name}.ui",
+    "fe.tool": "鉛筆",
+    "fe.paletteCount": "{count}色",
+    "fe.foreground": "前景色",
+    "fe.background": "背景色",
+    "fe.paletteIndex": "Idx {count}",
+    "fe.comment": "コメント",
+    "fe.cursorState": "{count}台が生成を続けています",
+    "fe.noComment": "榎本からのコメントはここに表示されます",
+    "fe.layerShell": "殻",
+    "fe.layerPieces": "ピース",
+    "fe.layerAdjustments": "調整",
+    "fe.pieceProgress": "{done} / {total}",
+    "fe.goal": "短期目標：{name}",
+    "fe.guide": "榎本",
+    "fitting.previewFor": "「{name}」の完成予想"
   }
 }
