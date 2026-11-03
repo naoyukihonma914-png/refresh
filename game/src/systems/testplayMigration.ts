@@ -1,7 +1,7 @@
 import { BALANCE } from '../config/balance';
 import { SET_IDS, type UiSetId } from '../content/workshopCatalog';
 import { isLegacyPageDesign, type LegacyPageDesign, type LegacyPageLayout } from './legacyPageDesign';
-import { createPageDesign,isPageDesign,PAGE_PARTS,pageMinimum,pagePlacementForSize,recommendedPage,validPagePlacement,type PageDesign,type PageLayout } from './pageDesign';
+import { createPageDesign,isCrampedPageLayout,isPageDesign,PAGE_PARTS,pageMinimum,pagePlacementForSize,recommendedPage,validPagePlacement,type PageDesign,type PageLayout } from './pageDesign';
 import type { GameState } from './state';
 
 const record=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value);
@@ -48,9 +48,10 @@ function migrateLayout(old:LegacyPageLayout):PageLayout {
   layout.height=up(Math.max(height,...PAGE_PARTS.map(id=>layout.parts[id].y+layout.parts[id].height)));
   if(layout.height<=config.maxHeight&&PAGE_PARTS.every(id=>validPagePlacement(layout,id,layout.parts[id]))&&score<bestScore){best=layout;bestScore=score;}
  }
- if(best)return best;
+ if(best&&!isCrampedPageLayout(best))return best;
  const safe=pagePlacementForSize(baseline,'generator',button,old.parts.generator);
- return safe?{...baseline,parts:{...baseline.parts,generator:safe}}:baseline;
+ const placed=safe?{...baseline,parts:{...baseline.parts,generator:safe}}:baseline;
+ return isCrampedPageLayout(placed)?baseline:placed;
 }
 /** Upgrade only the live page. Historical recordings retain their original page payload. */
 export function migrateLegacyPageDesign(value:unknown):PageDesign {

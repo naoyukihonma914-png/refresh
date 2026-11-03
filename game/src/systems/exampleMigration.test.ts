@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe,expect,it } from 'vitest';
 import { migrateExampleSave } from './exampleMigration';
+import { migratePageLayoutSave } from './pageLayoutMigration';
 import { decodeSave,encodeSave } from './save';
 import { isGameState } from './state';
 
@@ -17,7 +18,7 @@ describe('真正TP3形式16から17のお手本移行',()=>{
   const restored=structuredClone(migrated) as unknown as {schemaVersion:number;persistent:{examplesEnabled?:boolean};run:{workshop:{combo?:unknown}}};
   restored.schemaVersion=16;delete restored.persistent.examplesEnabled;delete restored.run.workshop.combo;
   expect(restored).toEqual(source);expect(JSON.stringify(source)).toBe(original);
-  expect(isGameState(migrated)).toBe(true);const loaded=decodeSave(original);expect(loaded).toEqual(migrated);expect(decodeSave(encodeSave(loaded))).toEqual(loaded);
+  const loaded=decodeSave(original);expect(isGameState(loaded)).toBe(true);expect(loaded.schemaVersion).toBe(18);expect(loaded).toEqual(migratePageLayoutSave(migrated));expect(decodeSave(encodeSave(loaded))).toEqual(loaded);
  });
  it('境界違いと骨格の壊れた入力は変換しない',()=>{
   const source=oldSave('workshop-step2');
