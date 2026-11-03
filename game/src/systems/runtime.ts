@@ -412,6 +412,14 @@ export class GameRuntime {
     this.persist();
   };
 
+  // テストプレイ専用：確認のためにピクセルを大量に足す。リリース前に呼び出し口ごと削除する。
+  addTestPlayPixels = () => {
+    if (!this.canOperate() || this.snapshot.state.run.world === 'release') return;
+    this.advanceForeground();
+    this.publish({ state: creditPixels(this.snapshot.state, BALANCE.debug.testPlayPixels) });
+    this.persist();
+  };
+
   enableDebugSave = () => {
     if (!this.canOperate()) return;
     this.advanceForeground();

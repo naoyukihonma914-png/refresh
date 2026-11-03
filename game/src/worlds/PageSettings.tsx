@@ -1,4 +1,5 @@
 import {ExampleSettings} from '../components/ExampleSettings';
+import {TestPlayPixels} from '../components/TestPlayPixels';
 import {GuideHistory} from '../components/GuideHistory';
 import {UiScaleControl} from '../components/UiScaleControl';
 import {Records,SoundSettings} from '../components/LongPlaySettings';
@@ -25,6 +26,7 @@ export function PageSettings({ state, runtime, i18n, onClose }: {
     <h1>{i18n.t('seed.settings')}</h1>
     <button className="text-button" onClick={onClose}>{i18n.t('settings.back')}</button>
     <ExampleSettings state={state} runtime={runtime} i18n={i18n}/>
+    <TestPlayPixels state={state} runtime={runtime} i18n={i18n}/>
     <UiScaleControl runtime={runtime} i18n={i18n}/>
     {state.run.version!=='v0.1'&&<><p>{i18n.t('settings.tokens', { count: state.resources.tokens })}</p>
     <form onSubmit={event => {

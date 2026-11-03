@@ -221,6 +221,15 @@ describe('プラットフォームを通した保存・時間処理', () => {
     expect(platform.settings.read().language).toBe('ja');
   });
 
+  it('テストプレイ用ピクセル追加は大量のピクセルを加えて保存する', async () => {
+    await start(); runtime.enableDebugSave();
+    runtime.addTestPlayPixels();
+    expect(runtime.getSnapshot().state.resources.pixels).toBe(BALANCE.debug.testPlayPixels);
+    const loaded = loadGame(storage);
+    expect(loaded.kind).toBe('loaded');
+    if (loaded.kind === 'loaded') expect(loaded.state.resources.pixels).toBe(BALANCE.debug.testPlayPixels);
+  });
+
   it('両方壊れた場合は確認待ちのまま書き込みと時間を止める', async () => {
     storage.setItem(SAVE_KEYS.primary, '壊れたデータ');
     await start(); step(20_000); runtime.persist(); runtime.addDebugPixels();

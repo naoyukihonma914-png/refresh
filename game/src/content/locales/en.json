@@ -1670,6 +1670,10 @@
     "examples.workshop.update": "Update Tessera. Requires 3 tokens.",
     "fitting.updateHint": "Update Tessera for more room to work.",
     "ws.extensionsLater": "Newer tools",
-    "ws.skillLaterUnavailable": "Unavailable in this version"
+    "ws.skillLaterUnavailable": "Unavailable in this version",
+    "testplay.title": "Test play",
+    "testplay.description": "Adds a big pile of pixels for checking. This button will be removed in the final version.",
+    "testplay.addPixels": "Add lots of pixels (+{count})",
+    "testplay.balance": "Current pixels: {count}"
   }
 }

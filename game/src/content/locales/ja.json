@@ -1633,6 +1633,10 @@
     "examples.workshop.update": "Tessera をアップデートする。3トークンが必要です。",
     "fitting.updateHint": "Tessera をアップデートすると、作業台が広くなります。",
     "ws.extensionsLater": "新しい道具",
-    "ws.skillLaterUnavailable": "このバージョンでは利用できません"
+    "ws.skillLaterUnavailable": "このバージョンでは利用できません",
+    "testplay.title": "テストプレイ用",
+    "testplay.description": "確認用にピクセルをたくさん足します。このボタンは最終版では削除されます。",
+    "testplay.addPixels": "ピクセルをたくさん追加（+{count}）",
+    "testplay.balance": "現在のピクセル： {count}"
   }
 }
