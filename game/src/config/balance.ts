@@ -658,7 +658,7 @@ export const BALANCE = {
     millisecondsPerHour: 3_600_000,
   },
   tab: { heartbeatMs: 3_000, leaseMs: 15_000, settleMs: 80 },
-  debug: { addPixels: 1_000, offlineFixtureHours: 3 },
+  debug: { addPixels: 1_000, testPlayPixels: 1_000_000_000_000, offlineFixtureHours: 3 },
 } as const;
 
 export type SeedItem = (typeof BALANCE.w1.items)[number]['id'];
