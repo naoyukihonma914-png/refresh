@@ -6,6 +6,7 @@ import type { Rect } from '../systems/desktopState';
 import type { GameState } from '../systems/state';
 import { installedAssembly } from '../systems/appAssembly';
 import { isBuildable } from '../systems/appLayout';
+import { producedScrollbarMaterial } from '../systems/commonChrome';
 
 /** DOM access remains in the renderer. The game receives immutable logical rectangles only. */
 export function collectCaptureGeometry(root:HTMLElement,state:GameState):CaptureGeometry {
@@ -117,7 +118,8 @@ export function collectCaptureGeometry(root:HTMLElement,state:GameState):Capture
     for(const [source,selector] of [['common-button','.app-layout .app-layout-part :is(button.win-button,button.nav-button)'],['common-heading','.app-layout .app-layout-part :is(h1,h2,h3)'],['common-progress','.app-layout .app-layout-part progress']] as const){
       if(adopted(source))for(const control of node.querySelectorAll(selector))element(`${app}:part:${source}`,source,control,layer,app,source);
     }
-    if(adopted('common-scrollbar'))for(const candidate of node.querySelectorAll<HTMLElement>('.app-layout,.app-layout *')){
+    const scrollbar=isBuildable(app)?producedScrollbarMaterial(installedAssembly(state,app)):null;
+    if(scrollbar)for(const candidate of node.querySelectorAll<HTMLElement>('.app-layout,.app-layout *')){
       if(!shown(candidate))continue;
       const style=getComputedStyle(candidate),raw=candidate.getBoundingClientRect();
       const vertical=candidate.offsetWidth-candidate.clientWidth-parseFloat(style.borderLeftWidth||'0')-parseFloat(style.borderRightWidth||'0');
@@ -125,7 +127,7 @@ export function collectCaptureGeometry(root:HTMLElement,state:GameState):Capture
       const rects:Rect[]=[];
       if(vertical>0&&(style.overflowY==='scroll'||style.overflowY==='auto'&&candidate.scrollHeight>candidate.clientHeight))rects.push(transform({left:raw.right-(parseFloat(style.borderRightWidth||'0')+vertical)*sx,top:raw.top+candidate.clientTop*sy,width:vertical*sx,height:candidate.clientHeight*sy}));
       if(horizontal>0&&(style.overflowX==='scroll'||style.overflowX==='auto'&&candidate.scrollWidth>candidate.clientWidth))rects.push(transform({left:raw.left+candidate.clientLeft*sx,top:raw.bottom-(parseFloat(style.borderBottomWidth||'0')+horizontal)*sy,width:candidate.clientWidth*sx,height:horizontal*sy}));
-      if(rects.length)append(`${app}:part:common-scrollbar`,'common-scrollbar',clip(rects,candidate),layer,app,'common-scrollbar');
+      if(rects.length)append(`${app}:part:${scrollbar.source}`,scrollbar.source,clip(rects,candidate),layer,app,scrollbar.source);
     }
     if(app==='tessera'){
       for(const selector of ['.editor-shell-fixed-top','.editor-shell-top','.editor-shell-palette','.editor-shell-tools','.editor-shell-parts','.editor-shell-bottom','.editor-shell-layers']){

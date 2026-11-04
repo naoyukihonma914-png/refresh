@@ -1,5 +1,5 @@
 import type { UiSetId,WorkshopPartId } from '../content/workshopCatalog';
-import { partsForSet } from '../content/workshopCatalog';
+import { fittingPartsForSet as partsForSet } from '../content/workshopFitting';
 import type { GameState } from './state';
 import { setComplete } from './workshop';
 

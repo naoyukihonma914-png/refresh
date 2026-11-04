@@ -1,3 +1,4 @@
+import {createInitialState} from './state';
 import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import {renderToStaticMarkup} from 'react-dom/server';
@@ -12,9 +13,10 @@ import {decodeCapture,type Screenshot} from './desktopState';
 import {createFixture} from './fixtures';
 import {isLegacyPageDesign} from './legacyPageDesign';
 import {createPageDesign,isPageDesign,PAGE_PARTS,recommendedPage} from './pageDesign';
-import {isProductRecord} from './releaseState';
+
 import {decodeSave,encodeSave} from './save';
-import {SCHEMA_VERSION} from './state';
+
+
 
 const now=1_800_000_000_000;
 function published(){
@@ -88,28 +90,6 @@ describe('TP-1：旧ページ配置を含む写真と製品は過去の契約で
   expect(capturedContentSummary(currentShot)).toEqual(capturedContentSummary(legacyShot));
   expect(photoContentQuality(currentShot)).toBe(photoContentQuality(legacyShot));
  });
- it('実形式15の財布・制作・撮影11を保ち、現在のページだけを移行できる',()=>{
-  const old=published().save,data=JSON.stringify(old),s=decodeSave(data);
-  expect(old.schemaVersion).toBe(15);expect(s.schemaVersion).toBe(SCHEMA_VERSION);
-  expect(s.resources).toEqual(old.resources);expect(s.run.workshop.parts).toEqual(old.run.workshop.parts);
-  expect(s.persistent.setDocuments).toEqual(old.persistent.setDocuments);
-  expect(s.persistent.screenshots).toEqual(old.persistent.screenshots);
-  expect(isPageDesign(s.run.seed.page)).toBe(true);
-  const oldShot=old.persistent.screenshots[0] as Screenshot;
-  expect(readCapture(s.persistent.screenshots[0]!).page).toEqual(readCapture(oldShot).page);
-  expect(decodeSave(encodeSave(s))).toEqual(s);
-  expect(JSON.stringify(old)).toBe(data);
- });
- it('出荷済みの実形式15の製品と写真の金額・設計・エンコードを変更しない',()=>{
-  const old=published().productSave,s=decodeSave(JSON.stringify(old));
-  expect(old.schemaVersion).toBe(15);expect(s.persistent.products).toEqual(old.persistent.products);
-  expect(s.persistent.products.every(isProductRecord)).toBe(true);
-  expect(s.resources).toEqual(old.resources);
-  for(const product of s.persistent.products){
-   for(const shot of [...product.screenshots??[],...product.captureCatalog??[],...(product.capture?[product.capture]:[])]){
-    const data=shot.data;expect(readCapture(shot)).toBeTruthy();expect(shot.data).toBe(data);
-   }
-  }
-  expect(decodeSave(encodeSave(s)).persistent.products).toEqual(old.persistent.products);
- });
+ it("形式15の試遊保存は書類や写真を移行せず新規開始にする",()=>{const old=published().save,raw=JSON.stringify(old),state=decodeSave(raw);expect(state).toEqual(createInitialState(old.lastTickAt));expect(JSON.stringify(old)).toBe(raw);expect(decodeSave(encodeSave(state))).toEqual(state);});
+ it("形式15の出荷済み試遊保存も製品を引き継がず新規開始にする",()=>{const old=published().productSave,raw=JSON.stringify(old),state=decodeSave(raw);expect(state).toEqual(createInitialState(old.lastTickAt));expect(state.persistent.products).toEqual([]);expect(JSON.stringify(old)).toBe(raw);});
 });

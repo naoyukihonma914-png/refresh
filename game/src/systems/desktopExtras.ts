@@ -10,6 +10,7 @@ import { isManagerProcessId, JOB_IDS, type AppId, type DesktopState, type JobId,
 import { readCapture } from './captureScene';
 import { capturedContentSummary } from './capturePhoto';
 import type { GameState } from './state';
+import { tesseraUpdatePending } from './workshopUpdate';
 export type ExtraAction =
  | {type:'job-assign'|'job-buy'|'job-update';app:JobId}
  | {type:'sort';by:'name'|'date'|'type'} | {type:'search';text:string} | {type:'large'}
@@ -125,6 +126,7 @@ export function actDesktopExtra(s:GameState,a:ExtraAction,now:number,language='j
   if(prefs.mode==='dark')next=completeRequests(next,['dark'],now);return next;
  }
  case 'skill':{
+  if(tesseraUpdatePending(s))return s;
   if(a.id==='major2'&&!p.skills.includes('major1')||a.id==='major3'&&(!p.skills.includes('major2')||!d.apps.includes('terminal')))return s;
   const skill=BALANCE.w3.skills.find(x=>x.id===a.id);if(!skill||p.skills.includes(a.id)||skill.band===2&&s.run.version==='v0.1'||s.resources.tokens<skill.cost)return s;
   const next:GameState={...s,resources:{...s.resources,tokens:s.resources.tokens-skill.cost},persistent:{...s.persistent,desktopPrefs:{...p,skills:[...p.skills,a.id]}},run:{...s.run,desktop:{...d,...(a.id==='burst'?{cooldownMs:d.cooldownMs*BALANCE.w3.burstMultiplier}:{}),...(a.id==='sortMail'?{mailFolder:'pending' as const}:{})}}};

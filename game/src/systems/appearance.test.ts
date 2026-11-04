@@ -5,7 +5,7 @@ import { createInitialState, isGameState } from './state';
 import { actWorkshop, advanceWorkshop, enterWorkshop } from './workshop';
 import { canSwitchEditor,editorName,appName,setDesktopStage,setEditorStage,unlockedDesktopStage,unlockedEditorStage } from './appearance';
 const now=1_800_000_000_000;
-function editor(){const s=createInitialState(now);s.resources.tokens=100;return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);}
+function editor(){const s=createInitialState(now);delete s.run.workshop.groupPuzzle;s.resources.tokens=100;return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);}
 
 describe('第3版：工房とデスクトップの見た目の段',()=>{
  it('Tesseraは初周中に3トークンで更新し、再購入で払わない',()=>{
@@ -45,7 +45,14 @@ describe('第3版：工房とデスクトップの見た目の段',()=>{
   s.run.version='v1';s=actWorkshop(s,{type:'skill',id:'extraParts'},now);expect(s.resources.tokens).toBe(100-15);
   expect(actWorkshop(s,{type:'skill',id:'extraParts'},now)).toBe(s);s=actWorkshop(s,{type:'buySet',set:'extras'},now);
   expect(Object.keys(s.run.workshop.parts)).toEqual(['plugin-tabs','plugin-table']);
-  for(const id of ['snap','motion','efficiency'] as const){const before=s.resources.tokens;s=actWorkshop(s,{type:'skill',id},now);expect(s.persistent.editorSkills).toContain(id);expect(s.resources.tokens).toBeLessThan(before);expect(actWorkshop(s,{type:'skill',id},now)).toBe(s);}
+  for(const id of ['motion','efficiency'] as const){const before=s.resources.tokens;s=actWorkshop(s,{type:'skill',id},now);expect(s.persistent.editorSkills).toContain(id);expect(s.resources.tokens).toBeLessThan(before);expect(actWorkshop(s,{type:'skill',id},now)).toBe(s);}
   expect(isGameState(s)).toBe(true);
+ });
+ it('撤去した工程用プラグインは新しく課金せず、旧取得履歴は保つ',()=>{
+  let s=editor();s.run.version='v1';
+  for(const id of ['batch','dimensions','layers','snap'] as const)expect(actWorkshop(s,{type:'skill',id},now)).toBe(s);
+  s.persistent.editorSkills=['batch','dimensions','layers','snap'];const owned=s.persistent.editorSkills,wallet=s.resources;
+  s=actWorkshop(s,{type:'guide',id:'close'},now);
+  expect(s.persistent.editorSkills).toBe(owned);expect(s.resources).toBe(wallet);expect(isGameState(s)).toBe(true);
  });
 });

@@ -6,6 +6,6 @@ export function setDocumentPresentation(document:SetDocument) {
  const first=partsForSet(document.set).find(part=>document.parts[part.id])?.id??null;
  return {
   customization:{...createEditorCustomization(),grid:false},
-  workshop:{...createWorkshopState(),entered:true,enteredAt:document.at,purchasedSets:[document.set],parts:document.parts,activePart:first},
+  workshop:{...createWorkshopState(),puzzleSet:document.set,entered:true,enteredAt:document.at,purchasedSets:[document.set],parts:document.parts,activePart:first},
  };
 }

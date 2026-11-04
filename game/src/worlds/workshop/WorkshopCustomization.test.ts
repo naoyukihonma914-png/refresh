@@ -16,7 +16,12 @@ describe('制作した設定の表示',()=>{
   expect(standard).toContain('data-workshop-adjustments="0"');expect(standard).toContain(i18n.t('ws.adjustmentStandard'));
   const changed={...production,elements:['title','close','minimize','maximize'],design:{...production.design,radius:8,shadow:true}};
   const custom=render(changed);
-  expect(custom).toContain('data-workshop-adjustments="3"');expect(custom).toContain(i18n.t('ws.adjustmentChanges',{count:3}));
+  expect(custom).toContain('data-workshop-adjustments="2"');expect(custom).toContain(i18n.t('ws.adjustmentChanges',{count:2}));
+  expect(custom).not.toContain('ws-order-controls');expect(custom).not.toContain('ws.controlSide');
+  expect(custom).toContain('data-workshop-adjust="scrollbarWidth"');
+  expect(custom).not.toContain('ws-window-controls-editor');
+  const oldColors=render({...production,design:{...production.design,controlColors:{close:'#f6d27a'}}});
+  expect(oldColors).toContain('data-workshop-adjustments="0"');
   // Merely visiting the adjustment page does not change the saved production.
   expect(production.design).toEqual(createComponentDesign());expect(production.elements).toEqual(part.elements);
  });

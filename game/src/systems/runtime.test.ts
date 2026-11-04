@@ -10,7 +10,9 @@ import { createFixture } from './fixtures';
 import { GameRuntime } from './runtime';
 import { encodeSave,loadGame,SAVE_KEYS } from './save';
 import { seedCursorQuote } from './seed';
-import { getWorkshopPart } from '../content/workshopCatalog';
+import { getWorkshopPart,type WorkshopPartId } from '../content/workshopCatalog';
+import { fittingDefinition } from '../content/workshopFitting';
+import { defaultPieceSocket } from './workshopFitting';
 
 const debugBase=1+BALANCE.w1.items.filter(item=>item.id==='border'||item.id==='save').reduce((n,item)=>n+item.perSecond,0);
 const hour = BALANCE.time.millisecondsPerHour;
@@ -18,6 +20,13 @@ let storage: ReturnType<typeof createMemoryStorage>;
 let runtime: GameRuntime;
 let platform: Platform;
 let clock: { wall: number; mono: number; hidden: boolean; owned: boolean };
+function fitRuntimePiece(part:WorkshopPartId,piece:string){
+ runtime.actWorkshop({type:'spawnPiece',part,piece});
+ const production=runtime.getSnapshot().state.run.workshop.parts[part]!;
+ const socket=defaultPieceSocket(fittingDefinition(part),production.fitting!,piece)!;
+ runtime.actWorkshop({type:'fitPiece',part,piece,socket});
+}
+
 
 function makePlatform(target = storage): Platform {
   return {
@@ -507,66 +516,64 @@ describe('段階7：v1.0の通常の出荷からv2へ', () => {
   });
 });
 
-it('制作工程をすぐ保存し、再読込・再配置で工程払いを重複しない',async()=>{
+it('はめたピースをすぐ保存し、再読込・取り外しと再装着で払いを重複しない',async()=>{
  const fixture=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!;
  storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
- const rect=runtime.getSnapshot().state.run.workshop.parts['common-button']!.rect;
- runtime.actWorkshop({type:'place',part:'common-button',rect});
- const paid=runtime.getSnapshot().state.resources.pixels;
+ fitRuntimePiece('common-button','label');const paid=runtime.getSnapshot().state.resources.pixels;
  expect(loadGame(storage).kind).toBe('loaded');runtime.dispose();await start();
- expect(runtime.getSnapshot().state.run.workshop.parts['common-button']!.step).toBe(1);
- runtime.actWorkshop({type:'place',part:'common-button',rect});
+ expect(runtime.getSnapshot().state.run.workshop.parts['common-button']!.step).toBe(4);
+ runtime.actWorkshop({type:'removePiece',part:'common-button',piece:'label'});fitRuntimePiece('common-button','label');
  expect(runtime.getSnapshot().state.resources.pixels).toBe(paid);
 });
 
 describe('お手本と完成の一時的な反応',()=>{
  it('お手本の入り切りを保存し、非所有・非表示中には変えない',async()=>{
-  storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('foundation-saved',clock.wall)!));await start();
+  storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('seed-color',clock.wall)!));await start();
   runtime.setExamplesEnabled(false);expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
   runtime.dispose();await start();expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
   clock.hidden=true;runtime.setExamplesEnabled(true);expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
   clock.hidden=false;clock.owned=false;runtime.setExamplesEnabled(true);expect(runtime.getSnapshot().state.persistent.examplesEnabled).toBe(false);
  });
- it('成功した最初の吸着だけクリック音1回と単調時計の反応を出し、工程払いを二重にしない',async()=>{
+ it('最初の装着でクリック音1回と単調時計の反応を出し、同じ装着では払いを二重にしない',async()=>{
   const fixture=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!;
   storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();vi.mocked(platform.audio.play).mockClear();clock.mono=123;
-  const rect=getWorkshopPart('common-button').defaultRect;
-  runtime.actWorkshop({type:'place',part:'common-button',rect:{...rect,x:rect.x+8},example:true});
-  expect(runtime.getSnapshot().state.run.workshop.parts['common-button']!.rect).toEqual(rect);
+  fitRuntimePiece('common-button','label');
+  expect(runtime.getSnapshot().state.run.workshop.parts['common-button']!.rect).toEqual(getWorkshopPart('common-button').defaultRect);
   expect(runtime.getSnapshot().workshopSnap).toEqual({part:'common-button',at:123});
   const sounds=vi.mocked(platform.audio.play).mock.calls.map(([sound])=>sound.kind);expect(sounds.filter(kind=>kind==='press')).toHaveLength(1);expect(sounds).not.toContain('build');
-  const pixels=runtime.getSnapshot().state.resources.pixels;runtime.actWorkshop({type:'place',part:'common-button',rect,example:true});
+  const pixels=runtime.getSnapshot().state.resources.pixels;fitRuntimePiece('common-button','label');
   expect(runtime.getSnapshot().state.resources.pixels).toBe(pixels);
   runtime.dispose();await start();expect(runtime.getSnapshot().workshopSnap).toBeUndefined();
  });
- it('音OFF・音量を守り、自由制作や裏のエディタでは吸着音を鳴らさない',async()=>{
-  const fixture=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!,rect=getWorkshopPart('common-button').defaultRect;
+ it('音OFF・音量を守り、お手本OFFでも実装着は鳴り、裏のエディタでは鳴らさない',async()=>{
+  const fixture=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!;
   fixture.persistent.progress.sound={enabled:false,volume:.4};storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
-  runtime.actWorkshop({type:'place',part:'common-button',rect,example:true});expect(platform.audio.play).not.toHaveBeenCalled();
+  fitRuntimePiece('common-button','label');expect(platform.audio.play).not.toHaveBeenCalled();
   const fresh=createFixture('stage8a-part-common-button-step-0-era0',clock.wall)!;fresh.persistent.progress.sound={enabled:true,volume:.4};
-  expect(runtime.importData(encodeSave(fresh))).toBe(true);vi.mocked(platform.audio.play).mockClear();runtime.actWorkshop({type:'place',part:'common-button',rect,example:true});
+  expect(runtime.importData(encodeSave(fresh))).toBe(true);vi.mocked(platform.audio.play).mockClear();fitRuntimePiece('common-button','label');
   expect(vi.mocked(platform.audio.play).mock.calls.some(([sound])=>sound.kind==='press'&&sound.volume===.4)).toBe(true);
   expect(runtime.importData(encodeSave(fresh))).toBe(true);runtime.setExamplesEnabled(false);vi.mocked(platform.audio.play).mockClear();
-  runtime.actWorkshop({type:'place',part:'common-button',rect:{...rect,x:rect.x+8},example:true});expect(runtime.getSnapshot().workshopSnap).toBeUndefined();expect(vi.mocked(platform.audio.play).mock.calls.some(([sound])=>sound.kind==='press')).toBe(false);
+  fitRuntimePiece('common-button','label');expect(runtime.getSnapshot().workshopSnap).toBeDefined();expect(vi.mocked(platform.audio.play).mock.calls.some(([sound])=>sound.kind==='press')).toBe(true);
   const behind=createFixture('stage8b-stream-draft-era0',clock.wall)!;behind.run.desktop.active='files';
-  expect(runtime.importData(encodeSave(behind))).toBe(true);vi.mocked(platform.audio.play).mockClear();runtime.actWorkshop({type:'test',part:'stream-preview',interaction:'select'});
+  expect(runtime.importData(encodeSave(behind))).toBe(true);vi.mocked(platform.audio.play).mockClear();
+  const piece=fittingDefinition('stream-preview').pieces.at(-1)!;fitRuntimePiece('stream-preview',piece);
   expect(platform.audio.play).not.toHaveBeenCalled();expect(runtime.getSnapshot().workshopCompletion).toBeUndefined();
  });
- it('完成だけで実合計を含む反応を1度発行し、再調整・書き出し・取り込み・再読込では再発行しない',async()=>{
+ it('最後のピースだけで実合計を含む反応を1度発行し、再調整・書き出し・取り込み・再読込では再発行しない',async()=>{
   const fixture=createFixture('stage8a-part-common-button-step-3-era0',clock.wall)!;storage.setItem(SAVE_KEYS.primary,encodeSave(fixture));await start();
-  const before=runtime.getSnapshot().state;runtime.actWorkshop({type:'test',part:'common-button',interaction:'press'});
+  const before=runtime.getSnapshot().state;fitRuntimePiece('common-button','label');
   const completed=runtime.getSnapshot(),event=completed.workshopCompletion!;
   expect(event).toMatchObject({serial:1,part:'common-button',partRate:BALANCE.workshop.partRates['common-button'],rateBefore:passivePixelsPerSecond(before),rateAfter:passivePixelsPerSecond(completed.state)});
   expect(event.activePartRate).toBeGreaterThan(0);
-  runtime.actWorkshop({type:'test',part:'common-button',interaction:'press'});expect(runtime.getSnapshot().workshopCompletion).toBe(event);
+  runtime.actWorkshop({type:'removePiece',part:'common-button',piece:'label'});fitRuntimePiece('common-button','label');expect(runtime.getSnapshot().workshopCompletion).toBe(event);
   runtime.actWorkshop({type:'adjust',part:'common-button',patch:{shadow:true}});expect(runtime.getSnapshot().workshopCompletion).toBe(event);
   runtime.actWorkshop({type:'export'});expect(runtime.getSnapshot().workshopCompletion).toBe(event);
   const encoded=encodeSave(runtime.getSnapshot().state);expect(runtime.importData(encoded)).toBe(true);expect(runtime.getSnapshot().workshopCompletion).toBeUndefined();
   runtime.dispose();await start();expect(runtime.getSnapshot().workshopCompletion).toBeUndefined();
  });
- it('世界4の未稼働材料が完成しても、その部品を現在の毎秒へ入金した反応を作らない',async()=>{
+ it('世界4の未稼働材料が完成しても、そのパーツを現在の毎秒へ入金した反応を作らない',async()=>{
   storage.setItem(SAVE_KEYS.primary,encodeSave(createFixture('stage8b-stream-draft-era0',clock.wall)!));await start();
-  runtime.actWorkshop({type:'test',part:'stream-preview',interaction:'select'});const event=runtime.getSnapshot().workshopCompletion!;
+  fitRuntimePiece('stream-preview',fittingDefinition('stream-preview').pieces.at(-1)!);const event=runtime.getSnapshot().workshopCompletion!;
   expect(event.partRate).toBe(BALANCE.workshop.partRates['stream-preview']);expect(event.activePartRate).toBe(0);expect(event.rateAfter).toBe(passivePixelsPerSecond(runtime.getSnapshot().state));
  });
 });

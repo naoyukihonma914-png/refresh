@@ -78,7 +78,7 @@ describe('第3版：不在中のターミナル', () => {
   it('不在の完成品エクスポートも一度だけ行い、繰り返してトークンを増やさない', () => {
     let state = automated();
     state.run.workshop = createFixture('stage8a-part-common-button-step-3-era0', now)!.run.workshop;
-    state = actWorkshop(state, { type:'test', part:'common-button', interaction:'press' }, now);
+    state = actWorkshop(state, { type:'fitPiece', part:'common-button', piece:'label', socket:'label' }, now);
     expect(state.run.workshop.parts['common-button']!.step).toBe(4);
     expect(state.run.workshop.parts['common-button']!.exportedAt).toBeNull();
     state.run.play.terminalCommand = 'export';

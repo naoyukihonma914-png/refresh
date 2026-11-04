@@ -1,0 +1,53 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8185/",
+  "buildSha256": "e2e15a067d3a95f73ca331d6e28cea972ada031932bd5a0ca432d4f706ca5327",
+  "setup": "public fixtures; real controls; unchanged exported save imported through file chooser; normal URL reload",
+  "references": [
+    "docs/世界2-修正指示書-第4ラウンド.md"
+  ],
+  "cases": [
+    {
+      "id": "en:customization",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "selectedRowOnly": true,
+        "oldPieceZoneEntryRemoved": true,
+        "unfinishedAndCompletedCustomizable": true,
+        "selectedPartOnlyAdjusted": true
+      }
+    },
+    {
+      "id": "en:funding",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "checks": {
+        "ordinaryReward": 1,
+        "grant": 3,
+        "balanceAfterExport": 4,
+        "balanceAfterUpdate": 1,
+        "normalImportReloadNoDuplicate": true,
+        "otherPurchasesBlockedBeforeUpdate": true,
+        "dismissalKeepsUpdateGoal": true,
+        "otherPurchasesAvailableImmediately": true,
+        "secondExportRewardOnly": 1
+      }
+    }
+  ],
+  "languages": [
+    "en"
+  ],
+  "passed": 2,
+  "failed": 0
+}

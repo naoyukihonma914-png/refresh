@@ -1,3 +1,4 @@
+import {BALANCE} from '../config/balance';
 import {editorName} from '../systems/appearance';
 import { useState } from 'react';
 import {LOCALES,type I18n,type MessageKey} from '../content/i18n';
@@ -14,6 +15,6 @@ export function GuideHistory({ state, i18n }: { state: GameState; i18n: I18n }) 
     <ul>{state.persistent.guideArchive.map(entry => <li key={`${entry.version}:${entry.kind}:${entry.id}`}>
       <button type="button" className="text-button" onClick={() => setSelected(entry)}>{i18n.t('release.guideRead', { version: entry.version, title: i18n.t(title(entry)) })}</button>
     </li>)}</ul>
-    {selected && <div className="guide-history-body"><p>{i18n.t(key(selected),{app:editorName(state,i18n)})}</p><button type="button" onClick={() => setSelected(null)}>{i18n.t('guide.close')}</button></div>}
+    {selected && <div className="guide-history-body"><p>{i18n.t(key(selected),{app:editorName(state,i18n),count:i18n.integer(BALANCE.workshop.updateGrantTokens)})}</p><button type="button" onClick={() => setSelected(null)}>{i18n.t('guide.close')}</button></div>}
   </section>;
 }

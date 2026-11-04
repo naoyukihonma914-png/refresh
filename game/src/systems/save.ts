@@ -1,3 +1,4 @@
+import { repairPuzzlePositions } from './workshopPuzzle';
 import { createAdviceState } from './advice';
 import { createPageDesign, isPageDesign } from './pageDesign';
 import { repairAppProjects } from './appLayout';
@@ -5,12 +6,8 @@ import { getWorkshopPart, WORKSHOP_PARTS, type UiSetId, type WorkshopPartId, typ
 import { isPartProduction, minimumPartSize, workshopPairValid, workshopRectOnGrid, type PartProduction } from './workshopState';
 import { normalizeWorkshopRect } from './workshop';
 import { captureStore } from '../platform/captures';
-import { canSave, isGameState, SCHEMA_VERSION, type GameState } from './state';
-import { migrateLegacySave } from './legacySave';
-import { migrateStage8bSave } from './stage8bMigration';
-import { migrateTestplaySave } from './testplayMigration';
-import { migrateExampleSave } from './exampleMigration';
-import { migratePageLayoutSave } from './pageLayoutMigration';
+import { canSave, createInitialState, isGameState, SCHEMA_VERSION, type GameState } from './state';
+import { migrateFittingProduction } from './workshopFitting';
 import type { SaveStorage } from '../platform/storage';
 export { createMemoryStorage, type SaveStorage } from '../platform/storage';
 
@@ -88,6 +85,7 @@ function repairWorkshopRects(state: GameState): void {
 export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameState {
   let data: unknown = JSON.parse(raw);
   const stored=data as GameState;
+  if(stored&&Number.isSafeInteger(stored.schemaVersion)&&Number(stored.schemaVersion)>=1&&Number(stored.schemaVersion)<SCHEMA_VERSION)return createInitialState(Number.isFinite(stored.lastTickAt)&&stored.lastTickAt>=0?stored.lastTickAt:0);
   const inflateShot = (shot:GameState['persistent']['screenshots'][number]) => {
       if('data' in shot)return shot;
       const ref=(shot as unknown as {sceneRef?:unknown}).sceneRef;
@@ -108,22 +106,26 @@ export function decodeSave(raw: string, readScene?: (ref:string)=>string): GameS
     return value.schemaVersion as number;
   };
   let version = versionOf(data);
+  if (version < 1) throw new Error('保存形式に対応していません');
   if (version > SCHEMA_VERSION) throw new Error('新しい版で保存されたデータです');
-  if (version < SCHEMA_VERSION) {
-    if(version<14)data=migrateLegacySave(data);
-    if(versionOf(data)===14)data=migrateStage8bSave(data);
-    if(versionOf(data)===15)data=migrateTestplaySave(data);
-    if(versionOf(data)===16)data=migrateExampleSave(data);
-    if(versionOf(data)===17)data=migratePageLayoutSave(data);
-    version = versionOf(data);
-    if (version !== SCHEMA_VERSION) throw new Error('保存データの変換に失敗しました');
-  }
   const candidate=data as GameState;
+  // Archived material fixtures and frozen screens may omit fitting fields.
+  if(candidate.run?.workshop?.parts&&typeof candidate.run.workshop.parts==='object'&&!Array.isArray(candidate.run.workshop.parts)){
+    for(const [id,production] of Object.entries(candidate.run.workshop.parts)){
+      const descriptor=WORKSHOP_PARTS.find(part=>part.id===id);
+      if(production&&descriptor&&!production.fitting){
+        const reference=normalizeWorkshopRect(candidate,descriptor.id,descriptor.defaultRect);
+        if(!reference||!isPartProduction({...production,rect:reference},descriptor.id))throw new Error('保存データの内容が不正です');
+        candidate.run.workshop.parts[descriptor.id]=migrateFittingProduction(production,descriptor.id,candidate.lastTickAt);
+      }
+    }
+  }
   if(candidate.run?.desktop){candidate.run.desktop.projects=repairAppProjects(candidate.run.desktop.projects,candidate.run.desktop.apps,candidate.run.desktop.upgrades,candidate.persistent?.desktopPrefs?.skills??[]);if(candidate.run.desktop.editingApp&&!candidate.run.desktop.projects[candidate.run.desktop.editingApp])candidate.run.desktop.editingApp=null;}
   if(candidate.run?.seed&&!isPageDesign(candidate.run.seed.page))candidate.run.seed.page=createPageDesign();
   if(candidate.run&&candidate.run.advice===undefined)candidate.run.advice=createAdviceState();
   repairWorkshopRects(candidate);
   if (!isGameState(data)) throw new Error('保存データの内容が不正です');
+  candidate.run.workshop=repairPuzzlePositions(candidate.run.workshop);
   return data;
 }
 

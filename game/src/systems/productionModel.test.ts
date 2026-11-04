@@ -138,8 +138,8 @@ describe('第3版：生産者の統合台帳',()=>{
 describe('第3版：作った中身の売上',()=>{
   it('部品・稼働アプリ・完成セットを分類して数え、旧アイコン数と書き出し回数を式へ入れない',()=>{
     const s=install(desktop(),'files'),counts=madeContentCounts(s),weights=BALANCE.release.contentWeights;
-    expect(counts.parts).toBe(22);expect(counts.sets).toBe(4);expect(counts.apps).toBe(2);
-    expect(counts.total).toBe(counts.seedParts*weights.seedParts+22*weights.parts+2*weights.apps+4*weights.sets);
+    expect(counts.parts).toBe(21);expect(counts.sets).toBe(4);expect(counts.apps).toBe(2);
+    expect(counts.total).toBe(counts.seedParts*weights.seedParts+21*weights.parts+2*weights.apps+4*weights.sets);
     const expected=Math.floor(BALANCE.release.base*(s.run.totalPixelsGenerated/BALANCE.release.pixelUnit)**BALANCE.release.exponent*(1+BALANCE.release.perElement*counts.total));
     expect(releaseEstimate(s)).toBe(expected);
     const changed=structuredClone(s);changed.persistent.progress.counts.icons=10000;

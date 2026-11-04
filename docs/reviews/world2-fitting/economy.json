@@ -1,0 +1,626 @@
+{
+  "assumptions": {
+    "clicksPerSecond": 2.5,
+    "decisionSeconds": 4,
+    "guideSeconds": 15,
+    "partSeconds": [
+      90,
+      135,
+      180
+    ],
+    "averageMomentum": 1.3,
+    "cursorPaybackSeconds": 120,
+    "maxSeconds": 86400,
+    "targetMinutes": [
+      40,
+      60
+    ],
+    "cursorPolicy": "Buy while affordable if cursor cost / its current pixels per second is at most the configured payback; prioritize the next construction purchase.",
+    "craftPolicy": "Mainline 21 parts to the 256-color exit; equal time per piece within the unchanged per-part Appendix C assumptions. Buy the 3-token update as soon as affordable. No generation-button clicking while crafting or reading. Generation clicks while waiting for a purchase use the real momentum reducer.",
+    "guides": "Read each actual new seed/workshop guide once; do not assume optional secrets, events or offline time."
+  },
+  "scenarios": [
+    {
+      "partSeconds": 90,
+      "seedSeconds": 531.2,
+      "prototypeWallSeconds": 2620.4,
+      "prototypeWallMinutes": 43.67333333333333,
+      "withinTarget": true,
+      "completedParts": 21,
+      "completedSets": [
+        "common",
+        "foundation",
+        "files",
+        "mail"
+      ],
+      "cursors": 24,
+      "totalPixelsGenerated": 842961.6383636085,
+      "pixels": 616397.638363532,
+      "rate": 878.1039999999999,
+      "tokens": 21,
+      "revenue": 405,
+      "displayWallBlocked": true,
+      "guidesRead": 8,
+      "purchases": [
+        {
+          "seconds": 4,
+          "action": "seed:border",
+          "pixels": 0.08999999999999808
+        },
+        {
+          "seconds": 12,
+          "action": "seed:save",
+          "pixels": 0.6940000000000097
+        },
+        {
+          "seconds": 70.7,
+          "action": "seed:color",
+          "pixels": 0.04875000000011909
+        },
+        {
+          "seconds": 136.4,
+          "action": "seed:font",
+          "pixels": 1.4918999999994185
+        },
+        {
+          "seconds": 180.8,
+          "action": "seed:layout",
+          "pixels": 3.177699999986089
+        },
+        {
+          "seconds": 234.2,
+          "action": "seed:motion",
+          "pixels": 9.95299999998042
+        },
+        {
+          "seconds": 305.2,
+          "action": "seed:bars",
+          "pixels": 3.639499999927466
+        },
+        {
+          "seconds": 399.2,
+          "action": "seed:workspace",
+          "pixels": 6.56050000002142
+        },
+        {
+          "seconds": 512.2,
+          "action": "seed:export",
+          "pixels": 7.966000000202257
+        },
+        {
+          "seconds": 551.4,
+          "action": "set:common",
+          "pixels": 15.777863550788425
+        },
+        {
+          "seconds": 709.4,
+          "action": "complete:common-frame",
+          "pixels": 19167.775363550398
+        },
+        {
+          "seconds": 713.4,
+          "action": "upgrade:Tessera",
+          "pixels": 19696.997363550407
+        },
+        {
+          "seconds": 807.4,
+          "action": "complete:common-button",
+          "pixels": 32434.384363550675
+        },
+        {
+          "seconds": 901.4,
+          "action": "complete:common-heading",
+          "pixels": 46308.75336354913
+        },
+        {
+          "seconds": 995.4,
+          "action": "complete:common-progress",
+          "pixels": 60897.98636355137
+        },
+        {
+          "seconds": 995.4,
+          "action": "set:foundation",
+          "pixels": 30897.98636355137
+        },
+        {
+          "seconds": 1093.4,
+          "action": "complete:foundation-taskbar",
+          "pixels": 48189.00236354947
+        },
+        {
+          "seconds": 1187.4,
+          "action": "complete:foundation-desktop",
+          "pixels": 67715.5103635501
+        },
+        {
+          "seconds": 1281.4,
+          "action": "complete:foundation-icons",
+          "pixels": 89068.51436355428
+        },
+        {
+          "seconds": 1375.4,
+          "action": "complete:foundation-notification",
+          "pixels": 112970.1023635526
+        },
+        {
+          "seconds": 1469.4,
+          "action": "complete:foundation-wallpaper",
+          "pixels": 138963.2183635539
+        },
+        {
+          "seconds": 1563.4,
+          "action": "complete:foundation-upgrades",
+          "pixels": 166864.0463635423
+        },
+        {
+          "seconds": 1563.4,
+          "action": "set:files",
+          "pixels": 101864.0463635423
+        },
+        {
+          "seconds": 1661.4,
+          "action": "complete:files-list",
+          "pixels": 134444.08236354814
+        },
+        {
+          "seconds": 1755.4,
+          "action": "complete:files-back",
+          "pixels": 169572.0543635484
+        },
+        {
+          "seconds": 1849.4,
+          "action": "complete:files-sort",
+          "pixels": 208283.25036355958
+        },
+        {
+          "seconds": 1943.4,
+          "action": "complete:files-search",
+          "pixels": 251465.646363555
+        },
+        {
+          "seconds": 2037.4,
+          "action": "complete:files-large",
+          "pixels": 299847.0543635375
+        },
+        {
+          "seconds": 2131.4,
+          "action": "complete:files-storage",
+          "pixels": 351943.2303635549
+        },
+        {
+          "seconds": 2131.4,
+          "action": "set:mail",
+          "pixels": 261943.2303635549
+        },
+        {
+          "seconds": 2229.4,
+          "action": "complete:mail-list",
+          "pixels": 321462.24636354484
+        },
+        {
+          "seconds": 2323.4,
+          "action": "complete:mail-body",
+          "pixels": 384187.9983635184
+        },
+        {
+          "seconds": 2417.4,
+          "action": "complete:mail-reply",
+          "pixels": 451307.4063635065
+        },
+        {
+          "seconds": 2511.4,
+          "action": "complete:mail-folders",
+          "pixels": 524732.5023634977
+        },
+        {
+          "seconds": 2605.4,
+          "action": "complete:mail-unread",
+          "pixels": 603226.0783635383
+        }
+      ]
+    },
+    {
+      "partSeconds": 135,
+      "seedSeconds": 531.2,
+      "prototypeWallSeconds": 3565.4,
+      "prototypeWallMinutes": 59.42333333333333,
+      "withinTarget": true,
+      "completedParts": 21,
+      "completedSets": [
+        "common",
+        "foundation",
+        "files",
+        "mail"
+      ],
+      "cursors": 24,
+      "totalPixelsGenerated": 1206917.2958637709,
+      "pixels": 980353.2958636577,
+      "rate": 878.1039999999999,
+      "tokens": 21,
+      "revenue": 467,
+      "displayWallBlocked": true,
+      "guidesRead": 8,
+      "purchases": [
+        {
+          "seconds": 4,
+          "action": "seed:border",
+          "pixels": 0.08999999999999808
+        },
+        {
+          "seconds": 12,
+          "action": "seed:save",
+          "pixels": 0.6940000000000097
+        },
+        {
+          "seconds": 70.7,
+          "action": "seed:color",
+          "pixels": 0.04875000000011909
+        },
+        {
+          "seconds": 136.4,
+          "action": "seed:font",
+          "pixels": 1.4918999999994185
+        },
+        {
+          "seconds": 180.8,
+          "action": "seed:layout",
+          "pixels": 3.177699999986089
+        },
+        {
+          "seconds": 234.2,
+          "action": "seed:motion",
+          "pixels": 9.95299999998042
+        },
+        {
+          "seconds": 305.2,
+          "action": "seed:bars",
+          "pixels": 3.639499999927466
+        },
+        {
+          "seconds": 399.2,
+          "action": "seed:workspace",
+          "pixels": 6.56050000002142
+        },
+        {
+          "seconds": 512.2,
+          "action": "seed:export",
+          "pixels": 7.966000000202257
+        },
+        {
+          "seconds": 551.4,
+          "action": "set:common",
+          "pixels": 15.777863550788425
+        },
+        {
+          "seconds": 754.4,
+          "action": "complete:common-frame",
+          "pixels": 24018.595363550474
+        },
+        {
+          "seconds": 758.4,
+          "action": "upgrade:Tessera",
+          "pixels": 24547.817363550483
+        },
+        {
+          "seconds": 897.4,
+          "action": "complete:common-button",
+          "pixels": 43238.9518635507
+        },
+        {
+          "seconds": 1036.4,
+          "action": "complete:common-heading",
+          "pixels": 63620.7933635482
+        },
+        {
+          "seconds": 1175.4,
+          "action": "complete:common-progress",
+          "pixels": 85049.7338635427
+        },
+        {
+          "seconds": 1175.4,
+          "action": "set:foundation",
+          "pixels": 55049.7338635427
+        },
+        {
+          "seconds": 1318.4,
+          "action": "complete:foundation-taskbar",
+          "pixels": 79747.38986353896
+        },
+        {
+          "seconds": 1457.4,
+          "action": "complete:foundation-desktop",
+          "pixels": 108077.78786353028
+        },
+        {
+          "seconds": 1596.4,
+          "action": "complete:foundation-icons",
+          "pixels": 139352.48186353204
+        },
+        {
+          "seconds": 1735.4,
+          "action": "complete:foundation-notification",
+          "pixels": 174405.3398635302
+        },
+        {
+          "seconds": 1874.4,
+          "action": "complete:foundation-wallpaper",
+          "pixels": 212555.7458635469
+        },
+        {
+          "seconds": 2013.4,
+          "action": "complete:foundation-upgrades",
+          "pixels": 253508.1038635294
+        },
+        {
+          "seconds": 2013.4,
+          "action": "set:files",
+          "pixels": 188508.1038635294
+        },
+        {
+          "seconds": 2156.4,
+          "action": "complete:files-list",
+          "pixels": 235481.02986353805
+        },
+        {
+          "seconds": 2295.4,
+          "action": "complete:files-back",
+          "pixels": 287237.49186353706
+        },
+        {
+          "seconds": 2434.4,
+          "action": "complete:files-sort",
+          "pixels": 344142.0978635146
+        },
+        {
+          "seconds": 2573.4,
+          "action": "complete:files-search",
+          "pixels": 407641.7238635065
+        },
+        {
+          "seconds": 2712.4,
+          "action": "complete:files-large",
+          "pixels": 478855.41186347074
+        },
+        {
+          "seconds": 2851.4,
+          "action": "complete:files-storage",
+          "pixels": 555684.1278634992
+        },
+        {
+          "seconds": 2851.4,
+          "action": "set:mail",
+          "pixels": 465684.1278634992
+        },
+        {
+          "seconds": 2994.4,
+          "action": "complete:mail-list",
+          "pixels": 551947.7238635088
+        },
+        {
+          "seconds": 3133.4,
+          "action": "complete:mail-body",
+          "pixels": 644100.7758634717
+        },
+        {
+          "seconds": 3272.4,
+          "action": "complete:mail-reply",
+          "pixels": 743106.6438635349
+        },
+        {
+          "seconds": 3411.4,
+          "action": "complete:mail-folders",
+          "pixels": 851324.4798636023
+        },
+        {
+          "seconds": 3550.4,
+          "action": "complete:mail-unread",
+          "pixels": 967181.735863664
+        }
+      ]
+    },
+    {
+      "partSeconds": 180,
+      "seedSeconds": 531.2,
+      "prototypeWallSeconds": 4510.4,
+      "prototypeWallMinutes": 75.17333333333333,
+      "withinTarget": false,
+      "completedParts": 21,
+      "completedSets": [
+        "common",
+        "foundation",
+        "files",
+        "mail"
+      ],
+      "cursors": 24,
+      "totalPixelsGenerated": 1570872.953363968,
+      "pixels": 1344308.9533636887,
+      "rate": 878.1039999999999,
+      "tokens": 21,
+      "revenue": 519,
+      "displayWallBlocked": true,
+      "guidesRead": 8,
+      "purchases": [
+        {
+          "seconds": 4,
+          "action": "seed:border",
+          "pixels": 0.08999999999999808
+        },
+        {
+          "seconds": 12,
+          "action": "seed:save",
+          "pixels": 0.6940000000000097
+        },
+        {
+          "seconds": 70.7,
+          "action": "seed:color",
+          "pixels": 0.04875000000011909
+        },
+        {
+          "seconds": 136.4,
+          "action": "seed:font",
+          "pixels": 1.4918999999994185
+        },
+        {
+          "seconds": 180.8,
+          "action": "seed:layout",
+          "pixels": 3.177699999986089
+        },
+        {
+          "seconds": 234.2,
+          "action": "seed:motion",
+          "pixels": 9.95299999998042
+        },
+        {
+          "seconds": 305.2,
+          "action": "seed:bars",
+          "pixels": 3.639499999927466
+        },
+        {
+          "seconds": 399.2,
+          "action": "seed:workspace",
+          "pixels": 6.56050000002142
+        },
+        {
+          "seconds": 512.2,
+          "action": "seed:export",
+          "pixels": 7.966000000202257
+        },
+        {
+          "seconds": 551.4,
+          "action": "set:common",
+          "pixels": 15.777863550788425
+        },
+        {
+          "seconds": 799.4,
+          "action": "complete:common-frame",
+          "pixels": 28869.41536355121
+        },
+        {
+          "seconds": 803.4,
+          "action": "upgrade:Tessera",
+          "pixels": 29398.637363551217
+        },
+        {
+          "seconds": 987.4,
+          "action": "complete:common-button",
+          "pixels": 54043.51936355153
+        },
+        {
+          "seconds": 1171.4,
+          "action": "complete:common-heading",
+          "pixels": 80932.83336354786
+        },
+        {
+          "seconds": 1355.4,
+          "action": "complete:common-progress",
+          "pixels": 109201.48136353934
+        },
+        {
+          "seconds": 1355.4,
+          "action": "set:foundation",
+          "pixels": 79201.48136353934
+        },
+        {
+          "seconds": 1543.4,
+          "action": "complete:foundation-taskbar",
+          "pixels": 111305.77736353448
+        },
+        {
+          "seconds": 1727.4,
+          "action": "complete:foundation-desktop",
+          "pixels": 148440.06536352227
+        },
+        {
+          "seconds": 1911.4,
+          "action": "complete:foundation-icons",
+          "pixels": 189636.44936350454
+        },
+        {
+          "seconds": 2095.4,
+          "action": "complete:foundation-notification",
+          "pixels": 235840.57736350188
+        },
+        {
+          "seconds": 2279.4,
+          "action": "complete:foundation-wallpaper",
+          "pixels": 286148.27336352435
+        },
+        {
+          "seconds": 2463.4,
+          "action": "complete:foundation-upgrades",
+          "pixels": 340152.1613635009
+        },
+        {
+          "seconds": 2463.4,
+          "action": "set:files",
+          "pixels": 275152.1613635009
+        },
+        {
+          "seconds": 2651.4,
+          "action": "complete:files-list",
+          "pixels": 336517.97736351244
+        },
+        {
+          "seconds": 2835.4,
+          "action": "complete:files-back",
+          "pixels": 404902.92936351127
+        },
+        {
+          "seconds": 3019.4,
+          "action": "complete:files-sort",
+          "pixels": 480000.9453634814
+        },
+        {
+          "seconds": 3203.4,
+          "action": "complete:files-search",
+          "pixels": 563817.8013634733
+        },
+        {
+          "seconds": 3387.4,
+          "action": "complete:files-large",
+          "pixels": 657863.76936353
+        },
+        {
+          "seconds": 3571.4,
+          "action": "complete:files-storage",
+          "pixels": 759425.0253635674
+        },
+        {
+          "seconds": 3571.4,
+          "action": "set:mail",
+          "pixels": 669425.0253635674
+        },
+        {
+          "seconds": 3759.4,
+          "action": "complete:mail-list",
+          "pixels": 782433.201363656
+        },
+        {
+          "seconds": 3943.4,
+          "action": "complete:mail-body",
+          "pixels": 904013.5533636059
+        },
+        {
+          "seconds": 4127.4,
+          "action": "complete:mail-reply",
+          "pixels": 1034905.8813636896
+        },
+        {
+          "seconds": 4311.4,
+          "action": "complete:mail-folders",
+          "pixels": 1177916.45736359
+        },
+        {
+          "seconds": 4495.4,
+          "action": "complete:mail-unread",
+          "pixels": 1331137.3933636774
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Diagnostic to the v0.1 display wall; no final balancing and no world3/v1-duration estimate.",
+    "Completion and export are actual domain actions. Craft durations are the provisional Appendix C human assumptions, not measured browser timings.",
+    "Optional UI sets, other editor plugins and purchase-order optimization are excluded. Changing these player choices changes the result."
+  ]
+}

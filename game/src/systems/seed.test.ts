@@ -31,14 +31,15 @@ describe('世界1は9つの部品を組み立てて工房を起動する', () =>
     expect(visibleSeedItems(state)).toEqual(['bars', 'workspace']);
   });
 
-  it('9つの購入が実際の工房へつながり、完成済みの制作物やトークンを勝手に渡さない', () => {
+  it('9つの購入で工房を開き、共通4要素だけを出来合いにして完成ツールやトークンを渡さない', () => {
     const state = through('export');
     expect(state.run.seed.built).toEqual(['border', 'save', 'color', 'font', 'layout', 'motion', 'bars', 'workspace', 'export']);
     expect(state.run.world).toBe('kumiki');
     expect(state.run.workshop.entered).toBe(true);
     expect(state.run.workshop.enterMs).toBe(BALANCE.workshop.enterMs);
-    expect(state.run.workshop.purchasedSets).toEqual([]);
-    expect(state.run.workshop.parts).toEqual({});
+    expect(state.run.workshop.purchasedSets).toEqual(['common']);
+    expect(Object.keys(state.run.workshop.parts)).toHaveLength(4);
+    expect(state.run.workshop.groupPuzzle!.purchased).toEqual([]);expect(state.run.workshop.groupPuzzle!.shelf).toEqual([]);
     expect(state.persistent.setDocuments).toEqual([]);
     expect(state.resources.tokens).toBe(0);
     expect(buildSeed(state, 'export', now)).toBe(state);

@@ -1,3 +1,5 @@
+import { createGroupFixture,GROUP_FIXTURE_NAMES } from './groupFixtures';
+import { selectPuzzlePart } from './workshopPuzzle';
 import { advanceAdvice, createAdviceState } from './advice';
 import { reconcileProgress } from './longPlay';
 import { actAppBuild } from './appBuild';
@@ -5,17 +7,25 @@ import { featureApp, isBuildable } from './appLayout';
 import { BALANCE, type DesktopUpgrade } from '../config/balance';
 import { desktopScreen, resizeDesktop, fitWindow, workHeight } from './desktopGeometry';
 import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, takeScreenshot } from './desktop';
-import { createInitialState, type GameState } from './state';
-import { buildSeed, createSeedVersion, updateSeedGuide } from './seed';
+import { createInitialState as actualInitialState, type GameState } from './state';
+import { buildSeed, createSeedVersion as actualSeedVersion, updateSeedGuide } from './seed';
 import { actPageDesign } from './pageDesign';
 import { setExamplesEnabled } from './workshopExamples';
 import { advanceActiveTime } from './time';
 import { UI_SETS, WORKSHOP_PARTS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
 import { BASE_PALETTE } from '../content/palette';
 import { createComponentDesign, type PartProduction } from './workshopState';
+import { FITTING_PARTS, fittingDefinition, fittingPartsForSet } from '../content/workshopFitting';
+import { defaultPieceSocket, emptyFitting, fittedPieces } from './workshopFitting';
 import { actWorkshop, enterWorkshop, advanceWorkshop } from './workshop';
-import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion, releaseEstimate } from './release';
+import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion as actualNextVersion, releaseEstimate } from './release';
 import { softwarePresentation, type SoftwareStage } from './releasePresentation';
+
+// Historical fixed URLs keep the mechanics and pictures they were recorded against.
+function createInitialState(now:number){const state=actualInitialState(now);delete state.run.workshop.groupPuzzle;return state;}
+
+function createSeedVersion(...args:Parameters<typeof actualSeedVersion>){const state=actualSeedVersion(...args);delete state.run.workshop.groupPuzzle;return state;}
+function startNextVersion(...args:Parameters<typeof actualNextVersion>){const state=actualNextVersion(...args);delete state.run.workshop.groupPuzzle;return state;}
 
 // Freeze historical stage8a URLs to the first 49 parts; future sets get their own fixtures.
 const STAGE8A_PARTS=WORKSHOP_PARTS.filter(part=>part.set!=='stream');
@@ -37,18 +47,20 @@ const LEGACY_FIXTURES = [
 ] as const;
 const STAGE8B_DESKTOP_VIEWS=['economy-before','economy-after','rates','capture-uncovered','capture-overlap','capture-covered','files-archive','note','editor','stream-draft','stream-ready','stream-spec-blocked','stream-gate'] as const;
 const STAGE8A_VIEWS = ['entry','set-shop','main','catalog','files-complete','required-complete-16color','common-custom','editor-custom'] as const;
-const TP_MAIN_PARTS=WORKSHOP_PARTS.filter(part=>UI_SETS.find(set=>set.id===part.set)?.mainline);
+const TP_LEGACY_MAIN_PARTS=WORKSHOP_PARTS.filter(part=>UI_SETS.find(set=>set.id===part.set)?.mainline);
+const TP_MAIN_PARTS=FITTING_PARTS.filter(part=>UI_SETS.find(set=>set.id===part.set)?.mainline);
 const TP_SEED_VIEWS=['start','before-layout','first-layout','stable'] as const;
 const TP_WORKSHOP_VIEWS=['route','help-catalog'] as const;
 const EXAMPLES_VIEWS=['seed-on','seed-off','seed-layout-on','seed-layout-off','seed-custom-on','seed-custom-off','route-on','route-off','place-on','place-off','adjust-on','adjust-off','adjust-custom','finish-on','finish-off','replay-off'] as const;
-export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
+export const FIXTURE_NAMES: readonly string[] = [...GROUP_FIXTURE_NAMES,...LEGACY_FIXTURES,
+  'fitting-entry-era0','fitting-frame-era0','fitting-frame-era1','fitting-mail-era0',
   ...EXAMPLES_VIEWS.flatMap(mode=>[0,1,2].map(era=>`examples-${mode}-era${era}`)),
   ...['desktop','desktop-pending'].flatMap(mode=>[0,1,2,3].map(era=>`examples-${mode}-era${era}`)),
   ...TP_SEED_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp1-${view}-era${era}`)),
   ...[0,1,2].map(era=>`tp1-workshop-shell-era${era}`),
   ...TP_WORKSHOP_VIEWS.flatMap(view=>[0,1,2].map(era=>`tp2-${view}-era${era}`)),
   ...[0,5,11,17,22].flatMap(count=>[0,1,2].map(era=>`tp3-progress-${count}-era${era}`)),
-  ...TP_MAIN_PARTS.flatMap(part=>[0,1,2].map(era=>`tp3-finish-${part.id}-era${era}`)),
+  ...TP_LEGACY_MAIN_PARTS.flatMap(part=>[0,1,2].map(era=>`tp3-finish-${part.id}-era${era}`)),
   ...[0,1,2].map(era=>`tp3-second-run-era${era}`),
   ...STAGE8B_DESKTOP_VIEWS.flatMap(view=>[0,1,2,3].map(era=>`stage8b-${view}-era${era}`)),
   ...[0,1,2].map(era=>`stage8b-second-workshop-era${era}`),
@@ -75,26 +87,52 @@ function workshopState(now:number,era=0):GameState {
  s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;return s;
 }
 function production(id:WorkshopPartId,step:PartProduction['step'],now:number):PartProduction {
- const p=getWorkshopPart(id);return {step,rect:{...p.defaultRect},elements:step>=2?[...p.elements]:[],design:createComponentDesign(),completedAt:step===4?now:null,exportedAt:null,tested:step===4};
+ const p=getWorkshopPart(id),definition=fittingDefinition(id),fitting=emptyFitting();
+ const count=step===4?definition.pieces.length:step>=2?Math.max(0,definition.pieces.length-1):0;
+ for(const piece of definition.pieces.slice(0,count)){
+  const socket=defaultPieceSocket(definition,fitting,piece)!;fitting.sockets[piece]=socket;fitting.spawned.push(piece);fitting.paid.push(piece);
+ }
+ if(step===1||step===3){const next=definition.pieces.find(piece=>!Object.hasOwn(fitting.sockets,piece));if(next)fitting.spawned.push(next);}
+ fitting.completionPaid=step===4;
+ const result:PartProduction={step:step===4?4:1,rect:{...p.defaultRect},elements:[],fitting,design:createComponentDesign(),completedAt:step===4?now:null,exportedAt:null,tested:step===4};
+ result.elements=fittedPieces(result,id);return result;
 }
 function addSets(s:GameState,sets:readonly UiSetId[],step:PartProduction['step'],now:number,exported=false):GameState {
  s.run.workshop.purchasedSets=[...new Set([...s.run.workshop.purchasedSets,...sets])];
- for(const set of sets)for(const p of partsForSet(set))s.run.workshop.parts[p.id]=production(p.id,step,now);
- s.run.workshop.activePart??=sets[0]?partsForSet(sets[0])[0]!.id:null;
+ for(const set of sets)for(const p of fittingPartsForSet(set))s.run.workshop.parts[p.id]=production(p.id,step,now);
+ s.run.workshop.activePart??=sets[0]?fittingPartsForSet(sets[0])[0]!.id:null;
  return exported?actWorkshop(s,{type:'export'},now):s;
 }
-// Tests may complete a part through the same new domain actions as the UI.
+function fitFixturePiece(s:GameState,id:WorkshopPartId,piece:string,now:number):GameState {
+ const current=s.run.workshop.parts[id]!;
+ if(current.fitting?.sockets[piece])return s;
+ const socket=defaultPieceSocket(fittingDefinition(id),current.fitting!,piece)!;
+ s=actWorkshop(s,{type:'spawnPiece',part:id,piece},now);
+ return actWorkshop(s,{type:'fitPiece',part:id,piece,socket},now);
+}
+/** The last-piece fixtures stop before completion rather than inventing an inspection gate. */
+function prepareWorkshopPartFixture(s:GameState,id:WorkshopPartId,now:number):GameState {
+ const definition=fittingDefinition(id);
+ s=actWorkshop(s,{type:'selectPart',part:id},now);
+ for(const piece of definition.pieces.slice(0,-1))s=fitFixturePiece(s,id,piece,now);
+ return actWorkshop(s,{type:'spawnPiece',part:id,piece:definition.pieces.at(-1)!},now);
+}
+// Tests may complete a part through the same domain actions as the UI.
 export function completeWorkshopPartFixture(s:GameState,id:WorkshopPartId,now:number,exported=true):GameState {
+ if(id==='common-scrollbar')id='common-frame';
  const p=getWorkshopPart(id);s.resources.pixels=Math.max(s.resources.pixels,1e12);
  s.run.totalPixelsGenerated=Math.max(s.run.totalPixelsGenerated,s.resources.pixels);
  if(!s.run.workshop.purchasedSets.includes(p.set))s=addSets(s,[p.set],0,now);
- s=actWorkshop(s,{type:'selectPart',part:id},now);s=actWorkshop(s,{type:'place',part:id,rect:{...p.defaultRect}},now);
- for(const element of p.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
- s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);s=actWorkshop(s,{type:'test',part:id,interaction:p.testInteraction},now);
+ s=actWorkshop(s,{type:'selectPart',part:id},now);
+ for(const piece of fittingDefinition(id).pieces)s=fitFixturePiece(s,id,piece,now);
  return exported?actWorkshop(s,{type:'export',part:id},now):s;
 }
 function customizeCommon(s:GameState):GameState {
- const p=s.run.workshop.parts['common-frame'];if(p){p.elements=['title','close','minimize','maximize'];s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:BASE_PALETTE[11]!,textColor:BASE_PALETTE[4]!,titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:BASE_PALETTE[4]!,minimize:BASE_PALETTE[4]!,maximize:BASE_PALETTE[4]!},symbolShape:'square'}},s.lastTickAt);}
+ const p=s.run.workshop.parts['common-frame'];if(p){
+  for(const piece of ['close','minimize','maximize'])s=actWorkshop(s,{type:'removePiece',part:'common-frame',piece},s.lastTickAt);
+  for(const [index,piece] of ['close','minimize','maximize'].entries())s=actWorkshop(s,{type:'fitPiece',part:'common-frame',piece,socket:`control-${index}`},s.lastTickAt);
+  s=actWorkshop(s,{type:'adjust',part:'common-frame',patch:{color:BASE_PALETTE[11]!,textColor:BASE_PALETTE[4]!,titleAlign:'center',controlSide:'start',controlSides:{close:'start',minimize:'end',maximize:'end'},controlColors:{close:BASE_PALETTE[4]!,minimize:BASE_PALETTE[4]!,maximize:BASE_PALETTE[4]!},symbolShape:'square'}},s.lastTickAt);
+ }
  s.run.workshop.activePart='common-frame';return s;
 }
 function customEditor(s:GameState,era:number):GameState {
@@ -124,8 +162,36 @@ function prototypeReady(now:number):GameState {
 
 // Runtime fixed states use memory storage and never overwrite a real save.
 export function createFixture(name:string|null,now:number):GameState|null {
+ const group=name?createGroupFixture(name,now):null;if(group)return group;
+ const state=fixtureState(name,now);if(!state)return null;
+ delete state.run.workshop.groupPuzzle;
+ const w=state.run.workshop,id=w.activePart;
+ if(id&&id!=='common-scrollbar'&&w.parts[id]?.step!==4)state.run.workshop={...selectPuzzlePart(w,id),view:w.view};
+ return state;
+}
+function fixtureState(name:string|null,now:number):GameState|null {
  if(!name||!FIXTURE_NAMES.includes(name))return null;
  if(name==='intro')return createInitialState(now);
+ const fitting=/^fitting-(entry|frame|mail)-era([01])$/.exec(name);
+ if(fitting){
+  const mode=fitting[1]!,era=Number(fitting[2]);let s=testplayWorkshop(now,era);
+  if(era===0&&mode!=='mail')s.resources.tokens=0;
+  if(mode!=='entry'){
+   s=actWorkshop(s,{type:'buySet',set:'common'},now);
+   if(mode==='mail'){
+    for(const set of ['common','foundation','files'] as const){
+     if(!s.run.workshop.purchasedSets.includes(set))s=actWorkshop(s,{type:'buySet',set},now);
+     for(const definition of fittingPartsForSet(set))s=completeWorkshopPartFixture(s,definition.id,now);
+    }
+    s=actWorkshop(s,{type:'buySet',set:'mail'},now);s=actWorkshop(s,{type:'selectPart',part:'mail-list'},now);
+   }else s=actWorkshop(s,{type:'selectPart',part:'common-frame'},now);
+  }
+  s=actWorkshop(s,{type:'help',target:null},now);s=actWorkshop(s,{type:'guide',id:'close'},now);
+  // A bounded screenshot budget is enough to work on the first set without inflating the real economy.
+  s.resources.pixels=mode==='entry'?BALANCE.workshop.setCosts.common*2:BALANCE.workshop.setCosts.mail;s.run.totalPixelsGenerated=Math.max(s.run.totalPixelsGenerated,s.resources.pixels);
+  return reconcileProgress(s,now);
+ }
+
  const examples=/^examples-(.+)-era([0-3])$/.exec(name);
  if(examples)return reconcileProgress(examplesFixture(examples[1]!,Number(examples[2]),now),now);
  const testplay=/^tp([123])-(.+)-era([0-2])$/.exec(name);
@@ -142,7 +208,7 @@ export function createFixture(name:string|null,now:number):GameState|null {
   return s;
  }
  const part=/^stage8a-part-(.+)-step-([0-4])-era([0-2])$/.exec(name);
- if(part){let s=addSets(workshopState(now,Number(part[3])),STAGE8A_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);const id=part[1] as WorkshopPartId;s.run.workshop.parts[id]=production(id,Number(part[2]) as PartProduction['step'],now);if(id==='bin-undo'||id==='bin-empty')s.run.workshop.parts['bin-list']=production('bin-list',4,now);s.run.workshop.activePart=id;return s;}
+ if(part){let s=addSets(workshopState(now,Number(part[3])),STAGE8A_SETS.map(set=>set.id),0,now);s.persistent.editorSkills=BALANCE.workshop.skills.map(skill=>skill.id);const id=(part[1]==='common-scrollbar'?'common-frame':part[1]) as WorkshopPartId;s.run.workshop.parts[id]=production(id,Number(part[2]) as PartProduction['step'],now);if(id==='bin-undo'||id==='bin-empty')s.run.workshop.parts['bin-list']=production('bin-list',4,now);s.run.workshop.activePart=id;return s;}
  const view=/^stage8a-(entry|set-shop|main|catalog|files-complete|required-complete-16color|common-custom|editor-custom)(?:-era([0-2]))?$/.exec(name);
  if(view){const mode=view[1]!,era=Number(view[2]??0);let s=workshopState(now,era);
   if(mode==='entry'||mode==='set-shop')return s;
@@ -237,12 +303,9 @@ function stage8bWorkshop(now:number,version:GameState['run']['version'],era=0,pr
 function stage8bSet(s:GameState,set:UiSetId,now:number,unfinished?:WorkshopPartId):GameState {
  if(!s.run.workshop.purchasedSets.includes(set))s=actWorkshop(s,{type:'buySet',set},now);
  if(!s.run.workshop.purchasedSets.includes(set))throw new Error(`Stage8b fixture cannot purchase ${set}`);
- for(const definition of partsForSet(set)){
+ for(const definition of fittingPartsForSet(set)){
   if(definition.id!==unfinished){s=completeWorkshopPartFixture(s,definition.id,now);continue;}
-  s=actWorkshop(s,{type:'selectPart',part:definition.id},now);
-  s=actWorkshop(s,{type:'place',part:definition.id,rect:{...definition.defaultRect}},now);
-  for(const element of definition.elements)s=actWorkshop(s,{type:'addElement',part:definition.id,element},now);
-  s=actWorkshop(s,{type:'confirmAdjustment',part:definition.id},now);
+  s=prepareWorkshopPartFixture(s,definition.id,now);
  }
  return s;
 }
@@ -290,10 +353,7 @@ function stage8bFixture(mode:string,era:number,now:number):GameState {
   if(mode==='stream-ready'||mode==='stream-spec-blocked')s=stage8bSet(s,'stream',now);
   else{
    const descriptor=getWorkshopPart('stream-preview');
-   s=actWorkshop(s,{type:'selectPart',part:descriptor.id},now);
-   s=actWorkshop(s,{type:'place',part:descriptor.id,rect:{...descriptor.defaultRect}},now);
-   for(const element of descriptor.elements)s=actWorkshop(s,{type:'addElement',part:descriptor.id,element},now);
-   s=actWorkshop(s,{type:'confirmAdjustment',part:descriptor.id},now);
+   s=prepareWorkshopPartFixture(s,descriptor.id,now);
   }
   if(mode==='stream-spec-blocked')s.persistent.specs.refresh=0;
   s.run.workshop.activePart='stream-preview';s.run.workshop.guide.current=null;s.run.workshop.guide.collapsed=true;
@@ -377,13 +437,10 @@ function testplayFixture(step:number,mode:string,era:number,now:number):GameStat
  }
  if(step===3&&mode.startsWith('progress-'))return testplayMainPrefix(testplayWorkshop(now,era),Number(mode.slice('progress-'.length)),now);
  if(step===3&&mode.startsWith('finish-')){
-  const id=mode.slice('finish-'.length) as WorkshopPartId,index=TP_MAIN_PARTS.findIndex(part=>part.id===id),definition=getWorkshopPart(id);
+  const legacyId=mode.slice('finish-'.length),id=(legacyId==='common-scrollbar'?'common-frame':legacyId) as WorkshopPartId,index=TP_MAIN_PARTS.findIndex(part=>part.id===id),definition=getWorkshopPart(id);
   let s=testplayMainPrefix(testplayWorkshop(now,era),index,now);
   if(!s.run.workshop.purchasedSets.includes(definition.set))s=actWorkshop(s,{type:'buySet',set:definition.set},now);
-  s=actWorkshop(s,{type:'selectPart',part:id},now);
-  s=actWorkshop(s,{type:'place',part:id,rect:{...definition.defaultRect}},now);
-  for(const element of definition.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
-  s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);
+  s=prepareWorkshopPartFixture(s,id,now);
   s=actWorkshop(s,{type:'help',target:null},now);
   return actWorkshop(s,{type:'guide',id:'close'},now);
  }
@@ -423,18 +480,12 @@ function examplesFixture(mode:string,era:number,now:number):GameState {
   return setExamplesEnabled(s,!mode.endsWith('-off'));
  }
  if(mode.startsWith('route'))return setExamplesEnabled(testplayWorkshop(now,era),mode.endsWith('-on'));
- let s=testplayMainPrefix(testplayWorkshop(now,era),2,now);
+ let s=testplayMainPrefix(testplayWorkshop(now,era),1,now);
+ s=completeWorkshopPartFixture(s,'common-heading',now,false);
  const part=getWorkshopPart('common-button');
  s=actWorkshop(s,{type:'selectPart',part:part.id},now);
- if(!mode.startsWith('place')){
-  s=actWorkshop(s,{type:'place',part:part.id,rect:{...part.defaultRect}},now);
-  for(const element of part.elements)s=actWorkshop(s,{type:'addElement',part:part.id,element},now);
-  if(mode==='adjust-custom'){
-   s=actWorkshop(s,{type:'place',part:part.id,rect:{...part.defaultRect,x:part.defaultRect.x+32,y:part.defaultRect.y+32}},now);
-   s=actWorkshop(s,{type:'adjust',part:part.id,patch:{radius:8,shadow:true}},now);
-  }
-  if(mode.startsWith('finish'))s=actWorkshop(s,{type:'confirmAdjustment',part:part.id},now);
- }
+ if(!mode.startsWith('place'))s=prepareWorkshopPartFixture(s,part.id,now);
+ if(mode==='adjust-custom')s=actWorkshop(s,{type:'adjust',part:part.id,patch:{radius:8,shadow:true}},now);
  s=actWorkshop(s,{type:'help',target:null},now);
  s=actWorkshop(s,{type:'guide',id:'close'},now);
  return setExamplesEnabled(s,!mode.endsWith('-off'));

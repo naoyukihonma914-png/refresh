@@ -1,0 +1,161 @@
+2026-11-04 UTC — group puzzle verification
+
+$ npm --prefix game test
+
+> refresh-game@0.0.1 test
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/refresh/game
+
+ ✓ src/architecture.test.ts (4 tests) 8241ms
+   ✓ 段階1の境界 > ブラウザへの直接アクセスはプラットフォーム内に収める  6279ms
+   ✓ 段階1の境界 > 同名のローカル変数・モデルの項目・JSX props・型だけの参照を誤検出しない  871ms
+   ✓ 段階1の境界 > ブラウザglobalは省略記法・globalThis・分割代入でも検出する  884ms
+ ✓ src/worlds/release/releaseLayouts.test.ts (20 tests) 3618ms
+   ✓ 製品ページは別の骨格でも同じ製品と操作を表示する > 'ja' / 購入集計完了=false: 親の分岐を通って情報と売上ボタンが一致する  319ms
+ ✓ src/systems/runtime.test.ts (59 tests) 2550ms
+   ✓ 段階7：v1.0の通常の出荷からv2へ > 製品の画像保存と売上画面への移行が失敗しても元の段階へ残り、再試行で一度だけ出荷する  343ms
+   ✓ TP-3：runtimeから既知UIをまとめて作る > 普通の起動・保存・一度の購入音を通し、次版の9つから工房だけを起動する  315ms
+ ✓ src/systems/fixtures.test.ts (16 tests) 15167ms
+   ✓ 第3版：ブラウザ固定状態の整合性 > 新制作全段階と旧公開名が新スキーマで保存復元できる  14457ms
+   ✓ TP：実操作の固定状態と真正v15入力 > 2周目URLは実出荷の既知UIから一括候補を作り、完成品はリセットする  316ms
+ ✓ src/systems/desktop.test.ts (6 tests) 2009ms
+   ✓ デスクトップ > 新しい工房から各デスクトップの確認状態を保存できる  1734ms
+ ✓ src/systems/releasePresentation.test.ts (24 tests) 2835ms
+   ✓ ソフトウェアの製品ページと出荷の世代 > 通常の出荷で様式を固定し、保存・旧姿への変更・次の版でも記録を変えない  362ms
+   ✓ ソフトウェアの製品ページと出荷の世代 > 凍結画面もない旧製品は、今の画面や掲載写真が新しくても世代1のままにする  302ms
+   ✓ ソフトウェアの製品ページと出荷の世代 > 世代1の見本は様式だけを変え、未実装のデスクトップを解放しない  498ms
+   ✓ ソフトウェアの製品ページと出荷の世代 > 世代2の見本は様式だけを変え、未実装のデスクトップを解放しない  452ms
+   ✓ ソフトウェアの製品ページと出荷の世代 > 世代3の見本は様式だけを変え、未実装のデスクトップを解放しない  395ms
+   ✓ ソフトウェアの製品ページと出荷の世代 > 様式を決める処理は売上・財布・写真・リリース条件に影響しない  387ms
+ ✓ src/systems/examplesFixtures.test.ts (6 tests) 1941ms
+   ✓ お手本の実操作用固定状態 > 全公開examples URLが現在の保存形式で復元できる  1460ms
+   ✓ お手本の実操作用固定状態 > 次runのOFFは実出荷製品を残し、作るものを未完成へ戻す  366ms
+ ✓ src/systems/desktopExtras.test.ts (22 tests) 1612ms
+   ✓ 段階8b：アプリとジョブ > ターミナルは選んだ間隔で実行し、停止・満杯・最小化でも重複や無限生成をしない  349ms
+   ✓ 段階8b：アプリとジョブ > 解放済みの10種類だけを順に依頼し、自動応答は半分のトークン  315ms
+ ✓ src/systems/seedReplay.test.ts (7 tests) 1228ms
+ ✓ src/systems/release.test.ts (35 tests) 1120ms
+   ✓ 製品ページからv1.0を出荷する > 製品ページの3秒と出荷の8秒を分け、閉じ直しと重複操作で売上を二重に付けない  457ms
+ ✓ src/systems/offlineTerminal.test.ts (7 tests) 958ms
+   ✓ 第3版：不在中のターミナル > ストレージの上限内だけ動き、満杯でも止まらず、履歴と撮影枚数を制限する  431ms
+ ✓ src/systems/longPlay.test.ts (26 tests) 816ms
+ ✓ src/systems/captureStorage.test.ts (29 tests) 22861ms
+   ✓ 場面の保存形式と独立した記録 > パーツ49個と毎回変わる累積記録があっても400枚を5MiBへ保存できる  7265ms
+   ✓ 場面の保存形式と独立した記録 > 200枚・400枚をUTF-16で5MiBの保存領域に収め、本体と予備・エクスポート・取り込みを往復できる  14637ms
+ ✓ src/systems/desktopGeometry.test.ts (7 tests) 662ms
+   ✓ PR #7：段ごとの論理画面 > 0→1→2→0で通常・最大化・最小化・閉じた窓と復元位置を収め、保存した位置を再読込する  351ms
+ ✓ src/worlds/workshop/FittingPieceContent.test.tsx (6 tests) 386ms
+ ✓ src/systems/stage8bIntegration.test.ts (5 tests) 371ms
+ ✓ src/content/feedback.test.ts (4 tests) 265ms
+ ✓ src/worlds/workshop/WorkshopHelp.test.tsx (6 tests) 418ms
+ ✓ src/systems/capturePageCompatibility.test.tsx (7 tests) 547ms
+ ✓ src/systems/workshop.test.ts (23 tests) 125ms
+ ✓ src/systems/fittingIntegration.test.ts (4 tests) 384ms
+ ✓ src/systems/nextHand.test.ts (6 tests) 224ms
+ ✓ src/systems/roundtrip.test.ts (9 tests) 65ms
+ ✓ src/worlds/capture/RecordedAppParts.test.tsx (3 tests) 121ms
+ ✓ src/systems/appBuild.test.ts (12 tests) 198ms
+ ✓ src/systems/captureEvaluation.test.ts (10 tests) 230ms
+ ✓ src/systems/commonChrome.test.ts (5 tests) 208ms
+ ✓ src/worlds/workshop/WorkshopNavigator.test.tsx (13 tests) 209ms
+ ✓ src/systems/workshopNavigation.test.ts (6 tests) 48ms
+ ✓ src/systems/workshopEra.test.ts (20 tests) 204ms
+ ✓ src/systems/groupPuzzle.test.ts (27 tests) 239ms
+ ✓ src/worlds/workshop/WorkshopExamples.test.tsx (16 tests) 218ms
+ ✓ src/content/i18n.test.ts (22 tests) 167ms
+ ✓ src/worlds/PhotoNavigation.test.tsx (1 test) 122ms
+ ✓ src/worlds/files/PhotoEvaluation.test.tsx (4 tests) 160ms
+ ✓ src/components/ExampleSettings.test.tsx (4 tests) 164ms
+ ✓ src/systems/workshopPuzzle.test.ts (13 tests) 116ms
+ ✓ src/systems/save.test.ts (44 tests) 123ms
+ ✓ src/worlds/files/FileLibrary.test.tsx (8 tests) 80ms
+ ✓ src/systems/exampleMigration.test.ts (6 tests) 93ms
+ ✓ src/worlds/workshop/FittingCanvas.test.tsx (4 tests) 58ms
+ ✓ src/systems/workshopUpdate.test.ts (15 tests) 68ms
+ ✓ src/systems/productionModel.test.ts (11 tests) 79ms
+ ✓ src/systems/workshopFeedback.test.ts (3 tests) 117ms
+ ✓ src/worlds/workshop/FinishTrial.test.tsx (6 tests) 63ms
+ ✓ src/worlds/workshop/WorkshopCustomization.test.ts (3 tests) 62ms
+ ✓ src/systems/pageLayoutModel.test.ts (10 tests) 47ms
+ ✓ src/systems/testplayMigration.test.ts (6 tests) 62ms
+ ✓ src/systems/workshopAssistance.test.ts (9 tests) 55ms
+ ✓ src/worlds/SeedFuturePreview.test.tsx (4 tests) 56ms
+ ✓ src/systems/commonChrome.test.tsx (6 tests) 57ms
+ ✓ src/systems/workshopShelf.test.ts (5 tests) 62ms
+ ✓ src/worlds/workshop/WorkshopCompletionFeedback.test.tsx (6 tests) 65ms
+ ✓ src/systems/workshopTrials.test.ts (25 tests) 35ms
+ ✓ src/systems/seedPacing.test.ts (2 tests) 39ms
+ ✓ src/systems/workshopExamples.test.ts (9 tests) 35ms
+ ✓ src/systems/pageDesign.test.ts (13 tests) 43ms
+ ✓ src/systems/seedAppearance.test.ts (6 tests) 26ms
+ ✓ src/systems/appearance.test.ts (7 tests) 40ms
+ ✓ src/components/GuideHistory.test.tsx (3 tests) 30ms
+ ✓ src/systems/seed.test.ts (10 tests) 113ms
+ ✓ src/components/SeedGenerateLabel.test.tsx (5 tests) 34ms
+ ✓ src/systems/advice.test.ts (7 tests) 41ms
+ ✓ src/systems/workshopFitting.test.ts (10 tests) 28ms
+ ✓ src/worlds/shellParts.test.tsx (6 tests) 22ms
+ ✓ src/systems/time.test.ts (13 tests) 23ms
+ ✓ src/systems/desktopFiles.test.ts (6 tests) 17ms
+ ✓ src/platform/tab.test.ts (3 tests) 8ms
+ ✓ src/systems/pageLayoutMigration.test.ts (3 tests) 21ms
+ ✓ src/systems/estimate.test.ts (3 tests) 8ms
+ ✓ src/systems/workshopPreview.test.ts (3 tests) 5ms
+ ✓ src/platform/audio.test.ts (2 tests) 9ms
+ ✓ src/platform/productAssets.test.ts (3 tests) 5ms
+ ✓ src/systems/captureVisibility.test.ts (8 tests) 7ms
+ ✓ src/platform/storage.test.ts (5 tests) 5ms
+ ✓ src/systems/viewport.test.ts (6 tests) 4ms
+ ✓ src/worlds/PhotoSurface.test.ts (1 test) 3ms
+ ✓ src/worlds/workshop/workshopZoom.test.ts (2 tests) 3ms
+
+ Test Files  78 passed (78)
+      Tests  801 passed (801)
+   Start at  05:19:03
+   Duration  34.03s (transform 3.16s, setup 0ms, collect 13.69s, tests 72.56s, environment 13ms, prepare 4.62s)
+
+
+$ python tools/vendor_fonts.py --check
+Subset checks passed: 3733 requested codepoints
+
+$ npm --prefix game run build
+
+> refresh-game@0.0.1 build
+> tsc --noEmit && vite build
+
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 217 modules transformed.
+rendering chunks...
+[plugin vite:singlefile]
+
+[plugin vite:singlefile] Inlining: index-CjEcnjCl.js
+[plugin vite:singlefile] Inlining: style-Cu9Jb6G3.css
+computing gzip size...
+dist/index.html  6,419.97 kB │ gzip: 4,150.96 kB
+✓ built in 2.71s
+
+Browser browser
+PASS ja:core
+PASS ja:era1
+PASS ja:catalog
+PASS en:core
+PASS en:era1
+PASS en:catalog
+
+Browser small
+PASS en:era1
+
+Browser reduced
+PASS ja:core
+
+Browser long
+PASS en-XA:core
+
+Built HTML SHA-256: 60e18b43a9180e04c1c90455400977016cdd8f305fd020d630747ec3e33a6bbe
+long-labels/summary.json: 1 passed; 0 failed; matching build; 0 exceptions/console/external requests
+reduced-motion/summary.json: 1 passed; 0 failed; matching build; 0 exceptions/console/external requests
+small-screen/summary.json: 1 passed; 0 failed; matching build; 0 exceptions/console/external requests
+summary.json: 6 passed; 0 failed; matching build; 0 exceptions/console/external requests

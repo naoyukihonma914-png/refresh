@@ -1,20 +1,29 @@
+import { actGroupPuzzle,buyGroup,currentGroupTools,initializeGroupWorkshop,isGroupPuzzleAction,type GroupPuzzleAction } from './groupPuzzle';
 import { BALANCE, type EditorSkill } from '../config/balance';
 import { paletteFor } from '../content/palette';
-import { WORKSHOP_PARTS, SET_IDS, getWorkshopPart, partsForSet, type UiSetId, type WorkshopPartId, type WorkshopRect, type TestInteraction } from '../content/workshopCatalog';
+import { WORKSHOP_PARTS, SET_IDS, getWorkshopPart, type UiSetId, type WorkshopPartId, type WorkshopRect, type TestInteraction } from '../content/workshopCatalog';
 import { editorStage, canSwitchEditor, setEditorStage } from './appearance';
 import { creditPixels } from './economy';
+import { clampPuzzlePoint, puzzlePieceRect, clearPuzzleSelection, ensurePuzzlePositions, puzzleParts, selectPuzzlePart, type PiecePoint } from './workshopPuzzle';
 import { productionCreditMultiplier } from './productionModel';
+import { grantTesseraUpdateFunds, tesseraUpdatePending } from './workshopUpdate';
 import type { GameState } from './state';
-import { completionCombo, examplePlacement, workshopComboMultiplier } from './workshopExamples';
+import { completionCombo, workshopComboMultiplier } from './workshopExamples';
+import { FITTING_PARTS, fittingDefinition, fittingPartsForSet as partsForSet } from '../content/workshopFitting';
+import { canFitPiece, defaultPieceSocket, emptyFitting, fittedPieces, fittingComplete, migrateFittingProduction, pieceReward } from './workshopFitting';
 import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId, type WorkshopHelpTarget, isWorkshopHelpTarget } from './workshopState';
 
-export type WorkshopAction =
+export type WorkshopAction = GroupPuzzleAction
   | {type:'help';target:WorkshopHelpTarget|null}
+  | {type:'clearPartSelection';set?:UiSetId} | {type:'togglePart'|'focusPart';part:WorkshopPartId}
+  | {type:'togglePiece';part:WorkshopPartId;piece:string} | {type:'stagePiece';part:WorkshopPartId;piece:string;at?:PiecePoint}
   | {type:'buySet';set:UiSetId} | {type:'selectPart';part:WorkshopPartId}
+  | {type:'spawnPiece'|'removePiece';part?:WorkshopPartId;piece:string}
+  | {type:'fitPiece';part?:WorkshopPartId;piece:string;socket:string}
   | {type:'place';part?:WorkshopPartId;rect:WorkshopRect;example?:boolean}
   | {type:'addElement';part?:WorkshopPartId;element:string;index?:number;side?:'start'|'end'}
   | {type:'adjust';part?:WorkshopPartId;patch:Partial<ComponentDesign>}
-  | {type:'confirmAdjustment'|'useExample';part?:WorkshopPartId}
+  | {type:'confirmAdjustment';part?:WorkshopPartId} | {type:'useExample';part?:WorkshopPartId}
   | {type:'test';part?:WorkshopPartId;interaction:TestInteraction}
   | {type:'export';part?:WorkshopPartId}
   | {type:'customize';patch:Partial<EditorCustomization>}
@@ -23,23 +32,24 @@ export type WorkshopAction =
   | {type:'exit'} | {type:'guide';id:WorkshopGuideId|'close'};
 
 export const defaultComponentDesign = (_state?:GameState):ComponentDesign => createComponentDesign();
-export const completedParts = (s:GameState):WorkshopPartId[] => WORKSHOP_PARTS.filter(d=>s.run.workshop.parts[d.id]?.step===4).map(d=>d.id);
+export const completedParts = (s:GameState):WorkshopPartId[] => FITTING_PARTS.filter(d=>s.run.workshop.parts[d.id]?.step===4).map(d=>d.id);
 export const setComplete = (s:GameState,set:UiSetId):boolean => partsForSet(set).every(d=>s.run.workshop.parts[d.id]?.step===4);
 export const completedSets = (s:GameState):UiSetId[] => SET_IDS.filter(id=>id!=='extras'&&setComplete(s,id));
 const mainline:readonly UiSetId[]=['common','foundation','files','mail'];
 export const nextWorkshopSet = (s:GameState):UiSetId|null => mainline.find(id=>!s.run.workshop.purchasedSets.includes(id))??null;
 export function canBuyWorkshopSet(s:GameState,set:UiSetId):boolean {
   const w=s.run.workshop,index=mainline.indexOf(set);
+  if(w.groupPuzzle&&set!=='stream')return false;
   return w.entered&&['kumiki','desktop'].includes(s.run.world)&&w.enterMs===0&&SET_IDS.includes(set)
     && !w.purchasedSets.includes(set)&&s.resources.pixels>=BALANCE.workshop.setCosts[set]
     && (index<1||setComplete(s,mainline[index-1]!))
     && (set!=='extras'||s.persistent.editorSkills.includes('extraParts'))
     && (set!=='stream'||s.run.world==='desktop'&&s.run.version===BALANCE.world4.minimumVersion);
 }
-export const canExportWorkshop = (s:GameState):boolean => completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt===null);
+export const canExportWorkshop = (s:GameState):boolean => completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt===null&&(!s.run.workshop.groupPuzzle||getWorkshopPart(id).set==='stream'));
 export const prototypeConditions = (s:GameState):[boolean,boolean,boolean] => [s.run.workshop.entered,completedParts(s).length>=BALANCE.release.prototypeParts,completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt!==null)];
-export const canInspectDesktopExit = (s:GameState):boolean => s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0&&setComplete(s,'files')&&setComplete(s,'mail');
-export const canAssembleDesktop = (s:GameState):boolean => s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0
+export const canInspectDesktopExit = (s:GameState):boolean => (!s.run.workshop.groupPuzzle||s.run.workshop.groupPuzzle.tools.foundation?.completionPaid===true)&&s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0&&setComplete(s,'files')&&setComplete(s,'mail');
+export const canAssembleDesktop = (s:GameState):boolean => (!s.run.workshop.groupPuzzle||s.run.workshop.groupPuzzle.tools.foundation?.completionPaid===true)&&s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0
   &&setComplete(s,'files')&&setComplete(s,'mail')&&s.resources.pixels>=BALANCE.w2.desktopCost
   &&s.persistent.specs.color>=BALANCE.release.prototypeColorLevel;
 export const workshopPlacementGrid=(s:GameState):number=>BALANCE.workshop.canvas.resolutionGrid[s.persistent.specs.resolution]!;
@@ -75,16 +85,21 @@ function showFirstSetHelp(s:GameState,set:UiSetId):GameState {
 function grantExtraMaterials(s:GameState):GameState {
   const w=s.run.workshop;
   if(!w.entered||!s.persistent.editorSkills.includes('extraParts'))return s;
+  if(w.groupPuzzle){
+    if(w.groupPuzzle.purchased.includes('extras'))return s;
+    const next=buyGroup(s,'extras',s.lastTickAt),g=next.run.workshop.groupPuzzle!;
+    return {...next,run:{...next.run,workshop:{...next.run.workshop,activePart:w.activePart,groupPuzzle:{...g,selected:w.groupPuzzle.selected,category:w.groupPuzzle.category,focus:w.groupPuzzle.focus,customPart:w.groupPuzzle.customPart}}}};
+  }
   const definitions=partsForSet('extras');
   if(w.purchasedSets.includes('extras')&&definitions.every(d=>w.parts[d.id]))return s;
   const parts={...w.parts};
-  for(const d of definitions)if(!parts[d.id])parts[d.id]={step:0,rect:{...d.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
+  for(const d of definitions)if(!parts[d.id])parts[d.id]={step:1,rect:{...d.defaultRect},elements:[],fitting:emptyFitting(),design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
   return showFirstSetHelp({...s,run:{...s.run,workshop:{...w,purchasedSets:w.purchasedSets.includes('extras')?w.purchasedSets:[...w.purchasedSets,'extras'],parts,activePart:w.activePart??definitions[0]!.id}}},'extras');
 }
 export function enterWorkshop(s:GameState):GameState {
   if(s.run.workshop.entered)return grantExtraMaterials(s);
   const next:GameState={...s,run:{...s.run,world:'kumiki',workshop:{...s.run.workshop,editorStageAtEntry:editorStage(s),entered:true,enteredAt:s.lastTickAt,enterMs:BALANCE.workshop.enterMs,lastActionAt:s.elapsedMs}}};
-  return showGuide(grantExtraMaterials(next),'entered');
+  return showGuide(grantExtraMaterials(initializeGroupWorkshop(next)),'entered');
 }
 function writePart(s:GameState,id:WorkshopPartId,part:PartProduction):GameState {
   return {...s,run:{...s.run,workshop:{...s.run.workshop,parts:{...s.run.workshop.parts,[id]:part}}}};
@@ -109,17 +124,24 @@ function designAllowed(s:GameState,d:ComponentDesign):boolean {
     &&Object.values(d.controlColors).every(c=>paletteAllows(s,c))
     &&(editorStage(s)>=2||d.motion==='plain');
 }
-function payStep(s:GameState,id:WorkshopPartId,index:0|1|2|3,now:number,finish=false):GameState {
+function payPiece(s:GameState,id:WorkshopPartId,now:number,firstFit:boolean,finish:boolean,amount=pieceReward(id)):GameState {
   const category=getWorkshopPart(id).category,efficiency=s.persistent.editorSkills.includes('efficiency')?BALANCE.workshop.efficiencyMultiplier:1;
-  return creditPixels(s,(BALANCE.workshop.categoryStepRewards[category][index]*efficiency*workshopComboMultiplier(s,now)+(finish?BALANCE.workshop.finishRewards[category]:0))*productionCreditMultiplier(s));
+  const reward=(firstFit?amount*efficiency*workshopComboMultiplier(s,now):0)+(finish?BALANCE.workshop.finishRewards[category]:0);
+  return reward>0?creditPixels(s,reward*productionCreditMultiplier(s)):s;
+}
+export function canBuyEditorSkill(s:GameState,id:EditorSkill):boolean {
+  const skill=BALANCE.workshop.skills.find(p=>p.id===id);
+  return !!skill&&(id==='update'||!tesseraUpdatePending(s))&&!['batch','dimensions','layers','snap','gessoUpdate','brio','brioUpdate'].includes(id)&&!s.persistent.editorSkills.includes(id)&&s.resources.tokens>=skill.cost
+    &&!(skill.band>=2&&s.run.version==='v0.1'&&id!=='modern')&&(id!=='modern'||canSwitchEditor(s));
 }
 function buySkill(s:GameState,id:EditorSkill):GameState {
-  const skill=BALANCE.workshop.skills.find(p=>p.id===id);
-  if(!skill||s.persistent.editorSkills.includes(id)||s.resources.tokens<skill.cost||skill.band===2&&s.run.version==='v0.1'&&id!=='modern')return s;
-  // The environment unlock is persistent even when the player displays an older desktop.
-  if(id==='modern'&&!canSwitchEditor(s))return s;
+  if(!canBuyEditorSkill(s,id))return s;
+  const skill=BALANCE.workshop.skills.find(p=>p.id===id)!;
   let next:GameState={...s,resources:{...s.resources,tokens:s.resources.tokens-skill.cost},persistent:{...s.persistent,editorSkills:[...s.persistent.editorSkills,id]}};
-  if(id==='update')next=setEditorStage(next,1);
+  if(id==='update'){
+    next=setEditorStage(next,1);
+    if(next.run.workshop.guide.current==='updateAvailable')next={...next,run:{...next.run,workshop:{...next.run.workshop,guide:{...next.run.workshop.guide,current:null,collapsed:true}}}};
+  }
   if(id==='modern'){
     next=setEditorStage(next,2);
     next={...next,persistent:{...next.persistent,editorCustomization:{...next.persistent.editorCustomization,panelPositions:{palette:'right',tools:'left',parts:'left',info:'bottom'}}}};
@@ -139,7 +161,7 @@ function customize(s:GameState,patch:Partial<EditorCustomization>):GameState {
 }
 export function actWorkshop(state:GameState,action:WorkshopAction,now:number):GameState {
   if(!Number.isFinite(now)||now<0||!state.run.workshop.entered||!['kumiki','desktop'].includes(state.run.world))return state;
-  state=grantExtraMaterials(state);
+  state=grantTesseraUpdateFunds(grantExtraMaterials(state));
   let s=state;
   const w=s.run.workshop;
   if(action.type==='help'){
@@ -152,16 +174,25 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     return {...s,run:{...s.run,workshop:{...w,guide:{...w.guide,current:action.id,collapsed:false}}}};
   }
   if(w.enterMs>0)return s;
+  if(isGroupPuzzleAction(action))return actGroupPuzzle(s,action,now);
+  if(w.groupPuzzle&&action.type==='buySet'&&action.set!=='stream')return s;
+  if(w.groupPuzzle&&action.type==='export'&&(!action.part||getWorkshopPart(action.part).set!=='stream'))return s;
+  if(w.groupPuzzle&&['selectPart','togglePart','focusPart','spawnPiece','fitPiece','removePiece','togglePiece','stagePiece','place','addElement','confirmAdjustment','useExample','test'].includes(action.type)){const id='part' in action?action.part??w.activePart:w.activePart;if(!id||getWorkshopPart(id).set!=='stream')return s;}
+  if(action.type==='clearPartSelection'&&action.set!==undefined&&!SET_IDS.includes(action.set))return s;
+  if(action.type==='clearPartSelection')return {...s,run:{...s.run,workshop:clearPuzzleSelection(w,action.set)}};
+  if(action.type==='togglePart')return {...s,run:{...s.run,workshop:selectPuzzlePart(w,action.part,true)}};
+  if(action.type==='focusPart')return puzzleParts(w).includes(action.part)?{...s,run:{...s.run,workshop:{...w,activePart:action.part}}}:s;
   if(action.type==='buySet'){
     if(!canBuyWorkshopSet(s,action.set))return s;
     const parts={...w.parts};
-    for(const d of partsForSet(action.set))parts[d.id]={step:0,rect:{...d.defaultRect},elements:[],design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
+    for(const d of partsForSet(action.set))parts[d.id]={step:1,rect:{...d.defaultRect},elements:[],fitting:emptyFitting(),design:defaultComponentDesign(s),completedAt:null,exportedAt:null,tested:false};
     s={...s,resources:{...s.resources,pixels:s.resources.pixels-BALANCE.workshop.setCosts[action.set]},run:{...s.run,workshop:{...w,purchasedSets:[...w.purchasedSets,action.set],parts,activePart:partsForSet(action.set)[0]!.id,view:'workbench'}}};
+    s={...s,run:{...s.run,workshop:selectPuzzlePart(s.run.workshop,partsForSet(action.set)[0]!.id)}};
     s=showGuide(s,'place');
     s=showFirstSetHelp(s,action.set);
   }else if(action.type==='selectPart'){
     if(!w.parts[action.part])return s;
-    s={...s,run:{...s.run,workshop:{...w,activePart:action.part,view:'workbench'}}};
+    s={...s,run:{...s.run,workshop:selectPuzzlePart(w,action.part)}};
   }else if(action.type==='skill')s=buySkill(s,action.id);
   else if(action.type==='customize')s=customize(s,action.patch);
   else if(action.type==='view'){
@@ -169,6 +200,8 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     s={...s,run:{...s.run,workshop:{...w,view:action.view}}};
   }else if(action.type==='zoom'){
     if(!Number.isFinite(action.zoom)||action.zoom<BALANCE.workshop.zoomMin||action.zoom>BALANCE.workshop.zoomMax)return s;
+    const options=editorStage(s)===0?BALANCE.workshop.eras.era0ZoomOptions:BALANCE.workshop.zoomOptions;
+    if(!options.some(value=>value===action.zoom))return s;
     s={...s,run:{...s.run,workshop:{...w,zoom:action.zoom}}};
   }else if(action.type==='exit'){
     if(!canInspectDesktopExit(s))return s;
@@ -181,92 +214,127 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     s={...s,resources:{...s.resources,tokens:s.resources.tokens+ids.length*BALANCE.workshop.exportTokens},run:{...s.run,workshop:{...s.run.workshop,tokenDiscovered:true}}};
     for(const set of new Set(ids.map(id=>getWorkshopPart(id).set)))s=snapshotSet(s,set,now);
     s=showGuide(s,'export');
+    s=grantTesseraUpdateFunds(s);
   }else{
     const id=action.part??w.activePart;if(!id||!w.parts[id])return s;
     const p=w.parts[id]!,descriptor=getWorkshopPart(id);
-    if(action.type==='place'){
-      const placement=action.example===true?examplePlacement(s,id,action.rect).rect:action.rect;
-      const rect=normalizeWorkshopRect(s,id,placement);
-      if(!rect||!partRectValid(s,id,rect))return s;
-      s=writePart(s,id,{...p,rect,step:p.step===0?1:p.step});
-      if(p.step===0)s=showGuide(payStep(s,id,0,now),'elements');
-    }else if(action.type==='addElement'){
-      if(p.step===0||!descriptor.elements.includes(action.element)||action.side!==undefined&&!['start','end'].includes(action.side)||action.index!==undefined&&(!Number.isSafeInteger(action.index)||action.index<0||action.index>descriptor.elements.length))return s;
-      const elements=p.elements.filter(e=>e!==action.element),index=action.index??elements.length;
-      elements.splice(Math.min(index,elements.length),0,action.element);
-      const design=action.side&&['minimize','maximize','close'].includes(action.element)?{...p.design,controlSides:{...p.design.controlSides,[action.element]:action.side}}:p.design;
-      const ready=descriptor.elements.every(e=>elements.includes(e)),nextStep=p.step===1&&ready?2:p.step;
-      s=writePart(s,id,{...p,elements,design,step:nextStep});
-      if(p.step===1&&ready)s=showGuide(payStep(s,id,1,now),'adjust');
-    }else if(action.type==='adjust'){
-      if(p.step<2)return s;
-      const design=adjustComponentDesign(p.design,action.patch,paletteFor(s.persistent.specs.color));
-      if(!design||!designAllowed(s,design)||!partRectValid(s,id,p.rect,design))return s;
-      s=writePart(s,id,{...p,design:structuredClone(design)});
-    }else if(action.type==='useExample'){
-      if(!s.persistent.examplesEnabled||p.step!==2)return s;
-      const design=defaultComponentDesign(s);
-      if(!designAllowed(s,design)||!partRectValid(s,id,p.rect,design))return s;
-      s=showGuide(payStep(writePart(s,id,{...p,design,step:3}),id,2,now),'test');
-    }else if(action.type==='confirmAdjustment'){
-      if(p.step!==2)return s;
-      s=showGuide(payStep(writePart(s,id,{...p,step:3}),id,2,now),'test');
-    }else if(action.type==='test'){
-      if(p.step!==3||action.interaction!==descriptor.testInteraction&&!descriptor.testAlternatives.includes(action.interaction))return s;
-      s=payStep(writePart(s,id,{...p,step:4,completedAt:now,tested:true}),id,3,now,true);
-      s={...s,run:{...s.run,workshop:{...s.run.workshop,combo:completionCombo(s,now)}}};
-      if(setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now);
-      s=showGuide(s,'complete');
+    const current=migrateFittingProduction(p,id,now),definition=fittingDefinition(id);
+    if(!current.fitting)return s;
+    if(current!==p)s=writePart(s,id,current);
+    const fitting=current.fitting;
+    if(action.type==='togglePiece'){
+      if(!definition.pieces.includes(action.piece)||fitting.sockets[action.piece]!==undefined)return s;
+      const hidden=fitting.hidden??[],visible=fitting.spawned.includes(action.piece)&&!hidden.includes(action.piece);
+      s=writePart(s,id,{...current,fitting:{...fitting,spawned:fitting.spawned.includes(action.piece)?fitting.spawned:[...fitting.spawned,action.piece],hidden:visible?[...hidden,action.piece]:hidden.filter(piece=>piece!==action.piece)}});
+      s={...s,run:{...s.run,workshop:ensurePuzzlePositions(s.run.workshop,[id])}};
+    }else if(action.type==='stagePiece'){
+      if(!definition.pieces.includes(action.piece)||action.at&&![action.at.x,action.at.y].every(value=>Number.isFinite(value)&&value>=0))return s;
+      const sockets={...fitting.sockets};delete sockets[action.piece];
+      const f={...fitting,sockets,spawned:fitting.spawned.includes(action.piece)?fitting.spawned:[...fitting.spawned,action.piece],hidden:(fitting.hidden??[]).filter(piece=>piece!==action.piece)};
+      s=writePart(s,id,{...current,fitting:f,elements:fittedPieces({...current,fitting:f},id)});
+      let next:GameState['run']['workshop']={...s.run.workshop,puzzleSet:getWorkshopPart(id).set,selectedParts:[...new Set([...puzzleParts(s.run.workshop).filter(other=>getWorkshopPart(other).set===getWorkshopPart(id).set),id])],activePart:id};
+      next=ensurePuzzlePositions(next,[id]);
+      const p=next.parts[id]!,positions={...p.fitting!.positions},previous=positions[action.piece]!;
+      positions[action.piece]={...previous,at:clampPuzzlePoint(action.at??previous.origin,puzzlePieceRect(next,id,action.piece))};
+      s={...s,run:{...s.run,workshop:{...next,parts:{...next.parts,[id]:{...p,fitting:{...p.fitting!,positions}}}}}};
+    }else if(action.type==='spawnPiece'){
+      if(!definition.pieces.includes(action.piece)||fitting.spawned.includes(action.piece))return s;
+      s=writePart(s,id,{...current,fitting:{...fitting,spawned:[...fitting.spawned,action.piece]}});
+    }else if(action.type==='fitPiece'||action.type==='addElement'){
+      // addElement remains a developer-fixture alias; the visible flow always spawns then drags.
+      const piece=action.type==='fitPiece'?action.piece:action.element;
+      const socket=action.type==='fitPiece'?action.socket:defaultPieceSocket(definition,fitting,piece);
+      if(!socket||!definition.pieces.includes(piece)||action.type==='fitPiece'&&!fitting.spawned.includes(piece)||!canFitPiece(id,fitting,piece,socket)||fitting.sockets[piece]===socket)return s;
+      const firstFit=!fitting.paid.includes(piece);
+      const nextFitting={...fitting,sockets:{...fitting.sockets,[piece]:socket},spawned:fitting.spawned.includes(piece)?fitting.spawned:[...fitting.spawned,piece],paid:firstFit?[...fitting.paid,piece]:fitting.paid};
+      const prepaid=firstFit?Math.min(pieceReward(id),fitting.prepaid??0):0;
+      if(fitting.prepaid!==undefined)nextFitting.prepaid=fitting.prepaid-prepaid;
+      let next:PartProduction={...current,fitting:nextFitting};
+      next={...next,elements:fittedPieces(next,id)};
+      // Older development fixtures iterate the original four frame elements.
+      // Convert that fixture call into the integrated scrollbar without exposing a legacy UI path.
+      if(action.type==='addElement'&&id==='common-frame'&&descriptor.elements.every(element=>next.elements.includes(element))&&!nextFitting.sockets.scrollbar){
+        s=writePart(s,id,next);
+        s=payPiece(s,id,now,firstFit,false,pieceReward(id)-prepaid);
+        s=actWorkshop(s,{type:'spawnPiece',part:id,piece:'scrollbar'},now);
+        return actWorkshop(s,{type:'fitPiece',part:id,piece:'scrollbar',socket:'scrollbar'},now);
+      }
+      const finish=!fitting.completionPaid&&fittingComplete(next,id);
+      if(finish)next={...next,step:4,tested:true,completedAt:now,createdStage:editorStage(s),fitting:{...nextFitting,completionPaid:true}};
+      s=payPiece(writePart(s,id,next),id,now,firstFit,finish,pieceReward(id)-prepaid);
+      if(fittingComplete(next,id))s={...s,run:{...s.run,workshop:{...s.run.workshop,selectedParts:puzzleParts(s.run.workshop).filter(part=>part!==id)}}};
+      if(finish){
+        s={...s,run:{...s.run,workshop:{...s.run.workshop,combo:completionCombo(s,now)}}};
+        if(s.run.workshop.guide.current==='updateAvailable')s={...s,run:{...s.run,workshop:{...s.run.workshop,guide:{...s.run.workshop.guide,current:null,collapsed:true}}}};
+        if(setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now);
+        s=showGuide(s,'complete');
+      }
+    }else if(action.type==='removePiece'){
+      if(!Object.hasOwn(fitting.sockets,action.piece))return s;
+      const sockets={...fitting.sockets};delete sockets[action.piece];
+      const next={...current,fitting:{...fitting,sockets}};
+      s=writePart(s,id,{...next,elements:fittedPieces(next,id)});
+    }else if(action.type==='adjust'||action.type==='useExample'){
+      // Appearance is optional at every point; socket placement owns control order and side.
+      const patch=action.type==='useExample'?defaultComponentDesign(s):{...action.patch,controlSide:current.design.controlSide,controlSides:current.design.controlSides};
+      const design=adjustComponentDesign(current.design,patch,paletteFor(s.persistent.specs.color));
+      if(!design||!designAllowed(s,design)||!partRectValid(s,id,current.rect,design))return s;
+      s=writePart(s,id,{...current,design:structuredClone(design)});
     }
     // A completed set document is the current version's work, while released products stay frozen.
-    if(s!==state&&p.step===4&&['place','addElement','adjust'].includes(action.type)&&setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now,true);
+    if(s!==state&&p.step===4&&['fitPiece','removePiece','addElement','adjust','useExample'].includes(action.type)&&setComplete(s,descriptor.set))s=snapshotSet(s,descriptor.set,now,true);
   }
   if(s===state)return state;
   const active=s.run.workshop.activePart;
-  const resetAssistance=active!==state.run.workshop.activePart||active!==null&&(s.run.workshop.parts[active]?.step??0)>=3;
+  const resetAssistance=active!==state.run.workshop.activePart||active!==null&&s.run.workshop.parts[active]?.step===4;
   return {...s,run:{...s.run,workshop:{...s.run.workshop,lastActionAt:s.elapsedMs,
     ...(resetAssistance?{assistance:{part:active,elapsedMs:0}}:{})}}};
 }
-/** A job may prepare three stages; the fourth remains a real human inspection. */
+/** A cursor fits one missing piece at a time; exporting remains an explicit action. */
 export function advanceWorkshopAssistance(state:GameState,ms:number,now:number):GameState {
   if(!Number.isFinite(ms)||ms<=0||!Number.isFinite(now)||now<0)return state;
+  const group=state.run.workshop.groupPuzzle;
+  if(group&&group.selected!=='stream'){
+    const job=state.run.desktop.jobs.tessera,eligible=state.run.world==='desktop'&&state.run.desktop.entered&&state.run.workshop.entered&&state.run.workshop.enterMs===0&&state.run.desktop.upgrades.includes('jobs')&&job.assigned&&job.cursors>0;
+    const interval=BALANCE.workshop.assistStepMs;
+    let next=state,budget=eligible?group.assistMs+ms*job.cursors*BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier*BALANCE.w3.updateMultiplier**job.updates:0;
+    const choose=()=>{const g=next.run.workshop.groupPuzzle!;return currentGroupTools(g).find(tool=>tool.id===g.focus&&!g.tools[tool.id]!.completionPaid)??currentGroupTools(g).find(tool=>!g.tools[tool.id]!.completionPaid);};
+    for(let tool=choose();eligible&&tool&&budget>=interval;tool=choose()){
+      const p=next.run.workshop.groupPuzzle!.tools[tool.id]!;
+      next=actWorkshop(next,p.placed?{type:'groupFit',tool:tool.id,piece:tool.pieces.find(piece=>piece.id!==tool.base&&!p.fitted[piece.id])!.id}:{type:'groupPlace',tool:tool.id,at:p.positions[tool.base]!.at},now);
+      budget-=interval;
+    }
+    const elapsed=choose()?budget:0,g=next.run.workshop.groupPuzzle!;
+    return g.assistMs===elapsed?next:{...next,run:{...next.run,workshop:{...next.run.workshop,groupPuzzle:{...g,assistMs:elapsed}}}};
+  }
   const w=state.run.workshop,id=w.activePart,part=id?w.parts[id]:undefined,job=state.run.desktop.jobs.tessera;
   const writeBudget=(s:GameState,elapsedMs:number):GameState=>{
     const current=s.run.workshop.assistance;
     if(current?.part===id&&current.elapsedMs===elapsedMs)return s;
     return {...s,run:{...s.run,workshop:{...s.run.workshop,assistance:{part:id,elapsedMs}}}};
   };
-  if(state.run.world!=='desktop'||!state.run.desktop.entered||!w.entered||w.enterMs>0
-    ||!state.run.desktop.upgrades.includes('jobs')||!job.assigned||job.cursors<=0||!id||!part||part.step>=3)return writeBudget(state,0);
-  const stepMs=BALANCE.workshop.assistStepMs;
-  const speed=job.cursors*BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier*BALANCE.w3.updateMultiplier**job.updates;
+  if(state.run.world!=='desktop'||!state.run.desktop.entered||!w.entered||w.enterMs>0||!state.run.desktop.upgrades.includes('jobs')||!job.assigned||job.cursors<=0||!id||!part||part.step===4)return writeBudget(state,0);
+  const interval=BALANCE.workshop.assistStepMs,speed=job.cursors*BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier*BALANCE.w3.updateMultiplier**job.updates;
   if(!Number.isFinite(speed)||speed<=0)return writeBudget(state,0);
-  // More time cannot spill into another component or finish the current one.
-  const available=3-part.step,cappedMs=Math.min(ms,stepMs*available);
-  let budget=Math.min(stepMs*available,(w.assistance?.part===id?w.assistance.elapsedMs:0)+cappedMs*speed),next=state;
-  while(budget>=stepMs){
-    const current=next.run.workshop.parts[id]!;
-    if(current.step>=3)return writeBudget(next,0);
-    const before=next;
-    if(current.step===0){
-      if(!partRectValid(next,id,current.rect))return writeBudget(next,0);
-      next=actWorkshop(next,{type:'place',part:id,rect:current.rect},now);
-    }else if(current.step===1){
-      const missing=getWorkshopPart(id).elements.filter(element=>!current.elements.includes(element));
-      if(missing.length)for(const element of missing)next=actWorkshop(next,{type:'addElement',part:id,element},now);
-      else next=actWorkshop(next,{type:'addElement',part:id,element:current.elements[0]!,index:0},now);
-    }else next=actWorkshop(next,{type:'confirmAdjustment',part:id},now);
-    if(next===before||next.run.workshop.parts[id]!.step<=current.step)return writeBudget(next,0);
-    budget-=stepMs;
-    if(next.run.workshop.parts[id]!.step>=3)return writeBudget(next,0);
+  const definition=fittingDefinition(id),missing=definition.pieces.filter(piece=>!part.elements.includes(piece));
+  let budget=Math.min(interval*missing.length,(w.assistance?.part===id?w.assistance.elapsedMs:0)+ms*speed),next=state;
+  for(const piece of missing){
+    if(budget<interval)break;
+    next=actWorkshop(next,{type:'spawnPiece',part:id,piece},now);
+    const fitting=next.run.workshop.parts[id]?.fitting;
+    const socket=fitting?defaultPieceSocket(definition,fitting,piece):null;
+    if(!socket)break;
+    const before=next;next=actWorkshop(next,{type:'fitPiece',part:id,piece,socket},now);
+    if(next===before)break;
+    budget-=interval;
   }
-  return writeBudget(next,budget);
+  return writeBudget(next,next.run.workshop.parts[id]?.step===4?0:budget%interval);
 }
 export function advanceWorkshop(s:GameState,ms:number):GameState {
   if(!Number.isFinite(ms)||ms<0||!s.run.workshop.entered)return s;
-  s=grantExtraMaterials(s);
+  s=grantTesseraUpdateFunds(grantExtraMaterials(s));
   const w=s.run.workshop,enterMs=Math.max(0,w.enterMs-ms);
   let next=enterMs===w.enterMs?s:{...s,run:{...s.run,workshop:{...w,enterMs}}};
-  if(next.run.world==='kumiki'&&next.elapsedMs-next.run.workshop.lastActionAt>=BALANCE.workshop.hintMs)next=showGuide(next,'hint');
+  if(next.run.world==='kumiki'&&!tesseraUpdatePending(next)&&next.elapsedMs-next.run.workshop.lastActionAt>=BALANCE.workshop.hintMs)next=showGuide(next,'hint');
   return next;
 }

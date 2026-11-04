@@ -310,18 +310,21 @@ export class GameRuntime {
     if (!this.canOperate() || this.suspended || this.platform.visibility.isHidden()) return;
     this.advanceForeground();
     const previous = this.snapshot.state;
-    const part=action.type==='place'||action.type==='test'?action.part??previous.run.workshop.activePart:null;
+    const part=action.type==='place'||action.type==='test'||action.type==='fitPiece'?action.part??previous.run.workshop.activePart:null;
     const placement=action.type==='place'&&action.example===true&&part?examplePlacement(previous,part,action.rect):null;
     let state = observeTesseraAction(previous, actWorkshop(previous, action, this.platform.clock.wallNow()), action.type, this.platform.clock.wallNow());
     if (action.type === 'exit' && canAssembleDesktop(state)) state = enterDesktop(state);
     if (previous === state) return;
     const rect=part?state.run.workshop.parts[part]?.rect:null;
-    const snapped=Boolean(placement?.snapped&&rect&&(['x','y','width','height'] as const).every(key=>rect[key]===placement.rect[key]));
+    const fitted=action.type==='fitPiece'&&part&&state.run.workshop.parts[part]?.fitting?.sockets[action.piece]===action.socket
+      &&previous.run.workshop.parts[part]?.fitting?.sockets[action.piece]!==action.socket;
+    const snapped=Boolean(fitted||placement?.snapped&&rect&&(['x','y','width','height'] as const).every(key=>rect[key]===placement.rect[key]));
     const visible=workshopVisible(previous);
-    this.publish({ state,...(snapped&&visible&&part?{workshopSnap:{part,at:this.platform.clock.monotonicNow()}}:{}) },true,action.type==='test'&&part?part:undefined);
+    const groupSnapped=(action.type==='groupFit'&&!previous.run.workshop.groupPuzzle?.tools[action.tool]?.fitted[action.piece]&&!!state.run.workshop.groupPuzzle?.tools[action.tool]?.fitted[action.piece])||(action.type==='groupPlace'&&!previous.run.workshop.groupPuzzle?.tools[action.tool]?.placed&&state.run.workshop.groupPuzzle?.tools[action.tool]?.placed===true);
+    this.publish({ state,...(snapped&&visible&&part?{workshopSnap:{part,at:this.platform.clock.monotonicNow()}}:{}) },true,(action.type==='test'||action.type==='fitPiece')&&part?part:undefined);
     if(visible){
-      if(snapped)this.sound('press',state);
-      else if (['buySet','place','skill','test'].includes(action.type)) this.sound('build',state);
+      if(snapped||groupSnapped)this.sound('press',state);
+      else if (['buySet','groupBuy','place','skill','test'].includes(action.type)) this.sound('build',state);
       if (action.type === 'export') this.sound('export',state);
     }
     this.persist();

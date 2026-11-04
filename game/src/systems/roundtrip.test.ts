@@ -2,26 +2,29 @@ import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import {describe,it,expect} from 'vitest';
 import {BALANCE} from '../config/balance';
-import {partsForSet,type UiSetId,type WorkshopPartId} from '../content/workshopCatalog';
-import {SCHEMA_VERSION,createInitialState,isGameState,type GameState} from './state';
+import {type UiSetId,type WorkshopPartId} from '../content/workshopCatalog';
+import {fittingDefinition,fittingPartsForSet as partsForSet} from '../content/workshopFitting';
+
+import { createInitialState, isGameState, type GameState } from './state';
 import {createSeedVersion,buildSeed} from './seed';
 import {actWorkshop,advanceWorkshop,canAssembleDesktop,canBuyWorkshopSet,enterWorkshop,prototypeConditions} from './workshop';
 import {createComponentDesign,createEditorCustomization,isCompleteSetDocument} from './workshopState';
 import {world4Preparation} from './world4';
 import {decodeSave,encodeSave} from './save';
-import {migrateStage8bSave} from './stage8bMigration';
+
 
 const now=1_800_000_000_000;
 function workshop(version:GameState['run']['version']='v0.1'):GameState {
- const s=createInitialState(now);s.run.version=version;s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s.resources.pixels=s.run.totalPixelsGenerated=100_000_000;
+ const s=createInitialState(now);delete s.run.workshop.groupPuzzle;s.run.version=version;s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s.resources.pixels=s.run.totalPixelsGenerated=100_000_000;
  return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);
 }
 function complete(s:GameState,id:WorkshopPartId):GameState {
- const descriptor=partsForSet(id.startsWith('stream-')?'stream':id.split('-')[0] as UiSetId).find(part=>part.id===id)!;
- s=actWorkshop(s,{type:'place',part:id,rect:descriptor.defaultRect},now);
- for(const element of descriptor.elements)s=actWorkshop(s,{type:'addElement',part:id,element},now);
- s=actWorkshop(s,{type:'confirmAdjustment',part:id},now);
- return actWorkshop(s,{type:'test',part:id,interaction:descriptor.testInteraction},now);
+ for(const piece of fittingDefinition(id).pieces){
+  s=actWorkshop(s,{type:'spawnPiece',part:id,piece},now);
+  const fitting=s.run.workshop.parts[id]!.fitting!,socket=fittingDefinition(id).sockets.find(socket=>socket.accepts.includes(piece)&&(socket.stacked||!Object.values(fitting.sockets).includes(socket.id)))!;
+  s=actWorkshop(s,{type:'fitPiece',part:id,piece,socket:socket.id},now);
+ }
+ return s;
 }
 function completeSet(s:GameState,set:UiSetId):GameState {
  s=actWorkshop(s,{type:'buySet',set},now);
@@ -36,7 +39,7 @@ describe('段階8b：周回は現在の版を作り直し、旧書類を保存�
   expect(previous).toEqual(original);expect(next.persistent.setDocuments).toHaveLength(4);
   expect(next.persistent.setDocuments.every(document=>document.version==='v0.1'&&isCompleteSetDocument(document))).toBe(true);
   expect(next.run.workshop.parts).toEqual({});expect(next.run.workshop.purchasedSets).toEqual([]);expect(next.run.desktop.apps).toEqual([]);expect(next.run.desktop.projects).toEqual({});
-  let rebuilt=next;rebuilt.resources.pixels=100_000_000;rebuilt.run.totalPixelsGenerated=100_000_000;
+  let rebuilt=next;delete rebuilt.run.workshop.groupPuzzle;rebuilt.resources.pixels=100_000_000;rebuilt.run.totalPixelsGenerated=100_000_000;
   for(const item of BALANCE.w1.items)rebuilt=buildSeed(rebuilt,item.id,now+2_000);
   rebuilt=advanceWorkshop(rebuilt,BALANCE.workshop.enterMs);rebuilt.persistent.specs.color=1;
   expect(prototypeConditions(rebuilt)).toEqual([true,false,false]);expect(canAssembleDesktop(rebuilt)).toBe(false);expect(canBuyWorkshopSet(rebuilt,'mail')).toBe(false);
@@ -76,11 +79,11 @@ describe('段階8b：世界4は制作と格納と性能の判定まで',()=>{
   early.run.world='desktop';early.run.desktop.entered=true;expect(canBuyWorkshopSet(early,'stream')).toBe(true);
   const purchased=actWorkshop(early,{type:'buySet',set:'stream'},now);
   expect(early.resources.pixels-purchased.resources.pixels).toBe(BALANCE.workshop.setCosts.stream);
-  expect(partsForSet('stream').every(part=>purchased.run.workshop.parts[part.id]?.step===0)).toBe(true);expect(world4Preparation(purchased).ready).toBe(false);
+  expect(partsForSet('stream').every(part=>purchased.run.workshop.parts[part.id]?.step===1&&purchased.run.workshop.parts[part.id]?.elements.length===0)).toBe(true);expect(world4Preparation(purchased).ready).toBe(false);
   const premature=structuredClone(purchased);premature.run.version='v1';expect(isGameState(premature)).toBe(false);
   const outsideDesktop=structuredClone(purchased);outsideDesktop.run.world='kumiki';outsideDesktop.run.desktop.entered=false;expect(isGameState(outsideDesktop)).toBe(false);
  });
- it('4工程で完成した現版の書類と60Hzが両方必要で、旧版書類では代替できない',()=>{
+ it('全ピースではめ終えた現版の書類と60Hzが両方必要で、旧版書類では代替できない',()=>{
   let s=workshop('v2');s.run.world='desktop';s.run.desktop.entered=true;s=completeSet(s,'stream');
   expect(s.persistent.setDocuments.find(document=>document.id==='v2:stream')).toBeDefined();
   const low=world4Preparation(s);expect(low).toMatchObject({versionAllowed:true,desktopAvailable:true,completedSets:['stream'],storedSets:['stream'],requiredHz:60,currentHz:30,ready:false});
@@ -92,15 +95,9 @@ describe('段階8b：世界4は制作と格納と性能の判定まで',()=>{
  });
 });
 
-describe('公開済み8aの保存形式14を現形式へ移行する',()=>{
- for(const name of ['workshop','desktop','release'])it(`${name}: frozen main1f0d72aの保存を資源・制作・記録のまま読む`,()=>{
-  const raw=gunzipSync(readFileSync(new URL(`./testdata/v14-stage8a-${name}.json.gz`,import.meta.url))).toString();
-  const original=JSON.parse(raw),frozen=JSON.stringify(original),next=decodeSave(raw);
-  expect(next.schemaVersion).toBe(SCHEMA_VERSION);expect(next.resources).toEqual(original.resources);expect(next.run.totalPixelsGenerated).toBe(original.run.totalPixelsGenerated);
-  expect(next.run.workshop).toEqual({...original.run.workshop,editorStageAtEntry:original.persistent.appearance.editor,helpTarget:null,combo:{count:0,lastCompletedAt:null}});expect(next.persistent.setDocuments).toEqual(original.persistent.setDocuments);
-  expect(next.run.desktop.windows).toEqual(original.run.desktop.windows);expect(next.run.desktop.jobs).toEqual(original.run.desktop.jobs);expect(next.run.desktop.apps).toEqual(original.run.desktop.apps);
-  expect(next.persistent.screenshots).toEqual(original.persistent.screenshots);expect(next.persistent.products).toEqual(original.persistent.products);expect(next.persistent.productionNote).toBe(original.persistent.productionNote);
-  expect(isGameState(next)).toBe(true);expect(decodeSave(encodeSave(next))).toEqual(next);
-  migrateStage8bSave(original);expect(JSON.stringify(original)).toBe(frozen);
+describe('形式14の試遊保存は移行せず新規開始へ読み替える',()=>{
+ it.each(['workshop','desktop','release'])('%s: 旧財布と制作・作品を引き継がない',name=>{
+  const raw=gunzipSync(readFileSync(new URL(`./testdata/v14-stage8a-${name}.json.gz`,import.meta.url))).toString(),old=JSON.parse(raw);
+  const loaded=decodeSave(raw);expect(loaded).toEqual(createInitialState(old.lastTickAt));expect(decodeSave(encodeSave(loaded))).toEqual(loaded);
  });
 });

@@ -1,0 +1,430 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8187/",
+  "buildSha256": "2114db49574fdc8dd8a5902d2a5b3736ab69c126d443154054e1d04a09ff94eb",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-修正指示書-第6ラウンド.md"
+  ],
+  "cases": [
+    {
+      "id": "en:era0:reduce0",
+      "status": "passed",
+      "images": [],
+      "console": [],
+      "pageErrors": [],
+      "externalRequests": [],
+      "checks": {
+        "catalog": [
+          {
+            "set": "common",
+            "pieces": 11,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "foundation",
+            "pieces": 13,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "files",
+            "pieces": 12,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "mail",
+            "pieces": 11,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "photo",
+            "pieces": 16,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "bin",
+            "pieces": 6,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "clock",
+            "pieces": 7,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "theme",
+            "pieces": 12,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "terminal",
+            "pieces": 10,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "manager",
+            "pieces": 5,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "extras",
+            "pieces": 4,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          }
+        ],
+        "16PiecesContained": {
+          "pieces": [
+            {
+              "part": "photo-display",
+              "piece": "image",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-display",
+              "piece": "fit",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-brightness",
+              "piece": "track",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-brightness",
+              "piece": "thumb",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-brightness",
+              "piece": "value",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-tone",
+              "piece": "track",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-tone",
+              "piece": "thumb",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-tone",
+              "piece": "value",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-wallpaper",
+              "piece": "image",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-wallpaper",
+              "piece": "apply",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-crop",
+              "piece": "image",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-crop",
+              "piece": "crop-frame",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-compare",
+              "piece": "before",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-compare",
+              "piece": "after",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-switch",
+              "piece": "previous",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-switch",
+              "piece": "next",
+              "inside": true,
+              "clear": true
+            }
+          ],
+          "overflow": "clip",
+          "scrollTop": 0,
+          "scrollLeft": 0
+        },
+        "noWorkbenchScroll": true,
+        "fittingEffect": true,
+        "reducedMotion": false,
+        "exportPending": true,
+        "looseBorderAndPreview": true,
+        "flightToIcon": true,
+        "mergedApps": [
+          "foundation",
+          "files"
+        ],
+        "commonPartsRemain": true,
+        "normalSaveReload": true,
+        "noDuplicateRewards": true
+      }
+    },
+    {
+      "id": "en:era1:reduce0",
+      "status": "passed",
+      "images": [],
+      "console": [],
+      "pageErrors": [],
+      "externalRequests": [],
+      "checks": {
+        "catalog": [
+          {
+            "set": "common",
+            "pieces": 11,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "foundation",
+            "pieces": 13,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "files",
+            "pieces": 12,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "mail",
+            "pieces": 11,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "photo",
+            "pieces": 16,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "bin",
+            "pieces": 6,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "clock",
+            "pieces": 7,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "theme",
+            "pieces": 12,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "terminal",
+            "pieces": 10,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "manager",
+            "pieces": 5,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          },
+          {
+            "set": "extras",
+            "pieces": 4,
+            "inside": true,
+            "sameSize": true,
+            "textFits": true
+          }
+        ],
+        "16PiecesContained": {
+          "pieces": [
+            {
+              "part": "photo-display",
+              "piece": "image",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-display",
+              "piece": "fit",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-brightness",
+              "piece": "track",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-brightness",
+              "piece": "thumb",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-brightness",
+              "piece": "value",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-tone",
+              "piece": "track",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-tone",
+              "piece": "thumb",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-tone",
+              "piece": "value",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-wallpaper",
+              "piece": "image",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-wallpaper",
+              "piece": "apply",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-crop",
+              "piece": "image",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-crop",
+              "piece": "crop-frame",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-compare",
+              "piece": "before",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-compare",
+              "piece": "after",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-switch",
+              "piece": "previous",
+              "inside": true,
+              "clear": true
+            },
+            {
+              "part": "photo-switch",
+              "piece": "next",
+              "inside": true,
+              "clear": true
+            }
+          ],
+          "overflow": "clip",
+          "scrollTop": 0,
+          "scrollLeft": 0
+        },
+        "noWorkbenchScroll": true,
+        "fittingEffect": true,
+        "reducedMotion": false,
+        "exportPending": true,
+        "looseBorderAndPreview": true,
+        "flightToIcon": true,
+        "mergedApps": [
+          "foundation",
+          "files"
+        ],
+        "commonPartsRemain": true,
+        "normalSaveReload": true,
+        "noDuplicateRewards": true
+      }
+    }
+  ],
+  "languages": [
+    "en"
+  ],
+  "passed": 2,
+  "failed": 0
+}

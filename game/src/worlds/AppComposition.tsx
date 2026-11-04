@@ -9,6 +9,7 @@ import type { BuiltApp } from '../systems/desktopState';
 import type { DesktopProps } from './desktopTypes';
 import {ClockFace,ClockTimerContents} from '../components/ClockContents';
 import {PhotoAdjustment} from '../components/PhotoAdjustment';
+import { customizedScrollbar, producedScrollbarMaterial } from '../systems/commonChrome';
 export const partLabel=(id:AppPartId,i18n:I18n)=>i18n.t(`builder.part.${id}` as MessageKey);
 const photoAdjustment=(id:AppPartId):id is 'brightness'|'tone'|'crop'=>id==='brightness'||id==='tone'||id==='crop';
 export function usePartMinimums(layout:AppLayout,i18n:I18n,fontFamily?:string,now=0){
@@ -23,7 +24,7 @@ export function commonDesignStyle(assembly:ReturnType<typeof installedAssembly>)
  const style:Record<string,string>={},defaults=createComponentDesign();
  if(!assembly)return style;
  const component=(source:string)=>assembly.common.find(part=>part.source===source)?.design;
- const button=component('common-button'),heading=component('common-heading'),progress=component('common-progress'),scroll=component('common-scrollbar');
+ const button=component('common-button'),heading=component('common-heading'),progress=component('common-progress'),scroll=producedScrollbarMaterial(assembly)?.design;
  if(button){
   if(!usesNativeComponentColors(button)){style['--app-common-button-bg']=button.color;style['--app-common-button-fg']=button.textColor;}
   if(button.radius!==defaults.radius)style['--app-common-button-radius']=`${button.radius}px`;
@@ -60,7 +61,7 @@ export function AppSurface({app,children,...props}:DesktopProps&{app:BuiltApp;ch
  },[fitted?.width,fitted?.height,w.width,w.height,w.maximized,size]);
 
  if(!layout)return <Composition.Provider value={null}>{children}</Composition.Provider>;
- return <div ref={ref} className="app-layout" data-composed-app={app} data-common-control-radius={assembly?.common.some(part=>part.source==='common-button'&&part.design.radius!==BALANCE.workshop.design.radius)||undefined} data-common-scroll-custom={assembly?.common.some(part=>part.source==='common-scrollbar'&&(!usesNativeComponentColors(part.design)||part.design.scrollbarWidth!==BALANCE.workshop.design.scrollbarWidth||part.design.radius!==BALANCE.workshop.design.radius||!part.design.arrows))||undefined} style={commonDesignStyle(assembly)}>{ruler}<Composition.Provider value={getInstalledAppParts(snapshot.state,app,Math.max(160,Math.floor(size.width/8)*8),Math.max(100,Math.floor(size.height/8)*8),metrics)}>{children}</Composition.Provider>{!layout.parts.length&&<p className="app-layout-empty">{i18n.t('builder.emptyInstalled')}</p>}</div>;
+ return <div ref={ref} className="app-layout" data-composed-app={app} data-common-control-radius={assembly?.common.some(part=>part.source==='common-button'&&part.design.radius!==BALANCE.workshop.design.radius)||undefined} data-common-scroll-custom={customizedScrollbar(assembly)||undefined} style={commonDesignStyle(assembly)}>{ruler}<Composition.Provider value={getInstalledAppParts(snapshot.state,app,Math.max(160,Math.floor(size.width/8)*8),Math.max(100,Math.floor(size.height/8)*8),metrics)}>{children}</Composition.Provider>{!layout.parts.length&&<p className="app-layout-empty">{i18n.t('builder.emptyInstalled')}</p>}</div>;
 }
 export function AppPart({id,children}: {id:AppPartId;children:ReactNode}){
  const parts=useContext(Composition);if(!parts)return <>{children}</>;

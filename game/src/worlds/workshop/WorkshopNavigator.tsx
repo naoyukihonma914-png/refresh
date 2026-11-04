@@ -1,73 +1,113 @@
-import { useEffect,useRef,useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { BALANCE } from '../../config/balance';
-import type { I18n,MessageKey } from '../../content/i18n';
-import { UI_SETS,getWorkshopPart,partsForSet,type UiSetId,type WorkshopPartId } from '../../content/workshopCatalog';
+import type { I18n, MessageKey } from '../../content/i18n';
+import { getWorkshopPart, type UiSetId, type WorkshopPartId } from '../../content/workshopCatalog';
+import { fittingDefinition, fittingPartsForSet } from '../../content/workshopFitting';
 import { paletteFor } from '../../content/palette';
+import { puzzleParts, puzzlePieceVisible } from '../../systems/workshopPuzzle';
+import { WorkshopHoverPreview, type WorkshopHover } from './WorkshopHoverPreview';
+import { fittedPieces, fittingComplete } from '../../systems/workshopFitting';
 import { editorStage } from '../../systems/appearance';
 import { blueprintAppForSet } from '../../systems/appAssembly';
 import type { BuiltApp } from '../../systems/desktopState';
-import { passivePixelsPerSecond } from '../../systems/economy';
 import { canRelease } from '../../systems/release';
-import type { GameRuntime,RuntimeSnapshot } from '../../systems/runtime';
-import { canAssembleDesktop,canBuyWorkshopSet,canInspectDesktopExit,completedParts,partMinimumSize,partRectValid,setComplete } from '../../systems/workshop';
-import { nextWorkshopTarget,workshopRowStatus,WORKSHOP_MAINLINE } from '../../systems/workshopNavigation';
-import { Estimate } from '../../components/Estimate';
-import { DimensionInput,PartInspector,type WorkshopDispatch } from './WorkshopCustomization';
+import type { GameRuntime, RuntimeSnapshot } from '../../systems/runtime';
+import { canAssembleDesktop, canBuyWorkshopSet, canInspectDesktopExit, completedParts, setComplete } from '../../systems/workshop';
+import { workshopRowStatus, WORKSHOP_MAINLINE } from '../../systems/workshopNavigation';
+import { PartInspector, type WorkshopDispatch } from './WorkshopCustomization';
 import { World4Preparation } from './World4Preparation';
 import { WorkshopHelp } from './WorkshopHelp';
-import { WorkshopSchematic,WorkshopDestinationGlyph } from './WorkshopSchematic';
-import { WorkshopExamples } from './WorkshopExamples';
-import { WorkshopCombo } from './WorkshopCompletionFeedback';
+import { WorkshopDestinationGlyph } from './WorkshopSchematic';
+import { WorkshopExamples, workshopExampleHand } from './WorkshopExamples';
+import { WorkshopGlyph } from './WorkshopGlyph';
+import { initialWorkshopPanelSet, workshopCategoryForSet, WORKSHOP_CATEGORIES, WORKSHOP_CATEGORY_SETS, type WorkshopCategory } from './workshopPanel';
+import './fitting-panel.css';
 
-export interface WorkshopNavigatorProps {runtime:GameRuntime;snapshot:RuntimeSnapshot;i18n:I18n;onAssembleApp?:(app:BuiltApp)=>void;finishHint?:(part:WorkshopPartId)=>string|null|undefined}
-export function WorkshopNavigator({runtime,snapshot,i18n,onAssembleApp,finishHint}:WorkshopNavigatorProps){
- const {state}=snapshot,w=state.run.workshop,stage=editorStage(state),skills=state.persistent.editorSkills,c=state.persistent.editorCustomization,t=i18n.t;
+export interface WorkshopNavigatorProps {
+ runtime:GameRuntime;snapshot:RuntimeSnapshot;i18n:I18n;onAssembleApp?:(app:BuiltApp)=>void;
+ previewZoom?:number;selectedPiece?:string|null;onSelectPiece?:(piece:string)=>void;finishHint?:(part:WorkshopPartId)=>string|null|undefined;onPickColor?:()=>void;onOpenPlugins?:()=>void;
+}
+
+/** Every navigation level has a stable place in one scrolling column. */
+export function WorkshopNavigator({runtime,snapshot,i18n,onAssembleApp,onPickColor,onOpenPlugins,previewZoom}:WorkshopNavigatorProps){
+ const {state}=snapshot,w=state.run.workshop,t=i18n.t,stage=editorStage(state),examples=state.persistent.examplesEnabled;
  const dispatch:WorkshopDispatch=runtime.actWorkshop;
- const part=w.activePart?getWorkshopPart(w.activePart):null,production=part?w.parts[part.id]:undefined,assembleApp=part?blueprintAppForSet(part.set):null;
- const partLabel=part?t(part.labelKey as MessageKey):t('ws.untitled'),setLabel=(set:UiSetId)=>t(`ws.set.${set}`);
- const next=nextWorkshopTarget(state),complete=completedParts(state),colors=paletteFor(state.persistent.specs.color),examples=state.persistent.examplesEnabled;
- const [optional,setOptional]=useState(false),[portalHost,setPortalHost]=useState<HTMLElement|null>(null),panel=useRef<HTMLDivElement>(null);
+ const initialSet=w.puzzleSet??initialWorkshopPanelSet(state),initialCategory=workshopCategoryForSet(initialSet);
+ const [category,setCategory]=useState<WorkshopCategory>(initialCategory);
+ const [selection,setSelection]=useState<Record<WorkshopCategory,UiSetId>>({shared:'common',required:initialCategory==='required'?initialSet:'foundation',optional:initialCategory==='optional'?initialSet:'photo'});
+ const selectedSet=selection[category],owned=w.purchasedSets.includes(selectedSet);
+ const active=w.activePart&&w.activePart!=='common-scrollbar'?getWorkshopPart(w.activePart):null;
+ const selectedIds=puzzleParts(w).filter(id=>getWorkshopPart(id).set===selectedSet);
+ const [adjusting,setAdjusting]=useState<WorkshopPartId|null>(null),[optionalExpanded,setOptionalExpanded]=useState(true);
+ const part=adjusting?getWorkshopPart(adjusting):active?.set===selectedSet?active:null,production=part?w.parts[part.id]:undefined;
+ const [hover,setHover]=useState<WorkshopHover|null>(null);
+ const showHover=(node:HTMLElement,id:WorkshopPartId,piece?:string)=>{
+  const root=panel.current?.closest<HTMLElement>('.workshop-root');if(!root)return;
+  const bounds=root.getBoundingClientRect(),row=node.getBoundingClientRect(),scale=bounds.width/root.offsetWidth;
+  setHover({part:id,piece,top:(row.top-bounds.top)/scale,right:(row.left-bounds.left)/scale,limitHeight:root.clientHeight});
+ };
+ const [portalHost,setPortalHost]=useState<HTMLElement|null>(null),panel=useRef<HTMLDivElement>(null),goal=useRef<HTMLDivElement>(null),tabs=useRef<HTMLDivElement>(null);
+ const [stickySizes,setStickySizes]=useState({goal:0,tabs:0});
+ useEffect(()=>{if(w.selectedParts===undefined&&w.activePart&&w.activePart!=='common-scrollbar')dispatch({type:'selectPart',part:w.activePart});},[w.selectedParts,w.activePart,dispatch]);
  useEffect(()=>{setPortalHost(panel.current?.closest<HTMLElement>('.workshop-root')??null);},[]);
- const statusIcon=(status:ReturnType<typeof workshopRowStatus>)=><svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">{status==='complete'?<path d="m2 7 3 3 7-7"/>:status==='ready'?<path d="m4 2 7 5-7 5z"/>:<rect x="2" y="2" width="10" height="10"/>}</svg>;
- const row=(set:UiSetId,id?:WorkshopPartId,isNext=false)=>{
-  const owned=w.purchasedSets.includes(set),definition=id?getWorkshopPart(id):null,label=definition?t(definition.labelKey as MessageKey):setLabel(set),status=workshopRowStatus(state,set,id);
-  const nextKey=id??set;
-  const select=()=>{if(!owned){dispatch({type:'buySet',set});return;}const selected=id??partsForSet(set).find(candidate=>w.parts[candidate.id]?.step!==4)?.id??partsForSet(set)[0]!.id;dispatch({type:'selectPart',part:selected});if(selected===w.activePart)panel.current?.querySelector<HTMLElement>('[data-workshop-step]')?.scrollIntoView({block:'nearest'});};
-  return <div className={`ws-navigation-row ${isNext?'is-next':''}`} data-navigation-set={set} data-navigation-part={id}>
-   <button type="button" className={`ws-navigation-target ${!owned?'ws-set-purchase':''}`} data-workshop-set={!owned?set:undefined} data-workshop-part={id} data-workshop-next={isNext?nextKey:undefined} data-next-kind={isNext?id?'part':'set':undefined} disabled={!owned&&!canBuyWorkshopSet(state,set)} aria-pressed={owned?id?part?.id===id:part?.set===set:undefined} onClick={select}>
-    <span className="ws-navigation-preview"><WorkshopSchematic set={set} part={id} i18n={i18n} thumbnail/></span>
-    <span className="ws-navigation-copy">{isNext&&<span className="ws-next-indicator">{t('tp.workshop.next' as MessageKey)}</span>}<span className="ws-navigation-name"><WorkshopDestinationGlyph set={set}/><span>{label}</span></span><span className="ws-navigation-state" data-status={status}>{statusIcon(status)}<span>{t(`tp.workshop.status.${status}` as MessageKey)}</span>{!id&&owned&&<span>{t('tp.workshop.partsCount' as MessageKey,{done:partsForSet(set).filter(candidate=>w.parts[candidate.id]?.step===4).length,total:partsForSet(set).length})}</span>}</span>{!owned&&<span className="ws-navigation-price">{t('ws.price',{count:i18n.price(BALANCE.workshop.setCosts[set])})}</span>}{!owned&&<Estimate cost={BALANCE.workshop.setCosts[set]} pixels={state.resources.pixels} rate={passivePixelsPerSecond(state)} runtime={runtime} i18n={i18n}/>}</span>
-   </button>
-   <button type="button" className="ws-navigation-help" data-workshop-help-set={id?undefined:set} data-workshop-help-part={id} aria-label={t('tp.workshop.helpFor' as MessageKey,{name:label})} onClick={()=>dispatch({type:'help',target:{set,...(id?{part:id}:{})}})}>{t('tp.workshop.helpButton' as MessageKey)}</button>
+ useEffect(()=>{
+  const measure=()=>setStickySizes({goal:goal.current?.offsetHeight??0,tabs:tabs.current?.offsetHeight??0});
+  measure();const observer=new ResizeObserver(measure);if(goal.current)observer.observe(goal.current);if(tabs.current)observer.observe(tabs.current);return()=>observer.disconnect();
+ },[examples,stage]);
+ useEffect(()=>{
+  const id=w.puzzleSet??(w.activePart?getWorkshopPart(w.activePart).set:null);if(!id)return;
+  const target=workshopCategoryForSet(id);setCategory(target);setSelection(previous=>({...previous,[target]:id}));
+  setAdjusting(previous=>previous&&puzzleParts(w).includes(previous)?previous:null);
+ },[w.activePart,w.puzzleSet,w.selectedParts]);
+ const hand=workshopExampleHand(state),complete=completedParts(state),setLabel=(id:UiSetId)=>t(`ws.set.${id}`);
+ const cue=hand.kind==='buySet'?hand.set:'part' in hand?hand.kind==='spawnPiece'||hand.kind==='fitPiece'?hand.piece:hand.part:hand.kind;
+ const selectSet=(id:UiSetId)=>{
+  const target=workshopCategoryForSet(id);setSelection(previous=>({...previous,[target]:id}));setCategory(target);setAdjusting(null);
+  if(id!==selectedSet)dispatch({type:'clearPartSelection',set:id});
+  setHover(null);
+ };
+ const selectPart=(id:WorkshopPartId)=>{dispatch({type:'togglePart',part:id});setAdjusting(null);};
+ const statusIcon=(done:boolean)=><svg viewBox="0 0 14 14" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">{done?<path d="m2 7 3 3 7-7"/>:<rect x="2" y="2" width="10" height="10"/>}</svg>;
+ const helpButton=(id:UiSetId,partId?:WorkshopPartId)=><button type="button" className="ws-navigation-help" data-workshop-help-set={partId?undefined:id} data-workshop-help-part={partId} aria-label={t('tp.workshop.helpFor' as MessageKey,{name:partId?t(getWorkshopPart(partId).labelKey as MessageKey):setLabel(id)})} onClick={()=>dispatch({type:'help',target:{set:id,...(partId?{part:partId}:{})}})}>{t('tp.workshop.helpButton' as MessageKey)}</button>;
+ const setRow=(id:UiSetId)=>{
+  const purchased=w.purchasedSets.includes(id),definitions=fittingPartsForSet(id),status=workshopRowStatus(state,id),done=definitions.filter(definition=>w.parts[definition.id]?.step===4).length;
+  return <div className="ws-panel-set-row" key={id} data-navigation-set={id} data-selected={selectedSet===id} data-status={status} role="group" aria-label={setLabel(id)}>
+   <button type="button" className="ws-panel-set-select" data-workshop-select-set={id} aria-pressed={selectedSet===id} onClick={()=>selectSet(id)}><span className="ws-panel-state-bar" aria-hidden="true"/><WorkshopDestinationGlyph set={id}/><span className="ws-panel-row-copy"><strong>{setLabel(id)}</strong><small>{purchased?t('tp.workshop.partsCount' as MessageKey,{done,total:definitions.length}):t('tp.workshop.status.unowned' as MessageKey)}</small></span></button>
+   <button type="button" className="ws-panel-set-buy" data-workshop-set={id} disabled={purchased||!canBuyWorkshopSet(state,id)} aria-label={t(purchased?'ws.owned':'ws.buySet')} onClick={()=>{selectSet(id);dispatch({type:'buySet',set:id});}}>{purchased?statusIcon(status==='complete'):t('ws.price',{count:i18n.price(BALANCE.workshop.setCosts[id])})}</button>
+   {helpButton(id)}
   </div>;
  };
- const exit=state.run.world==='desktop'?<World4Preparation state={state} i18n={i18n} dispatch={dispatch}/>:<section className="ws-exit"><button type="button" data-workshop-action="exit" data-workshop-next={next?.kind==='exit'?'exit':undefined} data-next-kind={next?.kind==='exit'?'exit':undefined} disabled={!canInspectDesktopExit(state)} title={!canInspectDesktopExit(state)?t('ws.requireParts'):undefined} onClick={()=>dispatch({type:'exit'})}>{next?.kind==='exit'&&<span className="ws-next-indicator">{t('tp.workshop.next' as MessageKey)}</span>}{t('ws.assemble')}</button><progress aria-label={t('ws.assemble')} max={UI_SETS.filter(set=>set.mainline).reduce((n,set)=>n+set.parts.length,0)} value={complete.filter(id=>WORKSHOP_MAINLINE.includes(getWorkshopPart(id).set)).length}/><small>{t('ws.price',{count:i18n.price(BALANCE.w2.desktopCost)})}</small>{w.exitInspected&&!canAssembleDesktop(state)&&<div className="ws-exit-requirements">{!setComplete(state,'files')||!setComplete(state,'mail')?<p>{t('ws.requireParts')}</p>:null}{state.persistent.specs.color<BALANCE.release.prototypeColorLevel&&<p>{t('ws.requireColor')}</p>}{canRelease(state)&&<button type="button" data-workshop-action="release" onClick={runtime.requestPrototypeRelease}>{t('ws.releaseReady')}</button>}</div>}</section>;
- return <div className="ws-panel ws-panel-parts ws-navigator" ref={panel}><div className="ws-panel-grip">{t('ws.parts')}</div>
-  <h3 className="ws-navigation-heading">{t((examples?'examples.workshop.assembly':'tp.workshop.route') as MessageKey)}</h3>
-  {(examples||next&&next.kind!=='exit')&&<div className="ws-next-row">{next&&next.kind!=='exit'&&row(next.set,next.kind==='part'?next.part:undefined,true)}{examples&&<WorkshopExamples state={state} i18n={i18n} dispatch={dispatch} onRelease={runtime.requestPrototypeRelease} finishHint={finishHint}/>}</div>}
-  <WorkshopCombo state={state} i18n={i18n} platform={runtime.platform}/>
-  <nav aria-label={t('tp.workshop.route' as MessageKey)} className="ws-navigation-rows">{w.purchasedSets.filter(set=>WORKSHOP_MAINLINE.includes(set)||set===part?.set).map(set=><div key={set}>{row(set)}</div>)}</nav>
-
-  {w.purchasedSets.length>0&&<label className="ws-set-selector">{t('ws.set')}<select data-workshop-set-selection value={part?.set??w.purchasedSets[0]} onChange={e=>{const set=e.target.value as UiSetId;const target=partsForSet(set).find(d=>w.parts[d.id]?.step!==4)??partsForSet(set)[0]!;dispatch({type:'selectPart',part:target.id});}}>{w.purchasedSets.map(set=><option key={set} value={set}>{setLabel(set)}</option>)}</select></label>}
-  {part&&<>
-   <div className="ws-production-heading"><h2>{partLabel}</h2><span>{t(part.set==='stream'?'world4.partBaseRate':'ws.baseRate',{count:i18n.rate(BALANCE.workshop.partRates[part.id])})}</span></div>
-   <ol className="ws-steps" data-workshop-step={production?.step??0}>{[0,1,2,3].map(n=><li key={n} aria-current={production?.step===n?'step':undefined} className={(production?.step??0)>n?'is-done':''}>{t(`ws.step.${n}` as MessageKey)}</li>)}</ol>
-   {!examples&&production?.step===0&&<div className="ws-stage-controls"><p>{t('ws.placementHint')}</p><button type="button" data-workshop-action="place" disabled={!partRectValid(state,part.id,part.defaultRect)} onClick={()=>dispatch({type:'place',part:part.id,rect:part.defaultRect})}>{t('ws.place')}</button>{!partRectValid(state,part.id,part.defaultRect)&&<small>{t('ws.placementBlocked')}</small>}</div>}
-   {!examples&&production?.step===1&&<div className="ws-element-list">{part.elements.map(element=><button type="button" data-workshop-element={element} data-workshop-action="element" key={element} disabled={production.elements.includes(element)} onClick={()=>dispatch({type:'addElement',part:part.id,element})}>{production.elements.includes(element)?'✓ ':''}{t(`ws.element.${element}` as MessageKey)}</button>)}{skills.includes('batch')&&<button type="button" data-workshop-action="batch" onClick={()=>part.elements.filter(e=>!production.elements.includes(e)).forEach(element=>dispatch({type:'addElement',part:part.id,element}))}>{t('ws.batch')}</button>}</div>}
-   {examples&&production&&<details className="ws-custom-work" data-workshop-customization><summary>{t('examples.workshop.custom' as MessageKey)}</summary>{production.step<2?<p>{t('examples.workshop.customBeforeAdjustment' as MessageKey)}</p>:<><PartInspector part={part} production={production} stage={stage} colors={colors} skills={skills} customization={c} dispatch={dispatch} i18n={i18n}/>{production.step===2&&<button type="button" data-workshop-action="confirmAdjustment" onClick={()=>dispatch({type:'confirmAdjustment',part:part.id})}>{t('examples.workshop.useCurrent' as MessageKey)}</button>}</>}{production.step>0&&skills.includes('dimensions')&&<fieldset className="ws-numeric-dimensions"><legend>{t('ws.canvas')}</legend>{(['x','y','width','height'] as const).map(key=><label key={key}>{t(`ws.${key}`)}<DimensionInput field={key} value={production.rect[key]} min={key==='width'?partMinimumSize(state,part.id).width:key==='height'?partMinimumSize(state,part.id).height:BALANCE.workshop.canvas.inset} step={BALANCE.workshop.canvas.resolutionGrid[state.persistent.specs.resolution]??BALANCE.workshop.canvas.grid} onCommit={value=>dispatch({type:'place',part:part.id,rect:{...production.rect,[key]:value}})}/></label>)}</fieldset>}</details>}
-   {!examples&&production&&production.step>=2&&<PartInspector part={part} production={production} stage={stage} colors={colors} skills={skills} customization={c} dispatch={dispatch} i18n={i18n}/>}
-   {!examples&&production?.step===2&&<button type="button" className="ws-primary" data-workshop-action="confirmAdjustment" onClick={()=>dispatch({type:'confirmAdjustment',part:part.id})}>{t('ws.confirmAdjustment')}</button>}
-   {!examples&&production?.step===3&&<p className="ws-test-hint" role="status">{t((finishHint?.(part.id)??`ws.test.${part.testInteraction}`) as MessageKey)}</p>}
-   {production?.step===4&&<div className="ws-completed" role="status"><strong>{t('ws.completed')}</strong><span>{t(production.exportedAt!==null?'ws.exported':'ws.notExported')}</span>{!examples&&production.exportedAt===null&&<button type="button" data-workshop-action="exportPart" onClick={()=>dispatch({type:'export',part:part.id})}>{t('ws.export')}</button>}</div>}
-   {!examples&&production&&production.step>0&&skills.includes('dimensions')&&<fieldset className="ws-numeric-dimensions"><legend>{t('ws.canvas')}</legend>{(['x','y','width','height'] as const).map(key=><label key={key}>{t(`ws.${key}`)}<DimensionInput field={key} value={production.rect[key]} min={key==='width'?partMinimumSize(state,part.id).width:key==='height'?partMinimumSize(state,part.id).height:BALANCE.workshop.canvas.inset} step={BALANCE.workshop.canvas.resolutionGrid[state.persistent.specs.resolution]??BALANCE.workshop.canvas.grid} onCommit={value=>dispatch({type:'place',part:part.id,rect:{...production.rect,[key]:value}})}/></label>)}</fieldset>}
-   <ul className="ws-navigation-parts">{partsForSet(part.set).filter(definition=>next?.kind!=='part'||definition.id!==next.part).map(definition=><li key={definition.id}>{row(definition.set,definition.id)}</li>)}</ul>
-  </>}
-  {state.run.world==='desktop'&&assembleApp&&onAssembleApp&&<button type="button" className="ws-assemble-app" data-workshop-assemble-app={assembleApp} onClick={()=>onAssembleApp(assembleApp)}>{t('ws.assembleApp')}</button>}
-
-  <button type="button" className="ws-text-button" aria-expanded={optional} onClick={()=>setOptional(!optional)}>{t('ws.optional')}</button>
-  {optional&&<div className="ws-optional-sets">{UI_SETS.filter(set=>!set.mainline&&set.id!=='extras'&&set.id!=='stream'&&!w.purchasedSets.includes(set.id)).map(set=><div key={set.id}>{row(set.id)}</div>)}</div>}
+ const exit=state.run.world==='desktop'?<World4Preparation state={state} i18n={i18n} dispatch={dispatch}/>:<section className="ws-exit">
+  <button type="button" data-workshop-action="exit" disabled={!canInspectDesktopExit(state)} title={!canInspectDesktopExit(state)?t('ws.requireParts'):undefined} onClick={()=>dispatch({type:'exit'})}>{t('ws.assemble')}</button>
+  <progress aria-label={t('ws.assemble')} max={WORKSHOP_MAINLINE.reduce((sum,id)=>sum+fittingPartsForSet(id).length,0)} value={complete.filter(id=>WORKSHOP_MAINLINE.includes(getWorkshopPart(id).set)).length}/>
+  <small>{t('ws.price',{count:i18n.price(BALANCE.w2.desktopCost)})}</small>
+  {w.exitInspected&&!canAssembleDesktop(state)&&<div className="ws-exit-requirements">{!setComplete(state,'files')||!setComplete(state,'mail')?<p>{t('ws.requireParts')}</p>:null}{state.persistent.specs.color<BALANCE.release.prototypeColorLevel&&<p>{t('ws.requireColor')}</p>}{canRelease(state)&&<button type="button" data-workshop-action="release" onClick={runtime.requestPrototypeRelease}>{t('ws.releaseReady')}</button>}</div>}
+ </section>;
+ const adjustments=part&&production&&adjusting?<section className="ws-fitting-adjustments" data-workshop-customization role="dialog" aria-label={t('fitting.adjustments' as MessageKey)}>
+  <header><h2>{t('fitting.adjustments' as MessageKey)}</h2><button type="button" aria-label={t('fitting.closeAdjustments' as MessageKey)} onClick={()=>setAdjusting(null)}><WorkshopGlyph name="close"/></button></header>
+  <div className="ws-fitting-adjustment-actions"><button type="button" data-workshop-action="useExample" onClick={()=>dispatch({type:'useExample',part:part.id})}>{t('fitting.auto' as MessageKey)}</button>{state.persistent.editorSkills.includes('eyedropper')&&onPickColor&&<button type="button" data-workshop-action="eyedropper" onClick={()=>{setAdjusting(null);onPickColor();}}><WorkshopGlyph name="eyedropper"/>{t('ws.eyedropper')}</button>}</div>
+  <PartInspector part={part} production={production} stage={stage} colors={paletteFor(state.persistent.specs.color)} skills={state.persistent.editorSkills} customization={state.persistent.editorCustomization} dispatch={dispatch} i18n={i18n}/>
+ </section>:null;
+ return <div className="ws-panel ws-panel-parts ws-navigator ws-fitting-panel" ref={panel} data-workshop-panel-scroll data-workshop-panel-view="zones" style={{'--ws-panel-goal-height':`${stickySizes.goal}px`,'--ws-panel-tabs-height':`${stickySizes.tabs}px`} as CSSProperties}>
+  {examples&&<div className="ws-panel-goal" ref={goal} data-workshop-next={cue}><span className="ws-next-indicator">{t('tp.workshop.next' as MessageKey)}</span><WorkshopExamples state={state} i18n={i18n} dispatch={dispatch} onRelease={runtime.requestPrototypeRelease} onOpenPlugins={onOpenPlugins}/></div>}
+  <div className="ws-panel-category-tabs" ref={tabs} role="tablist" aria-label={t('ws.parts')}>{WORKSHOP_CATEGORIES.map(id=><button type="button" key={id} role="tab" data-workshop-category={id} aria-selected={category===id} onClick={()=>{if(category!==id)dispatch({type:'clearPartSelection',set:selection[id]});setCategory(id);setAdjusting(null);setHover(null);}}>{t(`fitting.category.${id}` as MessageKey)}</button>)}</div>
+  <section className="ws-panel-zone" data-workshop-zone="sets"><h3 data-workshop-zone-heading="sets">{t('fitting.zone.sets' as MessageKey)}</h3>{category==='optional'&&<button type="button" className="ws-panel-optional-toggle" data-workshop-optional-toggle aria-expanded={optionalExpanded} onClick={()=>setOptionalExpanded(!optionalExpanded)}>{t((optionalExpanded?'fitting.optionalHide':'fitting.optionalShow') as MessageKey)}</button>}<div className="ws-panel-set-rows">{(category!=='optional'||optionalExpanded)&&WORKSHOP_CATEGORY_SETS[category].map(setRow)}</div></section>
+  <section className="ws-panel-zone" data-workshop-zone="parts"><h3 data-workshop-zone-heading="parts"><span>{t('fitting.zone.parts' as MessageKey)}</span><small>{setLabel(selectedSet)}</small></h3>{!owned&&<p className="ws-panel-unowned-note">{t('fitting.lockedParts' as MessageKey)}</p>}<div className="ws-panel-part-rows" data-has-selection={selectedIds.length>0}>{fittingPartsForSet(selectedSet).map(definition=>{
+   const p=w.parts[definition.id],status=workshopRowStatus(state,selectedSet,definition.id),done=!!p&&fittingComplete(p,definition.id);
+   return <div className="ws-panel-part-row" key={definition.id} data-navigation-part={definition.id} data-selected={selectedIds.includes(definition.id)} data-brightness={done?'complete':selectedIds.includes(definition.id)?'selected':'default'} data-status={status} onPointerEnter={e=>showHover(e.currentTarget,definition.id)} onPointerLeave={()=>setHover(null)}><button type="button" className="ws-panel-part-select" data-workshop-part={definition.id} aria-pressed={selectedIds.includes(definition.id)} disabled={!owned} onClick={()=>selectPart(definition.id)}><span className="ws-panel-state-bar" aria-hidden="true"/>{statusIcon(done)}<span>{t(definition.labelKey as MessageKey)}</span></button>{selectedIds.includes(definition.id)&&p&&<button type="button" className="ws-panel-part-customize" data-workshop-customize={definition.id} aria-label={t('fitting.customizePart' as MessageKey,{name:t(definition.labelKey as MessageKey)})} aria-expanded={adjusting===definition.id} onClick={()=>{dispatch({type:'focusPart',part:definition.id});setAdjusting(adjusting===definition.id?null:definition.id);}}>{t('page.customize')}</button>}{helpButton(selectedSet,definition.id)}</div>;
+  })}</div></section>
+  <section className="ws-panel-zone" data-workshop-zone="pieces"><h3 data-workshop-zone-heading="pieces">{t('fitting.zone.pieces' as MessageKey)}</h3>{selectedIds.length?selectedIds.map(id=>{
+   const descriptor=getWorkshopPart(id),p=w.parts[id]!;
+   return <div className="ws-piece-group" key={id} data-piece-part={id}><h4>{t(descriptor.labelKey as MessageKey)}</h4><div className="ws-fitting-piece-list" role="group" aria-label={t(descriptor.labelKey as MessageKey)}>{fittingDefinition(id).pieces.map(piece=>{
+    const fitted=fittedPieces(p,id).includes(piece),visible=puzzlePieceVisible(w,id,piece),status=fitted?'fitted':visible?'spawned':'notSpawned';
+    return <div key={piece} className="ws-panel-piece-row" data-brightness={fitted?'complete':visible?'selected':'default'} onPointerEnter={e=>showHover(e.currentTarget,id,piece)} onPointerLeave={()=>setHover(null)}><button type="button" data-workshop-piece={piece} data-workshop-piece-owner={id} data-piece-status={status} aria-pressed={visible} disabled={fitted} onClick={()=>dispatch({type:'togglePiece',part:id,piece})}><span className="ws-panel-state-bar" aria-hidden="true"/><span className="ws-fitting-piece-status" aria-hidden="true">{statusIcon(fitted)}</span><span>{t(`ws.element.${piece}` as MessageKey)}</span><small>{t((fitted?'fitting.fitted':visible?'fitting.selected':'fitting.hidden') as MessageKey)}</small></button></div>;
+   })}</div></div>;
+  }):<p className="ws-panel-unowned-note">{t('fitting.selectPart' as MessageKey)}</p>}</section>
+  {state.run.world==='desktop'&&owned&&blueprintAppForSet(selectedSet)&&onAssembleApp&&<button type="button" className="ws-assemble-app" data-workshop-assemble-app={blueprintAppForSet(selectedSet)!} onClick={()=>onAssembleApp(blueprintAppForSet(selectedSet)!)}>{t('ws.assembleApp')}</button>}
   {exit}
+  {hover&&portalHost&&createPortal(<WorkshopHoverPreview state={state} i18n={i18n} hover={hover} zoom={previewZoom??BALANCE.workshop.eras.canvasScale[stage]*w.zoom}/>,portalHost)}
+  {adjustments&&(portalHost?createPortal(adjustments,portalHost):adjustments)}
   {w.helpTarget&&portalHost&&createPortal(<WorkshopHelp target={w.helpTarget} i18n={i18n} stage={stage} onClose={()=>dispatch({type:'help',target:null})}/>,portalHost)}
  </div>;
 }

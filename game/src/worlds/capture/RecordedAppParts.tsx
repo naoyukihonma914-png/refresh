@@ -9,6 +9,7 @@ import { LineIcon } from '../desktop-icons';
 import { commonDesignStyle } from '../AppComposition';
 import { usesNativeComponentColors } from '../../systems/workshopState';
 import { PhotoAdjustment } from '../../components/PhotoAdjustment';
+import { customizedScrollbar } from '../../systems/commonChrome';
 
 export interface RecordedAppPartsProps {
  app:BuiltApp;scene:CaptureScene;i18n:I18n;
@@ -45,7 +46,10 @@ export function RecordedAppParts({app,scene,i18n,photograph,document,selectedSho
    case 'unread':return <span>{t('mail.unreadCount',{count:scene.desktop.feedback.filter(row=>row.readAt===null).length})}</span>;
   }
   if(app==='photo')switch(role){
-   case 'source':return button(t(scene.view.photo.source==='night'?'photo.night':scene.view.photo.source==='coast'?'photo.coast':'files.screenshots'));
+   case 'source':{
+    const material=assembly?.slots.find(slot=>slot.role==='source');
+    return material?.fitting?<>{material.elements.filter(piece=>piece==='previous'||piece==='next').map(piece=><span key={piece}>{button(t(piece==='previous'?'ws.preview.previousPhoto':'ws.preview.nextPhoto'))}</span>)}</>:button(t(scene.view.photo.source==='night'?'photo.night':scene.view.photo.source==='coast'?'photo.coast':'files.screenshots'));
+   }
    case 'image':return photograph;
    case 'brightness':return <PhotoAdjustment label={t('photo.brightness')} min={BALANCE.capture.photoControls.brightnessMin} max={BALANCE.capture.photoControls.brightnessMax} step={BALANCE.capture.photoControls.brightnessStep} value={scene.view.photo.brightness}>{i18n.number(scene.view.photo.brightness)}</PhotoAdjustment>;
    case 'tone':return <PhotoAdjustment label={t('photo.tone')} min={BALANCE.capture.photoControls.toneMin} max={BALANCE.capture.photoControls.toneMax} value={scene.view.photo.tone}>{i18n.integer(scene.view.photo.tone)}</PhotoAdjustment>;
@@ -86,7 +90,7 @@ export function RecordedAppParts({app,scene,i18n,photograph,document,selectedSho
   }
   return null;
  };
- return <div className="app-layout recorded-native-app" data-recorded-app={app} data-common-control-radius={assembly?.common.some(part=>part.source==='common-button'&&part.design.radius!==BALANCE.workshop.design.radius)||undefined} data-common-scroll-custom={assembly?.common.some(part=>part.source==='common-scrollbar'&&(!usesNativeComponentColors(part.design)||part.design.scrollbarWidth!==BALANCE.workshop.design.scrollbarWidth||part.design.radius!==BALANCE.workshop.design.radius||!part.design.arrows))||undefined} style={commonDesignStyle(assembly??null)}>{placements.map((placement,index)=>{
+ return <div className="app-layout recorded-native-app" data-recorded-app={app} data-common-control-radius={assembly?.common.some(part=>part.source==='common-button'&&part.design.radius!==BALANCE.workshop.design.radius)||undefined} data-common-scroll-custom={customizedScrollbar(assembly)||undefined} style={commonDesignStyle(assembly??null)}>{placements.map((placement,index)=>{
   const slot=assembly?.slots.find(item=>item.role===placement.role),saved=project?.installed?.parts.find(item=>item.id===placement.role),source=slot?.source??placement.sourcePartId;
   const known=source&&WORKSHOP_PARTS.some(part=>part.id===source),material=slot&&known?partVisual(source as WorkshopPartId,slot.design):null;
   const d=slot?.design,style:CSSProperties={position:'absolute',left:placement.rect.x-client.x,top:placement.rect.y-client.y,width:placement.rect.width,height:placement.rect.height,overflow:'hidden',fontSize:d?.fontSize??saved?.fontSize,

@@ -399,6 +399,15 @@ export const BALANCE = {
   // World2 naming retained only for generic integration settings during 8a.
   w2: { desktopCost: 200_000, hintMs: 300_000, enterMs: 1_200, upgradeMs: 2_000, maxName: 80 },
   workshop: {
+    eras: { canvasScale:[.85,1,1.15], panelWidths:[320,288,256], paletteWidths:[128,64,200], partRateMultipliers:[1,1.15,1.3], era0ZoomOptions:[.5,.85,1] },
+    groupPuzzle: {width:1920,height:1664,inset:32,gap:24,snapDistance:28,flightMs:650,glowMs:300},
+    fitting: {
+      pieceRewardTotals: { small:115, medium:230, large:460 }, previewZoom:.32,
+      hoverScale:.65, puzzleGap:24, snapDistance:28, dragThreshold:5, snapPulseMs:480,
+      boardInset:32, pieceAreaGap:12, boardWidth:1152, boardHeight:1600,
+      exportFlightMs:650, exportMergeMs:220, exportPulseMs:1300,
+      frameTitleHeight:32, frameControlSize:26, frameControlGap:3,
+    },
     feedback: { flightMs:650, pulseMs:1100, messageMs:1800, frameMs:33, originLift:12, maxWidth:260, queueLimit:4 },
     // 4.2 お手本/連続制作: 付録Cに具体値がないため一括で置いた仮値。
     examples: { snapDistance: 16, snapPulseMs: 480, comboWindowMs: 15_000, comboStepBonus: .02, comboMaxBonus: .10 },
@@ -419,7 +428,7 @@ export const BALANCE = {
       photo: 180_000, bin: 35_000, clock: 8_000, theme: 80_000,
       terminal: 1_400_000, manager: 12_000, extras: 0, stream: 2_000_000 },
     partRates: {
-      'common-frame': 12, 'common-scrollbar': 8, 'common-button': 10, 'common-heading': 6, 'common-progress': 9,
+      'common-frame': 20, 'common-scrollbar': 8, 'common-button': 10, 'common-heading': 6, 'common-progress': 9,
       'foundation-taskbar': 25, 'foundation-desktop': 20, 'foundation-icons': 22,
       'foundation-notification': 18, 'foundation-wallpaper': 16, 'foundation-upgrades': 24,
       'files-list': 40, 'files-back': 28, 'files-sort': 38, 'files-search': 45, 'files-large': 34, 'files-storage': 36,
@@ -436,7 +445,7 @@ export const BALANCE = {
     },
     categoryStepRewards: { small: [20, 25, 30, 40], medium: [40, 50, 60, 80], large: [80, 100, 120, 160] },
     finishRewards: { small: 120, medium: 250, large: 500 },
-    efficiencyMultiplier: 1.25, exportTokens: 1, achievementParts: [6, 10],
+    efficiencyMultiplier: 1.25, exportTokens: 1, updateGrantTokens: 3, achievementParts: [6, 10],
     assistStepMs: 45_000,
     enterMs: 1_200, hintMs: 300_000, zoomMin: 0.5, zoomMax: 2, zoomStep: 0.25,
     zoomOptions: [0.5, 0.75, 1, 1.25, 1.5, 2],
@@ -509,6 +518,8 @@ export const BALANCE = {
       { id: 'motion', band: 2, cost: 20 }, { id: 'extraParts', band: 2, cost: 15 },
       { id: 'efficiency', band: 2, cost: 10 }, { id: 'update', band: 1, cost: 3 },
       { id: 'modern', band: 2, cost: 25 },
+      // Purchase gates remain closed until these later generations are implemented.
+      { id: 'gessoUpdate', band: 2, cost: 40 }, { id: 'brio', band: 3, cost: 60 }, { id: 'brioUpdate', band: 3, cost: 90 },
     ],
   },
   world4: { minimumVersion: 'v2', requiredRefreshLevel: 1, refreshHz: [30, 60, 120, 240] },

@@ -1,0 +1,146 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8186/",
+  "buildSha256": "4e88d0545e06f0cde3fbcdb332437da2965ba0075e0abbf4e2bb851e9f5f6d2c",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-修正指示書-第5ラウンド.md"
+  ],
+  "cases": [
+    {
+      "id": "en:era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": false,
+      "checks": {
+        "multipleSelection": true,
+        "pieceToggle": true,
+        "normalSaveReload": true,
+        "stablePositions": true,
+        "noPaymentWhileStaged": true,
+        "completionDeselects": true,
+        "threeBrightnessLevels": [
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          }
+        ],
+        "realPreviews": true,
+        "matchingSocketGlow": true,
+        "previewKeepsState": true,
+        "tallPreviewFits": true,
+        "setClearsSelection": true,
+        "fittedPieceStaging": true,
+        "outsideReturnsToOrigin": true,
+        "categoryClearsSelection": true
+      }
+    },
+    {
+      "id": "en:era1",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": true,
+      "checks": {
+        "multipleSelection": true,
+        "pieceToggle": true,
+        "normalSaveReload": true,
+        "stablePositions": true,
+        "noPaymentWhileStaged": true,
+        "completionDeselects": true,
+        "threeBrightnessLevels": [
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "complete",
+            "filter": "saturate(0.35) brightness(0.55)"
+          },
+          {
+            "level": "default",
+            "filter": "saturate(0.65) brightness(0.75)"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          },
+          {
+            "level": "selected",
+            "filter": "none"
+          }
+        ],
+        "realPreviews": true,
+        "matchingSocketGlow": true,
+        "previewKeepsState": true,
+        "tallPreviewFits": true,
+        "setClearsSelection": true,
+        "fittedPieceStaging": true,
+        "outsideReturnsToOrigin": true,
+        "categoryClearsSelection": true
+      }
+    }
+  ],
+  "languages": [
+    "en"
+  ],
+  "passed": 2,
+  "failed": 0
+}

@@ -1,0 +1,120 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "language": "en",
+  "reducedMotion": true,
+  "baseUrl": "http://127.0.0.1:8184/",
+  "buildSha256": "3e5f68eaa2611c5aa562f20a01fa7bcd4549032d134c92f0235f1186c762fa6a",
+  "setup": "public fixed fixtures; real controls; frozen browser clock; debug export is read-only",
+  "references": [
+    "docs/mockups/02-1-tessera-aseprite-old.html",
+    "docs/mockups/02-2-tessera-aseprite-new.html"
+  ],
+  "cases": [
+    {
+      "id": "frame",
+      "fixture": "fitting-frame-era0",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "geometry": {
+        "width": 398.933349609375,
+        "logical": 704,
+        "panelWidth": 320,
+        "era": 0,
+        "manualZoom": 1,
+        "effectiveScale": 0.5666666897860441,
+        "viewportScale": 0.6666666666666666,
+        "eraScale": 0.8500000346790662,
+        "zoomOptions": [
+          "0.5",
+          "0.85",
+          "1"
+        ]
+      },
+      "checks": {
+        "spawnOnly": true,
+        "incompatibleDropNoReward": true,
+        "sharedControlIdentity": true,
+        "completionFlight": true,
+        "detachRefitExactWalletAndDates": true,
+        "actualScroll": {
+          "before": 0,
+          "after": 49
+        },
+        "commonFrameContainsWidgets": {
+          "contentTop": 91.80000305175781,
+          "childBottom": 86.13334655761719,
+          "childCount": 2
+        },
+        "realUpgrade": {
+          "tokenCost": 3,
+          "oneTokenDisabled": true,
+          "earnedTokensBeforePurchase": 3,
+          "newPartCreatedStage": 1,
+          "newPartRate": 10.35,
+          "newPartMultiplier": 1.15
+        }
+      },
+      "upgradeGeometry": {
+        "width": 469.33331298828125,
+        "logical": 704,
+        "panelWidth": 288,
+        "era": 1,
+        "manualZoom": 1,
+        "effectiveScale": 0.666666637767445,
+        "viewportScale": 0.6666666666666666,
+        "eraScale": 0.9999999566511675,
+        "zoomOptions": [
+          "0.5",
+          "0.75",
+          "1",
+          "1.25",
+          "1.5",
+          "2",
+          "fit"
+        ]
+      }
+    },
+    {
+      "id": "era1",
+      "fixture": "fitting-frame-era1",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "geometry": {
+        "width": 469.33331298828125,
+        "logical": 704,
+        "panelWidth": 288,
+        "era": 1,
+        "manualZoom": 1,
+        "effectiveScale": 0.666666637767445,
+        "viewportScale": 0.6666666666666666,
+        "eraScale": 0.9999999566511675,
+        "zoomOptions": [
+          "0.5",
+          "0.75",
+          "1",
+          "1.25",
+          "1.5",
+          "2",
+          "fit"
+        ]
+      },
+      "checks": {
+        "layersVisible": true,
+        "layerVisibilityOnly": true,
+        "examplesOffKeepsSockets": true,
+        "examplesOffStillFits": true
+      }
+    }
+  ],
+  "passed": 2,
+  "failed": 0
+}

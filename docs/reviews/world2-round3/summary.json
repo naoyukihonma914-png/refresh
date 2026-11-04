@@ -1,0 +1,1049 @@
+{
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8184/",
+  "buildSha256": "3e5f68eaa2611c5aa562f20a01fa7bcd4549032d134c92f0235f1186c762fa6a",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-修正指示書-第3ラウンド.md"
+  ],
+  "cases": [
+    {
+      "id": "era0",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/01-part-selection.png",
+          "label": "段①・選んだパーツ以外を暗く表示"
+        },
+        {
+          "file": "screenshots/02-category-selection.png",
+          "label": "分類タブとセットの各ゾーンで選択中だけ通常の明るさ"
+        },
+        {
+          "file": "screenshots/04-small-piece-drag.png",
+          "label": "最小化ピースと窪みはドラッグ中も同寸"
+        },
+        {
+          "file": "screenshots/03-fitted-gray-controls.png",
+          "label": "灰色の最小化・最大化・閉じるボタンと濃紺のタイトル帯"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "selection": [
+        {
+          "part": "common-frame",
+          "selected": "false",
+          "filter": "saturate(0.45) brightness(0.72)",
+          "border": "rgb(255, 246, 223)"
+        },
+        {
+          "part": "common-button",
+          "selected": "true",
+          "filter": "none",
+          "border": "rgb(255, 246, 223)"
+        },
+        {
+          "part": "common-heading",
+          "selected": "false",
+          "filter": "saturate(0.45) brightness(0.72)",
+          "border": "rgb(255, 246, 223)"
+        },
+        {
+          "part": "common-progress",
+          "selected": "false",
+          "filter": "saturate(0.45) brightness(0.72)",
+          "border": "rgb(255, 246, 223)"
+        }
+      ],
+      "sizes": [
+        {
+          "piece": "title",
+          "width": 446.25,
+          "height": 20.399993896484375
+        },
+        {
+          "piece": "minimize",
+          "width": 22.10009765625,
+          "height": 22.099990844726562
+        },
+        {
+          "piece": "maximize",
+          "width": 22.099853515625,
+          "height": 22.099990844726562
+        },
+        {
+          "piece": "close",
+          "width": 22.10009765625,
+          "height": 22.099990844726562
+        },
+        {
+          "piece": "scrollbar",
+          "width": 13.5999755859375,
+          "height": 309.3999938964844
+        }
+      ],
+      "controls": [
+        {
+          "background": "rgb(192, 192, 192)",
+          "color": "rgb(16, 16, 16)",
+          "opacity": "1"
+        },
+        {
+          "background": "rgb(192, 192, 192)",
+          "color": "rgb(16, 16, 16)",
+          "opacity": "1"
+        },
+        {
+          "background": "rgb(192, 192, 192)",
+          "color": "rgb(16, 16, 16)",
+          "opacity": "1"
+        }
+      ],
+      "customTitleControls": [
+        {
+          "background": "rgb(192, 192, 192)",
+          "color": "rgb(16, 16, 16)",
+          "opacity": "1"
+        },
+        {
+          "background": "rgb(192, 192, 192)",
+          "color": "rgb(16, 16, 16)",
+          "opacity": "1"
+        },
+        {
+          "background": "rgb(192, 192, 192)",
+          "color": "rgb(16, 16, 16)",
+          "opacity": "1"
+        }
+      ]
+    },
+    {
+      "id": "era1",
+      "status": "passed",
+      "images": [
+        {
+          "file": "screenshots/05-era1-selection.png",
+          "label": "段②・同じゾーン内の非選択行を暗く表示"
+        }
+      ],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "selection": [
+        {
+          "part": "common-frame",
+          "selected": "false",
+          "filter": "saturate(0.45) brightness(0.72)",
+          "border": "rgb(114, 113, 124)"
+        },
+        {
+          "part": "common-button",
+          "selected": "true",
+          "filter": "none",
+          "border": "rgb(114, 113, 124)"
+        },
+        {
+          "part": "common-heading",
+          "selected": "false",
+          "filter": "saturate(0.45) brightness(0.72)",
+          "border": "rgb(114, 113, 124)"
+        },
+        {
+          "part": "common-progress",
+          "selected": "false",
+          "filter": "saturate(0.45) brightness(0.72)",
+          "border": "rgb(114, 113, 124)"
+        }
+      ]
+    },
+    {
+      "id": "catalog",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "parts": [
+        "common-frame",
+        "common-button",
+        "common-heading",
+        "common-progress",
+        "foundation-taskbar",
+        "foundation-desktop",
+        "foundation-icons",
+        "foundation-notification",
+        "foundation-wallpaper",
+        "foundation-upgrades",
+        "files-list",
+        "files-back",
+        "files-sort",
+        "files-search",
+        "files-large",
+        "files-storage",
+        "mail-list",
+        "mail-body",
+        "mail-reply",
+        "mail-folders",
+        "mail-unread",
+        "photo-display",
+        "photo-brightness",
+        "photo-tone",
+        "photo-wallpaper",
+        "photo-crop",
+        "photo-compare",
+        "photo-switch",
+        "bin-list",
+        "bin-undo",
+        "bin-empty",
+        "clock-time",
+        "clock-timer",
+        "clock-calendar",
+        "theme-mode",
+        "theme-accent",
+        "theme-radius",
+        "theme-slideshow",
+        "theme-icons",
+        "terminal-output",
+        "terminal-commands",
+        "terminal-interval",
+        "terminal-run",
+        "terminal-history",
+        "manager-processes",
+        "manager-performance",
+        "plugin-tabs",
+        "plugin-table",
+        "stream-preview",
+        "stream-sources",
+        "stream-scenes",
+        "stream-comments"
+      ],
+      "sizes": [
+        {
+          "part": "common-frame",
+          "piece": "title",
+          "width": 446.25006103515625,
+          "height": 20.4000244140625
+        },
+        {
+          "part": "common-frame",
+          "piece": "minimize",
+          "width": 22.10003662109375,
+          "height": 22.0999755859375
+        },
+        {
+          "part": "common-frame",
+          "piece": "maximize",
+          "width": 22.0999755859375,
+          "height": 22.0999755859375
+        },
+        {
+          "part": "common-frame",
+          "piece": "close",
+          "width": 22.10003662109375,
+          "height": 22.0999755859375
+        },
+        {
+          "part": "common-frame",
+          "piece": "scrollbar",
+          "width": 13.5999755859375,
+          "height": 309.39996337890625
+        },
+        {
+          "part": "common-button",
+          "piece": "label",
+          "width": 156.39996337890625,
+          "height": 35.7000732421875
+        },
+        {
+          "part": "common-heading",
+          "piece": "label",
+          "width": 339.1500244140625,
+          "height": 31.4500732421875
+        },
+        {
+          "part": "common-heading",
+          "piece": "separator",
+          "width": 339.1500244140625,
+          "height": 3.4000244140625
+        },
+        {
+          "part": "common-progress",
+          "piece": "track",
+          "width": 339.1500244140625,
+          "height": 34
+        },
+        {
+          "part": "common-progress",
+          "piece": "fill",
+          "width": 226.0999755859375,
+          "height": 23.79998779296875
+        },
+        {
+          "part": "common-progress",
+          "piece": "percent",
+          "width": 91.800048828125,
+          "height": 26.3499755859375
+        },
+        {
+          "part": "foundation-taskbar",
+          "piece": "app-slots",
+          "width": 310.25,
+          "height": 61.2000732421875
+        },
+        {
+          "part": "foundation-taskbar",
+          "piece": "resource-area",
+          "width": 206.5499267578125,
+          "height": 61.199951171875
+        },
+        {
+          "part": "foundation-desktop",
+          "piece": "surface",
+          "width": 326.4000244140625,
+          "height": 130.9000244140625
+        },
+        {
+          "part": "foundation-desktop",
+          "piece": "selection",
+          "width": 153,
+          "height": 74.800048828125
+        },
+        {
+          "part": "foundation-icons",
+          "piece": "icon",
+          "width": 130.89996337890625,
+          "height": 62.9000244140625
+        },
+        {
+          "part": "foundation-icons",
+          "piece": "caption",
+          "width": 147.04998779296875,
+          "height": 27.20001220703125
+        },
+        {
+          "part": "foundation-notification",
+          "piece": "message",
+          "width": 150.45001220703125,
+          "height": 52.7000732421875
+        },
+        {
+          "part": "foundation-notification",
+          "piece": "action",
+          "width": 113.89996337890625,
+          "height": 28.9000244140625
+        },
+        {
+          "part": "foundation-wallpaper",
+          "piece": "image",
+          "width": 156.39996337890625,
+          "height": 78.20001220703125
+        },
+        {
+          "part": "foundation-wallpaper",
+          "piece": "fit",
+          "width": 42.5,
+          "height": 17.85003662109375
+        },
+        {
+          "part": "foundation-upgrades",
+          "piece": "item",
+          "width": 69.70001220703125,
+          "height": 81.60003662109375
+        },
+        {
+          "part": "foundation-upgrades",
+          "piece": "price",
+          "width": 46.74993896484375,
+          "height": 81.60003662109375
+        },
+        {
+          "part": "foundation-upgrades",
+          "piece": "purchase",
+          "width": 46.75,
+          "height": 81.60003662109375
+        },
+        {
+          "part": "files-list",
+          "piece": "rows",
+          "width": 496.4000244140625,
+          "height": 139.4000244140625
+        },
+        {
+          "part": "files-list",
+          "piece": "columns",
+          "width": 496.4000244140625,
+          "height": 38.25
+        },
+        {
+          "part": "files-back",
+          "piece": "back",
+          "width": 40.79998779296875,
+          "height": 40.800048828125
+        },
+        {
+          "part": "files-back",
+          "piece": "label",
+          "width": 81.5999755859375,
+          "height": 40.800048828125
+        },
+        {
+          "part": "files-sort",
+          "piece": "sort-key",
+          "width": 158.10003662109375,
+          "height": 54.4000244140625
+        },
+        {
+          "part": "files-sort",
+          "piece": "direction",
+          "width": 52.7000732421875,
+          "height": 54.4000244140625
+        },
+        {
+          "part": "files-search",
+          "piece": "query",
+          "width": 272,
+          "height": 61.2000732421875
+        },
+        {
+          "part": "files-search",
+          "piece": "search",
+          "width": 68,
+          "height": 61.199951171875
+        },
+        {
+          "part": "files-large",
+          "piece": "icon",
+          "width": 54.39996337890625,
+          "height": 54.4000244140625
+        },
+        {
+          "part": "files-large",
+          "piece": "caption",
+          "width": 108.7999267578125,
+          "height": 54.4000244140625
+        },
+        {
+          "part": "files-storage",
+          "piece": "used",
+          "width": 152.99993896484375,
+          "height": 24.6500244140625
+        },
+        {
+          "part": "files-storage",
+          "piece": "capacity",
+          "width": 152.99993896484375,
+          "height": 20.39996337890625
+        },
+        {
+          "part": "mail-list",
+          "piece": "sender",
+          "width": 154.699951171875,
+          "height": 95.20001220703125
+        },
+        {
+          "part": "mail-list",
+          "piece": "subject",
+          "width": 258.4000244140625,
+          "height": 95.199951171875
+        },
+        {
+          "part": "mail-list",
+          "piece": "date",
+          "width": 103.699951171875,
+          "height": 95.20001220703125
+        },
+        {
+          "part": "mail-body",
+          "piece": "subject",
+          "width": 496.4000244140625,
+          "height": 34
+        },
+        {
+          "part": "mail-body",
+          "piece": "body",
+          "width": 496.4000244140625,
+          "height": 102
+        },
+        {
+          "part": "mail-reply",
+          "piece": "reply",
+          "width": 60.35003662109375,
+          "height": 39.10003662109375
+        },
+        {
+          "part": "mail-reply",
+          "piece": "draft",
+          "width": 90.0999755859375,
+          "height": 39.10003662109375
+        },
+        {
+          "part": "mail-folders",
+          "piece": "inbox",
+          "width": 156.39996337890625,
+          "height": 27.2000732421875
+        },
+        {
+          "part": "mail-folders",
+          "piece": "archive",
+          "width": 156.39996337890625,
+          "height": 27.2000732421875
+        },
+        {
+          "part": "mail-unread",
+          "piece": "unread",
+          "width": 147.04998779296875,
+          "height": 45.9000244140625
+        },
+        {
+          "part": "mail-unread",
+          "piece": "read",
+          "width": 147.04998779296875,
+          "height": 45.89996337890625
+        },
+        {
+          "part": "photo-display",
+          "piece": "image",
+          "width": 326.4000244140625,
+          "height": 234.60003662109375
+        },
+        {
+          "part": "photo-display",
+          "piece": "fit",
+          "width": 88.4000244140625,
+          "height": 53.550048828125
+        },
+        {
+          "part": "photo-brightness",
+          "piece": "track",
+          "width": 118.99993896484375,
+          "height": 9.35003662109375
+        },
+        {
+          "part": "photo-brightness",
+          "piece": "thumb",
+          "width": 118.99993896484375,
+          "height": 39.0999755859375
+        },
+        {
+          "part": "photo-brightness",
+          "piece": "value",
+          "width": 34,
+          "height": 43.3499755859375
+        },
+        {
+          "part": "photo-tone",
+          "piece": "track",
+          "width": 118.99993896484375,
+          "height": 9.35003662109375
+        },
+        {
+          "part": "photo-tone",
+          "piece": "thumb",
+          "width": 118.99993896484375,
+          "height": 39.0999755859375
+        },
+        {
+          "part": "photo-tone",
+          "piece": "value",
+          "width": 34,
+          "height": 43.3499755859375
+        },
+        {
+          "part": "photo-wallpaper",
+          "piece": "image",
+          "width": 56.95001220703125,
+          "height": 61.2000732421875
+        },
+        {
+          "part": "photo-wallpaper",
+          "piece": "apply",
+          "width": 113.04998779296875,
+          "height": 61.2000732421875
+        },
+        {
+          "part": "photo-crop",
+          "piece": "image",
+          "width": 156.39996337890625,
+          "height": 58.6500244140625
+        },
+        {
+          "part": "photo-crop",
+          "piece": "crop-frame",
+          "width": 124.10003662109375,
+          "height": 49.29998779296875
+        },
+        {
+          "part": "photo-compare",
+          "piece": "before",
+          "width": 74.79998779296875,
+          "height": 54.4000244140625
+        },
+        {
+          "part": "photo-compare",
+          "piece": "after",
+          "width": 74.7999267578125,
+          "height": 54.4000244140625
+        },
+        {
+          "part": "photo-switch",
+          "piece": "previous",
+          "width": 73.95001220703125,
+          "height": 43.35003662109375
+        },
+        {
+          "part": "photo-switch",
+          "piece": "next",
+          "width": 73.95001220703125,
+          "height": 43.35003662109375
+        },
+        {
+          "part": "bin-list",
+          "piece": "item",
+          "width": 188.70001220703125,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "bin-list",
+          "piece": "date",
+          "width": 62.89996337890625,
+          "height": 68
+        },
+        {
+          "part": "bin-undo",
+          "piece": "item",
+          "width": 100.29998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "bin-undo",
+          "piece": "restore",
+          "width": 151.29998779296875,
+          "height": 68
+        },
+        {
+          "part": "bin-empty",
+          "piece": "count",
+          "width": 100.29998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "bin-empty",
+          "piece": "empty",
+          "width": 151.29998779296875,
+          "height": 68
+        },
+        {
+          "part": "clock-time",
+          "piece": "hours",
+          "width": 84.14996337890625,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "clock-time",
+          "piece": "minutes",
+          "width": 84.1500244140625,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "clock-time",
+          "piece": "seconds",
+          "width": 84.14996337890625,
+          "height": 68
+        },
+        {
+          "part": "clock-timer",
+          "piece": "duration",
+          "width": 241.4000244140625,
+          "height": 34
+        },
+        {
+          "part": "clock-timer",
+          "piece": "start",
+          "width": 241.4000244140625,
+          "height": 27.20001220703125
+        },
+        {
+          "part": "clock-calendar",
+          "piece": "month",
+          "width": 241.4000244140625,
+          "height": 17
+        },
+        {
+          "part": "clock-calendar",
+          "piece": "days",
+          "width": 241.4000244140625,
+          "height": 45.89996337890625
+        },
+        {
+          "part": "theme-mode",
+          "piece": "light",
+          "width": 125.79998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "theme-mode",
+          "piece": "dark",
+          "width": 125.79998779296875,
+          "height": 68
+        },
+        {
+          "part": "theme-accent",
+          "piece": "palette",
+          "width": 125.79998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "theme-accent",
+          "piece": "sample",
+          "width": 125.79998779296875,
+          "height": 68
+        },
+        {
+          "part": "theme-radius",
+          "piece": "track",
+          "width": 175.95001220703125,
+          "height": 9.35003662109375
+        },
+        {
+          "part": "theme-radius",
+          "piece": "thumb",
+          "width": 175.95001220703125,
+          "height": 39.0999755859375
+        },
+        {
+          "part": "theme-radius",
+          "piece": "sample",
+          "width": 50.150146484375,
+          "height": 43.3499755859375
+        },
+        {
+          "part": "theme-slideshow",
+          "piece": "images",
+          "width": 188.70001220703125,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "theme-slideshow",
+          "piece": "interval",
+          "width": 62.89996337890625,
+          "height": 68
+        },
+        {
+          "part": "theme-icons",
+          "piece": "track",
+          "width": 175.95001220703125,
+          "height": 9.35003662109375
+        },
+        {
+          "part": "theme-icons",
+          "piece": "thumb",
+          "width": 175.95001220703125,
+          "height": 39.0999755859375
+        },
+        {
+          "part": "theme-icons",
+          "piece": "icon",
+          "width": 50.150146484375,
+          "height": 43.3499755859375
+        },
+        {
+          "part": "terminal-output",
+          "piece": "prompt",
+          "width": 241.4000244140625,
+          "height": 15.300048828125
+        },
+        {
+          "part": "terminal-output",
+          "piece": "output",
+          "width": 241.4000244140625,
+          "height": 45.9000244140625
+        },
+        {
+          "part": "terminal-commands",
+          "piece": "command",
+          "width": 100.29998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "terminal-commands",
+          "piece": "description",
+          "width": 151.29998779296875,
+          "height": 68
+        },
+        {
+          "part": "terminal-interval",
+          "piece": "interval",
+          "width": 188.70001220703125,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "terminal-interval",
+          "piece": "unit",
+          "width": 62.89996337890625,
+          "height": 68
+        },
+        {
+          "part": "terminal-run",
+          "piece": "run",
+          "width": 226.10003662109375,
+          "height": 56.9500732421875
+        },
+        {
+          "part": "terminal-run",
+          "piece": "stop",
+          "width": 226.10003662109375,
+          "height": 56.95001220703125
+        },
+        {
+          "part": "terminal-history",
+          "piece": "command",
+          "width": 100.29998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "terminal-history",
+          "piece": "result",
+          "width": 151.29998779296875,
+          "height": 68
+        },
+        {
+          "part": "manager-processes",
+          "piece": "process",
+          "width": 125.79998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "manager-processes",
+          "piece": "rate",
+          "width": 75.64990234375,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "manager-processes",
+          "piece": "share",
+          "width": 50.14996337890625,
+          "height": 68
+        },
+        {
+          "part": "manager-performance",
+          "piece": "specs",
+          "width": 100.29998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "manager-performance",
+          "piece": "values",
+          "width": 151.29998779296875,
+          "height": 68
+        },
+        {
+          "part": "plugin-tabs",
+          "piece": "tab",
+          "width": 241.4000244140625,
+          "height": 17
+        },
+        {
+          "part": "plugin-tabs",
+          "piece": "page",
+          "width": 241.4000244140625,
+          "height": 45.89996337890625
+        },
+        {
+          "part": "plugin-table",
+          "piece": "time",
+          "width": 125.79998779296875,
+          "height": 68.00006103515625
+        },
+        {
+          "part": "plugin-table",
+          "piece": "pixels",
+          "width": 125.79998779296875,
+          "height": 68
+        },
+        {
+          "part": "stream-preview",
+          "piece": "source",
+          "width": 293.76007080078125,
+          "height": 32.89495849609375
+        },
+        {
+          "part": "stream-preview",
+          "piece": "image",
+          "width": 293.76007080078125,
+          "height": 175.949951171875
+        },
+        {
+          "part": "stream-sources",
+          "piece": "source",
+          "width": 110.159912109375,
+          "height": 55.07989501953125
+        },
+        {
+          "part": "stream-sources",
+          "piece": "selection",
+          "width": 36.72003173828125,
+          "height": 55.07989501953125
+        },
+        {
+          "part": "stream-scenes",
+          "piece": "scene",
+          "width": 293.760009765625,
+          "height": 24.47991943359375
+        },
+        {
+          "part": "stream-scenes",
+          "piece": "preview",
+          "width": 293.760009765625,
+          "height": 66.55499267578125
+        },
+        {
+          "part": "stream-comments",
+          "piece": "message",
+          "width": 117.8099365234375,
+          "height": 220.3199462890625
+        },
+        {
+          "part": "stream-comments",
+          "piece": "selection",
+          "width": 29.07000732421875,
+          "height": 220.3199462890625
+        }
+      ]
+    },
+    {
+      "id": "zooms",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "sizes": [
+        {
+          "zoom": "0.5",
+          "piece": "title",
+          "width": 262.5,
+          "height": 12
+        },
+        {
+          "zoom": "0.5",
+          "piece": "minimize",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "zoom": "0.5",
+          "piece": "maximize",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "zoom": "0.5",
+          "piece": "close",
+          "width": 13,
+          "height": 13
+        },
+        {
+          "zoom": "0.5",
+          "piece": "scrollbar",
+          "width": 8,
+          "height": 182
+        },
+        {
+          "zoom": "1",
+          "piece": "title",
+          "width": 525,
+          "height": 24
+        },
+        {
+          "zoom": "1",
+          "piece": "minimize",
+          "width": 26,
+          "height": 26
+        },
+        {
+          "zoom": "1",
+          "piece": "maximize",
+          "width": 26,
+          "height": 26
+        },
+        {
+          "zoom": "1",
+          "piece": "close",
+          "width": 26,
+          "height": 26
+        },
+        {
+          "zoom": "1",
+          "piece": "scrollbar",
+          "width": 16,
+          "height": 364
+        },
+        {
+          "zoom": "1.5",
+          "piece": "title",
+          "width": 787.5,
+          "height": 36
+        },
+        {
+          "zoom": "1.5",
+          "piece": "minimize",
+          "width": 39,
+          "height": 39
+        },
+        {
+          "zoom": "1.5",
+          "piece": "maximize",
+          "width": 39,
+          "height": 39
+        },
+        {
+          "zoom": "1.5",
+          "piece": "close",
+          "width": 39,
+          "height": 39
+        },
+        {
+          "zoom": "1.5",
+          "piece": "scrollbar",
+          "width": 24,
+          "height": 546
+        },
+        {
+          "maximized": true,
+          "piece": "title",
+          "width": 866.25,
+          "height": 39.5859375
+        },
+        {
+          "maximized": true,
+          "piece": "minimize",
+          "width": 42.890625,
+          "height": 42.890625
+        },
+        {
+          "maximized": true,
+          "piece": "close",
+          "width": 42.890625,
+          "height": 42.890625
+        },
+        {
+          "maximized": true,
+          "piece": "scrollbar",
+          "width": 26.390625,
+          "height": 600.5859375
+        }
+      ]
+    }
+  ],
+  "languages": [
+    "ja"
+  ],
+  "passed": 4,
+  "failed": 0
+}

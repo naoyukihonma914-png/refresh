@@ -1,3 +1,4 @@
+import { focusGroupMaterial } from './groupPuzzle';
 import { BALANCE,type DesktopUpgrade } from '../config/balance';
 import { sourceForSlot } from '../content/appRecipes';
 import { paletteFor } from '../content/palette';
@@ -7,7 +8,6 @@ import { validAppAssembly } from './appAssemblySchema';
 import { adjustComponentDesign, type ComponentDesign } from './workshopState';
 import type { BuiltApp } from './desktopState';
 import type { GameState } from './state';
-import { actWorkshop } from './workshop';
 export const hasAppPart=(s:GameState,app:BuiltApp,id:string)=>s.run.desktop.apps.includes(app)&&(installedAssembly(s,app)?.slots.some(slot=>slot.role===id)??false);
 export const functionalApp=appIsOperational;
 export type AppChangePatch=Parameters<typeof changePart>[2]&Partial<Pick<ComponentDesign,'nativeColors'|'radius'|'shadow'>>;
@@ -36,7 +36,7 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
  if(a.type==='app-fit'){const draft=fitAppLayout(project.draft,project.draft.width,project.draft.height,a.metrics);return JSON.stringify(draft)===JSON.stringify(project.draft)?s:update({...project,draft,draftAssembly:assemblyWithLayout(draftAssembly,draft)});}
  if(a.type==='app-refresh'){
   const refreshed=createAppAssembly(s,a.app,project.draft.parts.map(p=>p.id),a.metrics);
-  const slots=draftAssembly.slots.map(slot=>{const latest=refreshed.slots.find(p=>p.role===slot.role);return latest?{...slot,design:latest.design,elements:latest.elements}:slot;});
+  const slots=draftAssembly.slots.map(slot=>{const latest=refreshed.slots.find(p=>p.role===slot.role);return latest?{...structuredClone(latest),rect:slot.rect}:slot;});
   const assembly={...draftAssembly,common:[...draftAssembly.common.map(old=>refreshed.common.find(next=>next.source===old.source)??old),...refreshed.common.filter(next=>!draftAssembly.common.some(old=>old.source===next.source))],slots};
   const draft=fitAppLayout(assemblyLayout(assembly,project.draft),assembly.width,assembly.height,a.metrics);
   return edit(draft,assemblyWithLayout(assembly,draft));
@@ -53,7 +53,7 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
  }
  if(a.type==='app-craft'){
   const source=sourceForSlot(a.app,a.part);if(!source||!s.run.workshop.parts[source])return s;
-  const next=actWorkshop(s,{type:'selectPart',part:source},s.lastTickAt);return {...next,run:{...next.run,desktop:{...next.run.desktop,editingApp:null}}};
+  const next=focusGroupMaterial(s,source,s.lastTickAt);return {...next,run:{...next.run,desktop:{...next.run.desktop,editingApp:null}}};
  }
  if(a.type==='app-place'){
   if(project.draft.parts.some(part=>part.id===a.part)||!project.crafted.includes(a.part))return s;
@@ -62,7 +62,8 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
   if(!source||production?.step!==4&&!legacyMaterial)return s;
   const draft=placeAppPart(project.draft,a.part,a.metrics,a.rect);if(draft===project.draft)return s;
   const placed=draft.parts.find(p=>p.id===a.part)!;
-  const assembly={...draftAssembly,slots:[...draftAssembly.slots,{role:a.part,source,rect:{x:placed.x,y:placed.y,width:placed.width,height:placed.height},design:structuredClone(production?.step===4?production.design:legacyMaterial!.design),elements:[...(production?.step===4?production.elements:legacyMaterial!.elements)]}]};
+  const material=production?.step===4?production:legacyMaterial!;
+  const assembly={...draftAssembly,slots:[...draftAssembly.slots,{role:a.part,source,rect:{x:placed.x,y:placed.y,width:placed.width,height:placed.height},design:structuredClone(material.design),elements:[...material.elements],...(material.fitting?{fitting:structuredClone(material.fitting)}:{}),...(material.createdStage!==undefined?{createdStage:material.createdStage}:{})}]};
   return edit(assemblyLayout(assembly,draft),assembly);
  }
  if(a.type==='app-remove'){

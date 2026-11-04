@@ -1,8 +1,11 @@
+import { createGroupPuzzleState,isGroupPuzzleState,type GroupPuzzleState } from './groupPuzzleState';
 import { BALANCE, type EditorSkill } from '../config/balance';
 import { SET_IDS, WORKSHOP_PARTS, getWorkshopPart, type UiSetId, type WorkshopPartId, type WorkshopRect } from '../content/workshopCatalog';
+import { fittingPartsForSet } from '../content/workshopFitting';
+import { fittedPieces, fittingComplete, isPartFitting, type PartFitting } from './workshopFitting';
 export type { EditorSkill } from '../config/balance';
 export type { WorkshopRect } from '../content/workshopCatalog';
-export const WORKSHOP_GUIDE_IDS = ['entered','place','elements','adjust','test','complete','export','wall','hint'] as const;
+export const WORKSHOP_GUIDE_IDS = ['entered','place','elements','adjust','test','complete','export','updateAvailable','wall','hint'] as const;
 export type WorkshopGuideId = typeof WORKSHOP_GUIDE_IDS[number];
 export type PanelPosition = 'left' | 'right' | 'top' | 'bottom';
 export interface ComponentDesign {
@@ -23,12 +26,18 @@ export interface EditorCustomization {
   panelWidths: Record<'palette'|'tools'|'parts',number>;
 }
 export interface PartProduction {
+  /** The editor used for its first completion; missing historical fields mean the first era. */
+  createdStage?:0|1|2;
+  fitting?: PartFitting;
   step: 0|1|2|3|4; rect: WorkshopRect; elements: string[]; design: ComponentDesign;
   completedAt: number|null; exportedAt: number|null; tested: boolean;
 }
 export interface WorkshopHelpTarget {set:UiSetId;part?:WorkshopPartId}
 export interface WorkshopCombo {count:number;lastCompletedAt:number|null}
 export interface WorkshopState {
+  groupPuzzle?:GroupPuzzleState;
+  selectedParts?:WorkshopPartId[];
+  puzzleSet?:UiSetId;
   /** Absent in historical workshop pictures; completion chains belong only to this run. */
   combo?:WorkshopCombo;
   /** UI hints are optional in historical workshop presentation documents. */
@@ -65,6 +74,8 @@ export const createEditorCustomization = (stage:0|1|2=0): EditorCustomization =>
   panelWidths: { palette:BALANCE.workshop.customization.panelWidth,tools:BALANCE.workshop.customization.panelWidth,parts:BALANCE.workshop.customization.panelWidth },
 });
 export const createWorkshopState = (): WorkshopState => ({
+  groupPuzzle:createGroupPuzzleState(),
+  selectedParts:[],puzzleSet:'common',
   combo:{count:0,lastCompletedAt:null},
   helpTarget:null,
   editorStageAtEntry:0,
@@ -153,9 +164,17 @@ export function minimumPartSize(id:WorkshopPartId,design?:ComponentDesign):{widt
 export function isPartProduction(x:unknown,id:WorkshopPartId):x is PartProduction {
   if(!record(x)||![0,1,2,3,4].includes(x.step as number)||!isWorkshopRect(x.rect)||!isComponentDesign(x.design)
     ||!Array.isArray(x.elements)||!unique(x.elements)||typeof x.tested!=='boolean')return false;
+  if(x.createdStage!==undefined&&(![0,1,2].includes(x.createdStage as number)||x.step!==4))return false;
   const descriptor=getWorkshopPart(id);
   const min=minimumPartSize(id,x.design);
   if(x.rect.width<min.width||x.rect.height<min.height)return false;
+  if(x.fitting!==undefined){
+    if(!isPartFitting(x.fitting,id)||![1,4].includes(x.step as number))return false;
+    const production=x as unknown as PartProduction;
+    if(JSON.stringify(x.elements)!==JSON.stringify(fittedPieces(production,id)))return false;
+    if(x.step===4?!x.fitting.completionPaid||!amount(x.completedAt)||!x.tested:x.fitting.completionPaid||fittingComplete(production,id)||x.completedAt!==null||x.tested)return false;
+    return x.exportedAt===null||x.step===4&&amount(x.exportedAt)&&x.exportedAt>=Number(x.completedAt);
+  }
   if(!x.elements.every(e=>descriptor.elements.includes(e as string)))return false;
   if(Number(x.step)>=2&&!descriptor.elements.every(e=>(x.elements as unknown[]).includes(e)))return false;
   if(x.step===0&&(x.elements.length>0||x.tested))return false;
@@ -170,6 +189,7 @@ export function isWorkshopCombo(x:unknown):x is WorkshopCombo {
     &&(x.count===0?x.lastCompletedAt===null:amount(x.lastCompletedAt));
 }
 export function isWorkshopState(x:unknown):x is WorkshopState {
+  if(record(x)&&x.groupPuzzle!==undefined&&!isGroupPuzzleState(x.groupPuzzle,isComponentDesign))return false;
   if(record(x)&&x.combo!==undefined&&!isWorkshopCombo(x.combo))return false;
   if(record(x)&&x.helpTarget!==undefined&&x.helpTarget!==null&&!isWorkshopHelpTarget(x.helpTarget))return false;
   if(!record(x)||(x.editorStageAtEntry!==undefined&&![0,1,2].includes(x.editorStageAtEntry as number))||typeof x.entered!=='boolean'||!amount(x.enteredAt)||!between(x.enterMs,0,BALANCE.workshop.enterMs)
@@ -180,6 +200,8 @@ export function isWorkshopState(x:unknown):x is WorkshopState {
   const entries=Object.entries(x.parts);
   if(!entries.every(([id,p])=>WORKSHOP_PARTS.some(d=>d.id===id)&&(x.purchasedSets as unknown[]).includes(getWorkshopPart(id as WorkshopPartId).set)&&isPartProduction(p,id as WorkshopPartId)))return false;
   if(x.activePart!==null&&(!WORKSHOP_PARTS.some(d=>d.id===x.activePart)||!x.parts[x.activePart as string]))return false;
+  if(x.puzzleSet!==undefined&&!SET_IDS.includes(x.puzzleSet as UiSetId))return false;
+  if(x.selectedParts!==undefined&&(!Array.isArray(x.selectedParts)||!unique(x.selectedParts)||!x.selectedParts.every(id=>typeof id==='string'&&id!=='common-scrollbar'&&!!(x.parts as Record<string,unknown>)[id]&&(x.puzzleSet===undefined||getWorkshopPart(id as WorkshopPartId).set===x.puzzleSet))||new Set(x.selectedParts.map(id=>getWorkshopPart(id as WorkshopPartId).set)).size>1))return false;
   if(x.assistance!==undefined){
     const assistant=x.assistance;
     if(!record(assistant)||!amount(assistant.elapsedMs)||assistant.elapsedMs>=BALANCE.workshop.assistStepMs
@@ -209,6 +231,7 @@ export function isSetDocument(x:unknown):x is SetDocument {
 }
 /** Partial exports are records, but do not satisfy a completed-set requirement. */
 export function isCompleteSetDocument(document:SetDocument):boolean {
-  return WORKSHOP_PARTS.filter(part=>part.set===document.set).every(part=>document.parts[part.id]?.step===4);
+  const definitions=Object.values(document.parts).some(part=>part?.fitting)?fittingPartsForSet(document.set):WORKSHOP_PARTS.filter(part=>part.set===document.set);
+  return definitions.every(part=>document.parts[part.id]?.step===4);
 }
 export const isEditorSkill=(x:unknown):x is EditorSkill=>BALANCE.workshop.skills.some(s=>s.id===x);

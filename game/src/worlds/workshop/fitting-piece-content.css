@@ -1,0 +1,55 @@
+.workshop-root .wf-piece-content {display:flex;align-items:center;justify-content:center;inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;overflow:hidden;color:var(--wf-piece-foreground,#111);background:var(--wf-piece-background,#c0c0c0);font-family:'Refresh Pixel','Refresh UI',sans-serif;line-height:1.25;}
+.workshop-root .wf-piece-content[hidden] {display:none;}
+.workshop-root .wf-piece-content>button,.workshop-root .wf-piece-content>input,.workshop-root .wf-piece-content>select,.workshop-root .wf-piece-content>textarea {inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;max-inline-size:100%;padding:2px 4px;font:inherit;}
+.workshop-root .wf-piece-content button {color:inherit;background:inherit;border:2px outset #ddd;border-radius:var(--wf-piece-radius,0);line-height:1.2;overflow:hidden;max-inline-size:100%;min-inline-size:0;}
+.workshop-root .wf-piece-content button:active {border-style:inset;}
+.workshop-root .wf-piece-content button[aria-pressed=true] {background:#000080;color:white;}
+.workshop-root .wf-piece-content img {inline-size:100%;block-size:100%;object-fit:cover;display:block;pointer-events:none;}
+.workshop-root .wf-piece-content input,.workshop-root .wf-piece-content select,.workshop-root .wf-piece-content textarea {font:inherit;color:#111;background:#fff;border-radius:0;}
+.workshop-root .wf-piece-content time,.workshop-root .wf-piece-content output {font-variant-numeric:tabular-nums;}
+.workshop-root .wf-piece-content pre {white-space:pre-wrap;margin:0;align-self:stretch;inline-size:100%;padding:4px;overflow:auto;}
+.workshop-root .wf-piece-content article {block-size:100%;overflow:auto;padding:5px;}
+.workshop-root .wf-piece-content small {display:block;}
+.workshop-root .wf-piece-content hr {border:0;border-top:1px solid currentColor;inline-size:100%;margin:0;}
+.workshop-root .wf-piece-content progress,.workshop-root .wf-piece-content meter {inline-size:100%;block-size:100%;}
+.workshop-root .wf-empty-progress {opacity:.4;}
+.workshop-root .wf-row {display:flex;gap:3px;align-items:center;justify-content:space-between;inline-size:100%;block-size:100%;min-inline-size:0;overflow:hidden;}
+.workshop-root .wf-row>* {min-inline-size:0;}
+.workshop-root .wf-row>span {flex:1;}
+.workshop-root .wf-column-head {font-weight:bold;border-bottom:1px solid #808080;padding:2px;}
+.workshop-root .wf-list {display:flex;flex-direction:column;inline-size:100%;block-size:100%;overflow:auto;padding:1px;margin:0;list-style:none;min-block-size:0;}
+.workshop-root .wf-list>button,.workshop-root .wf-list>time,.workshop-root .wf-list>output {display:block;flex:none;text-align:left;min-block-size:24px;padding:3px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}
+.workshop-root .wf-list>button {border:0;border-bottom:1px solid #bbb;}
+.workshop-root .wf-list>button>span {display:block;}
+.workshop-root .wf-list>strong {border-bottom:1px solid #808080;min-block-size:25px;white-space:nowrap;padding:3px;}
+.workshop-root .wf-mail-column>button {min-block-size:31px;}
+.workshop-root .wf-envelope {display:flex;align-items:center;justify-content:center;gap:4px;}
+.workshop-root .wf-envelope svg {inline-size:20px;block-size:14px;fill:#fff8ca;stroke:currentColor;stroke-width:1;shape-rendering:crispEdges;}
+.workshop-root .wf-content-common-frame.wf-element-title {justify-content:flex-start;padding-inline:6px;}
+.workshop-root .wf-content-common-frame .ws-glyph {inline-size:14px;block-size:14px;}
+.workshop-root .wf-native-scrollbar {inline-size:100%;block-size:100%;display:flex;flex-direction:column;background:#bdbdbd;border:1px inset #fff;}
+.workshop-root .wf-native-scrollbar>span:first-child,.workshop-root .wf-native-scrollbar>span:last-child {block-size:15px;background:#c0c0c0;border:2px outset #fff;flex:none;}
+.workshop-root .wf-native-scrollbar>span:nth-child(2) {block-size:25%;background:#c0c0c0;border:2px outset #fff;margin-block:4px auto;}
+.workshop-root .wf-slider-track {inline-size:100%;block-size:5px;border:1px inset #ddd;background:#777;}
+.workshop-root .wf-crop-frame {display:flex;align-items:flex-end;inline-size:100%;block-size:100%;border:2px dashed #111;background:transparent;}
+.workshop-root .wf-crop-frame input {inline-size:100%;}
+.workshop-root .wf-calendar {display:grid;grid-template-columns:repeat(7,1fr);inline-size:100%;block-size:100%;gap:1px;overflow:auto;}
+.workshop-root .wf-calendar>button {min-block-size:16px;min-inline-size:0;padding:1px;}
+.workshop-root .wf-content-clock-time time {font-size:1.8em;}
+.workshop-root .wf-accent-sample,.workshop-root .wf-radius-sample {display:block;inline-size:90%;block-size:80%;border:1px solid #555;background:#c0c0c0;}
+.workshop-root .wf-slideshow {position:relative;inline-size:100%;block-size:100%;}
+.workshop-root .wf-slideshow img {block-size:75%;}
+.workshop-root .wf-desktop-surface {display:block;inline-size:100%;block-size:100%;background:#008080 center/cover;}
+.workshop-root .wf-selection-frame {display:block;inline-size:80%;block-size:75%;border:1px dashed #111;background:#00008022;}
+.workshop-root .wf-manager-column>button:not(:first-child) {min-block-size:29px;}
+
+/* Loose window controls keep the same face and dark glyph as fitted controls. */
+.workshop-root .wf-content-common-frame:is(.wf-element-minimize,.wf-element-maximize,.wf-element-close)>button:disabled {opacity:1;color:#101010;background:#c0c0c0;}
+
+.workshop-root .wf-piece-content {position:relative;overflow-wrap:anywhere;}
+.workshop-root .wf-piece-content button {white-space:normal;text-overflow:clip;}
+.workshop-root .wf-piece-content[data-loose=true][data-loose-frame=true] {outline:1px solid #494949;outline-offset:-1px;}
+.workshop-root .wf-calendar {grid-template-rows:repeat(5,minmax(0,1fr));overflow:hidden;}
+.workshop-root .wf-calendar>button {min-block-size:0;line-height:1;padding:0;border-width:1px;}
+
+.workshop-root .wf-slideshow-caption {display:grid;grid-template-columns:14px minmax(0,1fr);align-items:center;gap:2px;inline-size:100%;block-size:25%;min-block-size:0;}
