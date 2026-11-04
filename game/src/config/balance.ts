@@ -400,6 +400,7 @@ export const BALANCE = {
   w2: { desktopCost: 200_000, hintMs: 300_000, enterMs: 1_200, upgradeMs: 2_000, maxName: 80 },
   workshop: {
     eras: { canvasScale:[.85,1,1.15], panelWidths:[320,288,256], paletteWidths:[128,64,200], partRateMultipliers:[1,1.15,1.3], era0ZoomOptions:[.5,.85,1] },
+    groupPuzzle: {width:1920,height:1664,inset:32,gap:24,snapDistance:28,flightMs:650,glowMs:300},
     fitting: {
       pieceRewardTotals: { small:115, medium:230, large:460 }, previewZoom:.32,
       hoverScale:.65, puzzleGap:24, snapDistance:28, dragThreshold:5, snapPulseMs:480,

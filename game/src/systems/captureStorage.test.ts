@@ -1,3 +1,4 @@
+import {createInitialState} from './state';
 import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe,expect,it } from 'vitest';
@@ -16,7 +17,7 @@ import { decodeCapture,encodeCapture } from './desktopState';
 import { isCaptureScene,projectCapture,readCapture } from './captureScene';
 import { registerCaptureGeometry } from './captureEvaluation';
 import { clearGame,decodeSave,encodeSave,loadGame,SAVE_KEYS,saveGame } from './save';
-import { isGameState,SCHEMA_VERSION } from './state';
+import { isGameState } from './state';
 import { actWorkshop } from './workshop';
 const now=1800000000000;
 function disk(limit=Infinity){
@@ -101,18 +102,7 @@ describe('場面の保存形式と独立した記録',()=>{
   expect(isCaptureScene({...scene,desktop:{...scene.desktop,notice:9999999}})).toBe(false);
   const bad=structuredClone(scene);bad.workshop.parts['common-frame']!.rect.x=-1;expect(isCaptureScene(bad)).toBe(false);
  });
- it('実際の第6版の2枚入りセーブを移行し、資源・製品・窓・撮影時の本文とパレットを保つ',()=>{
-  const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString();
-  const old=JSON.parse(raw),s=decodeSave(raw);
-  expect(s.schemaVersion).toBe(SCHEMA_VERSION);expect(s.resources.tokens).toBe(old.resources.tokens);expect(s.resources.dollars).toBe(old.resources.dollars);expect(s.resources.pixels).toBeGreaterThanOrEqual(old.resources.pixels);expect(s.persistent.products.map(p=>[p.id,p.revenue,p.generatedPixels])).toEqual(old.persistent.products.map((p:{id:number;revenue:number;generatedPixels:number})=>[p.id,p.revenue,p.generatedPixels]));expect(s.run.desktop.screen).toEqual({width:800,height:600});expect(s.run.desktop.windows.note.open).toBe(old.run.desktop.windows.note.open);
-  expect(s.persistent.screenshots).toHaveLength(2);
-  const oldFrame=decodeCapture(old.persistent.screenshots[0].data) as typeof s;
-  const scene=readCapture(s.persistent.screenshots[0]!);expect(scene.note).toBe(oldFrame.persistent.productionNote);expect(scene).not.toHaveProperty('home');expect(scene).not.toHaveProperty('editor');
-  expect(scene.desktop.windows).toEqual(oldFrame.run.desktop.windows);expect(scene.palette).toHaveLength(256);
-  expect(s.run.desktop.feedback.every(f=>f.sender==='hikari')).toBe(true);
-  const target=disk();expect(saveGame(target.storage,s,now).kind).toBe('saved');expect(loadGame(target.storage).kind).toBe('loaded');
-  expect(decodeSave(encodeSave(s))).toEqual(s);
- });
+ it("形式6の試遊保存は写真を移行せず新規開始へ戻す",()=>{const raw=gunzipSync(readFileSync(new URL('./testdata/v6-two-shots.json.gz',import.meta.url))).toString(),old=JSON.parse(raw),state=decodeSave(raw);expect(state).toEqual(createInitialState(old.lastTickAt));expect(state.persistent.screenshots).toEqual([]);});
  it('保存本体と予備には参照だけを置き、通常保存では画像の書き直しと読み直しをしない',()=>{
   const s=shotState(),target=disk();expect(saveGame(target.storage,s,now).kind).toBe('saved');
   const core=JSON.parse(target.storage.getItem(SAVE_KEYS.primary)!);expect(core.persistent.screenshots[0].data).toBeUndefined();expect(core.persistent.screenshots[0].sceneRef).toMatch(/^refresh.capture\./);

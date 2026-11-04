@@ -1,3 +1,4 @@
+import { actGroupPuzzle,buyGroup,currentGroupTools,initializeGroupWorkshop,isGroupPuzzleAction,type GroupPuzzleAction } from './groupPuzzle';
 import { BALANCE, type EditorSkill } from '../config/balance';
 import { paletteFor } from '../content/palette';
 import { WORKSHOP_PARTS, SET_IDS, getWorkshopPart, type UiSetId, type WorkshopPartId, type WorkshopRect, type TestInteraction } from '../content/workshopCatalog';
@@ -12,7 +13,7 @@ import { FITTING_PARTS, fittingDefinition, fittingPartsForSet as partsForSet } f
 import { canFitPiece, defaultPieceSocket, emptyFitting, fittedPieces, fittingComplete, migrateFittingProduction, pieceReward } from './workshopFitting';
 import { adjustComponentDesign, createComponentDesign, isComponentDesign, isEditorCustomization, isWorkshopRect, workshopPairValid, workshopRectOnGrid, minimumPartSize, type ComponentDesign, type EditorCustomization, type PartProduction, type WorkshopGuideId, type WorkshopHelpTarget, isWorkshopHelpTarget } from './workshopState';
 
-export type WorkshopAction =
+export type WorkshopAction = GroupPuzzleAction
   | {type:'help';target:WorkshopHelpTarget|null}
   | {type:'clearPartSelection';set?:UiSetId} | {type:'togglePart'|'focusPart';part:WorkshopPartId}
   | {type:'togglePiece';part:WorkshopPartId;piece:string} | {type:'stagePiece';part:WorkshopPartId;piece:string;at?:PiecePoint}
@@ -38,16 +39,17 @@ const mainline:readonly UiSetId[]=['common','foundation','files','mail'];
 export const nextWorkshopSet = (s:GameState):UiSetId|null => mainline.find(id=>!s.run.workshop.purchasedSets.includes(id))??null;
 export function canBuyWorkshopSet(s:GameState,set:UiSetId):boolean {
   const w=s.run.workshop,index=mainline.indexOf(set);
+  if(w.groupPuzzle&&set!=='stream')return false;
   return w.entered&&['kumiki','desktop'].includes(s.run.world)&&w.enterMs===0&&SET_IDS.includes(set)
     && !w.purchasedSets.includes(set)&&s.resources.pixels>=BALANCE.workshop.setCosts[set]
     && (index<1||setComplete(s,mainline[index-1]!))
     && (set!=='extras'||s.persistent.editorSkills.includes('extraParts'))
     && (set!=='stream'||s.run.world==='desktop'&&s.run.version===BALANCE.world4.minimumVersion);
 }
-export const canExportWorkshop = (s:GameState):boolean => completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt===null);
+export const canExportWorkshop = (s:GameState):boolean => completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt===null&&(!s.run.workshop.groupPuzzle||getWorkshopPart(id).set==='stream'));
 export const prototypeConditions = (s:GameState):[boolean,boolean,boolean] => [s.run.workshop.entered,completedParts(s).length>=BALANCE.release.prototypeParts,completedParts(s).some(id=>s.run.workshop.parts[id]!.exportedAt!==null)];
-export const canInspectDesktopExit = (s:GameState):boolean => s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0&&setComplete(s,'files')&&setComplete(s,'mail');
-export const canAssembleDesktop = (s:GameState):boolean => s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0
+export const canInspectDesktopExit = (s:GameState):boolean => (!s.run.workshop.groupPuzzle||s.run.workshop.groupPuzzle.tools.foundation?.completionPaid===true)&&s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0&&setComplete(s,'files')&&setComplete(s,'mail');
+export const canAssembleDesktop = (s:GameState):boolean => (!s.run.workshop.groupPuzzle||s.run.workshop.groupPuzzle.tools.foundation?.completionPaid===true)&&s.run.world==='kumiki'&&s.run.workshop.entered&&s.run.workshop.enterMs===0
   &&setComplete(s,'files')&&setComplete(s,'mail')&&s.resources.pixels>=BALANCE.w2.desktopCost
   &&s.persistent.specs.color>=BALANCE.release.prototypeColorLevel;
 export const workshopPlacementGrid=(s:GameState):number=>BALANCE.workshop.canvas.resolutionGrid[s.persistent.specs.resolution]!;
@@ -83,6 +85,11 @@ function showFirstSetHelp(s:GameState,set:UiSetId):GameState {
 function grantExtraMaterials(s:GameState):GameState {
   const w=s.run.workshop;
   if(!w.entered||!s.persistent.editorSkills.includes('extraParts'))return s;
+  if(w.groupPuzzle){
+    if(w.groupPuzzle.purchased.includes('extras'))return s;
+    const next=buyGroup(s,'extras',s.lastTickAt),g=next.run.workshop.groupPuzzle!;
+    return {...next,run:{...next.run,workshop:{...next.run.workshop,activePart:w.activePart,groupPuzzle:{...g,selected:w.groupPuzzle.selected,category:w.groupPuzzle.category,focus:w.groupPuzzle.focus,customPart:w.groupPuzzle.customPart}}}};
+  }
   const definitions=partsForSet('extras');
   if(w.purchasedSets.includes('extras')&&definitions.every(d=>w.parts[d.id]))return s;
   const parts={...w.parts};
@@ -92,7 +99,7 @@ function grantExtraMaterials(s:GameState):GameState {
 export function enterWorkshop(s:GameState):GameState {
   if(s.run.workshop.entered)return grantExtraMaterials(s);
   const next:GameState={...s,run:{...s.run,world:'kumiki',workshop:{...s.run.workshop,editorStageAtEntry:editorStage(s),entered:true,enteredAt:s.lastTickAt,enterMs:BALANCE.workshop.enterMs,lastActionAt:s.elapsedMs}}};
-  return showGuide(grantExtraMaterials(next),'entered');
+  return showGuide(grantExtraMaterials(initializeGroupWorkshop(next)),'entered');
 }
 function writePart(s:GameState,id:WorkshopPartId,part:PartProduction):GameState {
   return {...s,run:{...s.run,workshop:{...s.run.workshop,parts:{...s.run.workshop.parts,[id]:part}}}};
@@ -167,6 +174,10 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
     return {...s,run:{...s.run,workshop:{...w,guide:{...w.guide,current:action.id,collapsed:false}}}};
   }
   if(w.enterMs>0)return s;
+  if(isGroupPuzzleAction(action))return actGroupPuzzle(s,action,now);
+  if(w.groupPuzzle&&action.type==='buySet'&&action.set!=='stream')return s;
+  if(w.groupPuzzle&&action.type==='export'&&(!action.part||getWorkshopPart(action.part).set!=='stream'))return s;
+  if(w.groupPuzzle&&['selectPart','togglePart','focusPart','spawnPiece','fitPiece','removePiece','togglePiece','stagePiece','place','addElement','confirmAdjustment','useExample','test'].includes(action.type)){const id='part' in action?action.part??w.activePart:w.activePart;if(!id||getWorkshopPart(id).set!=='stream')return s;}
   if(action.type==='clearPartSelection'&&action.set!==undefined&&!SET_IDS.includes(action.set))return s;
   if(action.type==='clearPartSelection')return {...s,run:{...s.run,workshop:clearPuzzleSelection(w,action.set)}};
   if(action.type==='togglePart')return {...s,run:{...s.run,workshop:selectPuzzlePart(w,action.part,true)}};
@@ -282,6 +293,20 @@ export function actWorkshop(state:GameState,action:WorkshopAction,now:number):Ga
 /** A cursor fits one missing piece at a time; exporting remains an explicit action. */
 export function advanceWorkshopAssistance(state:GameState,ms:number,now:number):GameState {
   if(!Number.isFinite(ms)||ms<=0||!Number.isFinite(now)||now<0)return state;
+  const group=state.run.workshop.groupPuzzle;
+  if(group&&group.selected!=='stream'){
+    const job=state.run.desktop.jobs.tessera,eligible=state.run.world==='desktop'&&state.run.desktop.entered&&state.run.workshop.entered&&state.run.workshop.enterMs===0&&state.run.desktop.upgrades.includes('jobs')&&job.assigned&&job.cursors>0;
+    const interval=BALANCE.workshop.assistStepMs;
+    let next=state,budget=eligible?group.assistMs+ms*job.cursors*BALANCE.spec.refresh[state.persistent.specs.refresh]!.multiplier*BALANCE.w3.updateMultiplier**job.updates:0;
+    const choose=()=>{const g=next.run.workshop.groupPuzzle!;return currentGroupTools(g).find(tool=>tool.id===g.focus&&!g.tools[tool.id]!.completionPaid)??currentGroupTools(g).find(tool=>!g.tools[tool.id]!.completionPaid);};
+    for(let tool=choose();eligible&&tool&&budget>=interval;tool=choose()){
+      const p=next.run.workshop.groupPuzzle!.tools[tool.id]!;
+      next=actWorkshop(next,p.placed?{type:'groupFit',tool:tool.id,piece:tool.pieces.find(piece=>piece.id!==tool.base&&!p.fitted[piece.id])!.id}:{type:'groupPlace',tool:tool.id,at:p.positions[tool.base]!.at},now);
+      budget-=interval;
+    }
+    const elapsed=choose()?budget:0,g=next.run.workshop.groupPuzzle!;
+    return g.assistMs===elapsed?next:{...next,run:{...next.run,workshop:{...next.run.workshop,groupPuzzle:{...g,assistMs:elapsed}}}};
+  }
   const w=state.run.workshop,id=w.activePart,part=id?w.parts[id]:undefined,job=state.run.desktop.jobs.tessera;
   const writeBudget=(s:GameState,elapsedMs:number):GameState=>{
     const current=s.run.workshop.assistance;

@@ -38,7 +38,7 @@ export function WorkshopExportShelf({state,i18n,platform,viewport,reducedMotion}
   <aside className="ws-desktop-shelf" data-workshop-shelf data-reduced-motion={reducedMotion||undefined} aria-label={i18n.t('ws.shelfDesktop' as MessageKey)} style={{...animationStyle,'--shelf-rows':Math.max(1,Math.ceil(entries.length/2)),'--shelf-height':`${entries.length?Math.ceil(entries.length/2)*62+26:26}px`} as CSSProperties}>
    <strong>{i18n.t('ws.shelfDesktop' as MessageKey)}</strong>
    <div className="ws-shelf-icons">{entries.map(entry=>{
-    const name=i18n.t((entry.part?getWorkshopPart(entry.part).labelKey:`ws.set.${entry.set}`) as MessageKey),incoming=flights.some(flight=>flight.entry===entry.id);
+    const name=i18n.t((entry.labelKey??(entry.part?getWorkshopPart(entry.part).labelKey:`ws.set.${entry.set}`)) as MessageKey),incoming=flights.some(flight=>flight.entry===entry.id);
     return <figure key={entry.id} data-shelf-entry={entry.id} data-shelf-merging={!entry.part&&incoming&&!reducedMotion||undefined} title={name}>
      <span className="ws-shelf-image">{entry.part?<><WorkshopGlyph name="file"/><span className="ws-shelf-part-mark"><WorkshopDestinationGlyph set={entry.set}/></span></>:<WorkshopDestinationGlyph set={entry.set}/>}</span><figcaption><ShelfLabel name={name}/></figcaption>
     </figure>;

@@ -16,7 +16,7 @@ import type { BuiltApp } from './desktopState';
 
 const now=1_800_000_000_000;
 function workshop(stage:0|1|2=0):GameState {
- let state=createInitialState(now);state.run.seed.built=BALANCE.w1.items.map(item=>item.id);
+ let state=createInitialState(now);delete state.run.workshop.groupPuzzle;state.run.seed.built=BALANCE.w1.items.map(item=>item.id);
  state=advanceWorkshop(enterWorkshop(creditPixels(state,1e12)),BALANCE.workshop.enterMs);
  state.persistent.editorSkills=stage===2?['update','modern']:stage===1?['update']:[];
  state.persistent.appearance.editor=stage;
@@ -77,7 +77,7 @@ describe('the workshop production era is attached to made material',()=>{
   expect(state.run.workshop.parts['common-button']!.completedAt).toBe(completedAt);
   expect(completedComponentSources(state).find(source=>source.id==='common-button')!.baseRate).toBe(rate);
  });
- it('preserves era metadata in exported documents and the schema18 save roundtrip',()=>{
+ it('preserves era metadata in exported documents and the current save roundtrip',()=>{
   let state=set(workshop(1),'common');state=actWorkshop(state,{type:'export'},now);
   for(const material of Object.values(state.persistent.setDocuments[0]!.parts))expect(material!.createdStage).toBe(1);
   expect(decodeSave(encodeSave(state))).toEqual(state);

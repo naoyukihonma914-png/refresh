@@ -1,11 +1,13 @@
+import { groupTool,toolLabel } from '../content/workshopGroups';
 import { fittingPartsForSet } from '../content/workshopFitting';
 import { getWorkshopPart, type UiSetId, type WorkshopPartId } from '../content/workshopCatalog';
 import type { WorkshopState } from './workshopState';
 
 export const SHELF_APPS=['foundation','files','mail'] as const;
-export interface WorkshopShelfEntry {id:string;set:UiSetId;part?:WorkshopPartId;parts:WorkshopPartId[]}
+export interface WorkshopShelfEntry {id:string;set:UiSetId;part?:WorkshopPartId;labelKey?:string;parts:WorkshopPartId[]}
 /** exportedAt already belongs to this run's save; the shelf needs no second reward/history record. */
 export function workshopShelf(w:WorkshopState):WorkshopShelfEntry[] {
+ if(w.groupPuzzle){const entries:WorkshopShelfEntry[]=w.groupPuzzle.shelf.map(id=>({id:`tool:${id}`,set:groupTool(id).set,labelKey:toolLabel(id),parts:groupTool(id).pieces.flatMap(piece=>piece.parts)}));return [...entries,...fittingPartsForSet('stream').filter(part=>w.parts[part.id]?.exportedAt!=null).map(part=>({id:`part:${part.id}`,set:part.set,part:part.id,parts:[part.id]}))];}
  const exported=Object.keys(w.parts).filter(id=>w.parts[id as WorkshopPartId]?.exportedAt!=null) as WorkshopPartId[];
  const merged=new Set<UiSetId>(SHELF_APPS.filter(set=>fittingPartsForSet(set).every(part=>exported.includes(part.id))));
  const entries:WorkshopShelfEntry[]=[];

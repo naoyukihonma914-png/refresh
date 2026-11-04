@@ -14,16 +14,16 @@ function oldProduction(id:WorkshopPartId,step:PartProduction['step'],elements?:s
  return {step,rect:{...part.defaultRect},elements:elements??(step>=2?[...part.elements]:[]),design:createComponentDesign(),tested:step===4,completedAt:step===4?now-2:null,exportedAt:step===4?now-1:null};
 }
 function legacyState(id:WorkshopPartId,production:PartProduction){
- const state=createInitialState(now);state.run.seed.built=['border','save'];state.run.world='kumiki';state.run.workshop.entered=true;
+ const state=createInitialState(now);delete state.run.workshop.groupPuzzle;state.run.seed.built=['border','save'];state.run.world='kumiki';state.run.workshop.entered=true;
  state.run.workshop.purchasedSets=[getWorkshopPart(id).set];state.run.workshop.activePart=id;state.run.workshop.parts[id]=production;
  state.resources.pixels=10000;state.run.totalPixelsGenerated=20000;
  return state;
 }
 
-describe('schema18 fitting compatibility',()=>{
+describe('historical material representation in schema19',()=>{
  it.each([0,1,2,3,4] as const)('converts old step%s without crediting resources or repeating migration',step=>{
   const old=legacyState('common-button',oldProduction('common-button',step)),raw=JSON.stringify(old),next=decodeSave(raw),p=next.run.workshop.parts['common-button']!;
-  expect(next.schemaVersion).toBe(18);expect(next.resources).toEqual(old.resources);expect(next.run.totalPixelsGenerated).toBe(old.run.totalPixelsGenerated);
+  expect(next.schemaVersion).toBe(19);expect(next.resources).toEqual(old.resources);expect(next.run.totalPixelsGenerated).toBe(old.run.totalPixelsGenerated);
   expect(p.fitting).toBeDefined();expect(p.step).toBe(step>=2?4:1);expect(p.elements).toEqual(old.run.workshop.parts['common-button']!.elements);
   expect(p.design).toEqual(old.run.workshop.parts['common-button']!.design);expect(decodeSave(encodeSave(next))).toEqual(next);expect(JSON.stringify(old)).toBe(raw);
  });

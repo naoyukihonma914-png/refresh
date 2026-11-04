@@ -1,0 +1,97 @@
+{
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "reducedMotion": false,
+  "baseUrl": "http://127.0.0.1:8188/",
+  "buildSha256": "60e18b43a9180e04c1c90455400977016cdd8f305fd020d630747ec3e33a6bbe",
+  "setup": "public fixtures; real controls; frozen browser clock; unchanged exported fixture imported through the product file chooser for normal-URL reload; no JavaScript state injection",
+  "references": [
+    "docs/世界2-改修指示書-グループパズル.md"
+  ],
+  "cases": [
+    {
+      "id": "en:era1",
+      "era": 1,
+      "language": "en",
+      "fixture": "group-entry-era1",
+      "status": "passed",
+      "images": [],
+      "pageErrors": [],
+      "console": [],
+      "externalRequests": [],
+      "noImages": true,
+      "checks": {
+        "mixedPieces": 9,
+        "allInsideCanvas": {
+          "scroll": [
+            1568,
+            1568,
+            888,
+            888
+          ],
+          "pieces": [
+            {
+              "tool": "files",
+              "piece": "frame",
+              "inside": true
+            },
+            {
+              "tool": "files",
+              "piece": "heading",
+              "inside": true
+            },
+            {
+              "tool": "files",
+              "piece": "list",
+              "inside": true
+            },
+            {
+              "tool": "files",
+              "piece": "toolbar",
+              "inside": true
+            },
+            {
+              "tool": "files",
+              "piece": "display",
+              "inside": true
+            },
+            {
+              "tool": "mail",
+              "piece": "frame",
+              "inside": true
+            },
+            {
+              "tool": "mail",
+              "piece": "list",
+              "inside": true
+            },
+            {
+              "tool": "mail",
+              "piece": "body",
+              "inside": true
+            },
+            {
+              "tool": "mail",
+              "piece": "folders",
+              "inside": true
+            }
+          ]
+        },
+        "twoFramesAndAlternatingFits": true,
+        "stagingAndRelativeFitsSurviveNormalImportReload": true,
+        "sameSizeDragGhosts": true,
+        "automaticSeparateShelfIcons": true,
+        "tokensAfterThreeTools": 17,
+        "realWorld3Exit": true,
+        "schemaVersion": 19
+      }
+    }
+  ],
+  "languages": [
+    "en"
+  ],
+  "passed": 1,
+  "failed": 0
+}

@@ -1,3 +1,4 @@
+import { commonPartIds } from '../content/workshopGroups';
 import { BALANCE } from '../config/balance';
 import { WORKSHOP_PARTS, type WorkshopPartId } from '../content/workshopCatalog';
 import { installedAssembly, appIsOperational } from './appAssembly';
@@ -11,10 +12,10 @@ export const componentBaseRate=(id:WorkshopPartId,createdStage:0|1|2=0):number=>
 // Historical standalone scrollbars stop producing separately once their new frame is acquired.
 const activeComponent=(s:GameState,id:WorkshopPartId):boolean=>s.run.workshop.parts[id]?.step===4&&!(id==='common-scrollbar'&&s.run.workshop.parts['common-frame']?.fitting&&s.run.workshop.parts['common-frame']?.step===4);
 export const seedComponentSources=(s:GameState):ComponentSource[]=>BALANCE.w1.items.flatMap(item=>s.run.seed.built.includes(item.id)?[{id:`seed:${item.id}`,baseRate:item.perSecond}]:[]);
-export const completedComponentSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>activeComponent(s,part.id)?[{id:part.id,baseRate:componentBaseRate(part.id,s.run.workshop.parts[part.id]?.createdStage)}]:[]);
+export const completedComponentSources=(s:GameState):ComponentSource[]=>[...WORKSHOP_PARTS.flatMap(part=>activeComponent(s,part.id)&&(!s.run.workshop.groupPuzzle||part.set!=='common')?[{id:part.id,baseRate:componentBaseRate(part.id,s.run.workshop.parts[part.id]?.createdStage)}]:[]),...Object.entries(s.run.workshop.groupPuzzle?.tools??{}).filter(([id])=>id!=='tabs'&&id!=='table').map(([id,p])=>({id:`tool:${id}:common`,baseRate:commonPartIds.reduce((sum,part)=>sum+componentBaseRate(part,p!.createdStage),0)}))];
 const commonSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>part.set==='common'&&activeComponent(s,part.id)?[{id:part.id,baseRate:componentBaseRate(part.id,s.run.workshop.parts[part.id]?.createdStage)}]:[]);
 export const editorPartSources=(s:GameState):ComponentSource[]=>[...seedComponentSources(s),...commonSources(s)];
-export const desktopFoundationSources=(s:GameState):ComponentSource[]=>WORKSHOP_PARTS.flatMap(part=>part.set==='foundation'&&s.run.workshop.parts[part.id]?.step===4?[{id:part.id,baseRate:componentBaseRate(part.id,s.run.workshop.parts[part.id]?.createdStage)}]:[]);
+export const desktopFoundationSources=(s:GameState):ComponentSource[]=>[...WORKSHOP_PARTS.flatMap(part=>part.set==='foundation'&&s.run.workshop.parts[part.id]?.step===4?[{id:part.id,baseRate:componentBaseRate(part.id,s.run.workshop.parts[part.id]?.createdStage)}]:[]),...(s.run.workshop.groupPuzzle?.tools.foundation?.completionPaid?[{id:'foundation:common',baseRate:commonPartIds.reduce((sum,id)=>sum+componentBaseRate(id,s.run.workshop.groupPuzzle!.tools.foundation!.createdStage),0)}]:[])];
 export function installedAppSources(s:GameState,app:BuiltApp):ComponentSource[]{
  if(!appIsOperational(s,app))return [];
  const assembly=installedAssembly(s,app);if(!assembly)return [];

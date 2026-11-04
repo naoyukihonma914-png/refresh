@@ -1,3 +1,4 @@
+import type { WorkshopToolId } from '../content/workshopGroups';
 import { BALANCE } from '../config/balance';
 import { APP_RECIPES, APP_REQUIRED, slotRoles, sourceForSlot, type AppSlotRole } from '../content/appRecipes';
 import { WORKSHOP_PARTS, type WorkshopPartId, type UiSetId } from '../content/workshopCatalog';
@@ -10,7 +11,7 @@ export type { AppAssembly,AssemblySlot,AssemblyMaterial } from './appAssemblySch
 export { validAppAssembly } from './appAssemblySchema';
 export function availableAssemblyRoles(s:GameState,app:BuiltApp):AppSlotRole[]{return slotRoles(app).filter(role=>s.run.workshop.parts[sourceForSlot(app,role)!]?.step===4);}
 export function availableAssemblySources(s:GameState,app:BuiltApp):WorkshopPartId[]{return [...new Set(availableAssemblyRoles(s,app).map(role=>sourceForSlot(app,role)!))];}
-function commonMaterials(s:GameState,legacy=false):AssemblyMaterial[]{return WORKSHOP_PARTS.filter(p=>p.set==='common'&&(legacy||s.run.workshop.parts[p.id]?.step===4)&&!(p.id==='common-scrollbar'&&!legacy&&s.run.workshop.parts['common-frame']?.fitting&&s.run.workshop.parts['common-frame']?.step===4)).map(p=>{const production=s.run.workshop.parts[p.id];return {source:p.id,design:production?.step===4?structuredClone(production.design):createComponentDesign(),elements:[...(production?.step===4?production.elements:p.elements)],...(production?.step===4&&production.fitting?{fitting:structuredClone(production.fitting)}:{}),...(!legacy&&production?.step===4&&production.createdStage!==undefined?{createdStage:production.createdStage}:{})};});}
+function commonMaterials(s:GameState,legacy=false,app?:BuiltApp):AssemblyMaterial[]{return WORKSHOP_PARTS.filter(p=>p.set==='common'&&(legacy||s.run.workshop.parts[p.id]?.step===4)&&!(p.id==='common-scrollbar'&&!legacy&&s.run.workshop.parts['common-frame']?.fitting&&s.run.workshop.parts['common-frame']?.step===4)).map(p=>{const production=s.run.workshop.parts[p.id],tool=app?s.run.workshop.groupPuzzle?.tools[app as WorkshopToolId]:undefined;return {source:p.id,design:structuredClone(tool?.designs[p.id]??(production?.step===4?production.design:createComponentDesign())),elements:[...(production?.step===4?production.elements:p.elements)],...(production?.step===4&&production.fitting?{fitting:structuredClone(production.fitting)}:{}),...(!legacy&&production?.step===4&&production.createdStage!==undefined?{createdStage:tool?.createdStage??production.createdStage}:{})};});}
 function slotFromPart(s:GameState,app:BuiltApp,part:AppPart,legacy=false):AssemblySlot|null {
  const source=sourceForSlot(app,part.id);if(!source)return null;const production=s.run.workshop.parts[source];if(!legacy&&production?.step!==4)return null;
  const design:ComponentDesign=legacy?{...createComponentDesign(),nativeColors:false,color:part.color,textColor:readableText(part.color),fontSize:part.fontSize}:structuredClone(production!.design);
@@ -19,7 +20,7 @@ function slotFromPart(s:GameState,app:BuiltApp,part:AppPart,legacy=false):Assemb
 /** Installable recipes refer to actual completed materials. A role never creates inventory. */
 export function createAppAssembly(s:GameState,app:BuiltApp,roles:readonly AppSlotRole[]=availableAssemblyRoles(s,app),metrics:PartMinimums={},previous?:AppAssembly):AppAssembly {
  const layout=recommendedLayout(app,[...new Set(roles)].filter(role=>availableAssemblyRoles(s,app).includes(role)),undefined,metrics,previous?assemblyLayout(previous):undefined);
- const madeCommon=commonMaterials(s),common=previous?[...structuredClone(previous.common),...madeCommon.filter(material=>!previous.common.some(old=>old.source===material.source))]:madeCommon;
+ const madeCommon=commonMaterials(s,false,app),common=previous?[...structuredClone(previous.common),...madeCommon.filter(material=>!previous.common.some(old=>old.source===material.source))]:madeCommon;
  return {app,version:s.run.version,width:layout.width,height:layout.height,common,slots:layout.parts.flatMap(part=>{const slot=slotFromPart(s,app,part),old=previous?.slots.find(p=>p.role===part.id);return slot?[old?{...structuredClone(old),rect:slot.rect}:slot]:[];})};
 }
 export function legacyAppAssembly(s:GameState,app:BuiltApp,layout:AppLayout):AppAssembly {

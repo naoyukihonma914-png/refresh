@@ -1,3 +1,4 @@
+import { createGroupPuzzleState,isGroupPuzzleState,type GroupPuzzleState } from './groupPuzzleState';
 import { BALANCE, type EditorSkill } from '../config/balance';
 import { SET_IDS, WORKSHOP_PARTS, getWorkshopPart, type UiSetId, type WorkshopPartId, type WorkshopRect } from '../content/workshopCatalog';
 import { fittingPartsForSet } from '../content/workshopFitting';
@@ -34,6 +35,7 @@ export interface PartProduction {
 export interface WorkshopHelpTarget {set:UiSetId;part?:WorkshopPartId}
 export interface WorkshopCombo {count:number;lastCompletedAt:number|null}
 export interface WorkshopState {
+  groupPuzzle?:GroupPuzzleState;
   selectedParts?:WorkshopPartId[];
   puzzleSet?:UiSetId;
   /** Absent in historical workshop pictures; completion chains belong only to this run. */
@@ -72,6 +74,7 @@ export const createEditorCustomization = (stage:0|1|2=0): EditorCustomization =>
   panelWidths: { palette:BALANCE.workshop.customization.panelWidth,tools:BALANCE.workshop.customization.panelWidth,parts:BALANCE.workshop.customization.panelWidth },
 });
 export const createWorkshopState = (): WorkshopState => ({
+  groupPuzzle:createGroupPuzzleState(),
   selectedParts:[],puzzleSet:'common',
   combo:{count:0,lastCompletedAt:null},
   helpTarget:null,
@@ -186,6 +189,7 @@ export function isWorkshopCombo(x:unknown):x is WorkshopCombo {
     &&(x.count===0?x.lastCompletedAt===null:amount(x.lastCompletedAt));
 }
 export function isWorkshopState(x:unknown):x is WorkshopState {
+  if(record(x)&&x.groupPuzzle!==undefined&&!isGroupPuzzleState(x.groupPuzzle,isComponentDesign))return false;
   if(record(x)&&x.combo!==undefined&&!isWorkshopCombo(x.combo))return false;
   if(record(x)&&x.helpTarget!==undefined&&x.helpTarget!==null&&!isWorkshopHelpTarget(x.helpTarget))return false;
   if(!record(x)||(x.editorStageAtEntry!==undefined&&![0,1,2].includes(x.editorStageAtEntry as number))||typeof x.entered!=='boolean'||!amount(x.enteredAt)||!between(x.enterMs,0,BALANCE.workshop.enterMs)

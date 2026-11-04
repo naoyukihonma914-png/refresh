@@ -62,6 +62,8 @@ export function OptionalTargetProvider({gameState,i18n,onExport,children}:{gameS
    app.actions.nextPhoto();
    const next=app.photo.sources[(app.photo.index+1)%app.photo.sources.length]!;
    result=translate('ws.optional.commandPhotoOpened',{name:next.label});lines=[result];
+  }else if(s.run.workshop.groupPuzzle){
+   const shelf=s.run.workshop.groupPuzzle.shelf;result=translate('group.commandCount',{count:shelf.length});lines=shelf.map(id=>translate(id==='tabs'?'ws.part.plugin-tabs':id==='table'?'ws.part.plugin-table':`ws.set.${id}`));
   }else{
    const count=completedParts(s).filter(id=>s.run.workshop.parts[id]!.exportedAt===null).length;
    if(count&&current.onExport){current.onExport();result=translate('ws.optional.commandExported',{count});}
