@@ -1,3 +1,4 @@
+import { focusGroupMaterial } from './groupPuzzle';
 import { BALANCE,type DesktopUpgrade } from '../config/balance';
 import { sourceForSlot } from '../content/appRecipes';
 import { paletteFor } from '../content/palette';
@@ -7,7 +8,6 @@ import { validAppAssembly } from './appAssemblySchema';
 import { adjustComponentDesign, type ComponentDesign } from './workshopState';
 import type { BuiltApp } from './desktopState';
 import type { GameState } from './state';
-import { actWorkshop } from './workshop';
 export const hasAppPart=(s:GameState,app:BuiltApp,id:string)=>s.run.desktop.apps.includes(app)&&(installedAssembly(s,app)?.slots.some(slot=>slot.role===id)??false);
 export const functionalApp=appIsOperational;
 export type AppChangePatch=Parameters<typeof changePart>[2]&Partial<Pick<ComponentDesign,'nativeColors'|'radius'|'shadow'>>;
@@ -53,7 +53,7 @@ export function actAppBuild(s:GameState,a:AppBuildAction):GameState {
  }
  if(a.type==='app-craft'){
   const source=sourceForSlot(a.app,a.part);if(!source||!s.run.workshop.parts[source])return s;
-  const next=actWorkshop(s,{type:'selectPart',part:source},s.lastTickAt);return {...next,run:{...next.run,desktop:{...next.run.desktop,editingApp:null}}};
+  const next=focusGroupMaterial(s,source,s.lastTickAt);return {...next,run:{...next.run,desktop:{...next.run.desktop,editingApp:null}}};
  }
  if(a.type==='app-place'){
   if(project.draft.parts.some(part=>part.id===a.part)||!project.crafted.includes(a.part))return s;

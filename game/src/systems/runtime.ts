@@ -320,10 +320,11 @@ export class GameRuntime {
       &&previous.run.workshop.parts[part]?.fitting?.sockets[action.piece]!==action.socket;
     const snapped=Boolean(fitted||placement?.snapped&&rect&&(['x','y','width','height'] as const).every(key=>rect[key]===placement.rect[key]));
     const visible=workshopVisible(previous);
+    const groupSnapped=(action.type==='groupFit'&&!previous.run.workshop.groupPuzzle?.tools[action.tool]?.fitted[action.piece]&&!!state.run.workshop.groupPuzzle?.tools[action.tool]?.fitted[action.piece])||(action.type==='groupPlace'&&!previous.run.workshop.groupPuzzle?.tools[action.tool]?.placed&&state.run.workshop.groupPuzzle?.tools[action.tool]?.placed===true);
     this.publish({ state,...(snapped&&visible&&part?{workshopSnap:{part,at:this.platform.clock.monotonicNow()}}:{}) },true,(action.type==='test'||action.type==='fitPiece')&&part?part:undefined);
     if(visible){
-      if(snapped)this.sound('press',state);
-      else if (['buySet','place','skill','test'].includes(action.type)) this.sound('build',state);
+      if(snapped||groupSnapped)this.sound('press',state);
+      else if (['buySet','groupBuy','place','skill','test'].includes(action.type)) this.sound('build',state);
       if (action.type === 'export') this.sound('export',state);
     }
     this.persist();

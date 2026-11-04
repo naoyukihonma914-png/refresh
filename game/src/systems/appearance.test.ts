@@ -5,7 +5,7 @@ import { createInitialState, isGameState } from './state';
 import { actWorkshop, advanceWorkshop, enterWorkshop } from './workshop';
 import { canSwitchEditor,editorName,appName,setDesktopStage,setEditorStage,unlockedDesktopStage,unlockedEditorStage } from './appearance';
 const now=1_800_000_000_000;
-function editor(){const s=createInitialState(now);s.resources.tokens=100;return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);}
+function editor(){const s=createInitialState(now);delete s.run.workshop.groupPuzzle;s.resources.tokens=100;return advanceWorkshop(enterWorkshop(s),BALANCE.workshop.enterMs);}
 
 describe('第3版：工房とデスクトップの見た目の段',()=>{
  it('Tesseraは初周中に3トークンで更新し、再購入で払わない',()=>{

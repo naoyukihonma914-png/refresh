@@ -60,7 +60,7 @@ describe('TP2：初回購入の説明と手動ヘルプ',()=>{
   expect(s.run.workshop.helpTarget).toEqual({set:'extras'});expect(s.persistent.testplay.helpSeen).toEqual(['extras']);
   for(const part of partsForSet('extras'))expect(s.run.workshop.parts[part.id]).toMatchObject({step:1,completedAt:null});
   s=actWorkshop(s,{type:'help',target:null},now+1);expect(actWorkshop(s,{type:'skill',id:'extraParts'},now+2)).toBe(s);
-  let next=createSeedVersion(s,'v2',now+1000);next.run.seed.built=BALANCE.w1.items.map(item=>item.id);
+  let next=createSeedVersion(s,'v2',now+1000);delete next.run.workshop.groupPuzzle;next.run.seed.built=BALANCE.w1.items.map(item=>item.id);
   const before=next.resources;next=enterWorkshop(next);
   expect(next.run.workshop.purchasedSets).toContain('extras');expect(next.resources).toEqual(before);
   expect(next.run.workshop.helpTarget).toBeNull();expect(next.persistent.testplay.helpSeen).toEqual(['extras']);

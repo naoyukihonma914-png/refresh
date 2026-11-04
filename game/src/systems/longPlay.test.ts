@@ -50,7 +50,7 @@ describe('出来事と隠し要素',()=>{
 
 describe('第3版：朱色の部品の隠し要素',()=>{
  const readyPart=(color:string)=>{
-  let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s.persistent.specs.color=1;
+  let s=createInitialState(now);delete s.run.workshop.groupPuzzle;s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s.persistent.specs.color=1;
   s=advanceWorkshop(enterWorkshop(creditPixels(s,10_000)),BALANCE.workshop.enterMs);
   s=actWorkshop(s,{type:'buySet',set:'common'},now);const definition=getWorkshopPart('common-button');
 

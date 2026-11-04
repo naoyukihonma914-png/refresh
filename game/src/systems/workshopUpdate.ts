@@ -4,6 +4,7 @@ import type { GameState } from './state';
 /** Older saves may record their first export in any of these permanent/live records. */
 export function hasWorkshopExport(state:GameState):boolean {
  const w=state.run.workshop,p=state.persistent;
+ if(w.groupPuzzle)return w.groupPuzzle.shelf.length>0;
  return w.tokenDiscovered||w.guide.seen.includes('export')||w.guide.seen.includes('updateAvailable')
   ||p.progress.records['first-export']!==undefined
   ||Object.values(w.parts).some(part=>part&&part.exportedAt!==null)

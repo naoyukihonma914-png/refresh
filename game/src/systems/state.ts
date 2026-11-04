@@ -9,7 +9,7 @@ import { BALANCE, type SeedItem, type SeedSkill, type SpecKey } from '../config/
 import { createWorkshopState, createEditorCustomization, isWorkshopState, isEditorCustomization, isSetDocument, isEditorSkill, workshopRectOnGrid, type WorkshopState, type EditorCustomization, type SetDocument, type EditorSkill } from './workshopState';
 import { isGuideArchive, isProductRecord, type GuideRecord, type ProductRecord, type ShippingState } from './releaseState';
 
-export const SCHEMA_VERSION = 18;
+export const SCHEMA_VERSION = 19;
 
 export const GUIDE_IDS = ['intro', 'instructions', 'tool', 'hint', 'return'] as const;
 export type GuideId = typeof GUIDE_IDS[number];

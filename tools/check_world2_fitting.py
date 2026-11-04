@@ -112,7 +112,9 @@ class FittingReview:
         expect(page.locator('[data-workshop]')).to_be_visible()
         if self.args.reduced_motion:
             assert page.evaluate('matchMedia("(prefers-reduced-motion: reduce)").matches')
-            expect(self.canvas(page).locator('[data-fitting-board]')).to_have_attribute('data-reduced-motion', 'true')
+            canvas = self.canvas(page)
+            reduced_target = canvas if canvas.get_attribute('data-reduced-motion') else canvas.locator('[data-fitting-board]')
+            expect(reduced_target).to_have_attribute('data-reduced-motion', 'true')
         return context, page
 
     @staticmethod

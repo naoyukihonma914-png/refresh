@@ -11,7 +11,7 @@ export function desktopOffers(state:GameState):DesktopOffer[] {
   if(id==='jobs')return state.run.desktop.upgrades.includes('jobs')?[]:[{id,kind:'jobs' as const,cost:BALANCE.w3.jobUnlockCost}];
   if(appIsOperational(state,id))return [];
   if(!state.run.workshop.purchasedSets.includes(id))return [{id,kind:'set' as const,cost:BALANCE.workshop.setCosts[id]}];
-  const ready=APP_REQUIRED[id].every(role=>state.run.workshop.parts[sourceForSlot(id,role)!]?.step===4);
+  const ready=state.run.workshop.groupPuzzle?!!state.run.workshop.groupPuzzle.tools[id]?.completionPaid:APP_REQUIRED[id].every(role=>state.run.workshop.parts[sourceForSlot(id,role)!]?.step===4);
   return [{id,kind:ready?'assemble' as const:'craft' as const,cost:0}];
  });
 }

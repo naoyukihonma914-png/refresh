@@ -1,3 +1,5 @@
+import { groupTool } from '../content/workshopGroups';
+import { focusGroupMaterial } from './groupPuzzle';
 import { WORKSHOP_PARTS } from '../content/workshopCatalog';
 import { usesNativeComponentColors } from './workshopState';
 import { actAppBuild, ownAppBlueprint, functionalApp, hasAppPart, type AppBuildAction } from './appBuild';
@@ -46,12 +48,12 @@ export function buyDesktopApp(state:GameState,id:DesktopUpgrade,now=state.lastTi
  if(offer.id==='jobs')return withDesktop({...state,resources:{...state.resources,pixels:state.resources.pixels-offer.cost}},{...state.run.desktop,upgrades:[...state.run.desktop.upgrades,'jobs'],builtAt:{...state.run.desktop.builtAt,jobs:now}});
  const app=offer.id;
  let next=state;
- if(offer.kind==='set')next=actWorkshop(next,{type:'buySet',set:app},now);
+ if(offer.kind==='set')next=actWorkshop(next,next.run.workshop.groupPuzzle?{type:'groupBuy',group:groupTool(app).group}:{type:'buySet',set:app},now);
  if(offer.kind==='assemble')next=actAppBuild(ownAppBlueprint(next,app),{type:'app-edit',app});
  else {
   const required=APP_REQUIRED[app].map(role=>sourceForSlot(app,role)!);
   const part=required.find(source=>next.run.workshop.parts[source]?.step!==4)??required[0];
-  if(part)next=actWorkshop(next,{type:'selectPart',part},now);
+  if(part)next=focusGroupMaterial(next,part,now);
   next={...next,run:{...next.run,workshop:{...next.run.workshop,view:'workbench'},desktop:{...next.run.desktop,editingApp:null}}};
  }
  return focusWindow(next,'tessera');
@@ -116,7 +118,7 @@ export function observeTesseraAction(before: GameState, after: GameState, type: 
   const done = after.run.desktop.feedback.filter(f => {
     if (f.completedAt !== null) return false;
     if(f.kind==='part')return after.run.workshop.parts[f.target as keyof typeof after.run.workshop.parts]?.step===4&&before.run.workshop.parts[f.target as keyof typeof before.run.workshop.parts]?.step!==4;
-    if(type==='adjust'&&f.kind==='color'){const a=before.run.workshop.parts['common-button']?.design,b=after.run.workshop.parts['common-button']?.design;return !!a&&!!b&&(a.color!==b.color||usesNativeComponentColors(a)!==usesNativeComponentColors(b));}
+    if((type==='adjust'||type==='groupAdjust')&&f.kind==='color'){const a=before.run.workshop.parts['common-button']?.design,b=after.run.workshop.parts['common-button']?.design;return !!a&&!!b&&(a.color!==b.color||usesNativeComponentColors(a)!==usesNativeComponentColors(b));}
     return false;
   }).map(f => f.id);
   return completeFeedback(after,done,now);
@@ -185,8 +187,8 @@ export function actDesktop(state: GameState, action: DesktopAction, now: number,
         const need=required[request.kind];
         if(need&&state.run.desktop.projects[need[0]]&&need[1].some(part=>!hasAppPart(state,need[0],part)))return focusWindow(actAppBuild(state,{type:'app-edit',app:need[0]}),'tessera');
         let next=focusWindow(withDesktop(state,{...d,notice:null,editingApp:app==='tessera'?null:d.editingApp}),app);
-        if(request.kind==='part')next=actWorkshop(next,{type:'selectPart',part:request.target as import('../content/workshopCatalog').WorkshopPartId},now);
-        if(request.kind==='color')next=actWorkshop(next,{type:'selectPart',part:'common-button'},now);
+        if(request.kind==='part')next=focusGroupMaterial(next,request.target as import('../content/workshopCatalog').WorkshopPartId,now);
+        if(request.kind==='color')next=focusGroupMaterial(next,'common-button',now);
         return next;
       }
       // Open the requested tools without replacing the player's saved arrangement.

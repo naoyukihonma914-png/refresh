@@ -38,7 +38,7 @@ export function documentFiles(state:GameState,i18n:I18n):DesktopFile[] {
   return state.persistent.setDocuments.filter(isCompleteSetDocument).map(document=>({
     id:`set:${document.id}`,
     kind:'set',
-    name:i18n.t('files.setDocumentVersionName',{name:i18n.t('ws.setDocument',{set:i18n.t(`ws.set.${document.set}` as MessageKey)}),version:document.version}),
+    name:state.run.workshop.groupPuzzle?i18n.t('group.toolDocument' as MessageKey,{tool:i18n.t(`ws.set.${document.set}` as MessageKey),version:document.version}):i18n.t('files.setDocumentVersionName',{name:i18n.t('ws.setDocument',{set:i18n.t(`ws.set.${document.set}` as MessageKey)}),version:document.version}),
     at:document.at,
     bytes:byteSize(document),
     edition:document.version===state.run.version?'current':'archive',

@@ -1,8 +1,9 @@
+import {createInitialState} from './state';
 import {describe,it,expect} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {gunzipSync} from 'node:zlib';
 import {createFixture,FIXTURE_NAMES,completeWorkshopPartFixture} from './fixtures';
-import {isGameState,SCHEMA_VERSION} from './state';
+import { isGameState } from './state';
 import {encodeSave,decodeSave} from './save';
 import {adoptedPartIds} from './appAssembly';
 import {producerLedger} from './economy';
@@ -169,25 +170,5 @@ describe('TP：実操作の固定状態と真正v15入力',()=>{
    expect(s.persistent.testplay.layoutGuideSeen).toBe(true);
   }
  });
- it('真正main v15の6保存を、財布・作品・写真を失わず現形式へ移す',()=>{
-  for(const name of ['seed-before-layout','seed-custom-layout','seed-inherited-layout','workshop-mid','desktop-records','shipping']){
-   const text=gunzipSync(readFileSync(new URL(`./testdata/tp-v15-main-${name}.json.gz`,import.meta.url))).toString('utf8'),old=JSON.parse(text);
-   expect(old.schemaVersion).toBe(15);
-   const migrated=decodeSave(text);expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);expect(isGameState(migrated)).toBe(true);
-   expect(migrated.resources).toEqual(old.resources);
-   for(const key of ['specs','seedSkills','editorSkills','products','setDocuments','screenshots'] as const)expect(migrated.persistent[key],name+':'+key).toEqual(old.persistent[key]);
-   expect(FITTING_PARTS.some(part=>part.id==='common-scrollbar')).toBe(false);
-   if(old.run.workshop.parts['common-scrollbar'])expect(migrated.run.workshop.parts['common-scrollbar']).toEqual(old.run.workshop.parts['common-scrollbar']);
-   for(const [id,production] of Object.entries(old.run.workshop.parts) as Array<[keyof typeof migrated.run.workshop.parts,{step:number;elements:string[];design:unknown;completedAt:number|null;exportedAt:number|null}]>){
-    if(id==='common-scrollbar')continue;
-    const current=migrated.run.workshop.parts[id]!;
-    expect(current.fitting,name+':'+id).toBeDefined();expect(current.design).toEqual(production.design);
-    expect(production.elements.every(piece=>Object.hasOwn(current.fitting!.sockets,piece))).toBe(true);
-    if(production.step===4){expect(current.completedAt).toBe(production.completedAt);expect(current.exportedAt).toBe(production.exportedAt);}
-   }
-   expect(decodeSave(encodeSave(migrated))).toEqual(migrated);
-   if(old.run.seed.page.layout)expect(Object.keys(migrated.run.seed.page.layout!.parts)).toHaveLength(6);
-   if(name==='seed-inherited-layout')expect(migrated.persistent.testplay.layoutGuideSeen).toBe(true);
-  }
- },30_000);
+ it("真正main形式15の6保存は全て新規開始へ読み替える",()=>{for(const name of ['seed-before-layout','seed-custom-layout','seed-inherited-layout','workshop-mid','desktop-records','shipping']){const raw=gunzipSync(readFileSync(new URL(`./testdata/tp-v15-main-${name}.json.gz`,import.meta.url))).toString(),old=JSON.parse(raw);expect(decodeSave(raw)).toEqual(createInitialState(old.lastTickAt));}},30_000);
 });

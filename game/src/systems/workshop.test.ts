@@ -17,7 +17,7 @@ import { creditPixels, workshopPartsPixelsPerSecond } from './economy';
 
 const now=1_800_000_000_000;
 function workshop():GameState {
- let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(x=>x.id);
+ let s=createInitialState(now);delete s.run.workshop.groupPuzzle;s.run.seed.built=BALANCE.w1.items.map(x=>x.id);
  return advanceWorkshop(enterWorkshop(creditPixels(s,10_000_000)),BALANCE.workshop.enterMs);
 }
 function fit(s:GameState,id:WorkshopPartId,piece:string,socket?:string):GameState {
@@ -117,7 +117,7 @@ describe('殻とピースの工房',()=>{
   let previous=workshop();for(const set of ['common','foundation','files','mail'] as const)previous=completeSet(previous,set);
   previous=actWorkshop(previous,{type:'export'},now+10);previous=actWorkshop(previous,{type:'exit'},now+20);
   const released=beginPrototypeRelease(previous,now+30);expect(released.persistent.products).toHaveLength(1);
-  let s=createSeedVersion(released,'v1',now+40);s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s=advanceWorkshop(enterWorkshop(creditPixels(s,10_000_000)),BALANCE.workshop.enterMs);s=completeSet(s,'common');
+  let s=createSeedVersion(released,'v1',now+40);delete s.run.workshop.groupPuzzle;s.run.seed.built=BALANCE.w1.items.map(item=>item.id);s=advanceWorkshop(enterWorkshop(creditPixels(s,10_000_000)),BALANCE.workshop.enterMs);s=completeSet(s,'common');
   const old=s.persistent.setDocuments.find(entry=>entry.id==='v0.1:common')!,copy=structuredClone(old),product=structuredClone(s.persistent.products[0]);
   s=actWorkshop(s,{type:'adjust',part:'common-button',patch:{radius:8}},now+50);expect(old).toEqual(copy);expect(s.persistent.products[0]).toEqual(product);expect(decodeSave(encodeSave(s))).toEqual(s);
  });

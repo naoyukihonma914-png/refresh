@@ -10,7 +10,7 @@ import {advanceOfflineTime} from './time';
 import {isManagerProcessId} from './desktopState';
 const now=1_800_000_000_000;
 function job():GameState {
- const source=createInitialState(now);source.run.seed.built=BALANCE.w1.items.map(item=>item.id);source.resources.pixels=source.run.totalPixelsGenerated=100_000;
+ const source=createInitialState(now);delete source.run.workshop.groupPuzzle;source.run.seed.built=BALANCE.w1.items.map(item=>item.id);source.resources.pixels=source.run.totalPixelsGenerated=100_000;
  let s=advanceWorkshop(enterWorkshop(source),BALANCE.workshop.enterMs);s.run.world='desktop';s.run.desktop.entered=true;s.run.desktop.upgrades=['jobs'];s.run.desktop.jobs.tessera={assigned:true,cursors:1,updates:0};s.persistent.specs.color=1;
  s=actWorkshop(s,{type:'buySet',set:'common'},now);return actWorkshop(s,{type:'selectPart',part:'common-button'},now);
 }

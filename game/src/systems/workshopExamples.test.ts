@@ -14,7 +14,7 @@ import { createComponentDesign,isWorkshopState } from './workshopState';
 
 const now=1_800_000_000_000;
 function workshop():GameState {
- let s=createInitialState(now);s.run.seed.built=BALANCE.w1.items.map(item=>item.id);
+ let s=createInitialState(now);delete s.run.workshop.groupPuzzle;s.run.seed.built=BALANCE.w1.items.map(item=>item.id);
  s=advanceWorkshop(enterWorkshop(creditPixels(s,10_000_000)),BALANCE.workshop.enterMs);
  return actWorkshop(s,{type:'buySet',set:'common'},now);
 }

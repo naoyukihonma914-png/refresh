@@ -1,3 +1,4 @@
+import { createGroupFixture,GROUP_FIXTURE_NAMES } from './groupFixtures';
 import { selectPuzzlePart } from './workshopPuzzle';
 import { advanceAdvice, createAdviceState } from './advice';
 import { reconcileProgress } from './longPlay';
@@ -6,8 +7,8 @@ import { featureApp, isBuildable } from './appLayout';
 import { BALANCE, type DesktopUpgrade } from '../config/balance';
 import { desktopScreen, resizeDesktop, fitWindow, workHeight } from './desktopGeometry';
 import { enterDesktop, buyDesktopApp as buyBlueprint, focusWindow, takeScreenshot } from './desktop';
-import { createInitialState, type GameState } from './state';
-import { buildSeed, createSeedVersion, updateSeedGuide } from './seed';
+import { createInitialState as actualInitialState, type GameState } from './state';
+import { buildSeed, createSeedVersion as actualSeedVersion, updateSeedGuide } from './seed';
 import { actPageDesign } from './pageDesign';
 import { setExamplesEnabled } from './workshopExamples';
 import { advanceActiveTime } from './time';
@@ -17,8 +18,14 @@ import { createComponentDesign, type PartProduction } from './workshopState';
 import { FITTING_PARTS, fittingDefinition, fittingPartsForSet } from '../content/workshopFitting';
 import { defaultPieceSocket, emptyFitting, fittedPieces } from './workshopFitting';
 import { actWorkshop, enterWorkshop, advanceWorkshop } from './workshop';
-import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion, releaseEstimate } from './release';
+import { advanceShipping, beginPrototypeRelease, beginProductRelease, showShipping, buySpec, startNextVersion as actualNextVersion, releaseEstimate } from './release';
 import { softwarePresentation, type SoftwareStage } from './releasePresentation';
+
+// Historical fixed URLs keep the mechanics and pictures they were recorded against.
+function createInitialState(now:number){const state=actualInitialState(now);delete state.run.workshop.groupPuzzle;return state;}
+
+function createSeedVersion(...args:Parameters<typeof actualSeedVersion>){const state=actualSeedVersion(...args);delete state.run.workshop.groupPuzzle;return state;}
+function startNextVersion(...args:Parameters<typeof actualNextVersion>){const state=actualNextVersion(...args);delete state.run.workshop.groupPuzzle;return state;}
 
 // Freeze historical stage8a URLs to the first 49 parts; future sets get their own fixtures.
 const STAGE8A_PARTS=WORKSHOP_PARTS.filter(part=>part.set!=='stream');
@@ -45,7 +52,7 @@ const TP_MAIN_PARTS=FITTING_PARTS.filter(part=>UI_SETS.find(set=>set.id===part.s
 const TP_SEED_VIEWS=['start','before-layout','first-layout','stable'] as const;
 const TP_WORKSHOP_VIEWS=['route','help-catalog'] as const;
 const EXAMPLES_VIEWS=['seed-on','seed-off','seed-layout-on','seed-layout-off','seed-custom-on','seed-custom-off','route-on','route-off','place-on','place-off','adjust-on','adjust-off','adjust-custom','finish-on','finish-off','replay-off'] as const;
-export const FIXTURE_NAMES: readonly string[] = [...LEGACY_FIXTURES,
+export const FIXTURE_NAMES: readonly string[] = [...GROUP_FIXTURE_NAMES,...LEGACY_FIXTURES,
   'fitting-entry-era0','fitting-frame-era0','fitting-frame-era1','fitting-mail-era0',
   ...EXAMPLES_VIEWS.flatMap(mode=>[0,1,2].map(era=>`examples-${mode}-era${era}`)),
   ...['desktop','desktop-pending'].flatMap(mode=>[0,1,2,3].map(era=>`examples-${mode}-era${era}`)),
@@ -155,7 +162,9 @@ function prototypeReady(now:number):GameState {
 
 // Runtime fixed states use memory storage and never overwrite a real save.
 export function createFixture(name:string|null,now:number):GameState|null {
+ const group=name?createGroupFixture(name,now):null;if(group)return group;
  const state=fixtureState(name,now);if(!state)return null;
+ delete state.run.workshop.groupPuzzle;
  const w=state.run.workshop,id=w.activePart;
  if(id&&id!=='common-scrollbar'&&w.parts[id]?.step!==4)state.run.workshop={...selectPuzzlePart(w,id),view:w.view};
  return state;
